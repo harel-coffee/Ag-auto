@@ -1,0 +1,4 @@
+cat /data/kiran/Data/VIC/params/metdatalistmultipleset/list_set1 | while read LINE ; do
+echo "copying $LINE..."
+cp /data/kirti/vic_inputdata0625_pnw_combined_05142008/$LINE ./metdata/
+done

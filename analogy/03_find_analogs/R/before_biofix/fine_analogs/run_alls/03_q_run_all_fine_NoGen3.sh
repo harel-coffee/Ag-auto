@@ -1,0 +1,17 @@
+#!/bin/bash
+
+for runname in bcc BNU Can CNRM GFDLG GFDLM
+do
+cd /home/hnoorazar/analog_codes/03_find_analogs/fine/rcp85_qsubs/$runname
+cat /home/hnoorazar/analog_codes/parameters/q_rcp85_nogen3 | while read LINE ; do
+qsub $LINE
+done
+done
+
+for runname in bcc BNU Can CNRM GFDLG GFDLM
+do
+cd /home/hnoorazar/analog_codes/03_find_analogs/fine/rcp45_qsubs/$runname
+cat /home/hnoorazar/analog_codes/parameters/q_rcp45_nogen3 | while read LINE ; do
+qsub $LINE
+done
+done
