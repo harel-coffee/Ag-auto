@@ -1,0 +1,240 @@
+\documentclass[12pt]{article}
+
+\pdfoutput=24
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{esvect}
+\usepackage[toc,page]{appendix}
+\usepackage{leftidx}
+\usepackage{color}
+\usepackage{framed, color}
+\usepackage{multirow}
+\usepackage{pdfpages}
+\usepackage{multicol}
+\usepackage{wrapfig,lipsum,booktabs}
+
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=cyan,      
+    urlcolor=red,
+    citecolor=red,
+}
+
+\usepackage{cleveref}
+\usepackage{commath}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+%%%%%%%%%%%
+%%%%%%%%%%%  User Defined Commands. (macros)
+%%%%%%%%%%%
+
+\definecolor{mgreen}{RGB}{25,147,100}
+\definecolor{shadecolor}{rgb}{1,.8,.1}
+\definecolor{shadecolor2}{RGB}{245,237,0}
+\definecolor{orange}{RGB}{255,137,20}
+\definecolor{orange}{RGB}{245,37,100}
+
+%%%%%%%%%%%
+%%%%%%%%%%%  Graphical Packages
+%%%%%%%%%%%
+\usepackage{pgfplots}
+\usetikzlibrary{patterns}
+\usepackage{mdframed}
+\usepackage{adjustbox}
+\usepackage{tcolorbox}
+%\usepackage{graphics}
+\usepackage{tikz,ifthen,fp,calc}
+\usepackage{caption}
+\usepackage{subcaption}
+\usetikzlibrary{plotmarks}
+\usepackage{graphicx}
+
+%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Theorem Styles
+%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{prop}{Proposition}[section]
+\newtheorem{corr}{Corollary}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{fact}{Fact}[section]
+
+\usepackage[english]{babel}
+\usepackage{babel,blindtext}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{exmp}{Example}[section]
+\usepackage{fullpage}
+\usepackage{amsfonts}
+\usepackage{lscape}
+\usepackage{bbm}
+
+\usepackage{todonotes}
+\usepackage{cite}
+\usepackage{verbatim}
+\usepackage{bm}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\usepackage[margin=1in]{geometry}
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords:---}} #1}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{authblk}
+\usepackage{cite}
+
+
+\newcommand*{\affaddr}[1]{#1} % No op here. Customize it for different styles.
+\newcommand*{\affmark}[1][*]{\textsuperscript{#1}}
+%\newcommand*{\email}[1]{\texttt{#1}}
+
+\title{\textbf{Mahalanobis distance explained}}
+\author{}
+\date{}
+
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords:}} #1}
+
+\begin{document} 
+
+\maketitle
+
+\section{Diagonalizability}
+
+Let $\mathbf{X}$ be a matrix whose rows are variables and 
+columns are observations that are centered about the mean. 
+Then the covariance of the $\mathbf{X}$ is given by
+
+\begin{equation}
+\mathbf{{\Large{\Sigma} }}= cov(\mathbf{X}) = \frac{1}{n-1}\mathbf{ XX^\text{T}}
+\end{equation}
+
+Assume we want to have a mapping $\mathbf{M}$ so that $\mathbf{Y=M^\text{T}X}$ has covariance 
+that is diagonal. Then
+
+\begin{itemize}
+\item Assume there is no observation with all zero values
+\item Assume there is no two identical observations, i.e.columns are linearly independent.
+\item (Rare) things like that which will make covariance matrix singular.
+\end{itemize}
+
+Then since covariance matrix is symmetric, with positive entries, etc., it is diagonalizable, 
+i.e. it can be written as 
+
+\begin{equation}\label{eq:eigendecomposition}
+\mathbf{{\Large{\Sigma} }}  = \mathbf{U^{-1} D U = U^\text{T} D U}
+\end{equation}
+
+or equivalently 
+
+\begin{equation}\label{eq:eigendecomposition2}
+\mathbf{U^\text{T} {\Large{\Sigma} }U }  = \mathbf{D}
+\end{equation}
+
+where $\mathbf{D}$ is diagonal and, in this case due to properties of covariance matrix, the 
+matrix $\mathbf{U}$ is orthogonal, i.e. $\mathbf{U^{-1} = U^\text{T}}$, i.e. $\mathbf{UU^\text{T}} = \mathbf{I}$
+
+The columns of $\mathbf{U^{-1}}$ are eigenvectors of covariance matrix, entries of $\mathbf{D}$
+are eigenvalues of covariance matrix, which are also variances of different variables in $\mathbf{X}$.
+
+
+Assume we want to rotate the data, or represent them in a 
+coordinate system where it is represented with variables that are
+orthogonal, i.e. the collinearity is killed. This is what PCA does.
+
+Now lets pretend we do not know that. Lets say we want to
+transform $\mathbf{X}$ into $\mathbf{Y}$ by a mapping $\mathbf{M^\text{T}}$, i.e. $\mathbf{Y= M^\text{T}X}$,
+so that covariance of $\mathbf{Y}$ is diagonal matrix, $\mathbf{\hat{D}}$. \\
+\pagebreak
+
+So, we want $cov(\mathbf{Y}) = \frac{1}{n-1}\mathbf{Y}\mathbf{Y^\text{T}}$,
+Lets take a look:
+
+\begin{equation}\label{eq:diagonalize}
+\begin{aligned}
+\mathbf{\hat{D}} = cov({\mathbf{Y}}) &= \frac{1}{n-1}\mathbf{Y}\mathbf{Y^\text{T}}\\
+                           &= \frac{1}{n-1}\mathbf{M^\text{T}X}\mathbf{(M^\text{T}X)^\text{T}}\\
+                           &= \frac{1}{n-1} \mathbf{M^\text{T}}\mathbf{XX^\text{T}}\mathbf{ M}\\
+                           &=  \mathbf{M^\text{T}}\mathbf{\Sigma}\mathbf{M}
+\end{aligned}
+\end{equation}
+
+So, we arrived at $\mathbf{\hat{D}} = \mathbf{M^\text{T}}\mathbf{\Sigma}\mathbf{M}$.
+Hence, if you choose $\mathbf{M}$ to be the same as $\mathbf{U}$, then
+covariance of $\mathbf{Y}$ would be diagonal, and you have $\mathbf{\hat{D}}  = \mathbf{D}$.\\
+
+Since, the the decomposition given by Eq.~(\ref{eq:eigendecomposition})
+is eigen-decomposition of $\mathbf{\Sigma}$, we can see this is what PCA does.
+
+\section{Equivalency}
+
+\theoremstyle{definition} 
+\begin{definition}
+Suppose the random vectors of $\mathbf{v}$ and $\mathbf{w}$ be drawn from a distribution 
+whose associated covariance matrix is given by $\mathbf{\Sigma}$. Then define the Malanoblis
+distance as follows:
+
+ \begin{equation}\label{eq:mahabDist}
+ d = \mathbf{(v - w)^\text{T} \Sigma^{-1} (v - w)} 
+ \end{equation}
+\end{definition}
+
+Lets take a look:
+
+\begin{equation}\label{eq:equivalency}
+\begin{aligned}
+\mathbf{d} &= \mathbf{(v - w)^\text{T} \Sigma^{-1} (v - w)} \\
+                 &= \mathbf{(v - w)^\text{T}  (U^\text{T} D U) ^{-1} (v - w)} \\
+                 &= \mathbf{(v - w)^\text{T}  (U^{-1} D^{-1} U^{-T}) (v - w)} \\
+                 &= \mathbf{(v - w)^\text{T}  (U^\text{T} D^{-1} U) (v - w)} \\
+                 &= \mathbf{(U(v - w))^\text{T}  D^{-1} (U (v - w))} \\
+\end{aligned}
+\end{equation}
+
+Notice:
+\begin{itemize}
+\item The diagonal entries of $\mathbf{D}$ eigenvalues of covariance matrix,
+which are variance of variables in $\mathbf{X}$. So, if the data in $\mathbf{X}$
+was scaled by their variances, then this distance was equivalent to
+ Euclidean distance.
+
+\item Lets look at the last term in above equation:
+
+\begin{equation}
+\mathbf{ U (v - w)}  = \mathbf{ U v} - \mathbf{ U w}
+\end{equation}
+
+Each of these terms are mappings of $\mathbf{v}$ and $\mathbf{w}$
+into the PCA space of the data $\mathbf{X}$.
+\end{itemize}
+
+
+Suppose $\mathbf{x}$ is a vector and we wish to represent it, 
+in the column space of a matrix $\mathbf{A} = [\mathbf{A}_1, \mathbf{A}_2, \dots \mathbf{A}_N]$,
+where each $\mathbf{A}_i$ is a column of $\mathbf{A}$. So, we are looking for constants $y_1, y_2, \dots, y_N$ so that 
+
+\[\mathbf{x} = y_1 \mathbf{A}_1 + y_2 \mathbf{A}_2 \dots + \mathbf{A}_N y_N = \mathbf{Ay} \]
+
+Hence, $\mathbf{y = A^{-1} X}$. So, $\mathbf{y}$ is the mapping of $\mathbf{x}$ into column space of
+$\mathbf{A}$. Just like $\mathbf{Uv}$ which is mapping of $\mathbf{v}$ into column space of $\mathbf{U^{-1}}$
+whose columns are eigenvectors of covariance, i.e. PCA.
+
+\iffalse
+P.S. I had to choose where to put the exponent \{-1\} to indicate inverse of the matrices, 
+whether to the left or right of  $\mathbf{\Sigma}$.
+Either way would have made some parts easier, but some other parts harder to follow.\\
+
+
+Now, the question is, when you mentioned M. Distance takes
+care of scales and collinearity, where, in what context you learned that.
+Did the context refer to this definition of distance as M. distance, 
+or they were talking about the distance between a point and distribution?
+\fi
+\end{document}

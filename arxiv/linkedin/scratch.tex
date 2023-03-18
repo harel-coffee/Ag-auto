@@ -1,0 +1,340 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{train\PYZus{}path} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/Users/hn/Documents/GitHub/job\PYZus{}inventory/Hossein/Code\PYZus{}Question/Zillow/TRAINING.csv}\PY{l+s+s1}{\PYZsq{}}
+        \PY{n}{test\PYZus{}path} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/Users/hn/Documents/GitHub/job\PYZus{}inventory/Hossein/Code\PYZus{}Question/Zillow/TEST.csv}\PY{l+s+s1}{\PYZsq{}}
+        
+        \PY{n}{zillow\PYZus{}train} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{n}{train\PYZus{}path}\PY{p}{)}
+        \PY{n}{zillow\PYZus{}test}  \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{n}{test\PYZus{}path}\PY{p}{)}
+\end{Verbatim}
+
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}10}]:} \PY{n+nb}{print} \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{zillow\PYZus{}train.shape}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{zillow\PYZus{}train}\PY{o}{.}\PY{n}{shape}\PY{p}{)}
+         \PY{n+nb}{print} \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{zillow\PYZus{}test.shape}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{zillow\PYZus{}test}\PY{o}{.}\PY{n}{shape}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+zillow\_train.shape (11588, 24)
+zillow\_test.shape (4402, 24)
+
+    \end{Verbatim}
+
+
+\iffalse
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}}  
+\PY{n+nn}{pandas}
+\PY{n+nn}{numpy} 
+
+        \PY{k+kn}{import} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{preprocessing}
+        \PY{k+kn}{import} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{model\PYZus{}selection}
+        \PY{k+kn}{import} \PY{n+nn}{time}
+        
+        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+        \PY{k+kn}{import} \PY{n+nn}{seaborn} \PY{k}{as} \PY{n+nn}{sb}
+
+{\color{incolor}In [{\color{incolor}2}]:} \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{utils} \PY{k}{import} \PY{n}{shuffle}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{pipeline} \PY{k}{import} \PY{n}{make\PYZus{}pipeline}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{kernel\PYZus{}ridge} \PY{k}{import} \PY{n}{KernelRidge}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn} \PY{k}{import} \PY{n}{ensemble}\PY{p}{,} \PY{n}{tree}\PY{p}{,} \PY{n}{linear\PYZus{}model}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{metrics} \PY{k}{import} \PY{n}{r2\PYZus{}score}\PY{p}{,} \PY{n}{mean\PYZus{}squared\PYZus{}error}
+        
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{model\PYZus{}selection} \PY{k}{import} \PY{n}{train\PYZus{}test\PYZus{}split}\PY{p}{,} \PYZbs{}
+                                            \PY{n}{KFold}\PY{p}{,} \PYZbs{}
+                                            \PY{n}{cross\PYZus{}val\PYZus{}score}\PY{p}{,} \PYZbs{}
+                                            \PY{n}{GridSearchCV}
+        
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{ensemble} \PY{k}{import} \PY{n}{RandomForestRegressor}\PY{p}{,}\PYZbs{}
+                                     \PY{n}{GradientBoostingRegressor}
+        
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{linear\PYZus{}model} \PY{k}{import} \PY{n}{ElasticNet}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{Ridge}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{Lasso}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{BayesianRidge}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{LassoLarsIC}
+                        
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{linear\PYZus{}model} \PY{k}{import} \PY{n}{RidgeCV}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{LassoCV}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{ElasticNetCV}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{LassoLarsCV}\PY{p}{,} \PYZbs{}
+                                         \PY{n}{LinearRegression}
+        
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{base} \PY{k}{import} \PY{n}{BaseEstimator}\PY{p}{,} \PYZbs{}
+                                 \PY{n}{TransformerMixin}\PY{p}{,} \PYZbs{}
+                                 \PY{n}{RegressorMixin}\PY{p}{,} \PY{n}{clone}
+
+{\color{incolor}In [{\color{incolor}3}]:} \PY{k+kn}{from} \PY{n+nn}{datetime} \PY{k}{import} \PY{n}{date}\PY{p}{,} \PY{n}{datetime}
+        
+        \PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k}{import} \PY{n}{stats}
+        \PY{k+kn}{from} \PY{n+nn}{scipy}\PY{n+nn}{.}\PY{n+nn}{stats} \PY{k}{import} \PY{n}{norm}\PY{p}{,} \PY{n}{skew}
+        
+        \PY{k+kn}{from} \PY{n+nn}{sklearn} \PY{k}{import} \PY{n}{preprocessing}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{feature\PYZus{}selection} \PY{k}{import} \PY{n}{chi2}
+        
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{preprocessing} \PY{k}{import} \PY{n}{OneHotEncoder}\PY{p}{,} \PYZbs{}
+                                          \PY{n}{StandardScaler}\PY{p}{,} \PYZbs{}
+                                           \PY{n}{Normalizer}\PY{p}{,} \PYZbs{}
+                                           \PY{n}{RobustScaler}
+\end{Verbatim}
+\fi
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%5
+
+
+
+    \section{Functions}\label{functions}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{k}{def} \PY{n+nf}{AAPE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{:}
+            \PY{n}{out} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n+nb}{abs}\PY{p}{(}\PY{n}{y\PYZus{}true} \PY{o}{\PYZhy{}} \PY{n}{y\PYZus{}pred}\PY{p}{)} \PY{o}{/} \PY{n}{y\PYZus{}true}\PY{p}{)}
+            \PY{k}{return} \PY{n}{out}\PY{o}{*}\PY{l+m+mi}{100}
+        
+        \PY{k}{def} \PY{n+nf}{median\PYZus{}APE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{:}
+            \PY{n}{out} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n+nb}{abs}\PY{p}{(}\PY{n}{y\PYZus{}true} \PY{o}{\PYZhy{}} \PY{n}{y\PYZus{}pred}\PY{p}{)} \PY{o}{/} \PY{n}{y\PYZus{}true}\PY{p}{)}
+            \PY{k}{return} \PY{n}{np}\PY{o}{.}\PY{n}{median}\PY{p}{(}\PY{n}{out}\PY{p}{)}\PY{o}{*}\PY{l+m+mi}{100}
+        
+        \PY{c+c1}{\PYZsh{} For accurate scoring}
+        \PY{k}{def} \PY{n+nf}{get\PYZus{}score}\PY{p}{(}\PY{n}{lables}\PY{p}{,} \PY{n}{prediction}\PY{p}{)}\PY{p}{:}    
+            \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R2 = }\PY{l+s+si}{\PYZob{}0:.2f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{sklearn}\PY{o}{.}\PY{n}{metrics}\PY{o}{.}\PY{n}{r2\PYZus{}score}\PY{p}{(}\PY{n}{lables}\PY{p}{,} \PY{n}{prediction}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RMSE = }\PY{l+s+si}{\PYZob{}0:.2f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{n}{mean\PYZus{}squared\PYZus{}error}\PY{p}{(}\PY{n}{lables}\PY{p}{,} \PY{n}{prediction}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AAPE = }\PY{l+s+si}{\PYZob{}:.2f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{AAPE}\PY{p}{(}\PY{n}{lables}\PY{p}{,} \PY{n}{prediction}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAPE = }\PY{l+s+si}{\PYZob{}:.2f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{median\PYZus{}APE}\PY{p}{(}\PY{n}{lables}\PY{p}{,} \PY{n}{prediction}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{k}{def} \PY{n+nf}{convert\PYZus{}date}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{p}{,} \PY{n}{date\PYZus{}column}\PY{p}{)}\PY{p}{:}
+            \PY{c+c1}{\PYZsh{} all the data are from 2015.}
+            \PY{n}{origin} \PY{o}{=} \PY{n}{date}\PY{p}{(}\PY{l+m+mi}{2015}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}
+            
+            \PY{c+c1}{\PYZsh{} convert the date\PYZus{}column from string to datetime format.}
+            \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{date\PYZus{}column}\PY{p}{]} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}datetime}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{date\PYZus{}column}\PY{p}{]}\PY{p}{)}
+            \PY{n}{sold\PYZus{}date} \PY{o}{=} \PY{p}{[}\PY{k+kc}{None}\PY{p}{]}\PY{o}{*}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{TransDate}\PY{p}{)}
+            \PY{n}{age} \PY{o}{=} \PY{p}{[}\PY{k+kc}{None}\PY{p}{]}\PY{o}{*}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{TransDate}\PY{p}{)}
+            
+            \PY{k}{for} \PY{n}{ii} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{TransDate}\PY{p}{)}\PY{p}{)}\PY{p}{:}
+                \PY{n}{sold\PYZus{}date}\PY{p}{[}\PY{n}{ii}\PY{p}{]} \PY{o}{=} \PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{TransDate}\PY{p}{[}\PY{n}{ii}\PY{p}{]}\PY{o}{.}\PY{n}{date}\PY{p}{(}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{date}\PY{p}{(}\PY{l+m+mi}{2015}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}\PY{o}{.}\PY{n}{days}
+                \PY{n}{age}\PY{p}{[}\PY{n}{ii}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{TransDate}\PY{p}{[}\PY{n}{ii}\PY{p}{]}\PY{o}{.}\PY{n}{year} \PY{o}{\PYZhy{}} \PY{n+nb}{int}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{BuiltYear}\PY{p}{[}\PY{n}{ii}\PY{p}{]}\PY{p}{)}
+            
+            \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{age}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{age}
+            \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{date\PYZus{}column}\PY{p}{]} \PY{o}{=} \PY{n}{sold\PYZus{}date}
+            \PY{k}{return} \PY{n}{df\PYZus{}tr}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}6}]:} \PY{k}{def} \PY{n+nf}{train\PYZus{}test}\PY{p}{(}\PY{n}{estimator}\PY{p}{,} \PY{n}{x\PYZus{}trn}\PY{p}{,} \PY{n}{x\PYZus{}tst}\PY{p}{,} \PY{n}{y\PYZus{}trn}\PY{p}{,} \PY{n}{y\PYZus{}tst}\PY{p}{)}\PY{p}{:}
+            \PY{n}{prediction\PYZus{}train} \PY{o}{=} \PY{n}{estimator}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{x\PYZus{}trn}\PY{p}{)}
+            \PY{c+c1}{\PYZsh{} Printing estimator}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{estimator}\PY{p}{)}
+            \PY{c+c1}{\PYZsh{} Printing train scores}
+            \PY{n}{get\PYZus{}score}\PY{p}{(}\PY{n}{y\PYZus{}trn}\PY{p}{,} \PY{n}{prediction\PYZus{}train} \PY{p}{)}
+            \PY{n}{prediction\PYZus{}test} \PY{o}{=} \PY{n}{estimator}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{x\PYZus{}tst}\PY{p}{)}
+            \PY{c+c1}{\PYZsh{} Printing test scores}
+            \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Test}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+            \PY{n}{get\PYZus{}score}\PY{p}{(}\PY{n}{y\PYZus{}tst}\PY{p}{,} \PY{n}{prediction\PYZus{}test}\PY{p}{)}    
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}7}]:} \PY{k}{def} \PY{n+nf}{regularize\PYZus{}cv}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{p}{,} \PY{n}{cols}\PY{p}{,} \PY{n}{target}\PY{p}{,} \PY{n}{method}\PY{p}{,} \PY{n}{no\PYZus{}folds}\PY{o}{=}\PY{l+m+mi}{5}\PY{p}{,} \PY{n}{rand\PYZus{}state}\PY{o}{=}\PY{l+m+mi}{100}\PY{p}{)}\PY{p}{:}
+            \PY{c+c1}{\PYZsh{} split the data into no\PYZus{}folds folds}
+            \PY{n}{kf} \PY{o}{=} \PY{n}{KFold}\PY{p}{(}\PY{n}{n\PYZus{}splits}\PY{o}{=}\PY{n}{no\PYZus{}folds}\PY{p}{,} \PY{n}{shuffle}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{l+m+mi}{100}\PY{p}{)}
+            \PY{n}{kf}\PY{o}{.}\PY{n}{get\PYZus{}n\PYZus{}splits}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{p}{)}
+            
+            \PY{c+c1}{\PYZsh{} pick up the target}
+            \PY{n}{y\PYZus{}tr} \PY{o}{=} \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{values}
+            
+            \PY{c+c1}{\PYZsh{}}
+            \PY{c+c1}{\PYZsh{} mean encoding}
+            \PY{c+c1}{\PYZsh{}}
+            \PY{k}{if} \PY{n}{method}\PY{o}{==}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mean}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{col}\PY{o}{+}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZus{}mean\PYZus{}target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{k+kc}{None}
+        
+                \PY{k}{for} \PY{n}{tr\PYZus{}ind}\PY{p}{,} \PY{n}{val\PYZus{}ind} \PY{o+ow}{in} \PY{n}{kf}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{p}{)}\PY{p}{:}
+                    \PY{c+c1}{\PYZsh{} gran validation and training sets.}
+                    \PY{n}{X\PYZus{}tr}\PY{p}{,} \PY{n}{X\PYZus{}val} \PY{o}{=} \PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{tr\PYZus{}ind}\PY{p}{]}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{p}{)}\PY{p}{,} \PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{val\PYZus{}ind}\PY{p}{]}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{p}{)}
+                    \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                        \PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}}
+        \PY{l+s+sd}{                 map mean\PYZus{}encoding of training set back to validation set}
+        \PY{l+s+sd}{                 this is done to prevent data leackage.}
+        \PY{l+s+sd}{                 This is a way of regularizing (prevent leackage)}
+        \PY{l+s+sd}{                 and would work just fine if size of data is big.}
+        \PY{l+s+sd}{                \PYZdq{}\PYZdq{}\PYZdq{}}
+                        \PY{n}{means} \PY{o}{=} \PY{n}{X\PYZus{}val}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{map}\PY{p}{(}\PY{n}{X\PYZus{}tr}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{n}{col}\PY{p}{)}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+                        \PY{n}{X\PYZus{}val}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{n}{col}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}mean\PYZus{}target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{means}
+                    \PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{val\PYZus{}ind}\PY{p}{]}\PY{o}{=} \PY{n}{X\PYZus{}val}
+        
+                \PY{c+c1}{\PYZsh{} replace NaNs with global mean}
+                \PY{n}{prior} \PY{o}{=} \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{col}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}mean\PYZus{}target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{fillna}\PY{p}{(}\PY{n}{prior}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+                \PY{k}{return} \PY{n}{df\PYZus{}tr}
+            \PY{c+c1}{\PYZsh{}}
+            \PY{c+c1}{\PYZsh{} count encoding (Why in the log we were getting division by zero,}
+            \PY{c+c1}{\PYZsh{}                 while clearly it was not zero?)}
+            \PY{k}{elif} \PY{n}{method}\PY{o}{==}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{col}\PY{o}{+}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZus{}count\PYZus{}target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{k+kc}{None}
+        
+                \PY{k}{for} \PY{n}{tr\PYZus{}ind}\PY{p}{,} \PY{n}{val\PYZus{}ind} \PY{o+ow}{in} \PY{n}{kf}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{n}{df\PYZus{}tr}\PY{p}{)}\PY{p}{:}
+                    \PY{c+c1}{\PYZsh{} gran validation and training sets.}
+                    \PY{n}{X\PYZus{}tr}\PY{p}{,} \PY{n}{X\PYZus{}val} \PY{o}{=} \PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{tr\PYZus{}ind}\PY{p}{]}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{p}{)}\PY{p}{,} \PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{val\PYZus{}ind}\PY{p}{]}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{p}{)}
+                    \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                        \PY{n}{means} \PY{o}{=} \PY{n}{X\PYZus{}val}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{map}\PY{p}{(}\PY{n}{X\PYZus{}tr}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{n}{col}\PY{p}{)}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+                        \PY{n}{X\PYZus{}val}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{n}{col}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}count\PYZus{}target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{means}
+                    \PY{n}{df\PYZus{}tr}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{val\PYZus{}ind}\PY{p}{]}\PY{o}{=} \PY{n}{X\PYZus{}val}
+        
+                \PY{c+c1}{\PYZsh{} replace NaNs with global count}
+                \PY{n}{prior} \PY{o}{=} \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{count}\PY{p}{(}\PY{p}{)}
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{df\PYZus{}tr}\PY{p}{[}\PY{n}{col}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}mean\PYZus{}target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{fillna}\PY{p}{(}\PY{n}{prior}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+                \PY{k}{return} \PY{n}{df\PYZus{}tr}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{k}{def} \PY{n+nf}{apply\PYZus{}train\PYZus{}encode\PYZus{}on\PYZus{}val}\PY{p}{(}\PY{n}{train\PYZus{}df}\PY{p}{,} \PY{n}{val\PYZus{}df}\PY{p}{,} \PY{n}{cols}\PY{p}{,} \PY{n}{method}\PY{p}{,} \PY{n}{target}\PY{p}{)}\PY{p}{:}
+            \PY{n}{val\PYZus{}df\PYZus{}new} \PY{o}{=} \PY{n}{val\PYZus{}df}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{p}{)}
+            \PY{k}{if} \PY{n}{method}\PY{o}{==}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mean}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+                \PY{c+c1}{\PYZsh{} pick up the target}
+                \PY{n}{y\PYZus{}tr} \PY{o}{=} \PY{n}{train\PYZus{}df}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{values}
+        
+                \PY{c+c1}{\PYZsh{} In the new dataFrame create new columns}
+                \PY{c+c1}{\PYZsh{} for encodings}
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{val\PYZus{}df\PYZus{}new}\PY{p}{[}\PY{n}{col}\PY{o}{+}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZus{}mean\PYZus{}target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{k+kc}{None}
+        
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{means} \PY{o}{=} \PY{n}{val\PYZus{}df\PYZus{}new}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{map}\PY{p}{(}\PY{n}{train\PYZus{}df}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{n}{col}\PY{p}{)}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+                    \PY{n}{val\PYZus{}df\PYZus{}new}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{n}{col}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}mean\PYZus{}target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{means}
+        
+                \PY{c+c1}{\PYZsh{} replace NaNs with global mean}
+                \PY{n}{prior} \PY{o}{=} \PY{n}{train\PYZus{}df}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}
+                \PY{n}{val\PYZus{}df\PYZus{}new}\PY{o}{.}\PY{n}{fillna}\PY{p}{(}\PY{n}{prior}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+                \PY{k}{return} \PY{n}{val\PYZus{}df\PYZus{}new}
+            
+            \PY{k}{elif} \PY{n}{method}\PY{o}{==}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+                \PY{c+c1}{\PYZsh{} pick up the target}
+                \PY{n}{y\PYZus{}tr} \PY{o}{=} \PY{n}{train\PYZus{}df}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{values}
+        
+                \PY{c+c1}{\PYZsh{} In the new dataFrame create new columns}
+                \PY{c+c1}{\PYZsh{} for encodings}
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{val\PYZus{}df\PYZus{}new}\PY{p}{[}\PY{n}{col}\PY{o}{+}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZus{}count\PYZus{}target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{k+kc}{None}
+        
+                \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{:}
+                    \PY{n}{means} \PY{o}{=} \PY{n}{val\PYZus{}df\PYZus{}new}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{map}\PY{p}{(}\PY{n}{train\PYZus{}df}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{n}{col}\PY{p}{)}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+                    \PY{n}{val\PYZus{}df\PYZus{}new}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{n}{col}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}count\PYZus{}target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{means}
+        
+                \PY{c+c1}{\PYZsh{} replace NaNs with global mean}
+                \PY{n}{prior} \PY{o}{=} \PY{n}{train\PYZus{}df}\PY{p}{[}\PY{n}{target}\PY{p}{]}\PY{o}{.}\PY{n}{count}\PY{p}{(}\PY{p}{)}
+                \PY{n}{val\PYZus{}df\PYZus{}new}\PY{o}{.}\PY{n}{fillna}\PY{p}{(}\PY{n}{prior}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+                \PY{k}{return} \PY{n}{val\PYZus{}df\PYZus{}new}
+\end{Verbatim}
+
+
+
+
+\usepackage{pgfplots}
+\usetikzlibrary{patterns}
+
+
+
+%\usepackage{graphics}
+\usepackage{tikz,ifthen,fp,calc}
+\usepackage{caption}
+\usepackage{subcaption}
+\usetikzlibrary{plotmarks}
+\usepackage{graphicx}
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Theorem Styles
+%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{prop}{Proposition}[section]
+\newtheorem{corr}{Corollary}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{fact}{Fact}[section]
+
+\usepackage[english]{babel}
+\usepackage{babel,blindtext}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{exmp}{Example}[section]
+\usepackage{fullpage}
+\usepackage{amsfonts}
+\usepackage{lscape}
+\usepackage{bbm}
+
+\usepackage{todonotes}
+\usepackage{cite}
+\usepackage{verbatim}
+\usepackage{bm}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\usepackage[margin=1in]{geometry}
+
+
+
+
+
+
+
+
+
+
+\begin{tcolorbox}
+\begin{center}
+\textbf{Notation used throughout the paper}
+\end{center}
+\begin{multicols}{2}
+[
+]
+\begin{itemize}
+\item $\psi$ potential function.
+\item $\nabla \psi$ gradient of function $\psi$.
+\item $\tau$ parameter for some potential functions like (tip of the) tent, (bend point of) BCM potential.
+\item $\mathbb{O}$ opinion space.
+\item $\mathbb{T}$ topic space, if topic space is finite, $|\mathbb{T}| = n$.
+\item $o_i^{(t)}$ opinion of agent $i$ at time $t$ if there is only one topic in the system.
+\item $o_i^{(t)}(s_k)$ opinion of agent $i$ at time $t$ about topic $s_k$.
+\item $\dot{o}$ derivative of $o$ with respect to time.
+\item $\Delta o_i^{(t+1)}(s_k) = o_i^{(t+1)}(s_k) - o_i^{(t)}(s_k) $.
+\item  $d_{ij}^{(t)}(s) = o_i^{(t)}(s) - o_j^{(t)}(s)$. 
+  
+Difference between opinion of agents $i$ and $j$ about topic $s$ at a time $t$.
+\columnbreak
+\item $N(\mu, \sigma)$ normal distribution with mean $\mu$ and standard deviation $\sigma$.
+\item $\alpha$ learning rate.
+\item $\sigma(\mathbf{A})$ spectrum of matrix $\mathbf{A}$.
+\item $\mathbf{J}$ Jacobian matrix.
+\item $\mathbf{C}$ coupling matrix.
+\item $c_{ij}$ inverse coupling strength of topic $i$ over topic $j$.
+\item $G = (V,E)$ graph $G$ with set of nodes $V$ and set of edges $E$.
+\item $n(i)$ set of neighbors of agent $i$.
+\item $||.||$ Euclidean norm.
+\item vectors and matrices will be bold letters.
+\item $\mu_s$ mean of polarization counts
+\item $\mu_p$ mean of stabilization time
+\end{itemize}
+\end{multicols}
+\end{tcolorbox}

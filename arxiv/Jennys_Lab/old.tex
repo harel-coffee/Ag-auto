@@ -1,0 +1,52 @@
+\section{Directory descriptions}
+
+
+\begin{itemize}
+
+\item {\scriptsize{\colorbox{lightgray}{/data/hydro/jennylabcommon2/metdata/historical/UI\_historical/VIC\_Binary\_CONUS\_to\_2016}}}
+
+The data in above directory is for observed historical data. It contains \textbf{8} variables.
+
+\begin{enumerate}
+\item Time period: 1979-2016
+\item variables: \{\vari{precip, tmax, tmin, wind, sph, srad, rmax, rmin}\}
+\end{enumerate}
+
+
+\item {\scriptsize{\colorbox{lightgray}{/data/hydro/jennylabcommon2/metdata/maca\_v2\_vic\_binary/}}}
+
+
+The data in above directory is related to modeled data. It contains \textbf{4} variables.
+
+Variables: 
+\begin{enumerate}
+
+\item \{\vari{precip}, \vari{tmax}, \vari{tmin}, \vari{wind}\} 	
+\item \{\vari{mm/day}, \vari{Celsius degree}, \vari{Celsius degree}, \vari{m/s}\}	
+
+\end{enumerate}
+
+Time periods:
+\begin{enumerate}	
+\item The historical data spans 1950-2005 and 	
+\item projections are from 2006 through 2099 for rcp45 and rcp85.
+\end{enumerate}
+
+Binary format:
+\begin{enumerate}
+\item unsigned short int for the first var (ppt),	
+\item signed short for all other variables multi: \{40,100,100,100\};
+\end{enumerate}
+
+
+
+So, in short 
+\[ \text{observed} \equiv  \text{8 variables} \equiv \text{1979-2016}
+\equiv \text{UI\_hitorical in directory }\]
+\vspace{-.2in}
+\[ \text{modeled} \equiv  \text{4 variables} \equiv \text{1950-2005} \equiv \text{a short path including MACA at the end}\]
+
+\end{itemize}
+
+
+
