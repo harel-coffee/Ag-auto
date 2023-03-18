@@ -1,0 +1,65 @@
+.skin-blue .main-header .logo {
+  font-family: "Lucida Sans", Times, "Times New Roman", serif;
+  font-weight: normal;
+  font-size: 22px;
+  background-color: #981e32;
+}
+  
+.skin-blue .main-header .logo:hover {
+  background-color: #c60c30;
+}
+  
+.skin-blue .main-header .navbar {
+  background-color: #981e32;
+}
+
+.skin-blue .main-header .navbar .sidebar-toggle:hover {
+  background-color: #c60c30;
+}
+
+.skin-blue .sidebar-menu > li.active > a,
+.skin-blue .sidebar-menu > li:hover > a {
+  border-left-color: #c60c30;
+}
+
+.nav-tabs-custom>.nav-tabs>li.active {
+    border-top-color: #c60c30;
+}
+
+.modal-lg {
+  width: 100%;
+}
+
+.modal-header {
+  background-color: #981e32;
+  color: #ffffff;
+}
+
+.modal-body{ 
+  height: 700px;
+  width: 1000px;
+}
+
+.img{
+  height: 700px;
+  width: 1000px;
+}
+
+#controls {
+  /* Appearance */
+  background-color: white;
+  padding: 0 20px 20px 20px;
+  cursor: move;
+  /* Fade out while not hovering */
+  opacity: 0.75;
+  zoom: 2;
+  transition: opacity 500ms 1s;
+}
+#controls:hover {
+  /* Fade in while hovering */
+  opacity: 0.95;
+  transition-delay: 0;
+}
+
+
+

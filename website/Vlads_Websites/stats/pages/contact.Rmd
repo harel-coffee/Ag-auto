@@ -1,0 +1,10 @@
+---
+title: "Contact"
+author: "Matthew Pruett"
+date: "March 9, 2018"
+output: html_document
+---
+  
+# Contact
+
+This is a prototype tool under development. We look forward to comments and feedback from you. You can reach us at kirtir@wsu.edu or matthew.pruett@wsu.edu.

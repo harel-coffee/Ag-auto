@@ -1,0 +1,18 @@
+---
+title: "People"
+author: "Matthew Pruett"
+date: "March 9, 2018"
+output: html_document
+---
+
+# Project Leads
+
+Kirti Rajagopalan - CSANR, Washington State University
+
+
+This online tool is primarily the result of efforts of the following people at Washington State University:
+
+* Kirti Rajagopalan (CSANR) 
+* Matthew Pruett *
+
+

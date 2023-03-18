@@ -1,0 +1,27 @@
+---
+title: "Data"
+author: "Matthew Pruett"
+date: "March 9, 2018"
+output: html_document
+---
+
+# Historical Climate Data
+
+The climate data used to model codling moth under historical conditions are gridded meteorological observations based on Abatzoglou (2011), for the period from 1979 to 2016.
+
+# Future Climate Projections
+
+The climate data used to model codling moth into the future starts with model output from the Coupled Model Intercomparison Project 5 (CMIP5; Taylor et al., 2012). CMIP5 is meant to provide a framework for coordinated climate change experiments, and is a collaborative effort across multiple research groups running global general circulation models to produce comparable projections of climatic variables into the future. The global future climate projections are too coarse in resolution for many regional applications, and so have been downscaled using the Modified Multivariate Adaptive Constructed Analog (MACA) method (Abatzoglou and Brown, 2012).
+In this tool, the future climate projections are considered in three time frames into the future:
+
+* 2040s: refers to the range of years 2025 to 2055.
+* 2060s: refers to the range of years 2045 to 2075.
+* 2080s: refers to the range of years 2065 to 2095.
+
+How temperatures are expected to change in the future is dependent on how far, how quickly, and how consistently the greenhouse gas concentrations in the atmosphere accumulate. As no one knows for sure how those concentrations will change, CMIP5 provides global data under different greenhouse gas concentration pathways, known in the climate modeling literature as Representative Concentration Pathways (or RCPs). Each RCP could result from different combinations of economic, technological, demographic, policy, and institutional futures.
+This tool uses downscaled climate data developed under two of these representative greenhouse gas concentration pathways:
+
+* RCP 4.5, the second lowest concentration pathways considered in CMIP5, where the concentration of greenhouse gases in the atmosphere is increasing, and expected to stabilize after the year 2100. This is the "lower temperature change" climate change scenario.
+* RCP 8.5, the highest concentration pathway considered in CMIP5, which corresponds to relatively higher greenhouse gas concentrations and temperature increase projections than the RCP 4.5 scenario. This is therefore the "higher temperature change" climate change scenario. Therefore, temperature-based impacts are typically more pronounced for the RCP 8.5 scenario.
+
+
