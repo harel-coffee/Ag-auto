@@ -1,0 +1,209 @@
+\documentclass[12pt]{article}
+\pdfoutput=24
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{esvect}
+
+\usepackage[toc,page]{appendix}
+
+\usepackage{leftidx}
+\usepackage{color}
+\usepackage{framed, color}
+\usepackage{multirow}
+% \usepackage{pdfpages}
+\usepackage{multicol}
+\usepackage{wrapfig, booktabs}
+\usepackage[font=small,skip=0pt]{caption}
+
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools, hyperref}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=cyan,
+    urlcolor=blue,
+    citecolor=red,
+}
+
+\usepackage{cleveref}
+\usepackage{commath}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+%%%%%%%%%%%
+%%%%%%%%%%%  User Defined Commands. (macros)
+%%%%%%%%%%%
+
+\definecolor{mgreen}{RGB}{25,147,100}
+\definecolor{shadecolor}{rgb}{1,.8,.1}
+\definecolor{shadecolor2}{RGB}{245,237,0}
+\definecolor{orange}{RGB}{255,137,20}
+\definecolor{orange}{RGB}{245,37,100}
+
+%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%        Theorem Styles
+%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{prop}{Proposition}[section]
+\newtheorem{corr}{Corollary}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{fact}{Fact}[section]
+
+\usepackage[english]{babel}
+\usepackage{babel,blindtext}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{exmp}{Example}[section]
+\usepackage{fullpage}
+\usepackage{amsfonts}
+\usepackage{lscape}
+\usepackage{bbm}
+
+\usepackage[x11names, dvipsnames]{xcolor}
+
+\usepackage{todonotes} % makes problem with xcolor package, if loaded before
+\usepackage{cite}
+\usepackage{verbatim}
+\usepackage{bm}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\usepackage[ textwidth = 15cm]{geometry}
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords:---}} #1}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{authblk}
+\usepackage{cite}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Code style
+%%%%%%%%%%%%%%%%%
+\usepackage{lipsum}
+\newlength{\seplinewidth}
+\newlength{\seplinesep}
+\setlength{\seplinewidth}{1mm}
+\setlength{\seplinesep}{2mm}
+
+
+\colorlet{sepline}{PaleVioletRed3}
+\newcommand*{\sepline}{%
+  \par
+  \vspace{\dimexpr\seplinesep+.5\parskip}%
+  \cleaders\vbox{%
+    \begingroup % because of color
+      \color{sepline}%
+      \hrule width\linewidth height\seplinewidth
+    \endgroup
+  }\vskip\seplinewidth
+  \vspace{\dimexpr\seplinesep-.5\parskip}%
+}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{}
+\lfoot{Page \thepage}
+\rfoot{h.noorazar@yahoo.com}
+\renewcommand{\footrulewidth}{2pt}
+\futurelet\TMPfootrule\def\footrule{{\color{Cerulean}\TMPfootrule}}
+
+%\lhead{Help}
+\renewcommand{\headrulewidth}{0pt}
+%\futurelet\TMPfootrule\def\headrule{{\color{Cerulean}\TMPfootrule}}
+\def\code#1{\textbf{\texttt{#1}}}
+\def\vari#1{{\color{Cerulean}{\textbf{\texttt{#1}}}}}
+\def\func#1{{\color{Maroon}{\textbf{\texttt{#1}}}}}
+\newenvironment{coded}{\color{blue}\code}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand*{\affaddr}[1]{#1} % No op here. Customize it for different styles.
+\newcommand*{\affmark}[1][*]{\textsuperscript{#1}}
+%\newcommand*{\email}[1]{\texttt{#1}}
+
+\title{\textbf{How to use code}}
+\usepackage{authblk}
+% \author[1]{Kirti Rajagopalan \thanks{kirtir@wsu.edu}}
+% \affil[1]{CAHNR, Washington State University}
+\author{}
+\date{}
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords:}} #1}
+
+\begin{document} 
+\maketitle
+\begin{abstract}
+This model is distributed by the Washington 
+State University Viticulture  Program, 
+located at WSU-IAREC, 24106 North Bunn Rd., Prosser, WA 99350, USA.  
+This model is also currently available at WSU's AgWeatherNet 
+(weather.wsu.edu).  A login account is required to view the model, 
+but it is currently free of charge.   More information on cold 
+hardiness modeling and monitoring can be found at: 
+\href{http://wine.wsu.edu/research-extension/weather/cold-hardiness}{http://wine.wsu.edu/research-extension/weather/cold-hardiness.}
+
+\end{abstract}
+
+\keywords{}
+
+\section{How to use code part of the excel file}
+
+The WSU cold hardiness model (version 2) developed by 
+John Ferguson is written in Visual Basic as a macro. 
+Press Ctl-m to run the model, then press Ctl-g to 
+graph the output. The model will read the variety-specific 
+constants from the \vari{input\_parameters} worksheet. 
+Weather data will be read from the \vari{input\_temps}
+ worksheet. All temperatures are in degrees Celsius. 
+Results will be placed in the \vari{model\_output} worksheet. 
+Running the model will clear any previous results that are
+ in the \vari{model\_output} worksheet. 
+
+If you get an error about running macros and security, 
+you will need to change that setting.
+
+Depending on your version of Excel, you  may need to open 
+Excel without the model, change the \textbf{Tools > Macro > Security} 
+to low, click ok, then open the model. Newer 
+versions  of Excel 
+will  give a security warning that macros have been 
+disabled. Select  \textbf{Options > Enable}  this content.
+
+The model code may be viewed and/or edited by 
+clicking on \textbf{Tools  >  Macro  >  Macros >  model  > Edit. Newer 
+versions, select View > Macros > View macros > Edit}.
+
+You should modify the pertinent columns of the \vari{input\_temps}
+ worksheet to suit your local conditions. The current default data is 
+ from Prosser, Washington. Change the data in the \vari{input\_parameters}
+ worksheet to the variety of interest by copying the pertinent line 
+ from \vari{variety\_parameters}. If you have any measured cold 
+ hardiness (Hc) values, put them in column H of 
+ the \vari{input\_temps} worksheet and change that 
+ column heading to a correct description of your data. 
+ Keep all yellow column headings intact. The default 
+ observed Hc values are for Cabernet Sauvignon in Prosser.
+
+Feel free to play with some of the  values  placed 
+in the \vari{input\_parameters}  sheet to explore how 
+the model works , get it to fit your observations,
+ or model a variety not listed. If  the model shows 
+ that deacclimation is delayed  at your location 
+ it probably means the Ecodormancy\_boundary is too large.
+
+The model uses integer day of year (jday) as the 
+time variable, typically starting on day 250 
+(September 7th) and counting past the first of the year to day 500 (May 15th).
+
+
+
+\end{document}
