@@ -1,0 +1,166 @@
+\section{Dynamic Model}
+
+The Dynamic Model excel file is provided 
+\href{http://ucanr.edu/sites/fruittree/How-to_Guides/Dynamic_Model_-_Chill_Accumulation/}{here} and its use is explained 
+\href{http://ucanr.edu/sites/fruittree/files/49320.pdf}{here}.
+
+
+\begin{enumerate}
+\item \func{Fahrenheit\_to\_Celsius(temp\_cel)} converts Fahrenheit temp. to Celsius. Celsius is the proper form of temp. used in the model. 
+
+\code{Input}:
+\begin{itemize}
+\item \vari{temp\_cel}  A real valued temp. or a column of a 
+data frame containing the temp in the Celsius format.
+\end{itemize}
+
+
+\code{output}
+\begin{itemize}
+\item A real valued temp. in Fahrenheit or a column of
+data frame.
+\end{itemize}
+
+%%%%%%%%%%%%%%%
+
+\item \func{initiate\_data\_frame(col\_names, init\_temp\_c, const)} Creates a new data frame 
+of size $2 \times 13$ and fills in the cells which are to be used
+by dynamic model. It corresponds to rows 11 and 12 of the 
+model given in the excel file.
+
+\code{Input}:
+
+\begin{itemize}
+\item \vari{col\_names}  The names of columns of the data frame to be used in the model.
+
+{\footnotesize {$ \vari{col\_names} = [ \text{date}, \:
+                                    \text{ time}, 
+                                     \text{temp\_c}, 
+                                     \text{temp\_k}, 
+                                     \text{ftmprt}, 
+                                     \text{sr}, 
+                                     \text{xi}, 
+                                     \text{xs}, 
+                                     \text{ak1}, 
+                                     \text{Inter-S}, 
+                                     \text{Inter-E},
+                                     \text{delt}, 
+                                     \text{Portions}] $}}
+
+\item \vari{init\_temp\_c}. Initial temps. corresponding to cells C11 and C12 
+of the excel file. $\vari{init\_{temp\_c}} = (15, 12)$.
+
+\item \vari{const} An object of the class \vari{constants} containing 
+constants of the model. They are given below and in 
+the D1 through D8 cells of the excel
+file.
+%%%%%%%%%
+\iffalse
+\begin{align*}
+\vari{const} 
+&=  \begin{bmatrix}
+           \vari{e0} \\
+           \vari{e1} \\
+           \vari{a0}\\
+           \vari{a1}\\
+           \vari{slp}\\
+           \vari{tetmlt}\\
+           \vari{aa}\\
+           \vari{ee}
+         \end{bmatrix}  =
+      \begin{bmatrix}
+           4.15E+03 \\
+           1.29E+04\\
+           1.40E+05 \\
+           2.57E+18\\
+           1.6\\
+           277\\
+           \vari{a0} / \vari{a1}\\
+           \vari{e1} - \vari{e0}
+         \end{bmatrix}
+\end{align*}
+\fi
+%%%%%%%%%
+
+\begin{table}[!htb]
+\caption{\vari{const} object}
+\begin{center}
+    \begin{tabular}{| l | l | l | l | l | l| l| l| l | l | l | p{1cm} |}
+     \hline
+    \scriptsize{\texttt{e0}} & \scriptsize{\texttt{e1}} & \scriptsize{\texttt{a0}} & \scriptsize{\texttt{a1}} & \scriptsize{\texttt{slp}} & \scriptsize{\texttt{tetmlt}} & \scriptsize{\texttt{aa}} & \scriptsize{\texttt{ee}} \\ \hline
+             \scriptsize{\texttt{4.15E+03}} & \scriptsize{\texttt{1.29E+04}} & \scriptsize{\texttt{1.40E+05}} & \scriptsize{2.57E+18} & \scriptsize{\texttt{1.6}} & \scriptsize{\texttt{277}} & \scriptsize{\texttt{a0 / a1}} & \scriptsize{\texttt{e1 - e0}}  \\ \hline
+    \end{tabular}
+\end{center}
+ \label{table:None}
+\end{table}
+
+\end{itemize}
+
+\code{output:} A data frame of the following form.
+
+\begin{table}[!htb]
+\caption{initial data frame to construct the model with.}
+\vspace{-.1in}
+\begin{center}
+    \begin{tabular}{| l | l | l| l | l | l | l | l | l| l| l| l | p{1cm} |}
+    \hline
+    \scriptsize{date}  & \scriptsize{time} & \scriptsize{temp\_c} & \scriptsize{temp\_k}  &  \scriptsize{ftmprt} & \scriptsize{sr} & \scriptsize{xi} & \scriptsize{xs} & \scriptsize{ak1} & \scriptsize{Inter-S} & \scriptsize{Inter-E} & \scriptsize{delt} & \scriptsize{Portions} \\ \hline
+     \scriptsize{\texttt{None}} & \scriptsize{\texttt{None}} & \scriptsize{\texttt{15} }& \scriptsize{\texttt{288}} & \scriptsize{\texttt{16.93}} & \scriptsize{\texttt{22471935.51}} & \scriptsize{\texttt{1}} & \scriptsize{v{.81}} & \scriptsize{\texttt{.09}} & \scriptsize{\texttt{0.00}} & \scriptsize{\texttt{.07}} & \scriptsize{\texttt{0.00}} & \scriptsize{0}\\ \hline
+     \scriptsize{\texttt{None}}  & \scriptsize{\texttt{None}} & \scriptsize{\texttt{12}} & \scriptsize{\texttt{285}} & \scriptsize{\texttt{12.44}} & \scriptsize{\texttt{252887.94}} & \scriptsize{\texttt{1}} & \scriptsize{\texttt{1.11}} & \scriptsize{\texttt{.06}} & \scriptsize{\texttt{.07}} & \scriptsize{\texttt{.13}} & \scriptsize{\texttt{0.00}} & \scriptsize{{0}}  \\ \hline
+    \end{tabular}
+\end{center}
+ \label{table:None1}
+\end{table}
+
+
+\item \func{fill\_in\_the\_table(given\_table, const)}
+ This function takes the \vari{const} object and \vari{given\_table} 
+ as input and runs the model to fill in the 
+ proper information that we need to compute the Chill Portions 
+ which is the ultimate goal of the model. 
+ 
+ \code{input:}
+ \begin{itemize}
+ \item \vari{given\_table} Is the data frame that contains 
+ the first two rows, like the one given by 
+Table \ref{table:None1} and the first three 
+ columns, from row 3 to the end, are provided by 
+ datalogger and are read off the disk. Anything from the column
+ \code{temp\_k}  onward is computed and filled by this function.
+
+\item \vari{const}: The object containing constants of the model
+mentioned before.
+ \end{itemize}
+ 
+\code{output:} A complete table that has the Chill Portions for the 
+data of out orchard.
+
+\item \func{dynamic\_model(path\_to\_data, col\_names, init\_temp\_c, const)}
+
+This function takes the path of the file we wish 
+to compute the Chilling portions for, along with 
+other inputs that we have already mentioned 
+before, and produces the Chilling Portions.
+
+\code{input:}
+\begin{itemize}
+\item \vari{path\_to\_data}: the path to the data location on the disk.
+\item \vari{col\_names}: Name of the columns 
+of the data frame, like mentioned before. These 
+names has to be exact, because they are used for
+computations in the model.\\
+
+{\color{red}{\textsc{NOTE}}}: These data should have temp. in 
+Celsius. And it is assumed the first three columns 
+are \code{date}, \code{time} and \code{temp} respectively.\\
+
+\item \vari{init\_temp\_c} Initial temp. as mentioned before.
+
+\item \vari{const}: An object containing the constants of the model.
+\end{itemize}
+
+\code{output:} A data frame containing all information we need. 
+(Shall I change this so that it just gives the \vari{Portions}?)
+
+\end{enumerate}
+

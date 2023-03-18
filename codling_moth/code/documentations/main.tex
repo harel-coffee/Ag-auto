@@ -1,0 +1,98 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{array} % table stuff
+\usepackage{tabu} % table stuff
+
+\usepackage{amsmath}
+\usepackage{hyperref}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\fancyhf{}
+\rhead{}
+%\lhead{Help}
+\renewcommand{\headrulewidth}{0pt}
+%\futurelet\TMPfootrule\def\headrule{{\color{Cerulean}\TMPfootrule}}
+
+\lfoot{Page \thepage}
+\rfoot{h.noorazar@yahoo.com}
+\renewcommand{\footrulewidth}{2pt}
+\futurelet\TMPfootrule\def\footrule{{\color{Cerulean}\TMPfootrule}}
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\usepackage[utf8]{inputenc}
+% \usepackage{tgbonum}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% color horizontal line
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[x11names, dvipsnames]{xcolor}
+\usepackage{lipsum}
+\usepackage[textwidth = 15cm]{geometry}
+
+\newlength{\seplinewidth}
+\newlength{\seplinesep}
+\setlength{\seplinewidth}{1mm}
+\setlength{\seplinesep}{2mm}
+\colorlet{sepline}{PaleVioletRed3}
+\newcommand*{\sepline}{%
+  \par
+  \vspace{\dimexpr\seplinesep+.5\parskip}%
+  \cleaders\vbox{%
+    \begingroup % because of color
+      \color{sepline}%
+      \hrule width\linewidth height\seplinewidth
+    \endgroup
+  }\vskip\seplinewidth
+  \vspace{\dimexpr\seplinesep-.5\parskip}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\code#1{\textbf{\texttt{#1}}}
+\def\vari#1{{\color{Cerulean}{\textbf{\texttt{#1}}}}}
+\def\func#1{{\color{Maroon}{\textbf{\texttt{#1}}}}}
+\newenvironment{coded}{\color{blue}\code}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+\title{Help \& Documentation\footnote{Name of the programmer 
+of functions is written in the code for debugging 
+purposes. If you see any flaw, please contact 
+the programmer.}}
+\author{}
+\date{}
+\maketitle
+\vspace{-.71in}
+\sepline
+Codes of this library is written by of Hydro Group members.
+
+\input{dynamic_model}
+\input{Codling_Moth_Generations}
+\input{Hossein_Codes}
+% \input{OtherFunctions-Doc}
+
+\input{questions}
+\input{appendix}
+
+\end{document}
+
+
+
+
+
+
+

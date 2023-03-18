@@ -1,0 +1,104 @@
+
+\section{Codling Moth Generations}
+
+All these functions are written by Giridhar.
+% \item \func{
+% \code{
+% \vari{
+% \texttt{
+% \scriptsize{
+
+\begin{enumerate}
+
+\item \func{readbinarydata\_addmdy(filename, Nrecords, Nofvariables, ymd, ind)}
+This function reads the binary data off the disk, 
+generates a matrix containing [\code{precip, Max temp., Min temp., Wind speed}] 
+adds the \code{ymd} to it and returns it.
+
+\code{input:}
+\begin{itemize}
+\item \vari{filename} This is the full path to the file which includes the file name.
+\item \vari{Nrecords}
+\item \vari{Nofvariables}
+\item \vari{ymd} Year, Month, Day values
+\item \vari{ind}
+\end{itemize}
+
+\code{output:} [\code{precip, Max temp., Min temp., Wind speed, ymd}]
+
+\hrule
+
+Why not \code{readRDF}? why connection thing?
+
+I do not know what the rest are yet. and I do not 
+know why \code{Nrecords} and {\code{Nofvariables}}
+are not found inside the function by looking at dimension of 
+the file read off the disk! Are not they related?
+
+\hrule
+
+
+\pagebreak
+
+%%%%%%%%%%%%%%%
+\item \func{create\_ymdvalues(nYears, Years, leap.year)}
+
+\code{input:}
+\begin{itemize}
+\item \vari{nYears}: Number of years. (Is not this just \code{length(\vari{Years})}?)
+\item \vari{Years}
+\item \vari{leap.year}: A binary vector indicating whether a year is a leap year or not.
+\end{itemize}
+\code{output:} \vari{ymd}, i.e. \code{Year, Month, Day}.
+%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%
+\item \func{add\_dd\_cumudd(metdata\_data.table, lower, upper)}
+
+Computes the degree days (\code{dd}), cumulative degree days (\code{Cum\_dd}) and concatenates it to the \code{metdata\_data.table}
+
+\code{input:}
+\begin{itemize}
+\item \vari{metdata\_data.table}: the data
+\item \vari{lower}: lower threshold
+\item \vari{upper}: upper threshold
+\end{itemize}
+
+\code{output:} \vari{[metdata\_data.table, dd, Cum\_dd]}
+%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%
+\item \func{CodlingMothRelPopulation(CodMothParams, metdata\_data.table)}
+
+\code{input:}
+\begin{itemize}
+\item \vari{CodMothParams}
+
+\item \vari{metdata\_data.table}
+\end{itemize}
+
+\code{output:}
+It takes a data table, and parameters of the model such as cumulative 
+degree days, and then
+based on them produces some random numbers from Weibull
+distribution and then generates (predicts/models) number of eggs,
+larva, pupa and adults, concatenates the new data to the loaded data
+and spits it out.
+%%%%%%%%%%%%%%%
+
+\item \func{CodlingMothPercentPopulation( CodMothParams, metdata\_data.table )}
+
+\code{input:}
+\begin{itemize}
+\item \vari{CodMothParams} The parameters of the model.
+\item \vari{metdata\_data.table} The collected data
+\end{itemize}
+
+\code{output:} This reads the data off the disk, and adds some
+new columns to it, containing percentages of stuff, it seems. (I have to find the source
+that this code is based on. Where did he learn the model from?)
+
+\subsection{Script}
+This goes from line 210 to 1400 (in the clean version).
+\end{enumerate}
+

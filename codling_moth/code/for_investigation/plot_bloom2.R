@@ -1,0 +1,55 @@
+#!/share/apps/R-3.2.2_gcc/bin/Rscript
+#library(chron)
+library(data.table)
+library(ggplot2)
+
+args = commandArgs(trailingOnly=TRUE)
+version = args[1]
+
+
+data_dir = "/data/hydro/users/Hossein/codling_moth/local/processed/"
+filename <- paste0(data_dir, "vertdd_combined_CMPOP_", version, ".rds")
+plot_path = "/data/hydro/users/Hossein/codling_moth/local/processed/plots/"
+
+data <- data.table(readRDS(filename))
+data$CountyGroup = as.character(data$CountyGroup)
+data[CountyGroup == 1]$CountyGroup = 'Cooler Areas'
+data[CountyGroup == 2]$CountyGroup = 'Warmer Areas'
+
+d1 = subset(data, select = c("latitude", "longitude", 
+                             "CountyGroup", "ClimateGroup", "ClimateScenario", 
+                             "year", "month", "day", "dayofyear", 
+                             "vert_Cum_dd_F", 
+                             "cripps_pink", "gala", "red_deli"))
+
+d1 = melt(d1, id = c("latitude", "longitude", 
+                     "CountyGroup", "ClimateGroup", "ClimateScenario", 
+                     "year", "month", "day", "dayofyear", 
+                     "vert_Cum_dd_F"))
+
+d1[variable == "red_deli"]$variable = "Red Delicious"
+d1[variable == "gala"]$variable = "Gala"
+d1[variable == "cripps_pink"]$variable = "Cripps Pink"
+
+p1 = ggplot(d1, aes(x=dayofyear, y=value, fill=factor(ClimateGroup))) +
+  #stat_summary(geom="ribbon", fun.y=function(z) { quantile(z,0.5) }, fun.ymin=function(z) { quantile(z,0.1) }, fun.ymax=function(z) { quantile(z,0.9) }, alpha=0.3) +
+  #stat_summary(geom="ribbon", fun.y=function(z) { quantile(z,0.5) }, fun.ymin=function(z) { quantile(z,0.25) }, fun.ymax=function(z) { quantile(z,0.75) }, alpha=0.7) +
+  stat_summary(geom="line", fun.y=function(z) { quantile(z,0.5) }, aes(color=factor(ClimateGroup)), size = 1)+ #, aes(color=factor(Timeframe))) + , # aes(color=factor(ClimateGroup))
+  scale_color_manual(values=c(rgb(29, 67, 111, max=255), rgb(92, 160, 201, max=255), rgb(211, 91, 76, max=255), rgb(125, 7, 37, max=255)))+#c("black", "red","darkgreen","blue")) +
+  #scale_fill_manual(values=c(rgb(29, 67, 111, max=255), rgb(92, 160, 201, max=255), rgb(211, 91, 76, max=255), rgb(125, 7, 37, max=255)))+#c("black", "red","darkgreen","blue")) +
+  facet_grid(. ~ variable ~ CountyGroup, scales = "free") +
+  #xlim(45, 165) +
+  scale_x_continuous(breaks=seq(45, 150, 10), limits = c(45, 150)) +
+  theme_bw() +
+  labs(x = "Julian Day", y = "Proportion Completing Full Bloom", color = "Climate Group") +
+  theme(
+    panel.grid.major = element_line(size = 0.7),
+    axis.text = element_text(face = "bold", size = 18),
+    axis.title = element_text(face = "bold", size = 20),
+    legend.title = element_text(face = "bold", size = 20),
+    legend.text = element_text(size = 20),
+    legend.position = "top",
+    #plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+    strip.text = element_text(size = 18, face = "bold"))
+
+ggsave("bloom2_rcp45.png", p1, path=plot_path, width = 45, height = 22, units = "cm")

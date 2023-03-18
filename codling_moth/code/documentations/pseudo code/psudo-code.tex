@@ -1,0 +1,448 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{esvect}
+\usepackage[toc,page]{appendix}
+\usepackage{leftidx}
+\usepackage{color}
+\usepackage{framed, color}
+\usepackage{multirow}
+\usepackage{pdfpages} % makes trouble in JASSS
+\usepackage{multicol}
+\usepackage{wrapfig,lipsum,booktabs}
+
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,hyperref} % mathtools make trouble in JASSS
+\usepackage{cleveref}
+\usepackage{commath}
+
+\usepackage{enumitem}
+\usepackage{amssymb}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+%%%%%%%%%%%
+\usepackage{mathtools,hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=cyan,      
+    urlcolor=red,
+    citecolor=red,
+}
+%%%%%%%%%%%%%%%%%% Pseudo Code package
+\usepackage[linesnumbered,ruled]{algorithm2e}
+
+\usepackage[x11names, dvipsnames]{xcolor}
+\usepackage{lipsum}
+
+\newlength{\seplinewidth}
+\newlength{\seplinesep}
+\setlength{\seplinewidth}{1mm}
+\setlength{\seplinesep}{2mm}
+\colorlet{sepline}{PaleVioletRed3}
+\newcommand*{\sepline}{%
+  \par
+  \vspace{\dimexpr\seplinesep+.5\parskip}%
+  \cleaders\vbox{%
+    \begingroup % because of color
+      \color{sepline}%
+      \hrule width\linewidth height\seplinewidth
+    \endgroup
+  }\vskip\seplinewidth
+  \vspace{\dimexpr\seplinesep-.5\parskip}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\code#1{\textbf{\texttt{#1}}}
+\def\vari#1{{\color{Cerulean}{\textbf{\texttt{#1}}}}}
+\def\func#1{{\color{Blue}{\textbf{\texttt{#1}}}}}
+\newenvironment{coded}{\color{blue}\code}
+
+
+%%%%%%%%%%%
+%%%%%%%%%%%  User Defined Commands. (macros)
+%%%%%%%%%%%
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\Op}{\mathbb{O}}
+\definecolor{mgreen}{RGB}{25,147,100}
+\definecolor{shadecolor}{rgb}{1,.8,.1}
+\definecolor{shadecolor2}{RGB}{245,237,0}
+\definecolor{orange}{RGB}{255,137,20}
+\definecolor{orange}{RGB}{245,37,100}
+\newcommand\ddfrac[2]{\frac{\displaystyle #1}{\displaystyle #2}}
+
+
+\usepackage[capposition=bottom]{floatrow}
+\usepackage{capt-of}
+\usepackage{booktabs}
+\usepackage{varwidth}
+\usepackage[T1]{fontenc}
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
+
+%%%%%%%%%%%
+%%%%%%%%%%%  Graphical Packages
+%%%%%%%%%%%
+\usepackage{mdframed}
+\usepackage{adjustbox}
+\usepackage{tcolorbox}
+\usepackage{graphics}
+\usepackage{tikz,ifthen,fp,calc} % calc makes trouble
+
+\usepackage{subcaption}
+\captionsetup[figure]{font=small,labelfont={bf,sf}}
+\captionsetup[subfigure]{font=scriptsize,labelfont={bf,sf}}
+
+\usetikzlibrary{plotmarks}
+\usepackage{graphicx}
+\usepackage{capt-of}% or \usepackage{caption}
+\usepackage{booktabs}
+\usepackage{varwidth}
+
+
+%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Theorem Styles
+%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{prop}{Proposition}[section]
+\newtheorem{corr}{Corollary}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{fact}{Fact}[section]
+
+\usepackage[english]{babel}
+\usepackage{babel,blindtext}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{exmp}{Example}[section]
+\usepackage{fullpage}
+\usepackage{amsfonts}
+\usepackage{lscape}
+\usepackage{bbm}
+
+\usepackage{todonotes}
+\usepackage{cite}
+\usepackage{verbatim}
+\usepackage{bm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% alphabeticall order of citations
+\usepackage[numbers]{natbib}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% double space
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand*{\affaddr}[1]{#1} % No op here. Customize it for different styles.
+\newcommand*{\affmark}[1][*]{\textsuperscript{#1}}
+
+\usepackage{authblk}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\usepackage[margin=.5in]{geometry}
+\title{Codling Moth Pseudo Code}
+
+\author[1]{Hossein Noorazar \thanks{h.noorazar@wsu.edu}}
+
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords:---}} #1}
+%\pgfplotsset{compat=1.12}
+
+\usepackage[utf8]{inputenc}
+\date{}
+\begin{document} 
+\maketitle
+\date{}
+
+\vspace{-.6in}
+
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+
+    \Input{\normalsize{\vari{raw\_file, params, start\_year, end\_year, lower=10, upper=31.11}}}
+
+    \Output{\normalsize{\vari{CMPOP\_files (minus some columns such as ClimateGroup, latitude, etc.)}}}
+    \vspace{.1in}
+    
+     \code{ \normalsize prepare\_time\_stuff(start\_year, end\_year)};       \hspace{.1in} //{\normalsize{Nyears, Nrecords, NofVariables, Years, ind}}\\
+    
+    \code{ \normalsize create\_ymdvalues (nYears, Years, leap.year)}  \hspace{.1in}  // {\normalsize{Generate Calendar}}\\
+    
+     \code{ \normalsize readbinarydata\_addmdy(input\_file, Nrecords, Nofvariables, ymd, ind)}
+    
+     \code{ \normalsize add\_dd\_cumdd(data, lower, upper)}  \hspace{.1in}  // {\normalsize{Calculate daily and cumulative gdd}}\\
+    
+     \code{ \normalsize add day of year from 1 to 365/366}\\
+    
+     \code{ \normalsize CodlingMothRelPopulation(params, data)} \hspace{.1in}  // {\normalsize{compute relative population}}\\
+    
+     \code{ \normalsize append relative population to the columns of the data: (tmax, tmin, dd, cum\_dd, cum\_dd\_F)}
+    
+     \code{\normalsize rename some of the columns: "SumEgg", "SumLarva", "SumPupa", "SumAdult", "dayofyear", 
+                      "year", "month", "day"}
+                      
+     \code{\normalsize CodlingMothPercentPopulation(params, data)}  \hspace{.1in}  // {\normalsize{Compute percentage population}}\\
+    
+    \normalsize \code{\normalsize append percentage pop. to the rest of the data}\\
+    \code{\normalsize return data}    
+    
+    \caption{Generate CMPOP files}
+    \label{alg:prepareDataCMPOP}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{\normalsize{\vari{input\_data, param, start\_year, end\_year, lower=10, upper=31.11}}}
+    \Output{\normalsize{\vari{CM files}}}
+    \vspace{.1in}
+    \code{ \normalsize prepare\_time\_stuff(start\_year, end\_year)};       \hspace{.1in} //{\normalsize{Nyears, Nrecords, NofVariables, Years, ind}}\\
+    
+    \code{ \normalsize create\_ymdvalues (nYears, Years, leap.year)}  \hspace{.1in}  // {\normalsize{Generate Calendar}}\\
+    
+     \code{ \normalsize readbinarydata\_addmdy(input\_file, Nrecords, Nofvariables, ymd, ind)}
+    
+     \code{ \normalsize add\_dd\_cumdd(data, lower, upper)}  \hspace{.1in}  // {\normalsize{Calculate daily and cumulative gdd}}\\
+    
+     \code{ \normalsize add day of year from 1 to 365/366}\\
+     
+      \code{ \normalsize add cumulative DD in celsius to data}\\
+      
+      \code{ \normalsize compute relative population and append it to the data. (CodlingMothRelPopulation(params, metdata))}\\
+      
+       \code{ \normalsize compute percentage population and append it to the data. (CodlingMothPercPopulation(params, metdata))}\\
+       
+       \code{ \normalsize compute generations of adults and larva of all 4 generations by the beginning of each month  and append it to the data.}\\
+       
+       \code{ \normalsize compute emergence and diapause  and append it to the data.}\\
+      
+      \code{ \normalsize compute when the 25\%, 50\% and 75\% of generations are hit.}\\
+     
+     \code {return CM\_file}
+    \caption{Generate CM files (prepareDataCMPOP)}
+    \label{alg:prepareDataCM}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    
+    \Input{\normalsize{\vari{params, metdata}}}
+    \Output{\normalsize{\vari{percentage\_population}}}
+    \vspace{.1in}
+    
+     \code{ \normalsize read parameters and generate an empty data frame with columns (dayofyear, year, month, Cum\_dd\_F)} \\
+    
+       \normalsize \For{$k = 1, \ldots, stage\_gen\_toiterate$ }{%
+       \normalsize relnum $\gets$ pweibull(data[Cum\_dd\_F], shape=params[i, 3], scale= params[i,4]) \\
+       \normalsize{add proper column name such as perc\_egg\_gen\_1}\\
+      }
+      
+      generate columns (PercEgg, PercLarva, PercPupa, PercAdult) \\
+      
+      \normalsize \For{ all columns of data frame }{%
+       \normalsize allrelnum\$PercEgg[allrelnum[Cum\_dd\_F] $>$ params [i,5] \& 
+                      allrelnum[Cum\_dd\_F] $<=$ params [i,6]] $\gets$ allrelnum[allrelnum[Cum\_dd\_F] > params [i, 5] \& 
+                                                                              allrelnum[Cum\_dd\_F] $<=$ params [i,6], 
+                                                                              columnnumber]
+      }
+      
+       return \textbf{allrelnum}
+    \caption{Codling Moth Percentage Population (CodlingMothPercPopulation)}
+    \label{alg:CodlingMothPercentPopulation}
+\end{algorithm}
+
+
+
+In the above algorithm stage\_gen\_toiterate is 16, 4 generations of eggs, 4 generations of larva, 4 of pupaes, 4 of adults.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+%    \underline{function adjacencyGeneration} $(n_s,n_p,u_b)$\;
+    \Input{\normalsize{\vari{params, metdata}}}
+    \Output{\normalsize{\vari{relative\_population}}}
+    \vspace{.1in}
+    \normalsize choose a subset of data (day\_of\_year, month, year, cumdd\_F)\\
+     \For{ all of the stages }{%
+     relnum $\gets$ dweibull(metdata[cumdd\_F], shape= params[i, 3], scale= params[i, 4]) * 10000\\
+     attach it to the data with proper name.
+      }
+      
+      
+      \For {all stages such as eggs}{
+      data [SumEgg] = data[EggGen1] + data[EggGen2] + data[EggGen3] + data[EggGen4]
+       }
+       return \textbf{data}
+    \caption{Codling Moth Relative Population (CodlingMothRelPopulation)}
+    \label{alg:CodlingMothRelPopulation}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{\normalsize{\vari{metdata, lower, upper}}}
+    \Output{\normalsize{\vari{metdata with additional columns}}}
+    \vspace{.1in}
+    Compute the degree days and cumulative degree days according those 6 type of relations between tmin, tmax, lower and upper temps.\\
+    
+     return \textbf{data}
+     
+    \caption{Add cumulative Degree Days (add\_dd\_cumdd)}
+    \label{alg:add_dd_cumdd}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{\normalsize{\vari{combined\_CMPOP, lower\_temp = 4.5, upper\_temp = 24.28}}}
+    \Output{\normalsize{\vari{metdata with additional columns}}}
+    \vspace{.1in}
+    generate vertical degree days\\
+    group by long, lat, climate scenario, climate group, year to generate cumulative vert. DD\\
+    generate 3 new columns for three type of apples (\code{pnorm(data[vert\_cumdd\_F], mean = 495.51, sd = 42.58, lower.tail = TRUE)})
+     return \textbf{data}
+     
+    \caption{(generate\_vertdd)}
+    \label{alg:generatevertdd}
+\end{algorithm}
+\vspace{-10in}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{\vari{combined\_CMPOP.RDS}}
+    \Output{\vari{Absolute and relative population of diapause}}
+    \vspace{.1in}
+
+   Look at the code please.
+     
+    \caption{Diapause, absolute and relative population (diapause\_abs\_rel)}
+    \label{alg:diapauseabsrel}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{\vari{combined\_CMPOP.RDS}}
+    \Output{\vari{Absolute and relative population of diapause}}
+    \vspace{.1in}
+
+   Look at the code please.
+     
+    \caption{Diapause, absolute and relative population (diapause\_abs\_rel)}
+    \label{alg:diapauseabsrel}
+\end{algorithm}
+
+
+\vspace{-10in}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[httb!]
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{\vari{vertdd\_combined\_CMPOP\_.RDS}}
+    \Output{\normalsize{\vari{bloom}}}
+    \vspace{.1in}
+    
+    Look at the code please
+     
+    \caption{Bloom (bloom)}
+    \label{alg:bloom}
+\end{algorithm}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\iffalse
+\begin{algorithm}[httb!]
+\tiny
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+%    \underline{function adjacencyGeneration} $(n_s,n_p,u_b)$\;
+    \Input{Two nonnegative integers $n_s$, $n_p$ and $u_b \in [0,1]$}
+    \Output{adjacency matrix \textbf{A}}
+    $N = n_s \times n_p$;                     \hspace{.1in} //population size\\
+    \textbf{A} = zero matrix of size $N$    \hspace{.1in}  // initiate adjacency matrix\\
+    // Initiate diagonal blocks:\\
+    \For{$k = 1, \ldots, n_s$ }{%
+       $a^k_{ij} = 1/(n_p-1)$ \hspace{.1in} if $ i \neq j $
+      }
+       // generate off-diagonal blocks:\\ 
+       \For{$i = 2, \ldots, n_s$ }{%
+          \For{$j = 1, \ldots, i-1$ }
+          {%
+          $\textbf{A}_{ij}$  choose randomly from $[0,u_b)$ \\
+          $\textbf{A}_{ji} \gets \textbf{A}_{ij}$ // copy lower diagonal blocks to upper diagonal blocks\\
+           }
+      }
+      %% start While
+      \While{not converged}
+      {
+      %% start For
+      \For{$rowCount = 1, \ldots, \text{N}$}
+      {%
+      // divide each row by sum of its entries:\\
+      $\textbf{A}[rowCount,:] \gets \textbf{A}[rowCount,:]/sum(\textbf{A}[rowCount,:])$
+      }%
+     %% End For
+
+     %% start For
+      \For{$colCount = 1, \ldots, \text{N}$}
+      {%
+      // divide each column by sum of its entries:\\
+      $\textbf{A}[:, \: colCount ] \gets \textbf{A}[:,colCount]/sum(\textbf{A}[:,colCount])$\
+      }%
+     %% End For
+            \For{$i = 2, \ldots, n_s$ }{%
+          \For{$j = 1, \ldots, i$ }
+          {%
+          $\textbf{A}_{ji} \gets \textbf{A}_{ij}$ // copy lower diagonal blocks to upper diagonal blocks\\
+           }
+      }
+      } %% End While
+      return \textbf{A}
+    \caption{\small Random adjacency matrix generation.(RAMG)}
+    \label{alg:adjacencyGenAlg}
+\end{algorithm}
+
+\fi
+
+
+
+
+
+\end{document}
+
+
+
+
+
+
+
