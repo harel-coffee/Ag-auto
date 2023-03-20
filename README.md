@@ -1,4 +1,4 @@
-![Image of Palouse](https://github.com/HNoorazar/Ag/blob/master/DSC_2980.jpeg)
+![Image of Palouse](https://github.com/HNoorazar/Ag/blob/main/DSC_2980.jpeg)
 
 # These codes support the hydro projects.
 
