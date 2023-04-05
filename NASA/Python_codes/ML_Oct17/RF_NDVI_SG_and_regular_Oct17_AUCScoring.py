@@ -364,7 +364,7 @@ filename = model_dir + "regular_" + VI_idx + "_RF1_default" + "_Oct17_AUCScoring
 pickle.dump(regular_forest_1_default, open(filename, 'wb'))
 
 # %% [markdown]
-# # Improve?
+# Improve?
 
 # %%
 # %%time
