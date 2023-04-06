@@ -88,8 +88,6 @@ landsat_raw_evi.reset_index(drop=True, inplace=True)
 landsat_raw_ndvi.reset_index(drop=True, inplace=True)
 
 # %%
-
-# %%
 # landsat_SG_dir = "/Users/hn/Documents/01_research_data/NASA/VI_TS/05_SG_TS/"
 # file_names = ["SG_Grant2017_" + VI_idx + "_JFD.csv"]
 
@@ -174,53 +172,38 @@ print(sorted(a_field_sentinel_raw_EVI.human_system_start_time.dt.year.unique()))
 print(sorted(a_field_sentinel_raw_NDVI.human_system_start_time.dt.year.unique()))
 
 # %%
-size = 20
-title_FontSize = 10
-legend_FontSize = 8
-tick_FontSize = 12
+size = 10
+title_FontSize = 5
+tick_legend_FontSize = 10 
 label_FontSize = 14
 
-params = {'legend.fontsize': 15, # medium, large
+params = {'legend.fontsize': tick_legend_FontSize, # medium, large
           # 'figure.figsize': (6, 4),
-          'axes.labelsize': size,
-          'axes.titlesize': size,
-          'xtick.labelsize': size, #  * 0.75
-          'ytick.labelsize': size, #  * 0.75
+          'axes.labelsize': tick_legend_FontSize*1.2,
+          'axes.titlesize': tick_legend_FontSize*1.5,
+          'xtick.labelsize': tick_legend_FontSize, #  * 0.75
+          'ytick.labelsize': tick_legend_FontSize, #  * 0.75
           'axes.titlepad': 10}
 
-#
-#  Once set, you cannot change them, unless restart the notebook
-#
 plt.rc('font', family = 'Palatino')
 plt.rcParams['xtick.bottom'] = True
 plt.rcParams['ytick.left'] = True
 plt.rcParams['xtick.labelbottom'] = True
 plt.rcParams['ytick.labelleft'] = True
 plt.rcParams.update(params)
-# pylab.rcParams.update(params)
-# plt.rc('text', usetex=True)
 
-# %%
+
 titlee="Unusual high EVI values in Landsat during the winter months."
-fig, axs = plt.subplots(2, 1, figsize=(15, 6), sharex=False, # sharey='col', # sharex=True, sharey=True,
+fig, axs = plt.subplots(2, 1, figsize=(10, 5), sharex=False, # sharey='col', # sharex=True, sharey=True,
                        gridspec_kw={'hspace': 0.35, 'wspace': .05});
 
 (ax1, ax2) = axs; ax1.grid(True); ax2.grid(True); 
 
-# ax1.scatter(a_field_landsat_raw_EVI['human_system_start_time'], 
-#             a_field_landsat_raw_EVI["EVI"], 
-#             s=20, c="r", label="EVI")
-
-# ax1.scatter(a_field_landsat_raw_NDVI['human_system_start_time'], 
-#             a_field_landsat_raw_NDVI["NDVI"], 
-#              s=20, c="dodgerblue", label="NDVI")
-
-ax1.plot(a_field_landsat_raw_EVI['human_system_start_time'], 
-         a_field_landsat_raw_EVI["EVI"], 
+ht_ = "human_system_start_time"
+ax1.plot(a_field_landsat_raw_EVI[ht_], a_field_landsat_raw_EVI["EVI"], 
          linewidth=4, color="dodgerblue", label="EVI") 
 
-ax1.plot(a_field_landsat_raw_NDVI['human_system_start_time'], 
-         a_field_landsat_raw_NDVI["NDVI"], 
+ax1.plot(a_field_landsat_raw_NDVI[ht_], a_field_landsat_raw_NDVI["NDVI"], 
          linewidth=4, color="#ff7f0e", linestyle="dashed", label="NDVI") 
 
 ax1.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
@@ -233,26 +216,21 @@ ax1.xaxis.set_major_locator(mdates.MonthLocator())
 ax1.xaxis.set_major_formatter(DateFormatter('%b'))
 
 from datetime import datetime
-ax1.axvspan(datetime(proper_year, 2, 10), 
-            datetime(proper_year, 2, 20), facecolor='.01', alpha=0.3)
-
-ax1.axvspan(datetime(proper_year, 11, 15), 
-            datetime(proper_year, 11, 25), facecolor='.01', alpha=0.3)
-
+ax1.axvspan(datetime(proper_year,  2, 5), datetime(proper_year,  2, 14), facecolor='.01', alpha=0.3)
+ax1.axvspan(datetime(proper_year, 11, 15), datetime(proper_year, 11, 25), facecolor='.01', alpha=0.3)
 ax1.set_title(titlee)
+ax1.set_yticks([0, 1, 2])
 ####################################
 
-ax2.plot(a_field_sentinel_raw_EVI['human_system_start_time'], 
-         a_field_sentinel_raw_EVI["EVI"], 
+ax2.plot(a_field_sentinel_raw_EVI[ht_], a_field_sentinel_raw_EVI["EVI"], 
          linewidth=4, color="dodgerblue", label="EVI") 
 
-ax2.plot(a_field_sentinel_raw_NDVI['human_system_start_time'], 
-         a_field_sentinel_raw_NDVI["NDVI"], 
+ax2.plot(a_field_sentinel_raw_NDVI[ht_], a_field_sentinel_raw_NDVI["NDVI"], 
          linewidth=4, color="#ff7f0e", linestyle="dashed", label="NDVI") 
 
 ax2.set_ylim([-0.05, 2.05])
 ax2.set_xlim([datetime(2017, 1, 1), datetime(2018, 1, 1)])
-ax2.set_ylabel("sentinel VI") # , labelpad=20); # fontsize = label_FontSize,
+ax2.set_ylabel("Sentinel VI") # , labelpad=20); # fontsize = label_FontSize,
 ax2.tick_params(axis='y', which='major') #, labelsize = tick_FontSize)
 ax2.tick_params(axis='x', which='major') #, labelsize = tick_FontSize) # 
 ax2.legend(loc="upper right");
@@ -260,7 +238,7 @@ from matplotlib.dates import MonthLocator, DateFormatter
 
 ax2.xaxis.set_major_locator(mdates.MonthLocator())
 ax2.xaxis.set_major_formatter(DateFormatter('%b'))
-
+ax2.set_yticks([0, 1, 2])
 # plt.yticks(np.arange(0, 2, 1));
 # ax.xaxis.set_major_locator(mdates.YearLocator(1))
 # ax1.set_ylim(-0.1, 2);
@@ -269,21 +247,19 @@ plot_dir = "/Users/hn/Documents/01_research_data/NASA/for_paper/plots/JFD_proble
 os.makedirs(plot_dir, exist_ok=True)
 
 file_name = plot_dir + "Sentinel_Landsat_EVI_JFDProblem.pdf"
-# plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 
 # %%
 titlee="Unusual high EVI values in Landsat during the winter months."
 fig, ax1 = plt.subplots(1, 1, figsize=(15, 3), sharex=False, sharey='col', # sharex=True, sharey=True,
                        gridspec_kw={'hspace': 0.35, 'wspace': .05});
-
 ax1.grid(True);
-ax1.plot(a_field_landsat_raw_EVI['human_system_start_time'], 
-         a_field_landsat_raw_EVI["EVI"], 
+
+ax1.plot(a_field_landsat_raw_EVI[ht_], a_field_landsat_raw_EVI["EVI"], 
          linewidth=4, color="dodgerblue", label="EVI") 
 
-ax1.plot(a_field_landsat_raw_NDVI['human_system_start_time'], 
-         a_field_landsat_raw_NDVI["NDVI"], 
+ax1.plot(a_field_landsat_raw_NDVI[ht_], a_field_landsat_raw_NDVI["NDVI"], 
          linewidth=4, color="#ff7f0e", linestyle="dashed", label="NDVI") 
 
 ax1.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
@@ -295,11 +271,8 @@ from matplotlib.dates import MonthLocator, DateFormatter
 ax1.xaxis.set_major_locator(mdates.MonthLocator())
 ax1.xaxis.set_major_formatter(DateFormatter('%b'))
 
-ax1.axvspan(datetime(proper_year, 2, 10), 
-            datetime(proper_year, 2, 20), facecolor='.01', alpha=0.3)
-ax1.axvspan(datetime(proper_year, 11, 15), 
-            datetime(proper_year, 11, 25), facecolor='.01', alpha=0.3)
-
+ax1.axvspan(datetime(proper_year,  2, 5), datetime(proper_year,  2, 14), facecolor='.01', alpha=0.3)
+ax1.axvspan(datetime(proper_year, 11, 15), datetime(proper_year, 11, 25), facecolor='.01', alpha=0.3)
 ax1.set_title(titlee)
 
 plot_dir = "/Users/hn/Documents/01_research_data/NASA/for_paper/plots/JFD_problem/"
@@ -312,15 +285,12 @@ file_name = plot_dir + "Landsat_EVI_JFDProblem.pdf"
 # %%
 fig, ax1 = plt.subplots(1, 1, figsize=(15, 3), sharex=False, sharey='col', # sharex=True, sharey=True,
                        gridspec_kw={'hspace': 0.35, 'wspace': .05});
-
 ax1.grid(True);
 
-ax1.plot(a_field_sentinel_raw_EVI['human_system_start_time'], 
-         a_field_sentinel_raw_EVI["EVI"], 
+ax1.plot(a_field_sentinel_raw_EVI[ht_], a_field_sentinel_raw_EVI["EVI"], 
          linewidth=4, color="dodgerblue", label="EVI") 
 
-ax1.plot(a_field_sentinel_raw_NDVI['human_system_start_time'], 
-         a_field_sentinel_raw_NDVI["NDVI"], 
+ax1.plot(a_field_sentinel_raw_NDVI[ht_], a_field_sentinel_raw_NDVI["NDVI"], 
          linewidth=4, color="#ff7f0e", linestyle="dashed", label="NDVI") 
 
 ax1.set_ylim([-0.05, 2.05])
@@ -342,6 +312,7 @@ file_name = plot_dir + "Sentinel_EVI_JFDProblem.pdf"
 
 # %%
 import seaborn as sb
+# colors = {'L7':'red', 'L8':'green'}
 
 # %%
 field_IDs=["102373_WSDA_SF_2017", "99108_WSDA_SF_2017",
@@ -349,38 +320,60 @@ field_IDs=["102373_WSDA_SF_2017", "99108_WSDA_SF_2017",
            "100316_WSDA_SF_2017"]
 
 # %%
-a_field_landsat_raw_EVI=landsat_raw_evi[landsat_raw_evi.ID==field_IDs[0]].copy()
 
-fig, ax = plt.subplots(figsize=(11, 4))
-sb.scatterplot(data=a_field_landsat_raw_EVI, x='human_system_start_time', y='EVI', hue='source')
-colors = {'L7':'red', 'L8':'green'}
+# %%
+size = 10
+title_FontSize = 5
+tick_legend_FontSize = 10 
+label_FontSize = 14
+
+params = {'legend.fontsize': tick_legend_FontSize, # medium, large
+          # 'figure.figsize': (6, 4),
+          'axes.labelsize': tick_legend_FontSize*1.2,
+          'axes.titlesize': tick_legend_FontSize*1.2,
+          'xtick.labelsize': tick_legend_FontSize, #  * 0.75
+          'ytick.labelsize': tick_legend_FontSize, #  * 0.75
+          'axes.titlepad': 10}
+
+plt.rc('font', family = 'Palatino')
+plt.rcParams['xtick.bottom'] = True
+plt.rcParams['ytick.left'] = True
+plt.rcParams['xtick.labelbottom'] = True
+plt.rcParams['ytick.labelleft'] = True
+plt.rcParams.update(params)
+
+a_field_landsat_raw_EVI=landsat_raw_evi[landsat_raw_evi.ID==field_IDs[0]].copy()
+fig, ax = plt.subplots(figsize=(8, 2))
+sb.scatterplot(data=a_field_landsat_raw_EVI, x=ht_, y='EVI', hue='source')
+legend = ax.legend()
+
 ax.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
 ax.set_xlabel(""); # , labelpad=20); # fontsize = label_FontSize,
 
 # %%
 a_field_landsat_raw_EVI=landsat_raw_evi[landsat_raw_evi.ID==field_IDs[1]].copy()
 
-fig, ax = plt.subplots(figsize=(11, 4))
-sb.scatterplot(data=a_field_landsat_raw_EVI, x='human_system_start_time', y='EVI', hue='source')
-colors = {'L7':'red', 'L8':'green'}
+fig, ax = plt.subplots(figsize=(8, 2))
+sb.scatterplot(data=a_field_landsat_raw_EVI, x=ht_, y='EVI', hue='source')
+legend = ax.legend()
 ax.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
 ax.set_xlabel(""); # , labelpad=20); # fontsize = label_FontSize,
 
 # %%
 a_field_landsat_raw_EVI=landsat_raw_evi[landsat_raw_evi.ID==field_IDs[2]].copy()
 
-fig, ax = plt.subplots(figsize=(11, 4))
-sb.scatterplot(data=a_field_landsat_raw_EVI, x='human_system_start_time', y='EVI', hue='source')
-colors = {'L7':'red', 'L8':'green'}
+fig, ax = plt.subplots(figsize=(8, 2))
+sb.scatterplot(data=a_field_landsat_raw_EVI, x=ht_, y='EVI', hue='source')
+legend = ax.legend() # remove legend title 
 ax.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
 ax.set_xlabel(""); # , labelpad=20); # fontsize = label_FontSize,
 
 # %%
 a_field_landsat_raw_EVI=landsat_raw_evi[landsat_raw_evi.ID==field_IDs[3]].copy()
 
-fig, ax = plt.subplots(figsize=(11, 4))
-sb.scatterplot(data=a_field_landsat_raw_EVI, x='human_system_start_time', y='EVI', hue='source')
-colors = {'L7':'red', 'L8':'green'}
+fig, ax = plt.subplots(figsize=(8, 2))
+sb.scatterplot(data=a_field_landsat_raw_EVI, x=ht_, y='EVI', hue='source')
+legend = ax.legend() # remove legend title 
 ax.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
 ax.set_xlabel(""); # , labelpad=20); # fontsize = label_FontSize,
 
