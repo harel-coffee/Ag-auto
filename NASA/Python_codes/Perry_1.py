@@ -20,16 +20,11 @@
 #
 # [Colab resources are not guaranteed](https://research.google.com/colaboratory/faq.html#:~:text=Colab\%20is\%20able\%20to\%20provide,other\%20factors\%20vary\%20over\%20time.). One can, however, [subscribe and increase resources]((https://colab.research.google.com/signup)) at his disposal.
 #
-# Creating an App also needs money and human time to create it. Please look at [Quotas and limits](https://cloud.google.com/appengine/docs/standard#:~:text=The%20standard%20environment%20gives%20you,suit%20your%20needs%2C%20see%20Quotas.) section as a starting point!
+# Creating an App also needs $ and human time to create it. Please look at [Quotas and limits](https://cloud.google.com/appengine/docs/standard#:~:text=The%20standard%20environment%20gives%20you,suit%20your%20needs%2C%20see%20Quotas.) section as a starting point!
 #
 # I ran different counties as a separate jobs and it took hours. If they want to run all counties at once, the cost (computation or $) is even higher.
 #
 # <p>&nbsp;</p>
-#
-# Speaking of money, money is source of lots of problems. Researchers have "shown" [sugar is good for you and fat is bad!](https://www.npr.org/sections/thetwo-way/2016/09/13/493739074/50-years-ago-sugar-industry-quietly-paid-scientists-to-point-blame-at-fat). Sugar companies were behind this study inducted in Harvard.
-# [Dallas Buyers Club](https://www.imdb.com/title/tt0790636/) showed problems within FDA. Bad cops, bad doctors who sell their souls for money. Advisors whose priority is fund not training te students. All of these (Teacher/Student, Doctor/Patient, Researcher/Society, Cop/Society) are relationships that instinctively is supposed to be based on trust and honesty. But ...
-#
-# Maybe you can watch Making of a Murderer and see what happened to the guy by cops, DA, AG, judge...
 
 # %% [markdown] id="c9MAEcsBblEc"
 # # Print Local Time 
