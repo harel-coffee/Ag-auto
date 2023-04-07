@@ -13,27 +13,23 @@
 # ---
 
 # %%
+import time# , shutil
 import numpy as np
 import pandas as pd
-import scipy, scipy.signal
-
 from datetime import date
-import time
 
-import random
-from random import seed, random
-
-import shutil
-
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report
+# import random
+# from random import seed, random
+# from sklearn.model_selection import train_test_split, GridSearchCV
+# from sklearn.neighbors import KNeighborsClassifier
+# from sklearn.metrics import classification_report
+# import scipy, scipy.signal
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
 
-import pickle, h5py
+import pickle #, h5py
 import sys, os, os.path
 
 # %%
@@ -56,12 +52,12 @@ print (meta.shape)
 print (meta_moreThan10Acr.shape)
 meta.head(2)
 
-# %%
-# Read Training Set Labels
+# %% [markdown]
+# # Read Training Set Labels
 
 # %%
-training_set_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data/"
-ground_truth_labels = pd.read_csv(training_set_dir+"train_labels.csv")
+training_set_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
+ground_truth_labels = pd.read_csv(training_set_dir+"groundTruth_labels_Oct17_2022.csv")
 print ("Unique Votes: ", ground_truth_labels.Vote.unique())
 print (len(ground_truth_labels.ID.unique()))
 ground_truth_labels.head(2)
@@ -107,8 +103,6 @@ for fName in landsat_fNames:
     landsat_DF=pd.concat([landsat_DF, curr])
 
 # %%
-
-# %%
 data_dir = "/Users/hn/Documents/01_research_data/NASA/VI_TS/04_regularized_TS/"
 file_names = ["regular_Walla2015_" + VI_idx + "_JFD.csv", 
               "regular_AdamBenton2016_" + VI_idx + "_JFD.csv", 
@@ -135,7 +129,9 @@ data.reset_index(drop=True, inplace=True)
 data.head(2)
 
 # %%
+print (f"{data.shape=}")
 ground_truth = data[data.ID.isin(list(ground_truth_labels.ID.unique()))].copy()
+print (f"{ground_truth.shape=}")
 
 # %% [markdown]
 # # Toss small fields
@@ -145,12 +141,12 @@ ground_truth_labels_extended = pd.merge(ground_truth_labels, meta, on=['ID'], ho
 ground_truth_labels = ground_truth_labels_extended[ground_truth_labels_extended.ExctAcr>=10].copy()
 ground_truth_labels.reset_index(drop=True, inplace=True)
 
-print ("There are [{:.0f}] fields in total whose"\
+print ("There are [{:.0f}] fields in total whose "\
        "area adds up to [{:.2f}].".format(len(ground_truth_labels_extended), \
                                               ground_truth_labels_extended.ExctAcr.sum()))
 
 
-print ("There are [{:.0f}] fields larger than 10 acres whose"\
+print ("There are [{:.0f}] fields larger than 10 acres whose "\
        "area adds up to [{:.2f}].".format(len(ground_truth_labels), \
                                             ground_truth_labels.ExctAcr.sum()))
 
@@ -204,6 +200,10 @@ for an_ID in ground_truth.ID.unique():
 # #### Make sure rows of ```ground_truth_allBands``` and ```ground_truth_labels``` are in the same order
 
 # %%
+test20_split_2Bconsistent_Oct17 = pd.read_csv(training_set_dir + "test20_split_2Bconsistent_Oct17.csv")
+train80_split_2Bconsistent_Oct17 = pd.read_csv(training_set_dir + "train80_split_2Bconsistent_Oct17.csv")
+
+# %%
 ground_truth_labels = ground_truth_labels.set_index('ID')
 ground_truth_labels = ground_truth_labels.reindex(index=ground_truth_wide['ID'])
 ground_truth_labels = ground_truth_labels.reset_index()
@@ -217,12 +217,23 @@ ground_truth_labels=ground_truth_labels[["ID", "Vote"]]
 ground_truth_labels.head(2)
 
 # %%
-x_train_df, x_test_df, y_train_df, y_test_df = train_test_split(ground_truth_wide, 
-                                                                ground_truth_labels, 
-                                                                test_size=0.2, 
-                                                                random_state=0,
-                                                                shuffle=True,
-                                                                stratify=ground_truth_labels.Vote.values)
+test20_split_2Bconsistent_Oct17.head(2)
+
+# %%
+ground_truth_wide.head(2)
+
+# %%
+# x_train_df, x_test_df, y_train_df, y_test_df = train_test_split(ground_truth_wide, 
+#                                                                 ground_truth_labels, 
+#                                                                 test_size=0.2, 
+#                                                                 random_state=0,
+#                                                                 shuffle=True,
+#                                                                 stratify=ground_truth_labels.Vote.values)
+
+x_train_df = ground_truth_wide[ground_truth_wide.ID.isin(list(train80_split_2Bconsistent_Oct17.ID))]
+x_test_df  = ground_truth_wide[ground_truth_wide.ID.isin(list(test20_split_2Bconsistent_Oct17.ID))]
+y_train_df = ground_truth_labels[ground_truth_labels.ID.isin(list(train80_split_2Bconsistent_Oct17.ID))]
+y_test_df  = ground_truth_labels[ground_truth_labels.ID.isin(list(test20_split_2Bconsistent_Oct17.ID))]
 
 # %%
 landsat_DF = landsat_DF[landsat_DF.ID.isin(list(y_test_df.ID))]
@@ -230,26 +241,36 @@ landsat_DF = nc.add_human_start_time_by_system_start_time(landsat_DF)
 landsat_DF.reset_index(drop=True, inplace=True)
 landsat_DF.head(2)
 
+# %%
+y_test_df.head(2)
+
+# %%
+""" Throws error. we are trying to unpickle a lower version with a higher version of pickle!
+"""
+# # !pip3 install scikit-learn==0.19.1 
+
+# %%
+# %load_ext autoreload
+# %autoreload
+
 # %% [markdown]
 # # Read SVM regular From Disk
 
 # %%
-model_dir = "/Users/hn/Documents/01_research_data/NASA/ML_Models/"
+model_dir = "/Users/hn/Documents/01_research_data/NASA/ML_Models_Oct17/"
 
-filename = model_dir + 'SVM_classifier_balanced_regularEVI_00.sav'
-SVM_classifier_balanced_00 = pickle.load(open(filename, 'rb'))
+filename = model_dir + 'SVM_classifier_balanced_regular_EVI_01_Oct17.sav'
+SVM_classifier_balanced = pickle.load(open(filename, 'rb'))
 
-filename = model_dir + 'SVM_classifier_NoneWeight_regularEVI_00.sav'
-SVM_classifier_NoneWeight_00 = pickle.load(open(filename, 'rb'))
+filename = model_dir + 'SVM_classifier_NoneWeight_regular_EVI_01_Oct17.sav'
+SVM_classifier_NoneWeight = pickle.load(open(filename, 'rb'))
 
 # %% [markdown]
 # #### Predict SVMs on regular data
 
 # %%
-SVM_classifier_NoneWeight_00_predictions = SVM_classifier_NoneWeight_00.predict(x_test_df.iloc[:, 1:])
-SVM_classifier_balanced_00_predictions = SVM_classifier_balanced_00.predict(x_test_df.iloc[:, 1:])
-
-# %%
+SVM_classifier_NoneWeight_predictions = SVM_classifier_NoneWeight.predict(x_test_df.iloc[:, 1:])
+SVM_classifier_balanced_predictions   = SVM_classifier_balanced.predict(x_test_df.iloc[:, 1:])
 
 # %% [markdown]
 # #### Form Table of Mistakes of SVM
@@ -257,20 +278,20 @@ SVM_classifier_balanced_00_predictions = SVM_classifier_balanced_00.predict(x_te
 # %%
 SVM_balanced_y_test_df=y_test_df.copy()
 SVM_None_y_test_df=y_test_df.copy()
-SVM_balanced_y_test_df["prediction"] = list(SVM_classifier_balanced_00_predictions)
+SVM_balanced_y_test_df["prediction"] = list(SVM_classifier_balanced_predictions)
 SVM_balanced_y_test_df.head(2)
 
 # %%
 SVM_None_y_test_df=y_test_df.copy()
 SVM_None_y_test_df=y_test_df.copy()
-SVM_None_y_test_df["prediction"] = list(SVM_classifier_NoneWeight_00_predictions)
+SVM_None_y_test_df["prediction"] = list(SVM_classifier_NoneWeight_predictions)
 SVM_None_y_test_df.head(2)
 
 # %% [markdown]
 # #### Write down the test result on the disk
 
 # %%
-test_result_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data/test_results/"
+test_result_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/test_results/"
 os.makedirs(test_result_dir, exist_ok=True)
 
 # %%
@@ -313,8 +334,6 @@ SVM_None_y_test_df_A1_P2
 # %%
 sorted(SVM_None_y_test_df_A1_P2.CropTyp)
 
-# %%
-
 # %% [markdown]
 # #### Plot SVM mistakes
 
@@ -332,6 +351,19 @@ params = {'legend.fontsize': 15, # medium, large
           'xtick.labelsize': size, #  * 0.75
           'ytick.labelsize': size, #  * 0.75
           'axes.titlepad': 10}
+
+# size = 10
+# title_FontSize = 5
+# tick_legend_FontSize = 10 
+# label_FontSize = 14
+
+# params = {'legend.fontsize': tick_legend_FontSize, # medium, large
+#           # 'figure.figsize': (6, 4),
+#           'axes.labelsize': tick_legend_FontSize*1.2,
+#           'axes.titlesize': tick_legend_FontSize*1.5,
+#           'xtick.labelsize': tick_legend_FontSize, #  * 0.75
+#           'ytick.labelsize': tick_legend_FontSize, #  * 0.75
+#           'axes.titlepad': 10}
 
 #
 #  Once set, you cannot change them, unless restart the notebook
@@ -365,12 +397,11 @@ def plot_oneColumn_CropTitle(dt, raw_dt, titlee, _label = "raw", idx="EVI", _col
 
 
 # %%
-test_result_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data/test_results/"
-os.makedirs(test_result_dir, exist_ok=True)
-
-# %%
 SVM_None_y_test_df_A2_P1.rename(columns={"prediction": "SVM_None_pred_A2P1"}, inplace=True)
 SVM_None_y_test_df_A1_P2.rename(columns={"prediction": "SVM_None_pred_A1P2"}, inplace=True)
+
+# %%
+test_result_dir
 
 # %%
 for anID in list(SVM_None_y_test_df_A1_P2.ID):
@@ -425,7 +456,10 @@ for anID in list(SVM_None_y_test_df_A2_P1.ID):
 # # Random Forest
 
 # %%
-filename = model_dir + 'regular_forest_default.sav'
+model_dir
+
+# %%
+filename = model_dir + 'regular_EVI_RF1_default_Oct17_accuracyScoring.sav'
 regular_forest_default_model = pickle.load(open(filename, 'rb'))
 
 # %%
@@ -435,7 +469,9 @@ regular_forest_default_y_test_df["prediction"]=list(regular_forest_default_preds
 regular_forest_default_y_test_df.head(2)
 
 # %%
-out_name=test_result_dir+ "regular_RF_default_y_test.csv"
+
+# %%
+out_name=test_result_dir+ "regular_RF_default_Oct17_accuracyScoring_y_test.csv"
 regular_forest_default_y_test_df.to_csv(out_name, index = False)
 
 # %%
@@ -473,7 +509,8 @@ forest_grid_1_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_dou
 forest_grid_1_confus_tbl_test
 
 # %%
-teset_set_fromBefore = pd.read_csv(training_set_dir+"test20_split_expertLabels_2Bconsistent.csv")
+
+# %%
 
 # %%
 x_test_df.head(2)
@@ -499,6 +536,9 @@ forest_default_yTest_A2P1.rename(columns={"prediction": "RF_default_pred_A2P1"},
 forest_default_yTest_A1P2.rename(columns={"prediction": "RF_default_pred_A1P2"}, inplace=True)
 
 # %%
+forest_default_yTest_A1P2
+
+# %%
 for anID in list(forest_default_yTest_A1P2.ID):
     curr_dt = SG_data_4_plot[SG_data_4_plot.ID==anID].copy()
     curr_meta = meta[meta.ID==anID].copy()
@@ -517,7 +557,7 @@ for anID in list(forest_default_yTest_A1P2.ID):
     plot_path = test_result_dir + "regular_RF_plots_A1_P2/"
     os.makedirs(plot_path, exist_ok=True)
     fig_name = plot_path + anID + '.pdf'
-    plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
+    # plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
     plt.close('all')
     
     
@@ -539,7 +579,7 @@ for anID in list(forest_default_yTest_A2P1.ID):
     plot_path = test_result_dir + "regular_RF_plots_A2_P1/"
     os.makedirs(plot_path, exist_ok=True)
     fig_name = plot_path + anID + '.pdf'
-    plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
+    # plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
     plt.close('all')
 
 # %% [markdown]
@@ -626,21 +666,16 @@ def DTW_prune(ts1, ts2):
 
 
 # %%
-filename = model_dir + "00_KNN_regular_EVI_DTW_prune_distanceWeight_12NNisBest.sav"
+filename = model_dir + "00_KNN_regular_EVI_DTW_prune_distanceWeight_16NNisBest.sav"
 distanceWeight_KNN = pickle.load(open(filename, 'rb'))
 
 # %%
-filename = model_dir + "00_KNN_regular_EVI_DTW_prune_uniformWeight_11NNisBest.sav"
-uniform_KNN = pickle.load(open(filename, 'rb'))
-
-# %%
 # %%time
-KNN_DTW_test_predictions_uniform = uniform_KNN.predict(x_test_df.iloc[:, 1:])
 KNN_DTW_test_predictions_distanceWeight = distanceWeight_KNN.predict(x_test_df.iloc[:, 1:])
 
 # %%
 KNN_y_test=y_test_df.copy()
-KNN_y_test["KNN_pred_uniform"] = list(KNN_DTW_test_predictions_uniform)
+# KNN_y_test["KNN_pred_uniform"] = list(KNN_DTW_test_predictions_uniform)
 KNN_y_test["KNN_pred_distance"] = list(KNN_DTW_test_predictions_distanceWeight)
 KNN_y_test.head(2)
 
@@ -659,17 +694,23 @@ print (KNN_y_test_dist_A1P2.ExctAcr.sum())
 abs(KNN_y_test_dist_A2P1.ExctAcr.sum()-KNN_y_test_dist_A1P2.ExctAcr.sum())
 
 # %%
-KNN_y_test_uniform_A1P2=KNN_y_test[KNN_y_test.Vote==1]
-KNN_y_test_uniform_A1P2=KNN_y_test_uniform_A1P2[KNN_y_test_uniform_A1P2.KNN_pred_uniform==2]
+# KNN_y_test_uniform_A1P2=KNN_y_test[KNN_y_test.Vote==1]
+# KNN_y_test_uniform_A1P2=KNN_y_test_uniform_A1P2[KNN_y_test_uniform_A1P2.KNN_pred_uniform==2]
 
-KNN_y_test_uniform_A2P1=KNN_y_test[KNN_y_test.Vote==2]
-KNN_y_test_uniform_A2P1=KNN_y_test_uniform_A2P1[KNN_y_test_uniform_A2P1.KNN_pred_uniform==1]
+# KNN_y_test_uniform_A2P1=KNN_y_test[KNN_y_test.Vote==2]
+# KNN_y_test_uniform_A2P1=KNN_y_test_uniform_A2P1[KNN_y_test_uniform_A2P1.KNN_pred_uniform==1]
 
 
-print (KNN_y_test_uniform_A2P1.ExctAcr.sum())
-print (KNN_y_test_uniform_A1P2.ExctAcr.sum())
+# print (KNN_y_test_uniform_A2P1.ExctAcr.sum())
+# print (KNN_y_test_uniform_A1P2.ExctAcr.sum())
 
-abs(KNN_y_test_uniform_A2P1.ExctAcr.sum()-KNN_y_test_uniform_A1P2.ExctAcr.sum())
+# abs(KNN_y_test_uniform_A2P1.ExctAcr.sum()-KNN_y_test_uniform_A1P2.ExctAcr.sum())
+
+# %%
+KNN_y_test_dist_A1P2
+
+# %%
+KNN_y_test_dist_A2P1
 
 # %% [markdown]
 # # Confusion Tables
@@ -773,7 +814,7 @@ confus_tbl_test
 
 # %%
 out_name=test_result_dir+ "regular_KNN_y_test.csv"
-KNN_y_test.to_csv(out_name, index = False)
+# KNN_y_test.to_csv(out_name, index = False)
 
 # %%
 
@@ -797,7 +838,7 @@ for anID in list(KNN_y_test_uniform_A1P2.ID):
     plot_path = test_result_dir + "regular_KNN_plots_A1_P2/"
     os.makedirs(plot_path, exist_ok=True)
     fig_name = plot_path + anID + '.pdf'
-    plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
+    # plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
     plt.close('all')
     
 for anID in list(KNN_y_test_uniform_A2P1.ID):
@@ -819,7 +860,7 @@ for anID in list(KNN_y_test_uniform_A2P1.ID):
     plot_path = test_result_dir + "regular_KNN_plots_A2_P1/"
     os.makedirs(plot_path, exist_ok=True)
     fig_name = plot_path + anID + '.pdf'
-    plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
+    # plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
     plt.close('all')
 
 
@@ -925,7 +966,7 @@ for anID in list(common_mistakes_clean.ID):
         
     os.makedirs(plot_path, exist_ok=True)
     fig_name = plot_path + anID + '.pdf'
-    plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
+    # plt.savefig(fname = fig_name, dpi=400, bbox_inches='tight')
     plt.close('all')
 
 # %%

@@ -21,25 +21,21 @@ from datetime import date
 import time
 
 import random
-from random import seed
-from random import random
-
-import os, os.path
+from random import random, seed
 import shutil
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestClassifier
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-import pickle
-import h5py
-import sys
 
-from sklearn.metrics import confusion_matrix
+import pickle #, h5py
+import sys, os, os.path
 
 # %%
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
@@ -48,7 +44,6 @@ import NASA_core as nc
 
 # %%
 from tslearn.metrics import dtw as dtw_metric
-
 # https://dtaidistance.readthedocs.io/en/latest/usage/dtw.html
 from dtaidistance import dtw
 from dtaidistance import dtw_visualisation as dtwvis
@@ -278,10 +273,6 @@ print ((x_test_df.ID==y_test_df.ID).sum())
 #      \begin{equation}\label{eq:Fscore}
 #         F_\beta = \frac{(1+\beta^2) TP}{ (1+\beta^2) TP + \beta^2 FN + FP}
 #      \end{equation}
-
-# %%
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
 
 # %%
 # %%time
@@ -518,8 +509,6 @@ regular_forest_grid_2_confus_tbl_test
 confusion_matrix(regular_forest_grid_2_y_test_df.Vote, regular_forest_grid_2_y_test_df.prediction)
 
 # %%
-
-
 print ("accuracy of more parameters on test set is [{:.4f}].".format(accuracy_score(y_test_df.Vote, 
                                                                      regular_forest_grid_1_y_test_df.prediction)))
 print ("accuracy of less parameters on test set is [{:.4f}].".format(accuracy_score(y_test_df.Vote, 

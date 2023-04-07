@@ -27,25 +27,20 @@ from datetime import date
 import time
 
 import random
-from random import seed
-from random import random
+from random import seed, random
 
-import os, os.path
 import shutil
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
-
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
 
-import h5py
-import sys
+import pickle #, h5py
+import sys, os, os.path
 
 
 # %%
@@ -300,8 +295,6 @@ SVM_classifier_NoneWeight_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
 print (SVM_classifier_NoneWeight_00.best_params_)
 print (SVM_classifier_NoneWeight_00.best_score_)
 
-# %%
-
 # %% [markdown]
 # # Test
 
@@ -358,7 +351,6 @@ balanced_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 balanced_confus_tbl_test
 
 # %%
-from sklearn.metrics import confusion_matrix
 confusion_matrix(balanced_y_test_df.Vote, balanced_y_test_df.prediction)
 
 # %%
@@ -404,7 +396,6 @@ print(classification_report(y_test_df.Vote, SVM_classifier_NoneWeight_00_predict
 print(classification_report(y_test_df.Vote, SVM_classifier_balanced_00_predictions))
 
 # %%
-import pickle
 model_dir = "/Users/hn/Documents/01_research_data/NASA/ML_Models_Oct17/"
 os.makedirs(model_dir, exist_ok=True)
     

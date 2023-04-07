@@ -21,15 +21,13 @@ from datetime import date, datetime
 import time
 
 import random
-from random import seed
-from random import random
+from random import random, seed
 
-import os, os.path
+import sys, os, os.path
 import shutil
 
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -37,12 +35,8 @@ from sklearn.neighbors import KNeighborsClassifier
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-import pickle
-import h5py
-import sys
-
+import pickle, h5py
 import scipy, scipy.signal
-
 
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc

@@ -20,9 +20,7 @@
 # %%
 import pandas as pd
 import csv
-import numpy as np
-import os, os.path
-import sys
+import sys, os, os.path
 
 import collections # to count frequency of elements of an array
 # to move files from one directory to another

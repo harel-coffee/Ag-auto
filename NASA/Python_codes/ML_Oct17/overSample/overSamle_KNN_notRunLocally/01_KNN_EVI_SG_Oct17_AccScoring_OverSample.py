@@ -24,29 +24,20 @@ import random
 from random import seed
 from random import random
 
-import os, os.path
+import sys, os, os.path
 import shutil
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-import pickle
-import h5py
-import sys
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
-
-import scipy, scipy.signal
-from sklearn.linear_model import LogisticRegression
-
-from sklearn.neighbors import KNeighborsClassifier
-
+import pickle, h5py
 
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc

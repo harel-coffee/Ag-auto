@@ -21,24 +21,21 @@ from datetime import date
 import time
 
 import random
-from random import seed
-from random import random
+from random import seed, random
 
-import os, os.path
 import shutil
 
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestClassifier
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-import pickle
-import h5py
-import sys
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
+
+import pickle #, h5py
+import sys, os, os.path
 
 # %%
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
@@ -282,85 +279,64 @@ print ((x_test_df.ID==y_test_df.ID).sum())
 #      \end{equation}
 
 # %%
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
+# # %%time
+# regular_forest_1_default = RandomForestClassifier(n_estimators=100, 
+#                                                   criterion='gini', max_depth=None, 
+#                                                   min_samples_split=2, min_samples_leaf=1, 
+#                                                   min_weight_fraction_leaf=0.0,
+#                                                   max_features='sqrt', max_leaf_nodes=None, 
+#                                                   min_impurity_decrease=0.0, 
+#                                                   bootstrap=True, oob_score=False, n_jobs=None, 
+#                                                   random_state=1, verbose=0, 
+#                                                   warm_start=False, class_weight=None, 
+#                                                   ccp_alpha=0.0, max_samples=None)
 
-# %%
-# %%time
-regular_forest_1_default = RandomForestClassifier(n_estimators=100, 
-                                                  criterion='gini', max_depth=None, 
-                                                  min_samples_split=2, min_samples_leaf=1, 
-                                                  min_weight_fraction_leaf=0.0,
-                                                  max_features='sqrt', max_leaf_nodes=None, 
-                                                  min_impurity_decrease=0.0, 
-                                                  bootstrap=True, oob_score=False, n_jobs=None, 
-                                                  random_state=1, verbose=0, 
-                                                  warm_start=False, class_weight=None, 
-                                                  ccp_alpha=0.0, max_samples=None)
+# regular_forest_1_default.fit(x_train_df.iloc[:, 1:], y_train_df.iloc[:, 1:].values.ravel())
 
-regular_forest_1_default.fit(x_train_df.iloc[:, 1:], y_train_df.iloc[:, 1:].values.ravel())
 
-# %%
-regular_forest_1_default_predictions = regular_forest_1_default.predict(x_test_df.iloc[:, 1:])
-regular_forest_1_default_y_test_df = y_test_df.copy()
-regular_forest_1_default_y_test_df["prediction"]=list(regular_forest_1_default_predictions)
-regular_forest_1_default_y_test_df.head(2)
+# regular_forest_1_default_predictions = regular_forest_1_default.predict(x_test_df.iloc[:, 1:])
+# regular_forest_1_default_y_test_df = y_test_df.copy()
+# regular_forest_1_default_y_test_df["prediction"]=list(regular_forest_1_default_predictions)
+# regular_forest_1_default_y_test_df.head(2)
 
-# %%
-true_single_predicted_single=0
-true_single_predicted_double=0
+# true_single_predicted_single=0
+# true_single_predicted_double=0
 
-true_double_predicted_single=0
-true_double_predicted_double=0
+# true_double_predicted_single=0
+# true_double_predicted_double=0
 
-for index_ in regular_forest_1_default_y_test_df.index:
-    curr_vote=list(regular_forest_1_default_y_test_df[regular_forest_1_default_y_test_df.index==index_].Vote)[0]
-    curr_predict=list(regular_forest_1_default_y_test_df[\
-                                            regular_forest_1_default_y_test_df.index==index_].prediction)[0]
-    if curr_vote==curr_predict:
-        if curr_vote==1: 
-            true_single_predicted_single+=1
-        else:
-            true_double_predicted_double+=1
-    else:
-        if curr_vote==1:
-            true_single_predicted_double+=1
-        else:
-            true_double_predicted_single+=1
+# for index_ in regular_forest_1_default_y_test_df.index:
+#     curr_vote=list(regular_forest_1_default_y_test_df[regular_forest_1_default_y_test_df.index==index_].Vote)[0]
+#     curr_predict=list(regular_forest_1_default_y_test_df[\
+#                                             regular_forest_1_default_y_test_df.index==index_].prediction)[0]
+#     if curr_vote==curr_predict:
+#         if curr_vote==1: 
+#             true_single_predicted_single+=1
+#         else:
+#             true_double_predicted_double+=1
+#     else:
+#         if curr_vote==1:
+#             true_single_predicted_double+=1
+#         else:
+#             true_double_predicted_single+=1
             
-regular_forest_default_confus_tbl_test = pd.DataFrame(columns=['None', 'Predict_Single', 'Predict_Double'], 
-                                               index=range(2))
-regular_forest_default_confus_tbl_test.loc[0, 'None'] = 'Actual_Single'
-regular_forest_default_confus_tbl_test.loc[1, 'None'] = 'Actual_Double'
-regular_forest_default_confus_tbl_test['Predict_Single']=0
-regular_forest_default_confus_tbl_test['Predict_Double']=0
+# regular_forest_default_confus_tbl_test = pd.DataFrame(columns=['None', 'Predict_Single', 'Predict_Double'], 
+#                                                index=range(2))
+# regular_forest_default_confus_tbl_test.loc[0, 'None'] = 'Actual_Single'
+# regular_forest_default_confus_tbl_test.loc[1, 'None'] = 'Actual_Double'
+# regular_forest_default_confus_tbl_test['Predict_Single']=0
+# regular_forest_default_confus_tbl_test['Predict_Double']=0
 
-regular_forest_default_confus_tbl_test.loc[0, "Predict_Single"]=true_single_predicted_single
-regular_forest_default_confus_tbl_test.loc[0, "Predict_Double"]=true_single_predicted_double
-regular_forest_default_confus_tbl_test.loc[1, "Predict_Single"]=true_double_predicted_single
-regular_forest_default_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
-regular_forest_default_confus_tbl_test
-
-# %%
-# FD1_y_test_df_act_1_pred_2=regular_forest_1_default_y_test_df[regular_forest_1_default_y_test_df.Vote==1].copy()
-# FD1_y_test_df_act_2_pred_1=regular_forest_1_default_y_test_df[regular_forest_1_default_y_test_df.Vote==2].copy()
-
-# FD1_y_test_df_act_1_pred_2=FD1_y_test_df_act_1_pred_2[FD1_y_test_df_act_1_pred_2.prediction==2].copy()
-# FD1_y_test_df_act_2_pred_1=FD1_y_test_df_act_2_pred_1[FD1_y_test_df_act_2_pred_1.prediction==1].copy()
-
-# FD1_y_test_df_act_2_pred_1 = pd.merge(FD1_y_test_df_act_2_pred_1, \
-#                                            GT_labels_extended, on=['ID'], how='left')
-# FD1_y_test_df_act_1_pred_2 = pd.merge(FD1_y_test_df_act_1_pred_2, \
-#                                       GT_labels_extended, on=['ID'], how='left')
-
-# print (FD1_y_test_df_act_2_pred_1.ExctAcr.sum())
-# print (FD1_y_test_df_act_1_pred_2.ExctAcr.sum())
-
-# print (FD1_y_test_df_act_2_pred_1.ExctAcr.sum()-FD1_y_test_df_act_1_pred_2.ExctAcr.sum())
+# regular_forest_default_confus_tbl_test.loc[0, "Predict_Single"]=true_single_predicted_single
+# regular_forest_default_confus_tbl_test.loc[0, "Predict_Double"]=true_single_predicted_double
+# regular_forest_default_confus_tbl_test.loc[1, "Predict_Single"]=true_double_predicted_single
+# regular_forest_default_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
+# regular_forest_default_confus_tbl_test
 
 # %%
-filename = model_dir + "regular_" + VI_idx + "_RF1_default" + "_Oct17_AUCScoring.sav"
-pickle.dump(regular_forest_1_default, open(filename, 'wb'))
+# This is not True. This model is not AUC!
+# filename = model_dir + "regular_" + VI_idx + "_RF1_default" + "_Oct17_AUCScoring.sav"
+# pickle.dump(regular_forest_1_default, open(filename, 'wb'))
 
 # %%
 # %%time
@@ -523,22 +499,6 @@ print ("accuracy of less parameters on test set is [{:.4f}].".format(accuracy_sc
                                                                      regular_forest_grid_2_y_test_df.prediction)))
 
 # %%
-# FG2_y_test_df_act_1_pred_2=regular_forest_grid_2_y_test_df[regular_forest_grid_2_y_test_df.Vote==1].copy()
-# FG2_y_test_df_act_2_pred_1=regular_forest_grid_2_y_test_df[regular_forest_grid_2_y_test_df.Vote==2].copy()
-
-# FG2_y_test_df_act_1_pred_2=FG2_y_test_df_act_1_pred_2[FG2_y_test_df_act_1_pred_2.prediction==2].copy()
-# FG2_y_test_df_act_2_pred_1=FG2_y_test_df_act_2_pred_1[FG2_y_test_df_act_2_pred_1.prediction==1].copy()
-
-# FG2_y_test_df_act_2_pred_1 = pd.merge(FG2_y_test_df_act_2_pred_1, 
-#                                       GT_labels_extended, on=['ID'], how='left')
-# FG2_y_test_df_act_1_pred_2 = pd.merge(FG2_y_test_df_act_1_pred_2, 
-#                                       GT_labels_extended, on=['ID'], how='left')
-
-# print (FG2_y_test_df_act_2_pred_1.ExctAcr.sum())
-# print (FG2_y_test_df_act_1_pred_2.ExctAcr.sum())
-# print (FG2_y_test_df_act_2_pred_1.ExctAcr.sum()-FG2_y_test_df_act_1_pred_2.ExctAcr.sum())
-
-# %%
 filename = model_dir + "regular_" + VI_idx + "_RF_grid_2_Oct17_AUCScoring.sav"
 pickle.dump(regular_forest_grid_2, open(filename, 'wb'))
 
@@ -569,8 +529,6 @@ for file in file_names:
 
 data.reset_index(drop=True, inplace=True)
 data.head(2)
-
-# %%
 
 # %%
 # GT_labels_extended = pd.merge(GT_labels, meta, on=['ID'], how='left')

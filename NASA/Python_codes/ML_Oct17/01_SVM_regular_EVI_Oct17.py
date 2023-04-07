@@ -27,25 +27,20 @@ from datetime import date
 import time
 
 import random
-from random import seed
-from random import random
+from random import seed, random
 
-import os, os.path
 import shutil
 
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
 
-import h5py
-import sys
+import pickle #, h5py
+import sys, os, os.path
 
 # %%
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
@@ -374,7 +369,6 @@ balanced_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 balanced_confus_tbl_test
 
 # %%
-from sklearn.metrics import confusion_matrix
 confusion_matrix(balanced_y_test_df.Vote, balanced_y_test_df.prediction)
 
 # %%
@@ -422,7 +416,6 @@ print(classification_report(y_test_df.Vote, SVM_classifier_balanced_00_predictio
 # %%
 
 # %%
-import pickle
 model_dir = "/Users/hn/Documents/01_research_data/NASA/ML_Models_Oct17/"
 filename = model_dir + "SVM_classifier_balanced_regular_" + VI_idx + "_01_Oct17.sav"
 pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))

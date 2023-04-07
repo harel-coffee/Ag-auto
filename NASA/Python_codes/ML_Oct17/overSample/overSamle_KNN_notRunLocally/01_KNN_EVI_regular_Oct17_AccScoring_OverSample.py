@@ -24,33 +24,23 @@ import random
 from random import seed
 from random import random
 
-import os, os.path
+import sys, os, os.path
 import shutil
 
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-import pickle
-import h5py
-import sys
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
-
-
-import scipy, scipy.signal
-from sklearn.linear_model import LogisticRegression
-
-from sklearn.neighbors import KNeighborsClassifier
-
+import pickle, h5py
 
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
+
 
 # %%
 from tslearn.metrics import dtw as dtw_metric
@@ -60,7 +50,7 @@ from dtaidistance import dtw
 from dtaidistance import dtw_visualisation as dtwvis
 
 # %%
-import shutup;
+import shutup; 
 shutup.please()
 
 # %% [markdown]
@@ -80,8 +70,8 @@ meta.head(2)
 # print (meta_lessThan10Acr.shape)
 
 # %%
-VI_idx = "NDVI"
-smooth_type = "SG"
+VI_idx = "EVI"
+smooth_type = "regular"
 
 # %%
 ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
@@ -104,7 +94,7 @@ for SR in np.arange(3, 9, 1):
     print (date.today(), "-", datetime.now().strftime("%H:%M:%S"))
     f_name = VI_idx + "_" + smooth_type + "_wide_train80_split_2Bconsistent_Oct17_overSample" + str(SR) + ".csv"
     wide_overSample = pd.read_csv(overSamples_data_folder + f_name) # train80_GT_wide:
-    print ("train set size of sample ratio " + str(SR) + " is", wide_overSample.shape)
+    print ("train set size of sample ratio " + str(3) + " is", wide_overSample.shape)
 
     x_train_df=wide_overSample.copy()
     x_train_df.drop(columns=["Vote"], inplace=True)
@@ -114,7 +104,7 @@ for SR in np.arange(3, 9, 1):
     assert ((list(x_train_df.ID)==list(y_train_df.ID)))
 
     parameters = {'n_neighbors':[2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20],
-                  "weights":["uniform", "distance"]}
+              "weights":["uniform", "distance"]}
     KNN_DTW_prune = GridSearchCV(KNeighborsClassifier(metric=DTW_prune), parameters, cv=5, verbose=1)
     KNN_DTW_prune.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
     
@@ -171,7 +161,7 @@ for SR in np.arange(3, 9, 1):
                 true_double_predicted_single+=1
 
     KNN_DTW_prune_confus_tbl_test = pd.DataFrame(columns=['None', 'Predict_Single', 'Predict_Double'], 
-                                                 index=range(2))
+                                   index=range(2))
     KNN_DTW_prune_confus_tbl_test.loc[0, 'None'] = 'Actual_Single'
     KNN_DTW_prune_confus_tbl_test.loc[1, 'None'] = 'Actual_Double'
     KNN_DTW_prune_confus_tbl_test['Predict_Single']=0
