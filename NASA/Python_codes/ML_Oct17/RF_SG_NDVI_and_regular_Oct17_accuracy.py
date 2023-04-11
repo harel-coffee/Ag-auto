@@ -14,8 +14,6 @@
 # ---
 
 # %%
-
-# %%
 import numpy as np
 import pandas as pd
 
@@ -23,24 +21,18 @@ from datetime import date
 import time
 
 import random
-from random import seed
-from random import random
+from random import random, seed
 
-import os, os.path
-import shutil
-
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
-
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-import pickle
-import h5py
-import sys
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
+import pickle #, h5py
+
+import sys, os, os.path, shutil
+
+# %%
 
 # %%
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
@@ -58,7 +50,9 @@ from dtaidistance import dtw_visualisation as dtwvis
 # # Metadata
 
 # %%
-meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
+NASA_dir_base = "/Users/hn/Documents/01_research_data/NASA/"
+meta_dir = NASA_dir_base + "parameters/"
+
 meta = pd.read_csv(meta_dir+"evaluation_set.csv")
 meta_moreThan10Acr=meta[meta.ExctAcr>10]
 print (meta.shape)
@@ -74,10 +68,10 @@ meta.head(2)
 # # Read Training Set Labels
 
 # %%
-model_dir = "/Users/hn/Documents/01_research_data/NASA/ML_Models_Oct17/"
+model_dir = NASA_dir_base + "ML_Models_Oct17/"
 os.makedirs(model_dir, exist_ok=True)
 
-training_set_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
+training_set_dir = NASA_dir_base + "ML_data_Oct17/"
 
 # %%
 GT_labels = pd.read_csv(training_set_dir+"groundTruth_labels_Oct17_2022.csv")
@@ -217,10 +211,8 @@ GT_labels.head(2)
 # %%
 # This cell and some edits after this are new compared to 00_SVM_SG_EVI.ipynb.
 # I want to avoid splitting and just use the one I created earlier.
-
-ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
-train80 = pd.read_csv(ML_data_folder+"train80_split_2Bconsistent_Oct17.csv")
-test20 = pd.read_csv(ML_data_folder+"test20_split_2Bconsistent_Oct17.csv")
+train80 = pd.read_csv(training_set_dir +"train80_split_2Bconsistent_Oct17.csv")
+test20  = pd.read_csv(training_set_dir + "test20_split_2Bconsistent_Oct17.csv")
 
 GT_labels.head(2)
 
@@ -246,7 +238,7 @@ print ((x_test_df.ID==y_test_df.ID).sum())
 # GT_labels = GT_labels.set_index('ID')
 # GT_labels = GT_labels.reindex(index=GT_wide['ID'])
 # GT_labels = GT_labels.reset_index()
-# GT_labels=GT_labels[["ID", "Vote"]]
+# GT_labels = GT_labels[["ID", "Vote"]]
 
 # x_train_df, x_test_df, y_train_df, y_test_df = train_test_split(GT_wide, 
 #                                                                 GT_labels, 
@@ -360,11 +352,8 @@ regular_forest_default_confus_tbl_test
 # print (FD1_y_test_df_act_2_pred_1.ExctAcr.sum()-FD1_y_test_df_act_1_pred_2.ExctAcr.sum())
 
 # %%
-filename = model_dir + "regular_" + VI_idx + "_RF1_default" + "_Oct17_AUCScoring.sav"
+filename = model_dir + "regular_" + VI_idx + "_RF1_default" + "_Oct17_accuracyScoring.sav"
 pickle.dump(regular_forest_1_default, open(filename, 'wb'))
-
-# %% [markdown]
-# Improve?
 
 # %%
 # %%time
@@ -380,7 +369,7 @@ parameters = {'n_jobs':[6],
               'max_samples':[None]
              } # , 
 regular_forest_grid_1 = GridSearchCV(RandomForestClassifier(random_state=0), 
-                                     parameters, cv=5, verbose=1, scoring="roc_auc",
+                                     parameters, cv=5, verbose=1,
                                      error_score='raise')
 
 regular_forest_grid_1.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values.ravel())
@@ -389,7 +378,7 @@ print (regular_forest_grid_1.best_params_)
 print (regular_forest_grid_1.best_score_)
 
 # %%
-filename = model_dir + "regular_" + VI_idx + "_RF_grid_1_Oct17_AUCScoring.sav"
+filename = model_dir + "regular_" + VI_idx + "_RF_grid_1_Oct17_accuracyScoring.sav"
 pickle.dump(regular_forest_grid_1, open(filename, 'wb'))
 
 # %% [markdown]
@@ -469,7 +458,7 @@ parameters = {'n_jobs':[6],
 
 
 regular_forest_grid_2 = GridSearchCV(RandomForestClassifier(random_state=0), 
-                                     parameters, cv=5, verbose=1, scoring="roc_auc",
+                                     parameters, cv=5, verbose=1,
                                      error_score='raise')
 
 regular_forest_grid_2.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values.ravel())
@@ -544,7 +533,7 @@ print ("accuracy of less parameters on test set is [{:.4f}].".format(accuracy_sc
 # print (FG2_y_test_df_act_2_pred_1.ExctAcr.sum()-FG2_y_test_df_act_1_pred_2.ExctAcr.sum())
 
 # %%
-filename = model_dir + "regular_" + VI_idx + "_RF_grid_2_Oct17_AUCScoring.sav"
+filename = model_dir + "regular_" + VI_idx + "_RF_grid_2_Oct17_accuracyScoring.sav"
 pickle.dump(regular_forest_grid_2, open(filename, 'wb'))
 
 # %% [markdown]
@@ -754,7 +743,7 @@ parameters = {'n_jobs':[6],
               'max_samples':[None, 1, 2, 3, 4, 5]
              } # , 
 forest_grid_1_SG = GridSearchCV(RandomForestClassifier(random_state=0), 
-                                parameters, cv=5, verbose=1, scoring="roc_auc",
+                                parameters, cv=5, verbose=1,
                                 error_score='raise')
 
 forest_grid_1_SG.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values.ravel())
@@ -763,7 +752,7 @@ print (forest_grid_1_SG.best_params_)
 print (forest_grid_1_SG.best_score_)
 
 
-filename = model_dir + "SG_" + VI_idx + "_RF_grid_1_Oct17_AUCScoring.sav"
+filename = model_dir + "SG_" + VI_idx + "_RF_grid_1_Oct17_accuracyScoring.sav"
 pickle.dump(forest_grid_1_SG, open(filename, 'wb'))
 
 # %%

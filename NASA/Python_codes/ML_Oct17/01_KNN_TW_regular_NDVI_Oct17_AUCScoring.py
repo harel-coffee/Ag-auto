@@ -21,30 +21,25 @@ import scipy, scipy.signal
 from datetime import date
 import time
 
-from random import seed
-from random import random
+from random import seed, random
 import random
-import os, os.path
-import shutil
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
 
-import h5py
-import sys
+import pickle, h5py
+
+import sys, os, os.path, shutil
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 # import NASA_plot_core as rcp
-
-import pickle
 
 # %%
 from tslearn.metrics import dtw as dtw_metric
@@ -400,16 +395,8 @@ print ("Recall is [{0:.2f}]".format(TP/(TP+FN)))
 filename = model_dir + "01_KNN_regular_" + VI_idx + "_DTW_prune_" + \
            KNN_DTW_prune.best_params_["weights"] + "Weight_" + \
                         str(KNN_DTW_prune.best_params_["n_neighbors"]) + "NNisBest_AUCScoring.sav"
-
+print (filename)
 pickle.dump(KNN_DTW_prune, open(filename, 'wb'))
-
-# %%
-# How to load the saved model:
-# loaded_model_KNN_DTW_prune = pickle.load(open(filename, 'rb'))
-# loaded_model.predict(x_test_df.iloc[0:2, 1:])
-
-# %% [markdown]
-# # Improve?
 
 # %% [markdown]
 # ### Lets see if putting weights will make a difference
@@ -485,7 +472,6 @@ confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 confus_tbl_test
 
 # %%
-from sklearn.metrics import confusion_matrix
 confusion_matrix(y_test_df_copy.Vote, y_test_df_copy.weightDist_predictions)
 
 # %%
@@ -493,7 +479,7 @@ filename = model_dir + "00_KNN_regular_" + VI_idx + "_DTW_prune_" + \
            KNN_DTW_prune_weightsDistance.best_params_["weights"] + \
            "Weight_" + str(KNN_DTW_prune_weightsDistance.best_params_["n_neighbors"]) + \
            "NNisBest_AUCScoring.sav"
-
+print (filename)
 pickle.dump(KNN_DTW_prune_weightsDistance, open(filename, 'wb'))
 
 # %%

@@ -21,9 +21,8 @@ import scipy, scipy.signal
 from datetime import date
 import time
 
-import random
 from random import seed, random
-# import shutil
+import random
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
@@ -32,9 +31,9 @@ from sklearn.metrics import classification_report, confusion_matrix
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
+import pickle, h5py
 
-import pickle #, h5py
-import sys, os, os.path
+import sys, os, os.path, shutil
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 # import NASA_plot_core as rcp
@@ -50,13 +49,13 @@ from dtaidistance import dtw_visualisation as dtwvis
 
 # %%
 meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
+meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
 meta = pd.read_csv(meta_dir+"evaluation_set.csv")
 meta_moreThan10Acr=meta[meta.ExctAcr>10]
 
 print (meta.shape)
 print (meta_moreThan10Acr.shape)
 meta.head(2)
-
 
 # %% [markdown]
 # # Read Training Set Labels
@@ -88,7 +87,7 @@ GT_labels.head(2)
 # # Read the Data
 
 # %%
-VI_idx = "EVI"
+VI_idx = "NDVI"
 data_dir = "/Users/hn/Documents/01_research_data/NASA/VI_TS/04_regularized_TS/"
 
 # %%
@@ -175,8 +174,8 @@ mins = pd.DataFrame(mins)
 mins.reset_index(inplace=True)
 
 
-_ranges.rename(columns = {'EVI':'EVI_range'}, inplace = True)
-mins.rename(columns = {'EVI':'EVI_min'}, inplace = True)
+_ranges.rename(columns = {'NDVI':'NDVI_range'}, inplace = True)
+mins.rename(columns = {'NDVI':'NDVI_min'}, inplace = True)
 
 print (_ranges.head(2))
 
@@ -189,50 +188,43 @@ GT_TS.head(2)
 ID_1=GT_TS.ID.unique()[0]
 ID_2=GT_TS.ID.unique()[12]
 
-# _minimum = GT_TS[GT_TS.ID==ID_1].EVI.values.min()
-# _range = GT_TS[GT_TS.ID==ID_1].EVI.values.max()-_minimum
-# y_1 = (GT_TS[GT_TS.ID==ID_1].EVI.values-_minimum)/_range
-# _minimum = GT_TS[GT_TS.ID==ID_2].EVI.values.min()
-# _range = GT_TS[GT_TS.ID==ID_2].EVI.values.max()-_minimum
-# y_2 = (GT_TS[GT_TS.ID==ID_2].EVI.values-_minimum)/_range
+dtw_score = dtw_metric(GT_TS[GT_TS.ID==ID_1].NDVI.values, GT_TS[GT_TS.ID==ID_2].NDVI.values)
 
-dtw_score = dtw_metric(GT_TS[GT_TS.ID==ID_1].EVI.values, GT_TS[GT_TS.ID==ID_2].EVI.values)
-
-dtw_score_ratios = dtw_metric(GT_TS[GT_TS.ID==ID_1].EVI_ratio.values, 
-                              GT_TS[GT_TS.ID==ID_2].EVI_ratio.values)
+dtw_score_ratios = dtw_metric(GT_TS[GT_TS.ID==ID_1].NDVI_ratio.values, 
+                              GT_TS[GT_TS.ID==ID_2].NDVI_ratio.values)
 
 # print ("dtw score is {:.2f}.".format(dtw_score))
 
 plt.figure(figsize=(20,4))
 plt.subplot(1, 1, 1)
 
-# plot EVIs
+# plot VIs
 plt.plot(range(len(GT_TS[GT_TS.ID==ID_1].human_system_start_time.values)),
-         GT_TS[GT_TS.ID==ID_1].EVI.values,
+         GT_TS[GT_TS.ID==ID_1].NDVI.values,
          c='k', linewidth=5);
 
 
 plt.plot(range(len(GT_TS[GT_TS.ID==ID_2].human_system_start_time.values)),
-         GT_TS[GT_TS.ID==ID_2].EVI.values,
+         GT_TS[GT_TS.ID==ID_2].NDVI.values,
         c='red', linewidth=5);
 
 # plot ratios
 plt.plot(range(len(GT_TS[GT_TS.ID==ID_1].human_system_start_time.values)), 
-         GT_TS[GT_TS.ID==ID_1].EVI_ratio.values,
+         GT_TS[GT_TS.ID==ID_1].NDVI_ratio.values,
          ".-.", c='k', linewidth=2, label="ratios");
 
 plt.plot(range(len(GT_TS[GT_TS.ID==ID_2].human_system_start_time.values)), 
-         GT_TS[GT_TS.ID==ID_2].EVI_ratio.values,
+         GT_TS[GT_TS.ID==ID_2].NDVI_ratio.values,
          ".-.", c='red', linewidth=2, label="ratios");
 
 
-title = "dtw score for EVI is [{:.2f}] and for ratios is [{:.2f}].".format(dtw_score, dtw_score_ratios)
+title = "dtw score for NDVI is [{:.2f}] and for ratios is [{:.2f}].".format(dtw_score, dtw_score_ratios)
 plt.ylim([-0.2, 1.05]);
 plt.title(title , fontsize = 20);
 
 # %%
-s1=GT_TS[GT_TS.ID==ID_1].EVI_ratio.values
-s2=GT_TS[GT_TS.ID==ID_2].EVI_ratio.values
+s1=GT_TS[GT_TS.ID==ID_1].NDVI_ratio.values
+s2=GT_TS[GT_TS.ID==ID_2].NDVI_ratio.values
 path = dtw.warping_path(s1, s2)
 dtwvis.plot_warping(s1, s2, path)
 distance = dtw.distance(s1, s2)
@@ -253,8 +245,8 @@ def DTW_prune(ts1, ts2):
 # # Widen
 
 # %%
-EVI_colnames = [VI_idx + "_" + str(ii) for ii in range(1, 37) ]
-columnNames = ["ID"] + EVI_colnames
+NDVI_colnames = [VI_idx + "_" + str(ii) for ii in range(1, 37) ]
+columnNames = ["ID"] + NDVI_colnames
 GT_wide = pd.DataFrame(columns=columnNames, 
                         index=range(len(GT_TS.ID.unique())))
 GT_wide["ID"] = GT_TS.ID.unique()
@@ -263,7 +255,7 @@ for an_ID in GT_TS.ID.unique():
     curr_df = GT_TS[GT_TS.ID==an_ID]
     
     GT_wide_indx = GT_wide[GT_wide.ID==an_ID].index
-    GT_wide.loc[GT_wide_indx, VI_idx+"_1":VI_idx+"_36"] = curr_df.EVI.values[:36]
+    GT_wide.loc[GT_wide_indx, VI_idx+"_1":VI_idx+"_36"] = curr_df.NDVI.values[:36]
 
 print (len(GT_wide.ID.unique()))
 GT_wide.head(2)
@@ -274,18 +266,7 @@ GT_wide.head(2)
 # #### Make sure rows of ```ground_truth_allBands``` and ```ground_truth_labels``` are in the same order
 
 # %%
-# ground_truth_labels = ground_truth_labels.set_index('ID')
-# ground_truth_labels = ground_truth_labels.reindex(index=ground_truth_wide['ID'])
-# ground_truth_labels = ground_truth_labels.reset_index()
-
-# x_train_df, x_test_df, y_train_df, y_test_df = train_test_split(ground_truth_wide, 
-#                                                                 ground_truth_labels, 
-#                                                                 test_size=0.2, 
-#                                                                 random_state=0,
-#                                                                 shuffle=True,
-#                                                                 stratify=ground_truth_labels.Vote.values)
-
-# This cell and some edits after this are new compared to 00_SVM_SG_EVI.ipynb.
+# This cell and some edits after this are new compared to 00_SVM_SG_NDVI.ipynb.
 # I want to avoid splitting and just use the one I created earlier.
 
 ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
@@ -319,9 +300,7 @@ print ((x_test_df.ID==y_test_df.ID).sum())
 # %%time
 parameters = {'n_neighbors':[2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20],
               "weights":["uniform"]}
-
-KNN_DTW_prune = GridSearchCV(KNeighborsClassifier(metric=DTW_prune), 
-                             parameters, cv=5, verbose=1, scoring="roc_auc")
+KNN_DTW_prune = GridSearchCV(KNeighborsClassifier(metric=DTW_prune), parameters, cv=5, verbose=1)
 KNN_DTW_prune.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
 
 # %%
@@ -411,7 +390,7 @@ print ("Recall is [{0:.2f}]".format(TP/(TP+FN)))
 # %%
 filename = model_dir + "01_KNN_regular_" + VI_idx + "_DTW_prune_" + \
            KNN_DTW_prune.best_params_["weights"] + "Weight_" + \
-                        str(KNN_DTW_prune.best_params_["n_neighbors"]) + "NNisBest_AUCScoring.sav"
+                        str(KNN_DTW_prune.best_params_["n_neighbors"]) + "NNisBest.sav"
 
 pickle.dump(KNN_DTW_prune, open(filename, 'wb'))
 
@@ -441,8 +420,7 @@ pickle.dump(KNN_DTW_prune, open(filename, 'wb'))
 parameters = {'n_neighbors':[2, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
               "weights":["distance"]}
 KNN_DTW_prune_weightsDistance = GridSearchCV(KNeighborsClassifier(metric=DTW_prune), 
-                                             parameters, cv=5, verbose=1, scoring="roc_auc")
-
+                                             parameters, cv=5, verbose=1)
 KNN_DTW_prune_weightsDistance.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
 
 # %%
@@ -507,13 +485,16 @@ confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 confus_tbl_test
 
 # %%
+y_test_df_copy.head(2)
+
+# %%
 confusion_matrix(y_test_df_copy.Vote, y_test_df_copy.weightDist_predictions)
 
 # %%
 filename = model_dir + "00_KNN_regular_" + VI_idx + "_DTW_prune_" + \
            KNN_DTW_prune_weightsDistance.best_params_["weights"] + \
            "Weight_" + str(KNN_DTW_prune_weightsDistance.best_params_["n_neighbors"]) + \
-           "NNisBest_AUCScoring.sav"
+           "NNisBest.sav"
 
 pickle.dump(KNN_DTW_prune_weightsDistance, open(filename, 'wb'))
 
@@ -528,9 +509,13 @@ plt.figure(figsize=(20,4))
 plt.subplot(1, 1, 1)
 
 ID_1 = actual_double_predicted_single_IDs[2]
-# plot EVI
+# plot VIs
+# plt.plot(range(len(ground_truth[ground_truth.ID==ID_1].human_system_start_time.values)),
+#          ground_truth[ground_truth.ID==ID_1].NDVI.values,
+#         c='k', linewidth=5);
+
 plt.plot(GT_TS[GT_TS.ID==ID_1].human_system_start_time.values,
-         GT_TS[GT_TS.ID==ID_1].EVI.values,
+         GT_TS[GT_TS.ID==ID_1].NDVI.values,
          c='k', linewidth=5);
 
 title = list(meta[meta.ID==ID_1].CropTyp)[0].replace(",", "")  + ", " + ID_1
@@ -544,16 +529,19 @@ meta[meta.ID.isin(actual_double_predicted_single_IDs)]["ExctAcr"].sum()
 meta[meta.ID.isin(actual_single_predicted_double_IDs)]["ExctAcr"].sum()
 
 # %%
-
-# %%
 plt.figure(figsize=(20,4))
 plt.subplot(1, 1, 1)
 
 ID_1 = actual_single_predicted_double_IDs[0]
-# plot EVIs
+# plot VIs
+# plt.plot(range(len(ground_truth[ground_truth.ID==ID_1].human_system_start_time.values)),
+#          ground_truth[ground_truth.ID==ID_1].NDVI.values,
+#         c='k', linewidth=5);
+
 plt.plot(GT_TS[GT_TS.ID==ID_1].human_system_start_time.values,
-         GT_TS[GT_TS.ID==ID_1].EVI.values,
-         c='k', linewidth=5);
+         GT_TS[GT_TS.ID==ID_1].NDVI.values,
+        c='k', linewidth=5);
+
 title = list(meta[meta.ID==ID_1].CropTyp)[0].replace(",", "")  + ", " + ID_1
 plt.ylim([-0.2, 1.05]);
 plt.title(title , fontsize = 20);
@@ -749,8 +737,8 @@ title = r"Learning Curves"
 cv = ShuffleSplit(n_splits=10, test_size=0.1, random_state=0)
 estimator = SVC(gamma=0.001)
 plot_learning_curve(estimator, title, 
-                    X=GT_wide.loc[:, "EVI_1":], 
-                    y=GT_labels.Vote.values, 
+                    X=ground_truth_wide.loc[:, VI_idx+"_1":], 
+                    y=ground_truth_labels.Vote.values, 
                     axes=axes[:, 1], ylim=(0.7, 1.01), cv=cv, n_jobs=4)
 
 plt.show()

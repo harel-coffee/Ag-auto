@@ -28,25 +28,19 @@ from datetime import date
 import time
 
 import random
-from random import seed
-from random import random
+from random import seed, random
 
-import os, os.path
-import shutil
-
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
 
-import h5py
-import sys
+import pickle #, h5py
+import sys, os, os.path, shutil
 
 
 # %%
@@ -247,39 +241,6 @@ y_test_df.tail(3)
 # %% [markdown]
 # # Start SVM
 
-# %% [markdown]
-# # Definitions
-#
-#   - **Precision** Of all instances we predict $\hat y = 1$, what fraction is actually 1.
-#      \begin{equation}\label{eq:precision}
-#         \text{Precision} = \frac{TP}{TP + FP}
-#      \end{equation}
-#
-#   - **Recall** Of all instances that are actually $y = 1$, what fraction we predict 1.
-#      \begin{equation}\label{eq:recall}
-#          \text{Recall} = \text{TPR} = \frac{TP}{TP + FN}
-#      \end{equation}
-#      
-#   - **Specifity** Fraction of all negative instances that are correctly predicted positive.
-#      \begin{equation}\label{eq:specifity}
-#         \text{Specifity} = TNR = \frac{TN}{TN + FP}\\
-#      \end{equation}
-#      
-#   - **F-Score** Adjust $\beta$ for trade off between  precision and recall. For precision oriented task $\beta = 0.5$.
-#      \begin{equation}\label{eq:Fscore}
-#         F_\beta = \frac{(1+\beta^2) TP}{ (1+\beta^2) TP + \beta^2 FN + FP}
-#      \end{equation}
-#
-#
-
-# %%
-from sklearn.pipeline import make_pipeline
-from sklearn.svm import SVC
-def DTW_prune(ts1, ts2):
-    d,_ = dtw.warping_paths(ts1, ts2, window=10, use_pruning=True);
-    return d
-
-
 # %%
 # %%time
 ##
@@ -301,7 +262,6 @@ print (SVM_classifier_balanced_00.best_score_)
 ##
 ##   None Weight
 ##
-
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
@@ -369,7 +329,6 @@ balanced_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 balanced_confus_tbl_test
 
 # %%
-from sklearn.metrics import confusion_matrix
 confusion_matrix(balanced_y_test_df.Vote, balanced_y_test_df.prediction)
 
 # %%
@@ -415,7 +374,6 @@ print(classification_report(y_test_df.Vote, SVM_classifier_NoneWeight_00_predict
 print(classification_report(y_test_df.Vote, SVM_classifier_balanced_00_predictions))
 
 # %%
-import pickle
 model_dir = "/Users/hn/Documents/01_research_data/NASA/ML_Models_Oct17/"
 filename = model_dir + "SVM_classifier_balanced_SG_" + VI_idx + "_01_Oct17_AUC.sav"
 pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))

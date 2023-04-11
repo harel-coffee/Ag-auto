@@ -79,15 +79,9 @@ print ("Unique Votes: ", GT_labels.Vote.unique())
 print (len(GT_labels.ID.unique()))
 GT_labels.head(2)
 
-# %% [markdown]
-# ### Detect how many fields are less than 10 acres and report in the paper
-
 # %%
 print (len(meta[meta.ID.isin(list(GT_labels.ID))].ID.unique()))
 meta.head(2)
-
-# %%
-GT_labels.head(2)
 
 # %% [markdown]
 # # Read the data

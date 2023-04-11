@@ -21,30 +21,23 @@ import scipy, scipy.signal
 from datetime import date
 import time
 
-from random import seed
-from random import random
+from random import seed, random
 import random
-import os, os.path
-import shutil
 
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
 
-import h5py
-import sys
+import pickle #, h5py
+import sys, os, os.path, shutil
+
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 # import NASA_plot_core as rcp
-from sklearn.metrics import confusion_matrix
-import pickle
 
 # %%
 from tslearn.metrics import dtw as dtw_metric
@@ -418,7 +411,7 @@ pickle.dump(KNN_DTW_prune, open(filename, 'wb'))
 # %%
 
 # %% [markdown]
-# # Improve?
+# Improve?
 
 # %% [markdown]
 # ### Lets see if putting weights will make a difference
@@ -502,7 +495,7 @@ filename = model_dir + "00_KNN_SG_" + VI_idx + "_DTW_prune_" + \
            KNN_DTW_prune_weightsDistance.best_params_["weights"] + \
            "Weight_" + str(KNN_DTW_prune_weightsDistance.best_params_["n_neighbors"]) + \
            "NNisBest.sav"
-
+print (filename)
 pickle.dump(KNN_DTW_prune_weightsDistance, open(filename, 'wb'))
 
 # %%

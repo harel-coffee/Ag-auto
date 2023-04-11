@@ -34,6 +34,7 @@ import shutil
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -80,9 +81,6 @@ ground_truth_labels = pd.read_csv(training_set_dir+"groundTruth_labels_Oct17_202
 print ("Unique Votes: ", ground_truth_labels.Vote.unique())
 print (len(ground_truth_labels.ID.unique()))
 ground_truth_labels.head(2)
-
-# %% [markdown]
-# ### Detect how many fields are less than 10 acres and report in the paper
 
 # %%
 print (len(meta[meta.ID.isin(list(ground_truth_labels.ID))].ID.unique()))
@@ -244,40 +242,6 @@ print ((x_test_df.ID==y_test_df.ID).sum())
 
 # %% [markdown]
 # # Start SVM
-
-# %% [markdown]
-# # Definitions
-#
-#   - **Precision** Of all instances we predict $\hat y = 1$, what fraction is actually 1.
-#      \begin{equation}\label{eq:precision}
-#         \text{Precision} = \frac{TP}{TP + FP}
-#      \end{equation}
-#
-#   - **Recall** Of all instances that are actually $y = 1$, what fraction we predict 1.
-#      \begin{equation}\label{eq:recall}
-#          \text{Recall} = \text{TPR} = \frac{TP}{TP + FN}
-#      \end{equation}
-#      
-#   - **Specifity** Fraction of all negative instances that are correctly predicted positive.
-#      \begin{equation}\label{eq:specifity}
-#         \text{Specifity} = TNR = \frac{TN}{TN + FP}\\
-#      \end{equation}
-#      
-#   - **F-Score** Adjust $\beta$ for trade off between  precision and recall. For precision oriented task $\beta = 0.5$.
-#      \begin{equation}\label{eq:Fscore}
-#         F_\beta = \frac{(1+\beta^2) TP}{ (1+\beta^2) TP + \beta^2 FN + FP}
-#      \end{equation}
-#
-#
-
-# %%
-from sklearn.pipeline import make_pipeline
-from sklearn.svm import SVC
-
-def DTW_prune(ts1, ts2):
-    d,_ = dtw.warping_paths(ts1, ts2, window=10, use_pruning=True);
-    return d
-
 
 # %%
 # %%time
