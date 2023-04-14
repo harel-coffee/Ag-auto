@@ -249,32 +249,11 @@ print ((x_test_df.ID==y_test_df.ID).sum())
 # %% [markdown]
 # # Start Random Forest
 
-# %% [markdown]
-# # Definitions
-#
-#   - **Precision** Of all instances we predict $\hat y = 1$, what fraction is actually 1.
-#      \begin{equation}\label{eq:precision}
-#         \text{Precision} = \frac{TP}{TP + FP}
-#      \end{equation}
-#
-#   - **Recall** Of all instances that are actually $y = 1$, what fraction we predict 1.
-#      \begin{equation}\label{eq:recall}
-#          \text{Recall} = \text{TPR} = \frac{TP}{TP + FN}
-#      \end{equation}
-#      
-#   - **Specifity** Fraction of all negative instances that are correctly predicted positive.
-#      \begin{equation}\label{eq:specifity}
-#         \text{Specifity} = TNR = \frac{TN}{TN + FP}\\
-#      \end{equation}
-#      
-#   - **F-Score** Adjust $\beta$ for trade off between  precision and recall. For precision oriented task $\beta = 0.5$.
-#      \begin{equation}\label{eq:Fscore}
-#         F_\beta = \frac{(1+\beta^2) TP}{ (1+\beta^2) TP + \beta^2 FN + FP}
-#      \end{equation}
+# %%
+from sklearn.ensemble import RandomForestClassifier
 
 # %%
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
+x_test_df.head(2)
 
 # %%
 # %%time

@@ -35,17 +35,14 @@ from matplotlib.image import imread
 # vgg16 model used for transfer learning on the dogs and cats dataset
 from matplotlib import pyplot
 # from keras.utils import to_categorical
-from tensorflow.keras.utils import to_categorical
-from keras.models import Sequential
+from tensorflow.keras.utils import to_categorical, load_img, img_to_array
 from keras.applications.vgg16 import VGG16
-from keras.models import Model
-from keras.layers import Dense
-from keras.layers import Flatten
+from keras.models import Model, Sequential, load_model
+
 import tensorflow as tf
 # from keras.optimizers import SGD
 
-from keras.layers import Conv2D
-from keras.layers import MaxPooling2D
+from keras.layers import Conv2D, Flatten, Dense, MaxPooling2D
 
 # from keras.optimizers import gradient_descent_v2
 # SGD = gradient_descent_v2.SGD(...)
@@ -60,9 +57,6 @@ import NASA_core as nc
 # import NASA_plot_core as rcp
 
 # %%
-from tensorflow.keras.utils import load_img
-from tensorflow.keras.utils import img_to_array
-from keras.models import load_model
 
 # %% [markdown]
 # # Directories
@@ -105,14 +99,11 @@ TL_models_list
 # %%
 # load and prepare the image
 def load_image(filename):
-    # load the image
-    img = load_img(filename, target_size=(224, 224))
-    # convert to array
-    img = img_to_array(img)
+    img = load_img(filename, target_size=(224, 224)) # load the image
+    img = img_to_array(img)     # convert to array
     # reshape into a single sample with 3 channels
     img = img.reshape(1, 224, 224, 3)
-    # center pixel data
-    img = img.astype('float32')
+    img = img.astype('float32') # center pixel data
     img = img - [123.68, 116.779, 103.939]
     return img
 
@@ -141,8 +132,8 @@ needed_cols = ["predType_point3", "predType_point34", "predType_point35",  "pred
 # %%
 ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
 
-train80 = pd.read_csv(ML_data_folder+"train80_split_2Bconsistent_Oct17.csv")
-test20 = pd.read_csv(ML_data_folder+"test20_split_2Bconsistent_Oct17.csv")
+train80 = pd.read_csv(ML_data_folder + "train80_split_2Bconsistent_Oct17.csv")
+test20  = pd.read_csv(ML_data_folder + "test20_split_2Bconsistent_Oct17.csv")
 
 # training_set_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data/"
 # ground_truth_labels = pd.read_csv(training_set_dir+"train_labels.csv")
@@ -179,7 +170,7 @@ for VI_idx in VI_idxs:
         nb_samples = test_df.shape[0]
 
         test_df["human_predict"] = test_df.filename.str.split("_", expand=True)[0]
-        test_df["prob_single"]=-1.0
+        test_df["prob_single"] = -1.0
         # print ("test_df.shape is {}.".format(test_df.shape))
         test_df.head(2)
 
@@ -511,7 +502,17 @@ for VI_idx in VI_idxs:
 
             out_name = "03_" + smooth_type + "_" + VI_idx + "_TL_Acreage_TFPR_SRatio_" + \
                         str(sample_ratio) + ".csv"
+
             acr_predTypes.to_csv(overSample_out_dir + out_name, index = True)
+
+# %%
+VI_idx="EVI"
+smooth_type = "SG"
+out_dir = "A/" 
+out_dir
+
+# %%
+import tensorflow
 
 # %%
 

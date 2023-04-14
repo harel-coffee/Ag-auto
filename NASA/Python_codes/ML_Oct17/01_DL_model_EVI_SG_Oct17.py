@@ -24,32 +24,26 @@
 import numpy as np
 import pandas as pd
 from datetime import date
-from random import seed
-from random import random
+from random import seed, random
 
 import time
 import scipy, scipy.signal
-import os, os.path
 import shutil
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import pyplot
 
 from pylab import imshow
 
 # vgg16 model used for transfer learning on the dogs and cats dataset
-from matplotlib import pyplot
+
 # from keras.utils import to_categorical
 from tensorflow.keras.utils import to_categorical
-from keras.models import Sequential
 from keras.applications.vgg16 import VGG16
-from keras.models import Model
-from keras.layers import Dense
-from keras.layers import Flatten
+from keras.models import Model, Sequential, load_model
 import tensorflow as tf
 # from keras.optimizers import SGD
-
-from keras.layers import Conv2D
-from keras.layers import MaxPooling2D
+from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
 
 # from keras.optimizers import gradient_descent_v2
 # SGD = gradient_descent_v2.SGD(...)
@@ -57,9 +51,8 @@ from keras.layers import MaxPooling2D
 from tensorflow.keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
 
-
 import h5py
-import sys
+import sys, os, os.path
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 import NASA_plot_core as rcp
@@ -71,7 +64,6 @@ from tensorflow.keras.utils import img_to_array
 # %%
 # from keras.preprocessing.image import load_img # commented out in windows
 # from keras.preprocessing.image import img_to_array # commented out in windows
-from keras.models import load_model
 
 # %% [markdown]
 # # Read Fields Metadata

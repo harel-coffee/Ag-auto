@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --partition=kamiak
-#SBATCH --constraint=cascadelake
-##SBATCH --partition=rajagopalan
+##SBATCH --partition=kamiak
+##SBATCH --constraint=cascadelake
+#SBATCH --partition=rajagopalan
 #SBATCH --requeue
-#SBATCH --job-name=KNN_indeks_smooth_type_SR_ratio_outer # Job Name
-#SBATCH --time=7-00:00:00    # Wall clock time limit in Days-HH:MM:SS
+#SBATCH --job-name=indeks_smooth_type_outer # Job Name
+#SBATCH --time=00-07:00:00    # Wall clock time limit in Days-HH:MM:SS
 #SBATCH --mem=20GB 
 #SBATCH --nodes=1            # Node count required for the job
 #SBATCH --ntasks-per-node=1  # Number of tasks to be launched per Node
@@ -13,8 +13,8 @@
 ####SBATCH --array=0-30000
 
 ###SBATCH -k o
-#SBATCH --output=/home/h.noorazar/NASA/Kamiak_ML_Oct17/error/KNN_indeks_smooth_type_SRSR_ratio_Oct17_acc_outer.o
-#SBATCH  --error=/home/h.noorazar/NASA/Kamiak_ML_Oct17/error/KNN_indeks_smooth_type_SRSR_ratio_Oct17_acc_outer.e
+#SBATCH --output=/home/h.noorazar/NASA/regionalStat/00_widen/error/widen_indeks_smooth_type.o
+#SBATCH  --error=/home/h.noorazar/NASA/regionalStat/00_widen/error/widen_indeks_smooth_type.e
 echo
 echo "--- We are now in $PWD, running an R script ..."
 echo
@@ -25,7 +25,7 @@ echo
 # module load r/4.1.0
 
 ## module purge         # Kamiak is not similar to Aeolus. purge on its own cannot be loaded. 
-                        # Either leave it out or add "module load StdEnv". Lets see if this works. (Feb 22.)
+                        # Either leave it out or add module load StdEnv. Lets see if this works. (Feb 22.)
 ## module load StdEnv
 
 module load gcc/7.3.0
@@ -56,8 +56,7 @@ echo "--------- continue on ---------"
 # ----------------------------------------------------------------
 # Run python code for matrix
 # ----------------------------------------------------------------
-
-python /home/h.noorazar/NASA/Kamiak_ML_Oct17/KNN_Oct17_accuracyScoring.py indeks smooth_type SR_ratio
+python /home/h.noorazar/NASA/regionalStat/00_widen/00_Widen.py indeks smooth_type
 
 echo
 echo "----- DONE -----"

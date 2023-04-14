@@ -3,7 +3,7 @@
 ##SBATCH --constraint=cascadelake
 #SBATCH --partition=rajagopalan
 #SBATCH --requeue
-#SBATCH --job-name=KNN_indeks_smooth_type_SR_ratio_outer # Job Name
+#SBATCH --job-name=indeks_smooth_type_outer # Job Name
 #SBATCH --time=00-07:00:00    # Wall clock time limit in Days-HH:MM:SS
 #SBATCH --mem=20GB 
 #SBATCH --nodes=1            # Node count required for the job
@@ -13,8 +13,8 @@
 ####SBATCH --array=0-30000
 
 ###SBATCH -k o
-#SBATCH --output=/home/h.noorazar/NASA/regionalStat/00_widen/error/widen_indeks_smooth_type.o
-#SBATCH  --error=/home/h.noorazar/NASA/regionalStat/00_widen/error/widen_indeks_smooth_type.e
+#SBATCH --output=/home/h.noorazar/NASA/regionalStat/00_plotClean_4_DL/error/indeks_smooth_type.o
+#SBATCH  --error=/home/h.noorazar/NASA/regionalStat/00_plotClean_4_DL/error/indeks_smooth_type.e
 echo
 echo "--- We are now in $PWD, running an R script ..."
 echo
@@ -56,7 +56,7 @@ echo "--------- continue on ---------"
 # ----------------------------------------------------------------
 # Run python code for matrix
 # ----------------------------------------------------------------
-python /home/h.noorazar/NASA/regionalStat/00_widen/00_Widen.py indeks smooth_type
+python /home/h.noorazar/NASA/regionalStat/00_plotClean_4_DL/DL_CleanPlots.py indeks smooth_type
 
 echo
 echo "----- DONE -----"

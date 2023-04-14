@@ -17,7 +17,7 @@ smooth_type = sys.argv[2]
 print(f"Passed Args. are: {VI_idx=:}, {smooth_type=:}!")
 
 """
-   # Read Training Set Labels
+ Read Training Set Labels
 """
 dir_base = "/data/project/agaid/h.noorazar/NASA/Data_Models_4_RegionalStat/"
 in_dir = dir_base + "00_SmoothedData/"

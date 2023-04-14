@@ -420,7 +420,7 @@ pickle.dump(KNN_DTW_prune, open(filename, 'wb'))
 # %%
 
 # %% [markdown]
-# # Improve?
+# Improve?
 
 # %% [markdown]
 # ### Lets see if putting weights will make a difference

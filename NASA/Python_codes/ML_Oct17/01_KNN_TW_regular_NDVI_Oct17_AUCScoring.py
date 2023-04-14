@@ -233,6 +233,12 @@ dtwvis.plot_warping(s1, s2, path)
 distance = dtw.distance(s1, s2)
 
 # %%
+params = {"figure.figsize":[1, 1],
+          "axes.titlepad" : 1,
+          "axes.titlesize": 10,
+          "font.size":10}
+plt.rcParams.update(params)
+
 d, paths = dtw.warping_paths(s1, s2, window=10, use_pruning=True);
 best_path = dtw.best_path(paths);
 dtwvis.plot_warpingpaths(s1, s2, paths, best_path);
@@ -248,6 +254,7 @@ def DTW_prune(ts1, ts2):
 # # Widen
 
 # %%
+# %%time
 NDVI_colnames = [VI_idx + "_" + str(ii) for ii in range(1, 37) ]
 columnNames = ["ID"] + NDVI_colnames
 GT_wide = pd.DataFrame(columns=columnNames, 
@@ -273,8 +280,8 @@ GT_wide.head(2)
 # I want to avoid splitting and just use the one I created earlier.
 
 ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
-train80 = pd.read_csv(ML_data_folder+"train80_split_2Bconsistent_Oct17.csv")
-test20 = pd.read_csv(ML_data_folder+"test20_split_2Bconsistent_Oct17.csv")
+train80 = pd.read_csv(ML_data_folder + "train80_split_2Bconsistent_Oct17.csv")
+test20 = pd.read_csv(ML_data_folder  + "test20_split_2Bconsistent_Oct17.csv")
 GT_labels.head(2)
 
 # %%
@@ -493,8 +500,8 @@ plt.figure(figsize=(20,4))
 plt.subplot(1, 1, 1)
 
 ID_1 = actual_double_predicted_single_IDs[2]
-# plot VIs
 
+# plot VIs
 plt.plot(GT_TS[GT_TS.ID==ID_1].human_system_start_time.values,
          GT_TS[GT_TS.ID==ID_1].NDVI.values,
          c='k', linewidth=5);
