@@ -28,6 +28,10 @@ import seaborn as sb
 from pylab import rcParams
 
 # %%
+import shutup
+shutup.please()
+
+# %%
 # size = 15
 # title_FontSize = 10
 # legend_FontSize = 8
@@ -127,9 +131,6 @@ plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False)
 with plt.xkcd(scale=1, length=200):
     plt.plot(noisy_tone, '-', c = "dodgerblue")
     plt.plot(nice_tone, '-', c='r') #  linewidth=2,
-    
-
-# %%
 
 # %%
 import igraph
@@ -513,10 +514,10 @@ SG_clean_SOS_orchardinPlot_VerticalLine(raw_dt = curr_landsat_DF, SG_dt = curr_S
                                         onset_cut=0.3, offset_cut=0.3);
 
 file_name = plot_dir + curr_ID + "_" + VI_idx + "_flowChart_NDVIRatio.pdf"
-plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+# plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 file_name = plot_dir + curr_ID + "_" + VI_idx + "_flowChart_NDVIRatio.png"
-plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+# plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 
 # %%

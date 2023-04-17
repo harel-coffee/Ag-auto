@@ -40,7 +40,7 @@ import NASA_core as nc
 # import NASA_plot_core as rcp
 
 # %%
-from tslearn.metrics import dtw as dtw_metric
+# from tslearn.metrics import dtw as dtw_metric
 # https://dtaidistance.readthedocs.io/en/latest/usage/dtw.html
 from dtaidistance import dtw
 from dtaidistance import dtw_visualisation as dtwvis

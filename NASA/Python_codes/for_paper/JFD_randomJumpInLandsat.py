@@ -207,8 +207,7 @@ ax1.plot(a_field_landsat_raw_NDVI[ht_], a_field_landsat_raw_NDVI["NDVI"],
          linewidth=4, color="#ff7f0e", linestyle="dashed", label="NDVI") 
 
 ax1.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
-ax1.tick_params(axis='y', which='major') #, labelsize = tick_FontSize)
-ax1.tick_params(axis='x', which='major') #, labelsize = tick_FontSize) # 
+ax1.tick_params(axis='both', which='major') #, labelsize = tick_FontSize)
 ax1.legend(loc="upper right");
 ax1.set_xlim([datetime(2017, 1, 1), datetime(2018, 1, 1)])
 from matplotlib.dates import MonthLocator, DateFormatter
@@ -263,8 +262,7 @@ ax1.plot(a_field_landsat_raw_NDVI[ht_], a_field_landsat_raw_NDVI["NDVI"],
          linewidth=4, color="#ff7f0e", linestyle="dashed", label="NDVI") 
 
 ax1.set_ylabel("Landsat VI") # , labelpad=20); # fontsize = label_FontSize,
-ax1.tick_params(axis='y', which='major') #, labelsize = tick_FontSize)
-ax1.tick_params(axis='x', which='major') #, labelsize = tick_FontSize) # 
+ax1.tick_params(axis='both', which='major') #, labelsize = tick_FontSize)
 ax1.legend(loc="upper right");
 ax1.set_xlim([datetime(2017, 1, 1), datetime(2018, 1, 1)])
 from matplotlib.dates import MonthLocator, DateFormatter
@@ -295,8 +293,7 @@ ax1.plot(a_field_sentinel_raw_NDVI[ht_], a_field_sentinel_raw_NDVI["NDVI"],
 
 ax1.set_ylim([-0.05, 2.05])
 ax1.set_ylabel("Sentinel VI") # , labelpad=20); # fontsize = label_FontSize,
-ax1.tick_params(axis='y', which='major') #, labelsize = tick_FontSize)
-ax1.tick_params(axis='x', which='major') #, labelsize = tick_FontSize) # 
+ax1.tick_params(axis='both', which='major') #, labelsize = tick_FontSize)
 ax1.legend(loc="upper right");
 ax1.set_xlim([datetime(2017, 1, 1), datetime(2018, 1, 1)])
 from matplotlib.dates import MonthLocator, DateFormatter
