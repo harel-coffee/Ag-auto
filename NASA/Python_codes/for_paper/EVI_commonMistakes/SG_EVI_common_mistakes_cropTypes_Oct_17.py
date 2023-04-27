@@ -12,6 +12,12 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# This notebook is the initial version that went in the paper. But, ```NDVI``` performs better. 
+#
+#
+# Moreover, we have precomputed the predictions and wrote it on the disk at this point. We will use them in the NDVI notebooks.
+
 # %%
 import shutup
 shutup.please()
@@ -456,7 +462,7 @@ test_result_dir
 # %%
 forest_grid_1_y_test_df = pd.merge(forest_grid_1_y_test_df, meta, on=['ID'], how='left')
 out_name=test_result_dir+ "SG_RF_grid_1_Oct17_y_test_accuracyScoring.csv"
-forest_grid_1_y_test_df.to_csv(out_name, index = False)
+# forest_grid_1_y_test_df.to_csv(out_name, index = False)
 
 # %%
 forest_grid_1_yTest_A1P2 = forest_grid_1_y_test_df[forest_grid_1_y_test_df.Vote==1]
@@ -650,7 +656,7 @@ KNN_y_test_dist_A1P2=KNN_y_test_dist_A1P2[KNN_y_test_dist_A1P2.KNN_pred_distance
 KNN_y_test_dist_A2P1=KNN_y_test[KNN_y_test.Vote==2]
 KNN_y_test_dist_A2P1=KNN_y_test_dist_A2P1[KNN_y_test_dist_A2P1.KNN_pred_distance==1]
 
-KNN_y_test_dist_A2P1.ExctAcr.sum()-KNN_y_test_dist_A1P2.ExctAcr.sum()
+# KNN_y_test_dist_A2P1.ExctAcr.sum()-KNN_y_test_dist_A1P2.ExctAcr.sum()
 
 # %%
 print (f"{test_result_dir = }")
@@ -732,10 +738,10 @@ SVM_winner_y_test_df_A1_P2.rename(columns={"prediction": "SVM_winner_pred_A1P2"}
 
 # %%
 SG_common_mistakes=pd.merge(SG_common_mistakes, \
-                            SVM_winner_y_test_df_A2_P1[["ID","SVM_winner_pred_A2P1"]],on=['ID'],how='left')
+                            SVM_winner_y_test_df_A2_P1[["ID","SVM_winner_pred_A2P1"]],on=['ID'], how='left')
 
 SG_common_mistakes=pd.merge(SG_common_mistakes, 
-                            SVM_winner_y_test_df_A1_P2[["ID","SVM_winner_pred_A1P2"]],on=['ID'],how='left')
+                            SVM_winner_y_test_df_A1_P2[["ID","SVM_winner_pred_A1P2"]],on=['ID'], how='left')
 
 # %%
 forest_grid_1_yTest_A2P1.rename(columns={"prediction": "RF_G1_pred_A2P1"}, inplace=True)

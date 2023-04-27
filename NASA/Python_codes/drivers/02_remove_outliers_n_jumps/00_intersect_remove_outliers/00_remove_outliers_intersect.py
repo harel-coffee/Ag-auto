@@ -19,6 +19,7 @@ import datetime
 from datetime import date
 from patsy import cr
 import sys
+
 start_time = time.time()
 
 # search path for modules
@@ -29,23 +30,23 @@ start_time = time.time()
 ###
 ####################################################################################
 
-sys.path.append('/home/hnoorazar/NASA/')
+sys.path.append("/home/hnoorazar/NASA/")
 import NASA_core as nc
 import NASA_plot_core as ncp
 
 ####################################################################################
 ###
-###      Parameters                   
+###      Parameters
 ###
 ####################################################################################
 
 indeks = sys.argv[1]
 satellite_name = sys.argv[2]
 
-print ("Terminal Arguments are: ")
-print (indeks)
-print (satellite_name)
-print ("__________________________________________")
+print("Terminal Arguments are: ")
+print(indeks)
+print(satellite_name)
+print("__________________________________________")
 
 if indeks == "NDVI":
     NoVI = "EVI"
@@ -64,8 +65,8 @@ data_dir = data_base + "01_raw_GEE/"
 output_dir = data_base + "/02_outliers_removed/"
 os.makedirs(output_dir, exist_ok=True)
 
-print ("data_dir is: " +  data_dir)
-print ("output_dir is: " + output_dir)
+print("data_dir is: " + data_dir)
+print("output_dir is: " + output_dir)
 
 ########################################################################################
 ###
@@ -74,12 +75,12 @@ print ("output_dir is: " + output_dir)
 ########################################################################################
 if satellite_name == "L5":
     f_name = "L5_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
-elif satellite_name=="L7":
+elif satellite_name == "L7":
     f_name = "L7_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
-elif satellite_name=="L8":
+elif satellite_name == "L8":
     f_name = "L8_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
 else:
-    print ("bad f_name!!!")
+    print("bad f_name!!!")
 
 L578 = pd.read_csv(data_dir + f_name + ".csv")
 L578.drop([NoVI], axis=1, inplace=True)
@@ -88,24 +89,22 @@ L578["ID"] = L578["ID"].astype(str)
 IDs = np.sort(L578["ID"].unique())
 
 L578 = nc.add_human_start_time_by_system_start_time(L578)
-L578 = nc.initial_clean(df = L578, column_to_be_cleaned = indeks)
-print ("Number of unique fields is: ")
+L578 = nc.initial_clean(df=L578, column_to_be_cleaned=indeks)
+print("Number of unique fields is: ")
 print(len(IDs))
-print ("__________________________________________")
+print("__________________________________________")
 
-print ("Dimension of the data is: " + str(L578.shape))
-print ("__________________________________________")
+print("Dimension of the data is: " + str(L578.shape))
+print("__________________________________________")
 
 #########################################################
-output_df = pd.DataFrame(data = None,
-                         index = np.arange(L578.shape[0]), 
-                         columns = L578.columns)
+output_df = pd.DataFrame(data=None, index=np.arange(L578.shape[0]), columns=L578.columns)
 counter = 0
 row_pointer = 0
 for a_poly in IDs:
-    if (counter % 1000 == 0):
-        print (counter)
-    curr_field = L578[L578[IDcolName]==a_poly].copy()
+    if counter % 1000 == 0:
+        print(counter)
+    curr_field = L578[L578[IDcolName] == a_poly].copy()
     # small fields may have nothing in them!
     if curr_field.shape[0] > 2:
         ##************************************************
@@ -114,20 +113,20 @@ for a_poly in IDs:
         #
         ##************************************************
         """
-         we are killing some of the ourliers here and put them
-         in the normal range! do we want to do it here? No, lets do it later.
+        we are killing some of the ourliers here and put them
+        in the normal range! do we want to do it here? No, lets do it later.
         """
-        # curr_field.loc[curr_field[indeks] < 0 , indeks] = 0 
-        no_Outlier_TS = nc.interpolate_outliers_EVI_NDVI(outlier_input = curr_field, given_col = indeks)
-        no_Outlier_TS.loc[no_Outlier_TS[indeks] < 0 , indeks] = 0 
+        # curr_field.loc[curr_field[indeks] < 0 , indeks] = 0
+        no_Outlier_TS = nc.interpolate_outliers_EVI_NDVI(outlier_input=curr_field, given_col=indeks)
+        no_Outlier_TS.loc[no_Outlier_TS[indeks] < 0, indeks] = 0
 
         """
         it is possible that for a field we only have x=2 data points
         where all the EVI/NDVI is outlier. Then, there is nothing to 
         use for interpolation. So, hopefully interpolate_outliers_EVI_NDVI is returning an empty data table.
-        """ 
+        """
         if len(no_Outlier_TS) > 0:
-            output_df[row_pointer: row_pointer + curr_field.shape[0]] = no_Outlier_TS.values
+            output_df[row_pointer : row_pointer + curr_field.shape[0]] = no_Outlier_TS.values
             counter += 1
             row_pointer += curr_field.shape[0]
 
@@ -137,11 +136,10 @@ for a_poly in IDs:
 ###
 ####################################################################################
 
-out_name = output_dir + "noOutlier_" + f_name + "_" +  indeks + ".csv"
+out_name = output_dir + "noOutlier_" + f_name + "_" + indeks + ".csv"
 
 output_df.drop_duplicates(inplace=True)
 # output_df.dropna(inplace=True)
-output_df.to_csv(out_name, index = False)
-
-print ("it took {:.0f} minutes to run this code.".format((end_time - start_time)/60))
-
+output_df.to_csv(out_name, index=False)
+end_time = time.time()
+print("it took {:.0f} minutes to run this code.".format((end_time - start_time) / 60))

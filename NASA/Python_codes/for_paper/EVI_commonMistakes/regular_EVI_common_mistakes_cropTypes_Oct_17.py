@@ -12,6 +12,12 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# This notebook is the initial version that went in the paper. But, ```NDVI``` performs better. 
+#
+#
+# Moreover, we have precomputed the predictions and wrote it on the disk at this point. We will use them in the NDVI notebooks.
+
 # %%
 import time# , shutil
 import numpy as np

@@ -30,7 +30,6 @@ module load gcc/7.3.0
 module load python/3.7.1/gcc/7.3.0
 
 cd /home/hnoorazar/NASA/02_remove_outliers_n_jumps/01_intersect_remove_jumps_JFD
-   
 
 # ----------------------------------------------------------------
 # Gathering useful information
