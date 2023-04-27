@@ -13,46 +13,104 @@
 # ---
 
 # %%
-
-# %%
 import pandas as pd
+import numpy as np
+import os, sys
 
 # %%
-
-# %%
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/")
+import NASA_core as nc
 
 # %%
 dir_base = "/Users/hn/Documents/01_research_data/NASA/VI_TS/"
-data_dir = dir_base + "/8th_intersected_2008_2018_EastIrr/02_outliers_removed/"
-
-
+data_dir = dir_base + "/8th_intersected_2008_2018_EastIrr/03_jumps_removed/"
 SF_data_dir = "/Users/hn/Documents/01_research_data/NASA/shapefiles/10_intersect_East_Irr_2008_2018_2cols/"
 
 # %%
-# %%time
-f_name = "noOutlier_L8_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01_EVI.csv"
-noOutlier_L8 = pd.read_csv(data_dir + f_name)
+indeks = "NDVI"
+batch = str(22)
+regular_window_size = 10
+IDcolName = "ID"
+print(f"{indeks=}")
+print(f"{batch=}")
 
-data_part_fname = "10_intersect_East_Irr_2008_2018_2cols_data_part.csv"
-SF_data_IDs = pd.read_csv(SF_data_dir + data_part_fname)
-
-# %%
-print (f"{noOutlier_L8.shape=}")
-noOutlier_L8.head(2)
 
 # %%
-SF_data_IDs.head(2)
+f_name = "NoJump_intersect_" + indeks + "_batchNumber" + str(batch) + "_JFD.csv"
+# out_name = output_dir + indeks + "_regular_intersect_batchNumber" + batch + "_JFD.csv"
+
+an_EE_TS = pd.read_csv(data_dir + f_name, low_memory=False)
+
+if "system_start_time" in an_EE_TS.columns:
+    an_EE_TS.drop(["system_start_time"], axis=1, inplace=True)
+
+an_EE_TS["human_system_start_time"] = pd.to_datetime(an_EE_TS["human_system_start_time"])
+an_EE_TS["ID"] = an_EE_TS["ID"].astype(str)
+print(an_EE_TS.head(2))
+
 
 # %%
-SF_data_IDs.sort_values(by=["ID"], inplace=True)
-SF_data_IDs.reset_index(drop=True, inplace=True)
+### List of unique polygons
+###
+ID_list = an_EE_TS[IDcolName].unique()
+print(len(ID_list))
 
 # %%
-print (f"{len(SF_data_IDs.ID.unique())=}")
-print (f"{SF_data_IDs.shape=}")
+reg_cols = ["ID", "human_system_start_time", indeks]  # list(an_EE_TS.columns)
+print(f"{reg_cols=}")
 
 # %%
-SF_data_IDs[SF_data_IDs.acreage<10].shape
+st_yr = an_EE_TS.human_system_start_time.dt.year.min()
+end_yr = an_EE_TS.human_system_start_time.dt.year.max()
+no_days = (end_yr - st_yr + 1) * 366  # 14 years, each year 366 days!
+
+no_steps = int(np.ceil(no_days / regular_window_size))  # no_days // regular_window_size
+nrows = no_steps * len(ID_list)
+
+output_df = pd.DataFrame(data=None, index=np.arange(nrows), columns=reg_cols)
+print("st_yr is {}!".format(st_yr))
+print("end_yr is {}!".format(end_yr))
+print("nrows is {}!".format(nrows))
 
 # %%
-SF_data_IDs[SF_data_IDs.acreage<10].shape
+counter = 0
+row_pointer = 0
+
+# %%
+a_poly = ID_list[0]
+
+# %%
+if counter % 1000 == 0:
+    print(counter)
+curr_field = an_EE_TS[an_EE_TS[IDcolName] == a_poly].copy()
+
+# %%
+# Sort by DoY (sanitary check)
+curr_field.sort_values(by=["human_system_start_time"], inplace=True)
+curr_field.reset_index(drop=True, inplace=True)
+
+# %%
+regularized_TS = nc.regularize_a_field(
+        a_df=curr_field,
+        V_idks=indeks,
+        interval_size=regular_window_size,
+        start_year=st_yr,
+        end_year=end_yr,
+    )
+
+# %%
+regularized_TS = nc.fill_theGap_linearLine(a_regularized_TS=regularized_TS, V_idx=indeks)
+
+# %%
+if counter == 0:
+    print(
+        f"{list(output_df.columns)=}",
+    )
+    print(
+        f"{list(regularized_TS.columns)=}",
+    )
+
+# %%
+print(f"{indeks=}")
+
+# %%

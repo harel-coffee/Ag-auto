@@ -49,7 +49,7 @@ from dtaidistance import dtw_visualisation as dtwvis
 # %%
 dir_base = "/Users/hn/Documents/01_research_data/NASA/"
 meta_dir = dir_base + "/parameters/"
-SF_data_dir = dir_base + "/data_part_of_shapefile/"
+SF_data_dir   = dir_base + "/data_part_of_shapefile/"
 pred_dir_base = dir_base + "/RegionalStatData/"
 pred_dir = pred_dir_base + "02_ML_preds/"
 
@@ -57,8 +57,8 @@ pred_dir = pred_dir_base + "02_ML_preds/"
 # # Read Fields Metadata
 
 # %%
-meta_6000 = pd.read_csv(meta_dir+"evaluation_set.csv")
-meta_6000_moreThan10Acr=meta_6000[meta_6000.ExctAcr>10]
+meta_6000 = pd.read_csv(meta_dir + "evaluation_set.csv")
+meta_6000_moreThan10Acr = meta_6000[meta_6000.ExctAcr>10]
 
 print (meta_6000.shape)
 print (meta_6000_moreThan10Acr.shape)

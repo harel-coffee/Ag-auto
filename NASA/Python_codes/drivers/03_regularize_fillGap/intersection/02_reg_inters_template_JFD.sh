@@ -4,19 +4,19 @@
 # Configure PBS options
 # ----------------------------------------------------------------
 ## Define a job name
-#PBS -N outer_indeks_Jump_batch_number
+#PBS -N batch_indeks_reg_JFD
 
 ## Define compute options
 #PBS -l nodes=1:ppn=1
 #PBS -l mem=30gb
-#PBS -l walltime=06:00:00
-#PBS -q batch
+#PBS -l walltime=99:00:00
+#PBS -q hydro
 
 ## Define path for output & error logs
 #PBS -k o
 
-#PBS -e /home/hnoorazar/NASA/02_remove_outliers_n_jumps/01_intersect_remove_jumps_JFD/error/outer_JFD_e
-#PBS -o /home/hnoorazar/NASA/02_remove_outliers_n_jumps/01_intersect_remove_jumps_JFD/error/outer_JFD_o
+#PBS -e /home/hnoorazar/NASA/03_regularize_fillGap/error/batch_indeks_inters_JFD_e
+#PBS -o /home/hnoorazar/NASA/03_regularize_fillGap/error/batch_indeks_inters_JFD_o
 
 ## Define path for reporting
 ##PBS -M h.noorazar@yahoo.com
@@ -29,7 +29,8 @@ module purge
 module load gcc/7.3.0
 module load python/3.7.1/gcc/7.3.0
 
-cd /home/hnoorazar/NASA/02_remove_outliers_n_jumps/01_intersect_remove_jumps_JFD
+cd /home/hnoorazar/NASA/03_regularize_fillGap
+   
 
 # ----------------------------------------------------------------
 # Gathering useful information
@@ -51,4 +52,10 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python3 ./01_remove_jumps_JFD_intersect.py indeks batch_number
+python3 ./02_regularize_inters_JFD.py indeks batch
+
+
+
+
+
+

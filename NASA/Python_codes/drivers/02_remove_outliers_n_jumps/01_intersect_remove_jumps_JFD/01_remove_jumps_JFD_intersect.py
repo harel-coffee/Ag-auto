@@ -56,7 +56,7 @@ IDcolName = "ID"
 ###
 ####################################################################################
 data_base = "/data/hydro/users/Hossein/NASA/"
-data_dir = data_base + "/02_outliers_removed/"
+data_dir = data_base + "02_outliers_removed/"
 SF_data_dir = "/data/hydro/users/Hossein/NASA/000_shapefile_data_part/"
 output_dir = data_base + "/03_jumps_removed/"
 os.makedirs(output_dir, exist_ok=True)
@@ -73,8 +73,8 @@ SF_data_IDs = pd.read_csv(SF_data_dir + "10_intersect_East_Irr_2008_2018_2cols_d
 SF_data_IDs.sort_values(by=["ID"], inplace=True)
 SF_data_IDs.reset_index(drop=True, inplace=True)
 
-# there are
-batch_size = int(np.ceil(69271 / 40))
+# there are: len(SF_data_IDs.ID.unique() = 69271
+batch_size = int(np.ceil(len(SF_data_IDs.ID.unique()) / 40))
 
 batch_IDs = SF_data_IDs.loc[(batch_number - 1) * batch_size : (batch_number * batch_size - 1)]
 
@@ -83,14 +83,14 @@ print(batch_IDs[:3])
 print(batch_IDs[-3:])
 
 out_name = (
-    output_dir + "NoJump_intersect_" + indeks + "batch_number" + str(batch_number) + "_JFD.csv"
+    output_dir + "NoJump_intersect_" + indeks + "_batchNumber" + str(batch_number) + "_JFD.csv"
 )
 
-common_part = "T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
+common_part = "T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01_"
 f_names = [
-    "noOutlier_" + "L5_" + common_part + "_" + indeks + ".csv",
-    "noOutlier_" + "L7_" + common_part + "_" + indeks + ".csv",
-    "noOutlier_" + "L8_" + common_part + "_" + indeks + ".csv",
+    "noOutlier_" + "L5_" + common_part + indeks + ".csv",
+    "noOutlier_" + "L7_" + common_part + indeks + ".csv",
+    "noOutlier_" + "L8_" + common_part + indeks + ".csv",
 ]
 
 L5 = pd.read_csv(data_dir + f_names[0], low_memory=False)
@@ -110,11 +110,9 @@ L8 = L8[L8[indeks].notna()]
 L578 = pd.concat([L5, L7, L8])
 del (L5, L7, L8)
 
-L578["human_system_start_time"] = pd.to_datetime(L578["human_system_start_time"])
-L578["ID"] = L578["ID"].astype(str)
-
+# L578["ID"] = L578["ID"].astype(str)
 L578 = L578[L578.ID.isin(list(batch_IDs.ID))].copy()
-
+L578["human_system_start_time"] = pd.to_datetime(L578["human_system_start_time"])
 ########################################################################################
 ###
 ### List of unique polygons
@@ -142,11 +140,11 @@ for a_poly in IDs:
     curr_field.reset_index(drop=True, inplace=True)
 
     ################################################################
-    no_Outlier_TS = nc.correct_big_jumps_1DaySeries_JFD(
+    no_jump_TS = nc.correct_big_jumps_1DaySeries_JFD(
         dataTMS_jumpie=curr_field, give_col=indeks, maxjump_perDay=0.018
     )
 
-    output_df[row_pointer : row_pointer + curr_field.shape[0]] = no_Outlier_TS.values
+    output_df[row_pointer : row_pointer + curr_field.shape[0]] = no_jump_TS.values
     counter += 1
     row_pointer += curr_field.shape[0]
 
