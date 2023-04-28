@@ -4,19 +4,19 @@
 # Configure PBS options
 # ----------------------------------------------------------------
 ## Define a job name
-#PBS -N batch_indeks_reg_JFD
+#PBS -N batchNo_indeks_reg_JFD
 
 ## Define compute options
 #PBS -l nodes=1:ppn=1
-#PBS -l mem=30gb
-#PBS -l walltime=99:00:00
-#PBS -q hydro
+#PBS -l mem=20gb
+#PBS -l walltime=06:00:00
+#PBS -q batch
 
 ## Define path for output & error logs
 #PBS -k o
 
-#PBS -e /home/hnoorazar/NASA/03_regularize_fillGap/error/batch_indeks_inters_JFD_e
-#PBS -o /home/hnoorazar/NASA/03_regularize_fillGap/error/batch_indeks_inters_JFD_o
+#PBS -e /home/hnoorazar/NASA/03_regularize_fillGap/error/batchNo_indeks_inters_JFD_e
+#PBS -o /home/hnoorazar/NASA/03_regularize_fillGap/error/batchNo_indeks_inters_JFD_o
 
 ## Define path for reporting
 ##PBS -M h.noorazar@yahoo.com
@@ -52,7 +52,7 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python3 ./02_regularize_inters_JFD.py indeks batch
+python3 ./02_regularize_inters_JFD.py indeks batchNo
 
 
 

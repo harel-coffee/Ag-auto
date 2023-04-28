@@ -104,13 +104,12 @@ regularized_TS = nc.fill_theGap_linearLine(a_regularized_TS=regularized_TS, V_id
 # %%
 if counter == 0:
     print(
-        f"{list(output_df.columns)=}",
+        f"{list(output_df.columns) = }",
     )
     print(
-        f"{list(regularized_TS.columns)=}",
+        f"{list(regularized_TS.columns) = }",
     )
 
 # %%
-print(f"{indeks=}")
 
 # %%

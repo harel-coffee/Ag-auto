@@ -1,5 +1,5 @@
 ####
-#### Nov 17, 2021
+#### April 28, 2023
 ####
 
 import csv
@@ -14,8 +14,9 @@ import datetime
 import time
 import sys
 
-start_time = time.time()
 
+start_time = time.time()
+print("current time is {}".format(time.time()))
 # search path for modules
 # look @ https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
 
@@ -36,26 +37,23 @@ import NASA_plot_core as ncp
 ####################################################################################
 
 indeks = sys.argv[1]
-county = sys.argv[2]
+batch = str(sys.argv[2])
 
 # do the following since walla walla has two parts and we have to use walla_walla in terminal
 print("Terminal Arguments are: ")
-print(indeks)
-print(county)
+print("indeks= ", indeks)
+print("batch= ", batch)
 print("__________________________________________")
-if indeks == "NDVI":
-    NoVI = "EVI"
-else:
-    NoVI = "NDVI"
 
 IDcolName = "ID"
+SG_window = 7
+SG_polyOrder = 3
 ####################################################################################
 ###
 ###                   Aeolus Directories
 ###
 ####################################################################################
 data_base = "/data/hydro/users/Hossein/NASA/"
-# /data/hydro/users/Hossein/NASA/03_jumps_removed
 data_dir = data_base + "04_regularized_TS/"
 
 output_dir = data_base + "/05_SG_TS/"
@@ -66,8 +64,8 @@ os.makedirs(output_dir, exist_ok=True)
 ###                   process data
 ###
 ########################################################################################
-f_name = "regular_" + county + "_" + indeks + "_JFD.csv"
-out_name = output_dir + "SG_" + county + "_" + indeks + "_JFD.csv"
+f_name = indeks + "_regular_intersect_batchNumber" + batch + "_JFD.csv"
+out_name = output_dir + indeks + "_SG_intersect_batchNumber" + batch + "_JFD.csv"
 
 an_EE_TS = pd.read_csv(data_dir + f_name, low_memory=False)
 an_EE_TS["ID"] = an_EE_TS["ID"].astype(str)
@@ -98,7 +96,9 @@ for a_poly in ID_list:
     curr_field = an_EE_TS[an_EE_TS[IDcolName] == a_poly].copy()
 
     # Smoothen by Savitzky-Golay
-    SG = scipy.signal.savgol_filter(curr_field[indeks].values, window_length=7, polyorder=3)
+    SG = scipy.signal.savgol_filter(
+        curr_field[indeks].values, window_length=SG_window, polyorder=SG_polyOrder
+    )
     SG[SG > 1] = 1  # SG might violate the boundaries. clip them:
     SG[SG < -1] = -1
     if counter == 0:
@@ -124,5 +124,5 @@ an_EE_TS.to_csv(out_name, index=False)
 
 
 end_time = time.time()
-print("current time is {}".format(end_time))
+print("current time is {}".format(time.time()))
 print("it took {:.0f} minutes to run this code.".format((end_time - start_time) / 60))

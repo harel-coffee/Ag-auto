@@ -124,6 +124,12 @@ for a_poly in ID_list:
     if counter == 0:
         print("output_df columns = ", list(output_df.columns))
         print("regularized_TS columns", list(regularized_TS.columns))
+
+    ################################################################
+
+    output_df[row_pointer : (row_pointer + regularized_TS.shape[0])] = regularized_TS.values
+    row_pointer += regularized_TS.shape[0]
+
     counter += 1
 
 

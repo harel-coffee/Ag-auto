@@ -2,14 +2,16 @@
 cd /home/hnoorazar/NASA/04_SG
 
 outer=1
-for county in AdamBenton2016 FranklinYakima2018 Grant2017 Monterey2014 Walla2015
+for indeks in EVI NDVI
 do
-  for indeks in EVI NDVI
+  batch_size=1
+  while [ $batch_size -le 40 ]
   do
-    cp 02_SG_train_template_JFD.sh ./qsubs/q_train_JFD$outer.sh
-    sed -i s/outer/"$outer"/g    ./qsubs/q_train_JFD$outer.sh
-    sed -i s/indeks/"$indeks"/g  ./qsubs/q_train_JFD$outer.sh
-    sed -i s/county/"$county"/g  ./qsubs/q_train_JFD$outer.sh
-    let "outer+=1" 
+    cp 02_SG_inters_template_JFD.sh      ./qsubs/q_inters_JFD$outer.sh
+    sed -i s/outer/"$outer"/g            ./qsubs/q_inters_JFD$outer.sh
+    sed -i s/indeks/"$indeks"/g          ./qsubs/q_inters_JFD$outer.sh
+    sed -i s/batch_size/"$batch_size"/g  ./qsubs/q_inters_JFD$outer.sh
+    let "outer+=1"
+    let "batch_size+=1"
   done
 done
