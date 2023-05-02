@@ -188,6 +188,7 @@ def filter_out_nonIrrigated(dt_df_irr):
     dt_irrig["Irrigtn"] = dt_irrig["Irrigtn"].str.lower()
     dt_irrig = dt_irrig[~dt_irrig["Irrigtn"].str.contains("none")]
     dt_irrig = dt_irrig[~dt_irrig["Irrigtn"].str.contains("unknown")]
+    dt_irrig = dt_irrig[~dt_irrig["Irrigtn"].str.contains("empty")]
 
     return dt_irrig
 

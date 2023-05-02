@@ -25,7 +25,7 @@ import NASA_core as nc
 try:
     print("numpy.__version__=", numpy.__version__)
 except:
-    print("umpy.__version__ not printed")
+    print("numpy.__version__ not printed")
 
 ####################################################################################
 ###

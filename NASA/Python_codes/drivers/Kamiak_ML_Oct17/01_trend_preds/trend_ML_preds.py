@@ -46,6 +46,7 @@ smooth = sys.argv[2]
 batch_no = str(sys.argv[3])
 model = sys.argv[4]
 
+print(f"Passed Args. are: {VI_idx=:}, {smooth=:}, {batch_no=:}, and {model=}!")
 ####################################################################################
 ###
 ###      Directories
