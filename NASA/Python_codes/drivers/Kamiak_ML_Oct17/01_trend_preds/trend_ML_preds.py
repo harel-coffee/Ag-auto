@@ -108,15 +108,23 @@ print(f"{winnerModel=}")
 ##    Read Model
 ##
 if winnerModel.endswith(".sav"):
-    f_name = VI_idx + "_" + smooth + "_intersect_batchNumber" + str(batch_no) + "_wide_JFD.csv"
+    f_name = (
+        VI_idx
+        + "_"
+        + smooth
+        + "_intersect_batchNumber"
+        + str(batch_no)
+        + "_wide_JFD.csv"
+    )
     wide_TS = pd.read_csv(in_dir + f_name)
     print(f"{'number of wide_TS Fields: ', len(wide_TS.ID.unique())}")
 
     ML_model = pickle.load(open(model_dir + winnerModel, "rb"))
     predictions = ML_model.predict(wide_TS.iloc[:, 2:])
     pred_colName = model + "_" + VI_idx + "_" + smooth + "_preds"
-    A = pd.DataFrame(columns=["ID", pred_colName])
+    A = pd.DataFrame(columns=["ID", "year", pred_colName])
     A.ID = wide_TS.ID.values
+    A.year = wide_TS.year.values
     A[pred_colName] = predictions
     predictions = A.copy()
     del A
@@ -204,7 +212,9 @@ else:
 
 
 ######  Export Output
-pred_colName = VI_idx + "_" + smooth + "_" + model + "_batchNumber" + batch_no + "_preds"
+pred_colName = (
+    VI_idx + "_" + smooth + "_" + model + "_batchNumber" + batch_no + "_preds"
+)
 out_name = out_dir + pred_colName + ".csv"
 predictions.to_csv(out_name, index=False)
 
