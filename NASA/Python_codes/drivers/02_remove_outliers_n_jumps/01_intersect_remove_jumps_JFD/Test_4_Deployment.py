@@ -16,6 +16,7 @@
 import pandas as pd
 import numpy as np
 import os, sys
+from datetime import date, datetime
 
 # %%
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/")
@@ -23,92 +24,51 @@ import NASA_core as nc
 
 # %%
 dir_base = "/Users/hn/Documents/01_research_data/NASA/VI_TS/"
-data_dir = dir_base + "/8th_intersected_2008_2018_EastIrr/03_jumps_removed/"
+data_dir = dir_base + "/05_SG_TS/"
 SF_data_dir = "/Users/hn/Documents/01_research_data/NASA/shapefiles/10_intersect_East_Irr_2008_2018_2cols/"
 
 # %%
-indeks = "NDVI"
-batch = str(22)
-regular_window_size = 10
-IDcolName = "ID"
-print(f"{indeks=}")
-print(f"{batch=}")
-
+VI_idx = "EVI"
+batch_no = "2"
+smooth = "SG"
+print(f"Passed Args. are: {VI_idx=:}, {smooth=:}, and {batch_no=:}!")
 
 # %%
-f_name = "NoJump_intersect_" + indeks + "_batchNumber" + str(batch) + "_JFD.csv"
-# out_name = output_dir + indeks + "_regular_intersect_batchNumber" + batch + "_JFD.csv"
-
-an_EE_TS = pd.read_csv(data_dir + f_name, low_memory=False)
-
-if "system_start_time" in an_EE_TS.columns:
-    an_EE_TS.drop(["system_start_time"], axis=1, inplace=True)
-
-an_EE_TS["human_system_start_time"] = pd.to_datetime(an_EE_TS["human_system_start_time"])
-an_EE_TS["ID"] = an_EE_TS["ID"].astype(str)
-print(an_EE_TS.head(2))
-
+f_name = VI_idx + "_" + smooth + "_" + "intersect_batchNumber" + batch_no + "_JFD.csv"
+in_dir = data_dir
+data = pd.read_csv(in_dir + f_name)
+data["human_system_start_time"] = pd.to_datetime(data["human_system_start_time"])
 
 # %%
-### List of unique polygons
-###
-ID_list = an_EE_TS[IDcolName].unique()
-print(len(ID_list))
+VI_colnames = [VI_idx + "_" + str(ii) for ii in range(1, 37)]
+columnNames = ["ID", "year"] + VI_colnames
+
+years = data.human_system_start_time.dt.year.unique()
+IDs = data.ID.unique()
+no_rows = len(IDs) * len(years)
+
+data_wide = pd.DataFrame(columns=columnNames, index=range(no_rows))
+data_wide.ID = list(IDs) * len(years)
+data_wide.sort_values(by=["ID"], inplace=True)
+data_wide.reset_index(drop=True, inplace=True)
+data_wide.year = list(years) * len(IDs)
+
+data_wide.head(2)
 
 # %%
-reg_cols = ["ID", "human_system_start_time", indeks]  # list(an_EE_TS.columns)
-print(f"{reg_cols=}")
+for an_ID in IDs:
+    curr_field = data[data.ID==an_ID]
+    curr_years = curr_field.human_system_start_time.dt.year.unique()
+    for a_year in curr_years:
+        curr_field_year = curr_field[curr_field.human_system_start_time.dt.year == a_year]
+        
+        data_wide_indx = data_wide[(data_wide.ID == an_ID) & (data_wide.year == a_year)].index
+        if VI_idx == "EVI":
+            data_wide.loc[data_wide_indx, "EVI_1":"EVI_36"] = curr_field_year.EVI.values[:36]
+        elif VI_idx == "NDVI":
+            data_wide.loc[data_wide_indx, "NDVI_1":"NDVI_36"] = curr_field_year.NDVI.values[:36]
 
 # %%
-st_yr = an_EE_TS.human_system_start_time.dt.year.min()
-end_yr = an_EE_TS.human_system_start_time.dt.year.max()
-no_days = (end_yr - st_yr + 1) * 366  # 14 years, each year 366 days!
-
-no_steps = int(np.ceil(no_days / regular_window_size))  # no_days // regular_window_size
-nrows = no_steps * len(ID_list)
-
-output_df = pd.DataFrame(data=None, index=np.arange(nrows), columns=reg_cols)
-print("st_yr is {}!".format(st_yr))
-print("end_yr is {}!".format(end_yr))
-print("nrows is {}!".format(nrows))
-
-# %%
-counter = 0
-row_pointer = 0
-
-# %%
-a_poly = ID_list[0]
-
-# %%
-if counter % 1000 == 0:
-    print(counter)
-curr_field = an_EE_TS[an_EE_TS[IDcolName] == a_poly].copy()
-
-# %%
-# Sort by DoY (sanitary check)
-curr_field.sort_values(by=["human_system_start_time"], inplace=True)
-curr_field.reset_index(drop=True, inplace=True)
-
-# %%
-regularized_TS = nc.regularize_a_field(
-        a_df=curr_field,
-        V_idks=indeks,
-        interval_size=regular_window_size,
-        start_year=st_yr,
-        end_year=end_yr,
-    )
-
-# %%
-regularized_TS = nc.fill_theGap_linearLine(a_regularized_TS=regularized_TS, V_idx=indeks)
-
-# %%
-if counter == 0:
-    print(
-        f"{list(output_df.columns) = }",
-    )
-    print(
-        f"{list(regularized_TS.columns) = }",
-    )
 
 # %%
 

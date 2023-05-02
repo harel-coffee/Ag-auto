@@ -22,17 +22,18 @@ print("--------------------------------------------------------------")
 VI_idx = sys.argv[1]
 smooth_type = sys.argv[2]
 print(f"Passed Args. are: {VI_idx=:}, {smooth_type=:}!")
-
+#####
 #####    Directories
+#####
 dir_base = "/data/project/agaid/h.noorazar/NASA/Data_Models_4_RegionalStat/"
 in_dir = dir_base + "00_SmoothedData/"
 SF_data_dir = dir_base + "00_SF_dataPart/"
 out_dir = dir_base + "01_cleanPlots_4_DL/" + VI_idx + "_" + smooth_type + "/"
 os.makedirs(out_dir, exist_ok=True)
 
-
-######### Read SF data
-
+#####
+##### Read SF data
+#####
 meta_names = ["AdamBenton2016.csv", "FranklinYakima2018.csv", "Grant2017.csv", "Walla2015.csv"]
 SF_data = pd.DataFrame()
 for file in meta_names:
@@ -84,7 +85,6 @@ for curr_ID in data.ID.unique():
     crr_fld = data[data.ID == curr_ID].copy()
     crr_fld.reset_index(drop=True, inplace=True)
 
-    SFYr = crr_fld.human_system_start_time.dt.year.unique()[0]
     fig, ax = plt.subplots()
     fig.set_size_inches(10, 2.5)
     ax.grid(False)
@@ -94,7 +94,7 @@ for curr_ID in data.ID.unique():
     right = crr_fld["human_system_start_time"].values[-1]
     ax.set_xlim([left, right])
 
-    # the following line alsow orks
+    # the following line also works
     ax.set_ylim([-0.005, 1])
 
     # train_images is the same as expert labels!

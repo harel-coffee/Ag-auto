@@ -55,8 +55,6 @@ os.makedirs(out_dir, exist_ok=True)
 ######                           Body
 ######
 #####################################################################
-
-
 # We need this for KNN
 def DTW_prune(ts1, ts2):
     d, _ = dtw.warping_paths(ts1, ts2, window=10, use_pruning=True)
