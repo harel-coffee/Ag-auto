@@ -22,6 +22,10 @@ import pickle, h5py
 from dtaidistance import dtw
 from dtaidistance import dtw_visualisation as dtwvis
 
+print("--------------------------------------------------------------")
+print(date.today(), "-", datetime.now().strftime("%H:%M:%S"))
+print("--------------------------------------------------------------")
+
 ####################################################################################
 ###
 ###                      Kamiak Core path
@@ -117,7 +121,7 @@ if winnerModel.endswith(".sav"):
         + "_wide_JFD.csv"
     )
     wide_TS = pd.read_csv(in_dir + f_name)
-    print(f"{'number of wide_TS Fields: ', len(wide_TS.ID.unique())}")
+    print("wide_TS.shape: ", wide_TS.shape)
 
     ML_model = pickle.load(open(model_dir + winnerModel, "rb"))
     predictions = ML_model.predict(wide_TS.iloc[:, 2:])

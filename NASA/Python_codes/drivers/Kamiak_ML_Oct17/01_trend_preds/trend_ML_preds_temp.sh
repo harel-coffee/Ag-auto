@@ -3,7 +3,7 @@
 #SBATCH --constraint=cascadelake
 ##SBATCH --partition=rajagopalan
 #SBATCH --requeue
-#SBATCH --job-name=indeks_smooth_batch_no # Job Name
+#SBATCH --job-name=indeks_smooth_ML_model_batch_no # Job Name
 #SBATCH --time=1-00:00:00    # Wall clock time limit in Days-HH:MM:SS
 #SBATCH --mem=20GB 
 #SBATCH --nodes=1            # Node count required for the job
