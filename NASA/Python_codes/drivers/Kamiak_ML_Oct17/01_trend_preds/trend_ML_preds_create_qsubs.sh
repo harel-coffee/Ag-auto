@@ -1,8 +1,8 @@
 #!/bin/bash
-cd /home/h.noorazar/NASA/trend/clean_plots_4_DL
+cd /home/h.noorazar/NASA/trend/01_trend_preds
 
 outer=1
-for ML_model in RF DL SVM kNN
+for ML_model in RF DL SVM KNN
 do
   for indeks in EVI NDVI
   do

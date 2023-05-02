@@ -5,7 +5,7 @@
 #SBATCH --requeue
 #SBATCH --job-name=indeks_smooth_batch_no # Job Name
 #SBATCH --time=1-00:00:00    # Wall clock time limit in Days-HH:MM:SS
-#SBATCH --mem=16GB 
+#SBATCH --mem=8GB 
 #SBATCH --nodes=1            # Node count required for the job
 #SBATCH --ntasks-per-node=1  # Number of tasks to be launched per Node
 #SBATCH --ntasks=1           # Number of tasks per array job
@@ -13,8 +13,8 @@
 ####SBATCH --array=0-30000
 
 ###SBATCH -k o
-#SBATCH --output=/home/h.noorazar/NASA/trend/clean_plots_4_DL/error/indeks_smooth_batch_no.o
-#SBATCH  --error=/home/h.noorazar/NASA/trend/clean_plots_4_DL/error/indeks_smooth_batch_no.e
+#SBATCH --output=/home/h.noorazar/NASA/trend/00_trend_widen/error/indeks_smooth_batch_no.o
+#SBATCH  --error=/home/h.noorazar/NASA/trend/00_trend_widen/error/indeks_smooth_batch_no.e
 echo
 echo "--- We are now in $PWD, running an R script ..."
 echo
@@ -57,7 +57,7 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python /home/h.noorazar/NASA/trend/clean_plots_4_DL/trend_cleanPlot_4_DL.py indeks smooth batch_no ML_model
+python /home/h.noorazar/NASA/trend/00_trend_widen/trend_widen.py indeks smooth batch_no ML_model
 
 echo
 echo "----- DONE -----"

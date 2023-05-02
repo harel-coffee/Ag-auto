@@ -1,4 +1,4 @@
-import shutup
+import shutup, random, time
 
 shutup.please()
 
@@ -6,33 +6,20 @@ import numpy as np
 import pandas as pd
 
 from datetime import date, datetime
-import time
-
-import random
 from random import seed, random
 
-import os, os.path, shutil
+import sys, os, os.path, shutil
 
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
+####################################################################################
+###
+###                      Time It!
+###
+####################################################################################
 
-# import matplotlib
-# import matplotlib.pyplot as plt
-# from pylab import imshow
-
-import scipy, scipy.signal
-import pickle, h5py
-import sys
-
-from tslearn.metrics import dtw as dtw_metric
-
-# https://dtaidistance.readthedocs.io/en/latest/usage/dtw.html
-from dtaidistance import dtw
-from dtaidistance import dtw_visualisation as dtwvis
+start_time = time.time()
+print("--------------------------------------------------------------")
+print(date.today(), "-", datetime.now().strftime("%H:%M:%S"))
+print("--------------------------------------------------------------")
 
 ####################################################################################
 ###
@@ -43,11 +30,10 @@ from dtaidistance import dtw_visualisation as dtwvis
 sys.path.append("/home/h.noorazar/NASA/")
 import NASA_core as nc
 
-
 try:
     print("numpy.__version__=", numpy.__version__)
 except:
-    print("umpy.__version__ not printed")
+    print("numpy.__version__ not printed")
 
 ####################################################################################
 ###
@@ -65,14 +51,13 @@ batch_no = str(sys.argv[3])
 ###
 ####################################################################################
 data_base = "/data/project/agaid/h.noorazar/NASA/"
-if smooth_type == "regular":
+if smooth == "regular":
     in_dir = data_base + "VI_TS/04_regularized_TS/"
 else:
     in_dir = data_base + "VI_TS/05_SG_TS/"
 
-out_dir = data_base + VI_idx + "_" + smooth_type + "_" + "/"
+out_dir = in_dir
 os.makedirs(out_dir, exist_ok=True)
-
 
 #####################################################################
 ######
@@ -83,6 +68,8 @@ f_name = VI_idx + "_" + smooth + "_" + "intersect_batchNumber" + batch_no + "_JF
 data = pd.read_csv(in_dir + f_name)
 data["human_system_start_time"] = pd.to_datetime(data["human_system_start_time"])
 
+out_name = VI_idx + "_" + smooth + "_" + "intersect_batchNumber" + batch_no + "_wide_JFD.csv"
+out_name = out_dir + out_name
 ##############################
 ##
 ##     Widen
@@ -92,7 +79,7 @@ data["human_system_start_time"] = pd.to_datetime(data["human_system_start_time"]
 # Form an empty dataframe to populate
 #
 VI_colnames = [VI_idx + "_" + str(ii) for ii in range(1, 37)]
-columnNames = ["ID"] + VI_colnames
+columnNames = ["ID", "year"] + VI_colnames
 
 years = data.human_system_start_time.dt.year.unique()
 IDs = data.ID.unique()
@@ -117,3 +104,13 @@ for an_ID in IDs:
             data_wide.loc[data_wide_indx, "EVI_1":"EVI_36"] = curr_field_year.EVI.values[:36]
         elif VI_idx == "NDVI":
             data_wide.loc[data_wide_indx, "NDVI_1":"NDVI_36"] = curr_field_year.NDVI.values[:36]
+
+data_wide.drop_duplicates(inplace=True)
+data_wide.dropna(inplace=True)
+data_wide.to_csv(out_name, index=False)
+
+end_time = time.time()
+print("it took {:.0f} minutes to run this code.".format((end_time - start_time) / 60))
+print("--------------------------------------------------------------")
+print(date.today(), "-", datetime.now().strftime("%H:%M:%S"))
+print("--------------------------------------------------------------")

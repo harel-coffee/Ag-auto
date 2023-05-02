@@ -56,6 +56,8 @@ data_wide.year = list(years) * len(IDs)
 data_wide.head(2)
 
 # %%
+# %%time
+
 for an_ID in IDs:
     curr_field = data[data.ID==an_ID]
     curr_years = curr_field.human_system_start_time.dt.year.unique()
@@ -69,7 +71,15 @@ for an_ID in IDs:
             data_wide.loc[data_wide_indx, "NDVI_1":"NDVI_36"] = curr_field_year.NDVI.values[:36]
 
 # %%
+data_wide.head(2)
 
 # %%
+wide_TS = data_wide.copy()
+
+# %%
+data_wide.iloc[:, 2:].head(2)
+
+# %%
+ML_model = "kNN"
 
 # %%

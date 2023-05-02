@@ -1,54 +1,67 @@
-import shutup
+import shutup, time, random
 
 shutup.please()
+
 import numpy as np
 import pandas as pd
-import sys, os, os.path, shutil
+
 from datetime import date, datetime
 
-from sklearn.neighbors import KNeighborsClassifier
+from random import seed, random
+
+import sys, os, os.path, shutil
+
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+
+import scipy, scipy.signal
+import pickle, h5py
 
 # from tslearn.metrics import dtw as dtw_metric
-
 # https://dtaidistance.readthedocs.io/en/latest/usage/dtw.html
 from dtaidistance import dtw
 from dtaidistance import dtw_visualisation as dtwvis
 
-import pickle, h5py
-import sys, os, os.path
+####################################################################################
+###
+###                      Kamiak Core path
+###
+####################################################################################
 
 sys.path.append("/home/h.noorazar/NASA/")
 import NASA_core as nc
 
-print("--------------------------------------------------------------")
-print(date.today(), "-", datetime.now().strftime("%H:%M:%S"))
-print("--------------------------------------------------------------")
 ####################################################################################
 ###
 ###      Parameters
 ###
 ####################################################################################
-size = sys.argv[1]
-VI_idx = sys.argv[2]
-smooth = sys.argv[3]
-county_ = sys.argv[4]
-model = sys.argv[5]
 
-print(f"Passed Args. are: {size=:}, {VI_idx=:}, {smooth=:}, {county_=:}, {model=:}!")
+VI_idx = sys.argv[1]
+smooth = sys.argv[2]
+batch_no = str(sys.argv[3])
+model = sys.argv[4]
 
-"""
-   Directories
-"""
-param_dir = "/data/project/agaid/h.noorazar/NASA/parameters/"
+####################################################################################
+###
+###      Directories
+###
+####################################################################################
+data_base = "/data/project/agaid/h.noorazar/NASA/"
 
-NASA_base = "/data/project/agaid/h.noorazar/NASA/"
-dir_base = NASA_base + "/Data_Models_4_RegionalStat/"
-in_dir = dir_base + "01_wideData/"
-SF_data_dir = dir_base + "00_SF_dataPart/"
-model_dir = NASA_base + "ML_Models_Oct17/"
-out_dir = dir_base + "02_ML_preds/"
+if model != "DL":
+    if smooth == "regular":
+        in_dir = data_base + "VI_TS/04_regularized_TS/"
+    else:
+        in_dir = data_base + "VI_TS/05_SG_TS/"
+else:
+    in_dir = data_base + "06_cleanPlots_4_DL/" + VI_idx + "_" + smooth + "_plots/"
+
+out_dir = data_base + "trend_ML_preds/"
 os.makedirs(out_dir, exist_ok=True)
+
+param_dir = data_base + "parameters/"
+model_dir = data_base + "ML_Models_Oct17/"
 
 
 #####################################################################
@@ -73,37 +86,14 @@ def load_image(filename):
     return img
 
 
-meta_names = ["AdamBenton2016.csv", "FranklinYakima2018.csv", "Grant2017.csv", "Walla2015.csv"]
-SF_data = pd.DataFrame()
-for file in meta_names:
-    curr_file = pd.read_csv(SF_data_dir + file)
-    SF_data = pd.concat([SF_data, curr_file])
-
-###### Filter SF Data so we can use field IDs to filter widen TS.
-#### We only want irrigated area, for sure:
-county_ = county_.replace("_", " ")
-SF_data = SF_data[SF_data.county == county_].copy()
-print(f"{'In current county: ', len(SF_data.ID.unique())}")
-
-SF_data = nc.filter_out_nonIrrigated(SF_data)
-print(f"{'Irrigated Fields: ', len(SF_data.ID.unique())}")
-
-if size == "large":
-    SF_data = SF_data[SF_data.Acres > 10].copy()
-    print(f"{SF_data.Acres.min()=}")
-else:
-    SF_data = SF_data[SF_data.Acres <= 10].copy()
-    print(f"{SF_data.Acres.min()=}")
-print(f"{'after size filter: ', len(SF_data.ID.unique())}")
+####################################################################################
+###
+###      Read
+###
+####################################################################################
 
 winnerModels = pd.read_csv(param_dir + "winnerModels.csv")
-wide_TS = pd.read_csv(in_dir + VI_idx + "_" + smooth + "_wide.csv")
 
-print(f"{'wide_TS Fields: ', len(wide_TS.ID.unique())}")
-wide_TS = wide_TS[wide_TS.ID.isin(list(SF_data.ID.unique()))]
-print(f"{'wide_TS Fields: ', len(wide_TS.ID.unique())}")
-
-wide_TS.reset_index(drop=True, inplace=True)
 
 winnerModel = np.array(
     winnerModels.loc[
@@ -113,12 +103,17 @@ winnerModel = np.array(
     ].output_name
 )[0]
 print(f"{winnerModel=}")
+
 ##
 ##    Read Model
 ##
 if winnerModel.endswith(".sav"):
+    f_name = VI_idx + "_" + smooth + "_intersect_batchNumber" + str(batch_no) + "_wide_JFD.csv"
+    wide_TS = pd.read_csv(in_dir + f_name)
+    print(f"{'number of wide_TS Fields: ', len(wide_TS.ID.unique())}")
+
     ML_model = pickle.load(open(model_dir + winnerModel, "rb"))
-    predictions = ML_model.predict(wide_TS.iloc[:, 1:])
+    predictions = ML_model.predict(wide_TS.iloc[:, 2:])
     pred_colName = model + "_" + VI_idx + "_" + smooth + "_preds"
     A = pd.DataFrame(columns=["ID", pred_colName])
     A.ID = wide_TS.ID.values
@@ -183,13 +178,13 @@ else:
         "predType_point99",
     ]
 
-    plot_dir = dir_base + "01_cleanPlots_4_DL/" + VI_idx + "_" + smooth + "/"
+    plot_dir = in_dir
     p_filenames = os.listdir(plot_dir)
     p_filenames_clean = []
     for a_file in p_filenames:
         if a_file.endswith(".jpg"):
-            if a_file.split(".")[0] in SF_data.ID.unique():
-                p_filenames_clean += [a_file]
+            # if a_file.split(".")[0] in SF_data.ID.unique():
+            p_filenames_clean += [a_file]
 
     # print ("len(p_filenames_clean) is [{}].".format(len(p_filenames_clean)))
 
@@ -209,8 +204,8 @@ else:
 
 
 ######  Export Output
-pred_colName = model + "_" + VI_idx + "_" + smooth + "_preds"
-out_name = out_dir + pred_colName + "_" + county_.replace(" ", "_") + "_" + size + ".csv"
+pred_colName = VI_idx + "_" + smooth + "_" + model + "_batchNumber" + batch_no + "_preds"
+out_name = out_dir + pred_colName + ".csv"
 predictions.to_csv(out_name, index=False)
 
 print("--------------------------------------------------------------")
