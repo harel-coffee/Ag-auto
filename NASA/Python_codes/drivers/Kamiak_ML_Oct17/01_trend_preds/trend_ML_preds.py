@@ -1,4 +1,4 @@
-import shutup, time, random
+import shutup, time  # , random
 
 shutup.please()
 
@@ -46,7 +46,7 @@ smooth = sys.argv[2]
 batch_no = str(sys.argv[3])
 model = sys.argv[4]
 
-print(f"Passed Args. are: {VI_idx=:}, {smooth=:}, {batch_no=:}, and {model=}!")
+print("Passed Args. are: ", VI_idx, ",", smooth, ",", batch_no, ",", model)
 ####################################################################################
 ###
 ###      Directories
@@ -99,7 +99,6 @@ def load_image(filename):
 
 winnerModels = pd.read_csv(param_dir + "winnerModels.csv")
 
-
 winnerModel = np.array(
     winnerModels.loc[
         (winnerModels.VI_idx == VI_idx)
@@ -107,19 +106,14 @@ winnerModel = np.array(
         & (winnerModels.model == model)
     ].output_name
 )[0]
-print(f"{winnerModel=}")
+print("winnerModel=", winnerModel)
 
 ##
 ##    Read Model
 ##
 if winnerModel.endswith(".sav"):
     f_name = (
-        VI_idx
-        + "_"
-        + smooth
-        + "_intersect_batchNumber"
-        + str(batch_no)
-        + "_wide_JFD.csv"
+        VI_idx + "_" + smooth + "_intersect_batchNumber" + batch_no + "_wide_JFD.csv"
     )
     wide_TS = pd.read_csv(in_dir + f_name)
     print("wide_TS.shape: ", wide_TS.shape)
@@ -146,7 +140,7 @@ else:
     from keras.preprocessing.image import ImageDataGenerator
 
     ML_model = load_model(model_dir + winnerModel)
-
+    ML_model = load_model(model_dir + winnerModel)
     prob_thresholds = [
         3,
         3.4,
@@ -169,35 +163,18 @@ else:
         9.9,
     ]
 
-    needed_cols = [
-        "predType_point3",
-        "predType_point34",
-        "predType_point35",
-        "predType_point36",
-        "predType_point4",
-        "predType_point5",
-        "predType_point6",
-        "predType_point7",
-        "predType_point8",
-        "predType_point9",
-        "predType_point91",
-        "predType_point92",
-        "predType_point93",
-        "predType_point94",
-        "predType_point95",
-        "predType_point96",
-        "predType_point97",
-        "predType_point98",
-        "predType_point99",
-    ]
-
     plot_dir = in_dir
-    p_filenames = os.listdir(plot_dir)
-    p_filenames_clean = []
-    for a_file in p_filenames:
-        if a_file.endswith(".jpg"):
-            # if a_file.split(".")[0] in SF_data.ID.unique():
-            p_filenames_clean += [a_file]
+    # p_filenames = os.listdir(plot_dir)
+
+    f_name = "NDVI_SG_intersect_batchNumber" + batch_no + "_wide_JFD.csv"
+    wide_TS = pd.read_csv(data_base + "VI_TS/05_SG_TS/" + f_name)
+    p_filenames_clean = list(wide_TS.ID + "_" + wide_TS.year.astype(str) + ".jpg")
+
+    # p_filenames_clean = []
+    # for a_file in p_filenames:
+    #     if a_file.endswith(".jpg"):
+    #         # if a_file.split(".")[0] in SF_data.ID.unique():
+    #         p_filenames_clean += [a_file]
 
     # print ("len(p_filenames_clean) is [{}].".format(len(p_filenames_clean)))
 
@@ -208,12 +185,12 @@ else:
         img = load_image(plot_dir + predictions.loc[idx, "filename"])
         predictions.loc[idx, "prob_single"] = ML_model.predict(img, verbose=False)[0][0]
 
-    for prob in np.divide(prob_thresholds, 10).round(2):
-        colName = "prob_point" + str(prob)[2:]
-        # print ("line 39: " + str(prob))
-        # print ("line 40: " + colName)
-        predictions.loc[predictions.prob_single < prob, colName] = "double"
-        predictions.loc[predictions.prob_single >= prob, colName] = "single"
+    # for prob in np.divide(prob_thresholds, 10).round(2):
+    #     colName = "prob_point" + str(prob)[2:]
+    #     # print ("line 39: " + str(prob))
+    #     # print ("line 40: " + colName)
+    #     predictions.loc[predictions.prob_single < prob, colName] = "d"
+    #     predictions.loc[predictions.prob_single >= prob, colName] = "s"
 
 
 ######  Export Output
