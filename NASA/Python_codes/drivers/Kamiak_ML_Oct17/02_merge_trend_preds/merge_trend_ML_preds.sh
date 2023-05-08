@@ -3,7 +3,7 @@
 #SBATCH --constraint=cascadelake
 ##SBATCH --partition=rajagopalan
 #SBATCH --requeue
-#SBATCH --job-name=indeks_smooth_ML_model_batch_no # Job Name
+#SBATCH --job-name=merge_trend_preds
 #SBATCH --time=1-00:00:00    # Wall clock time limit in Days-HH:MM:SS
 #SBATCH --mem=20GB 
 #SBATCH --nodes=1            # Node count required for the job
@@ -13,8 +13,8 @@
 ####SBATCH --array=0-30000
 
 ###SBATCH -k o
-#SBATCH --output=/home/h.noorazar/NASA/trend/01_trend_preds/error/indeks_smooth_batch_no_ML_model.o
-#SBATCH  --error=/home/h.noorazar/NASA/trend/01_trend_preds/error/indeks_smooth_batch_no_ML_model.e
+#SBATCH --output=/home/h.noorazar/NASA/trend/02_merge_trend_preds/error/merge_trend_preds.o
+#SBATCH  --error=/home/h.noorazar/NASA/trend/02_merge_trend_preds/error/merge_trend_preds.e
 echo
 echo "--- We are now in $PWD, running an R script ..."
 echo
@@ -57,7 +57,7 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python /home/h.noorazar/NASA/trend/01_trend_preds/trend_ML_preds.py indeks smooth batch_no ML_model
+python /home/h.noorazar/NASA/trend/02_merge_trend_preds/merge_trend_ML_preds.py 
 
 echo
 echo "----- DONE -----"

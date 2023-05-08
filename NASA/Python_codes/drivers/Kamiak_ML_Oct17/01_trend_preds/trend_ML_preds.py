@@ -6,9 +6,7 @@ import numpy as np
 import pandas as pd
 
 from datetime import date, datetime
-
 from random import seed, random
-
 import sys, os, os.path, shutil
 
 from sklearn.ensemble import RandomForestClassifier
@@ -112,9 +110,7 @@ print("winnerModel=", winnerModel)
 ##    Read Model
 ##
 if winnerModel.endswith(".sav"):
-    f_name = (
-        VI_idx + "_" + smooth + "_intersect_batchNumber" + batch_no + "_wide_JFD.csv"
-    )
+    f_name = VI_idx + "_" + smooth + "_intersect_batchNumber" + batch_no + "_wide_JFD.csv"
     wide_TS = pd.read_csv(in_dir + f_name)
     print("wide_TS.shape: ", wide_TS.shape)
 
@@ -194,9 +190,7 @@ else:
 
 
 ######  Export Output
-pred_colName = (
-    VI_idx + "_" + smooth + "_" + model + "_batchNumber" + batch_no + "_preds"
-)
+pred_colName = VI_idx + "_" + smooth + "_" + model + "_batchNumber" + batch_no + "_preds"
 out_name = out_dir + pred_colName + ".csv"
 predictions.to_csv(out_name, index=False)
 

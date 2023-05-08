@@ -26,97 +26,252 @@ out_dir = data_base + "merged_trend_ML_preds/"
 os.makedirs(out_dir, exist_ok=True)
 ####################################################################################
 ###
-###      Read
+###      Create file names. all bacthes of the same
+###      technique w/ the same smoothness will be on the same list.
 ###
 ####################################################################################
+NDVI_regular_RF_files = [
+    m + str(n) for m, n in zip(["NDVI_regular_RF_batchNumber"] * 40, list(range(1, 41)))
+]
+NDVI_regular_RF_files = [m + str(n) for m, n in zip(NDVI_regular_RF_files, ["_preds.csv"] * 40)]
 
-##
-##    Read Model
-##
-if winnerModel.endswith(".sav"):
-    f_name = VI_idx + "_" + smooth + "_intersect_batchNumber" + batch_no + "_wide_JFD.csv"
-    wide_TS = pd.read_csv(in_dir + f_name)
-    print("wide_TS.shape: ", wide_TS.shape)
+EVI_regular_RF_files = [
+    m + str(n) for m, n in zip(["EVI_regular_RF_batchNumber"] * 40, list(range(1, 41)))
+]
+EVI_regular_RF_files = [m + str(n) for m, n in zip(EVI_regular_RF_files, ["_preds.csv"] * 40)]
 
-    ML_model = pickle.load(open(model_dir + winnerModel, "rb"))
-    predictions = ML_model.predict(wide_TS.iloc[:, 2:])
-    pred_colName = model + "_" + VI_idx + "_" + smooth + "_preds"
-    A = pd.DataFrame(columns=["ID", "year", pred_colName])
-    A.ID = wide_TS.ID.values
-    A.year = wide_TS.year.values
-    A[pred_colName] = predictions
-    predictions = A.copy()
-    del A
-else:
-    # from keras.utils import to_categorical
-    from tensorflow.keras.utils import to_categorical, load_img, img_to_array
-    from keras.models import Sequential, Model, load_model
-    from keras.applications.vgg16 import VGG16
-    import tensorflow as tf
+NDVI_SG_RF_files = [m + str(n) for m, n in zip(["NDVI_SG_RF_batchNumber"] * 40, list(range(1, 41)))]
+NDVI_SG_RF_files = [m + str(n) for m, n in zip(NDVI_SG_RF_files, ["_preds.csv"] * 40)]
 
-    # from keras.optimizers import SGD
-    from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
-    from tensorflow.keras.optimizers import SGD
-    from keras.preprocessing.image import ImageDataGenerator
+EVI_SG_RF_files = [m + str(n) for m, n in zip(["EVI_SG_RF_batchNumber"] * 40, list(range(1, 41)))]
+EVI_SG_RF_files = [m + str(n) for m, n in zip(EVI_SG_RF_files, ["_preds.csv"] * 40)]
 
-    ML_model = load_model(model_dir + winnerModel)
-    ML_model = load_model(model_dir + winnerModel)
-    prob_thresholds = [
-        3,
-        3.4,
-        3.5,
-        3.6,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        9.1,
-        9.2,
-        9.3,
-        9.4,
-        9.5,
-        9.6,
-        9.7,
-        9.8,
-        9.9,
-    ]
+NDVI_regular_SVM_files = [
+    m + str(n) for m, n in zip(["NDVI_regular_SVM_batchNumber"] * 40, list(range(1, 41)))
+]
+NDVI_regular_SVM_files = [m + str(n) for m, n in zip(NDVI_regular_SVM_files, ["_preds.csv"] * 40)]
 
-    plot_dir = in_dir
-    # p_filenames = os.listdir(plot_dir)
+EVI_regular_SVM_files = [
+    m + str(n) for m, n in zip(["EVI_regular_SVM_batchNumber"] * 40, list(range(1, 41)))
+]
+EVI_regular_SVM_files = [m + str(n) for m, n in zip(EVI_regular_SVM_files, ["_preds.csv"] * 40)]
 
-    f_name = "NDVI_SG_intersect_batchNumber" + batch_no + "_wide_JFD.csv"
-    wide_TS = pd.read_csv(data_base + "VI_TS/05_SG_TS/" + f_name)
-    p_filenames_clean = list(wide_TS.ID + "_" + wide_TS.year.astype(str) + ".jpg")
+NDVI_SG_SVM_files = [
+    m + str(n) for m, n in zip(["NDVI_SG_SVM_batchNumber"] * 40, list(range(1, 41)))
+]
+NDVI_SG_SVM_files = [m + str(n) for m, n in zip(NDVI_SG_SVM_files, ["_preds.csv"] * 40)]
 
-    # p_filenames_clean = []
-    # for a_file in p_filenames:
-    #     if a_file.endswith(".jpg"):
-    #         # if a_file.split(".")[0] in SF_data.ID.unique():
-    #         p_filenames_clean += [a_file]
+EVI_SG_SVM_files = [m + str(n) for m, n in zip(["EVI_SG_SVM_batchNumber"] * 40, list(range(1, 41)))]
+EVI_SG_SVM_files = [m + str(n) for m, n in zip(EVI_SG_SVM_files, ["_preds.csv"] * 40)]
 
-    # print ("len(p_filenames_clean) is [{}].".format(len(p_filenames_clean)))
 
-    predictions = pd.DataFrame({"filename": p_filenames_clean})
-    predictions["prob_single"] = -1.0
+NDVI_regular_DL_files = [
+    m + str(n) for m, n in zip(["NDVI_regular_DL_batchNumber"] * 40, list(range(1, 41)))
+]
+NDVI_regular_DL_files = [m + str(n) for m, n in zip(NDVI_regular_DL_files, ["_preds.csv"] * 40)]
 
-    for idx in predictions.index:
-        img = load_image(plot_dir + predictions.loc[idx, "filename"])
-        predictions.loc[idx, "prob_single"] = ML_model.predict(img, verbose=False)[0][0]
+EVI_regular_DL_files = [
+    m + str(n) for m, n in zip(["EVI_regular_DL_batchNumber"] * 40, list(range(1, 41)))
+]
+EVI_regular_DL_files = [m + str(n) for m, n in zip(EVI_regular_DL_files, ["_preds.csv"] * 40)]
 
-    # for prob in np.divide(prob_thresholds, 10).round(2):
-    #     colName = "prob_point" + str(prob)[2:]
-    #     # print ("line 39: " + str(prob))
-    #     # print ("line 40: " + colName)
-    #     predictions.loc[predictions.prob_single < prob, colName] = "d"
-    #     predictions.loc[predictions.prob_single >= prob, colName] = "s"
+NDVI_SG_DL_files = [m + str(n) for m, n in zip(["NDVI_SG_DL_batchNumber"] * 40, list(range(1, 41)))]
+NDVI_SG_DL_files = [m + str(n) for m, n in zip(NDVI_SG_DL_files, ["_preds.csv"] * 40)]
+
+EVI_SG_DL_files = [m + str(n) for m, n in zip(["EVI_SG_DL_batchNumber"] * 40, list(range(1, 41)))]
+EVI_SG_DL_files = [m + str(n) for m, n in zip(EVI_SG_DL_files, ["_preds.csv"] * 40)]
+
+NDVI_regular_KNN_files = [
+    m + str(n) for m, n in zip(["NDVI_regular_KNN_batchNumber"] * 40, list(range(1, 41)))
+]
+NDVI_regular_KNN_files = [m + str(n) for m, n in zip(NDVI_regular_KNN_files, ["_preds.csv"] * 40)]
+
+EVI_regular_KNN_files = [
+    m + str(n) for m, n in zip(["EVI_regular_KNN_batchNumber"] * 40, list(range(1, 41)))
+]
+EVI_regular_KNN_files = [m + str(n) for m, n in zip(EVI_regular_KNN_files, ["_preds.csv"] * 40)]
+
+NDVI_SG_KNN_files = [
+    m + str(n) for m, n in zip(["NDVI_SG_KNN_batchNumber"] * 40, list(range(1, 41)))
+]
+NDVI_SG_KNN_files = [m + str(n) for m, n in zip(NDVI_SG_KNN_files, ["_preds.csv"] * 40)]
+
+EVI_SG_KNN_files = [m + str(n) for m, n in zip(["EVI_SG_KNN_batchNumber"] * 40, list(range(1, 41)))]
+EVI_SG_KNN_files = [m + str(n) for m, n in zip(EVI_SG_KNN_files, ["_preds.csv"] * 40)]
+
+### read and concatenate bacthes to form a single experiment (experiment e.g. NDVI_SG_RF)
+NDVI_SG_RF, NDVI_SG_DL, NDVI_SG_KNN, NDVI_SG_SVM = (
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+)
+
+NDVI_regular_RF, NDVI_regular_DL, NDVI_regular_KNN, NDVI_regular_SVM = (
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+)
+
+EVI_SG_RF, EVI_SG_DL, EVI_SG_KNN, EVI_SG_SVM = (
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+)
+
+EVI_regular_RF, EVI_regular_DL, EVI_regular_KNN, EVI_regular_SVM = (
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+    pd.DataFrame(),
+)
+
+# NDVI_SG_RF batches
+for a_file in NDVI_SG_RF_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    NDVI_SG_RF = pd.concat([NDVI_SG_RF, curr_df])
+
+# EVI_SG_RF batches
+for a_file in EVI_SG_RF_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    EVI_SG_RF = pd.concat([EVI_SG_RF, curr_df])
+
+# NDVI_SG_SVM batches
+for a_file in NDVI_SG_SVM_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    NDVI_SG_SVM = pd.concat([NDVI_SG_SVM, curr_df])
+
+# EVI_SG_SVM batches
+for a_file in EVI_SG_SVM_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    EVI_SG_SVM = pd.concat([EVI_SG_SVM, curr_df])
+
+# NDVI_SG_KNN batches
+for a_file in NDVI_SG_KNN_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    NDVI_SG_KNN = pd.concat([NDVI_SG_KNN, curr_df])
+
+# EVI_SG_KNN batches
+for a_file in EVI_SG_KNN_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    EVI_SG_KNN = pd.concat([EVI_SG_KNN, curr_df])
+
+# NDVI_SG_DL batches
+for a_file in NDVI_SG_DL_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    curr_df["ID"] = curr_df["filename"].str.split("_", expand=True)[0]
+    curr_df["year"] = (
+        curr_df["filename"].str.split("_", expand=True)[1].str.split(".", expand=True)[0]
+    )
+    curr_df.year = curr_df.year.astype(int)
+    curr_df = curr_df[["ID", "year", "prob_single"]]
+    curr_df.rename(columns={"prob_single": "NDVI_SG_DL_p_single"}, inplace=True)
+
+    NDVI_SG_DL = pd.concat([NDVI_SG_DL, curr_df])
+
+# EVI_SG_DL batches
+for a_file in EVI_SG_DL_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    curr_df["ID"] = curr_df["filename"].str.split("_", expand=True)[0]
+    curr_df["year"] = (
+        curr_df["filename"].str.split("_", expand=True)[1].str.split(".", expand=True)[0]
+    )
+    curr_df.year = curr_df.year.astype(int)
+    curr_df = curr_df[["ID", "year", "prob_single"]]
+    curr_df.rename(columns={"prob_single": "EVI_SG_DL_p_single"}, inplace=True)
+    EVI_SG_DL = pd.concat([EVI_SG_DL, curr_df])
+
+
+# NDVI_regular_RF batches
+for a_file in NDVI_regular_RF_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    NDVI_regular_RF = pd.concat([NDVI_regular_RF, curr_df])
+
+# EVI_regular_RF batches
+for a_file in EVI_regular_RF_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    EVI_regular_RF = pd.concat([EVI_regular_RF, curr_df])
+
+# NDVI_regular_SVM batches
+for a_file in NDVI_regular_SVM_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    NDVI_regular_SVM = pd.concat([NDVI_regular_SVM, curr_df])
+
+# EVI_regular_SVM batches
+for a_file in EVI_regular_SVM_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    EVI_regular_SVM = pd.concat([EVI_regular_SVM, curr_df])
+
+# NDVI_regular_KNN batches
+for a_file in NDVI_regular_KNN_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    NDVI_regular_KNN = pd.concat([NDVI_regular_KNN, curr_df])
+
+# EVI_regular_KNN batches
+for a_file in EVI_regular_KNN_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    EVI_regular_KNN = pd.concat([EVI_regular_KNN, curr_df])
+
+# NDVI_regular_DL batches
+for a_file in NDVI_regular_DL_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    curr_df["ID"] = curr_df["filename"].str.split("_", expand=True)[0]
+    curr_df["year"] = (
+        curr_df["filename"].str.split("_", expand=True)[1].str.split(".", expand=True)[0]
+    )
+    curr_df.year = curr_df.year.astype(int)
+    curr_df = curr_df[["ID", "year", "prob_single"]]
+    curr_df.rename(columns={"prob_single": "NDVI_regular_DL_p_single"}, inplace=True)
+
+    NDVI_regular_DL = pd.concat([NDVI_regular_DL, curr_df])
+
+# EVI_regular_DL batches
+for a_file in EVI_regular_DL_files:
+    curr_df = pd.read_csv(in_dir + a_file)
+    curr_df["ID"] = curr_df["filename"].str.split("_", expand=True)[0]
+    curr_df["year"] = (
+        curr_df["filename"].str.split("_", expand=True)[1].str.split(".", expand=True)[0]
+    )
+    curr_df.year = curr_df.year.astype(int)
+    curr_df = curr_df[["ID", "year", "prob_single"]]
+    curr_df.rename(columns={"prob_single": "EVI_regular_DL_p_single"}, inplace=True)
+
+    EVI_regular_DL = pd.concat([EVI_regular_DL, curr_df])
+
+######
+######     Merge all the MLs of a given experiment in one file.
+######
+NDVI_SG_RF = pd.merge(NDVI_SG_RF, NDVI_SG_SVM, on=["ID", "year"], how="left")
+NDVI_SG_RF = pd.merge(NDVI_SG_RF, NDVI_SG_KNN, on=["ID", "year"], how="left")
+NDVI_SG_RF = pd.merge(NDVI_SG_RF, NDVI_SG_DL, on=["ID", "year"], how="left")
+
+EVI_SG_RF = pd.merge(EVI_SG_RF, EVI_SG_SVM, on=["ID", "year"], how="left")
+EVI_SG_RF = pd.merge(EVI_SG_RF, EVI_SG_KNN, on=["ID", "year"], how="left")
+EVI_SG_RF = pd.merge(EVI_SG_RF, EVI_SG_DL, on=["ID", "year"], how="left")
+
+NDVI_regular_RF = pd.merge(NDVI_regular_RF, NDVI_regular_SVM, on=["ID", "year"], how="left")
+NDVI_regular_RF = pd.merge(NDVI_regular_RF, NDVI_regular_KNN, on=["ID", "year"], how="left")
+NDVI_regular_RF = pd.merge(NDVI_regular_RF, NDVI_regular_DL, on=["ID", "year"], how="left")
+
+EVI_regular_RF = pd.merge(EVI_regular_RF, EVI_regular_SVM, on=["ID", "year"], how="left")
+EVI_regular_RF = pd.merge(EVI_regular_RF, EVI_regular_KNN, on=["ID", "year"], how="left")
+EVI_regular_RF = pd.merge(EVI_regular_RF, EVI_regular_DL, on=["ID", "year"], how="left")
 
 
 ######  Export Output
-pred_colName = VI_idx + "_" + smooth + "_" + model + "_batchNumber" + batch_no + "_preds"
-out_name = out_dir + pred_colName + ".csv"
-predictions.to_csv(out_name, index=False)
+out_name = out_dir + "NDVI_SG_preds_intersect.csv"
+NDVI_SG_RF.to_csv(out_name, index=False)
+
+out_name = out_dir + "EVI_SG_preds_intersect.csv"
+EVI_SG_RF.to_csv(out_name, index=False)
+
+out_name = out_dir + "NDVI_regular_preds_intersect.csv"
+NDVI_regular_RF.to_csv(out_name, index=False)
+
+out_name = out_dir + "EVI_regular_preds_intersect.csv"
+EVI_regular_RF.to_csv(out_name, index=False)
 
 print("--------------------------------------------------------------")
 print(date.today(), "-", datetime.now().strftime("%H:%M:%S"))

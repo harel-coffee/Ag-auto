@@ -115,9 +115,6 @@ SF_data_irrigated = filter_out_nonIrrigated(SF_data)
 SF_data_irrigated_crops = (sorted((list(SF_data_irrigated.CropType.unique()))))
 
 # %%
-[x if x not in SF_data_irrigated_crops for x in SF_data_crops]
-
-# %%
 [x for x in SF_data_crops if x not in SF_data_irrigated_crops]
 
 # %%

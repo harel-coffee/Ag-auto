@@ -1219,7 +1219,6 @@ axs.legend(loc="best");
 file_name = plot_dir + "SG_NDVI_cropWise_precent.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
-
 plt.show()
 
 # %%

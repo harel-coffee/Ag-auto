@@ -10,8 +10,6 @@ source_1 = "/Users/hn/Documents/00_GitHub/Ag/remote_sensing/R/remote_core.R"
 source(source_1)
 options(digits=9)
 options(digit=9)
-
-
 ################################################################################
 
 data_dir <- paste0("/Users/hn/Documents/01_research_data/remote_sensing/", 

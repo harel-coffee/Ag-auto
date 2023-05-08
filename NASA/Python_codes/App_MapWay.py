@@ -234,3 +234,25 @@ expon(VI_TS, a_ID, VI_idx)
 # %%
 
 # %%
+curr_df = pd.read_csv("/Users/hn/Desktop/NDVI_regular_DL_batchNumber31_preds.csv")
+curr_df["ID"] = curr_df["filename"].str.split("_", expand=True)[0]
+curr_df["year"] = (
+        curr_df["filename"].str.split("_", expand=True)[1].str.split(".", expand=True)[0]
+    )
+curr_df = curr_df[["ID", "year", "prob_single"]]
+curr_df.head(2)
+
+# %%
+A = pd.read_csv("/Users/hn/Desktop/NDVI_regular_RF_batchNumber31_preds.csv")
+A.head(2)
+
+# %%
+A.year[0]
+
+# %%
+B = pd.merge(curr_df, A, on=["ID", "year"], how="left")
+
+# %%
+B.head(2)
+
+# %%
