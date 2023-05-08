@@ -38,7 +38,7 @@
 # !date
 
 # %% [markdown] id="jX3TvMJBe3lZ"
-# # **geopandas and geemap musy be installed every time!!!**
+# # **geopandas and geemap must be installed every time!!!**
 #
 
 # %% colab={"base_uri": "https://localhost:8080/"} id="xMCOiQUYe6XS" outputId="3e126c12-4eda-4dfb-ba61-da3ecfe3fda0"
@@ -49,10 +49,10 @@ import subprocess
 try:
     import geemap
 except ImportError:
-    print('geemap package not installed. Must be installed every time we want to run this notebook. Installing ...')
+    print('geemap not installed. Must be installed every tim to run this notebook. Installing ...')
     subprocess.check_call(["python", '-m', 'pip', 'install', 'geemap'])
 
-    print('geopandas package not installed. Must be installed every time we want to run this notebook. Installing ...')
+    print('geopandas not installed. Must be installed every time to run this notebook. Installing ...')
     subprocess.check_call(["python", '-m', 'pip', 'install', 'geopandas'])
 
 # %% [markdown] id="4_4IBtM4ffpt"

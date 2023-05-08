@@ -1,3 +1,7 @@
+"""
+   This is copy of NASA_core.py where I try to do things in place.
+   No new dataframe.
+"""
 import numpy as np
 import pandas as pd
 
@@ -402,7 +406,7 @@ def correct_big_jumps_1DaySeries_JFD(dataTMS_jumpie, give_col, maxjump_perDay=0.
     dataTMS_jumpie : dataframe
         the same dataframe with no big jumps! (just one iteration)
     """
-    # dataTMS_jumpie = initial_clean(df = dataTMS_jumpie, column_to_be_cleaned = give_col)
+    # dataTMS_jumpie = initial clean(df = dataTMS_jumpie, column_to_be_cleaned = give_col)
 
     dataTMS_jumpie["human_system_start_time"] = pd.to_datetime(
         dataTMS_jumpie["human_system_start_time"]
@@ -500,7 +504,7 @@ def correct_big_jumps_1DaySeries(dataTMS_jumpie, give_col, maxjump_perDay=0.015)
     That translates into 0.02 = 0.4 / 20 per day.
     But we did choose 0.015 as default
     """
-    dataTMS_jumpie = initial_clean(df=dataTMS_jumpie, column_to_be_cleaned=give_col)
+    # dataTMS_jumpie = initial clean(df=dataTMS_jumpie, column_to_be_cleaned=give_col)
 
     dataTMS_jumpie["human_system_start_time"] = pd.to_datetime(
         dataTMS_jumpie["human_system_start_time"]
@@ -553,25 +557,24 @@ def correct_big_jumps_1DaySeries(dataTMS_jumpie, give_col, maxjump_perDay=0.015)
     return dataTMS_jumpie
 
 
-def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
+def interpolate_outliers_EVI_NDVI(outlier_input, field_ID, given_col):
     """
+    Arguments
+    ---------
+    outlier_input : dataframe
+           This is the dataframe that contains everything
+
+    Returns
+    -------
+    regularized_df : dataframe
+
     outliers are those that are beyond boundaries. For example and EVI value of 2.
     Big jump in the other function means we have a big jump but we are still
     within the region of EVI values. If in 20 days we have a jump of 0.3 then that is noise.
-
-    in 2017 data I did not see outlier in NDVI. It only happened in EVI.
     """
-    outlier_input = initial_clean(df=outlier_input, column_to_be_cleaned=given_col)
-
-    outlier_input["human_system_start_time"] = pd.to_datetime(
-        outlier_input["human_system_start_time"]
-    )
-    outlier_input.sort_values(by=["human_system_start_time"], inplace=True)
-    outlier_input.reset_index(drop=True, inplace=True)
-
     # 1st block
-    time_vec = outlier_input["human_system_start_time"].values.copy()
-    vec = outlier_input[given_col].values.copy()
+    time_vec = outlier_input["human_system_start_time"].values
+    vec = outlier_input[given_col].values
 
     # find out where are outliers
     high_outlier_inds = np.where(vec > 1)[0]
@@ -583,7 +586,7 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
 
     # 2nd block
     if len(all_outliers_idx) == 0:
-        return outlier_input
+        return
 
     """
     it is possible that for a field we only have x=2 data points
@@ -591,10 +594,10 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
     use for interpolation. So, we return an empty datatable
     """
     if len(all_outliers_idx) == len(outlier_input):
-        outlier_input = initial_clean(df=outlier_input, column_to_be_cleaned=given_col)
+        # outlier_input = initial clean(df=outlier_input, column_to_be_cleaned=given_col)
         outlier_input = outlier_input[outlier_input[given_col] < 1.5]
         outlier_input = outlier_input[outlier_input[given_col] > -1.5]
-        return outlier_input
+        return
 
     # 3rd block
 
@@ -612,7 +615,7 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
         non_outiers = np.arange(len(vec))[~np.in1d(np.arange(len(vec)), all_outliers_idx)]
         if len(all_outliers_idx) == 0:
             outlier_input[given_col] = vec
-            return outlier_input
+            return
 
     # 4th block
     # Get rid of outliers that are at the end of the time series
@@ -628,7 +631,7 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
         non_outiers = np.arange(len(vec))[~np.in1d(np.arange(len(vec)), all_outliers_idx)]
         if len(all_outliers_idx) == 0:
             outlier_input[given_col] = vec
-            return outlier_input
+            return
     """
     At this point outliers are in the middle of the vector
     and beginning and the end of the vector are clear.
@@ -660,7 +663,7 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
                 slope * ((time_vec[left_pointer + 1 : right_pointer]).astype(int)) + intercept
             )
     outlier_input[given_col] = vec
-    return outlier_input
+    return
 
 
 def initial_clean(df, column_to_be_cleaned):

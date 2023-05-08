@@ -18,9 +18,10 @@ import numpy as np
 import os, sys
 from datetime import date, datetime
 
-# %%
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/")
 import NASA_core as nc
+
+# %%
 
 # %%
 dir_base = "/Users/hn/Documents/01_research_data/NASA/VI_TS/"
@@ -81,5 +82,9 @@ data_wide.iloc[:, 2:].head(2)
 
 # %%
 ML_model = "kNN"
+
+# %%
+
+# %%
 
 # %%
