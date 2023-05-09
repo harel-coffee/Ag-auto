@@ -343,7 +343,7 @@ NDVI_SG_summary_L_double_perc[ML_cols] = (NDVI_SG_summary_L_double_perc[ML_cols]
 
 # %%
 NDVI_SG_summary_L_double_perc.plot(x="year", y=["RF", "SVM", "KNN", "DL"], 
-                              kind="line", figsize=(15, 3), linewidth=4);
+                                   kind="line", figsize=(15, 3), linewidth=4);
 plt.xlabel("year")
 plt.ylabel("area (%)")
 plt.title("double-cropped area as percentage (NDVI, 5-step smoothed)")
