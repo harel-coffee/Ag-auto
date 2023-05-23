@@ -24,8 +24,8 @@ import random
 from random import seed
 from random import random
 
-import os, os.path
-import shutil
+import os, os.path, sys, shutil
+
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -34,9 +34,7 @@ from sklearn.metrics import classification_report
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-import pickle
-import h5py
-import sys
+import pickle, h5py
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.pipeline import make_pipeline
@@ -71,7 +69,7 @@ meta.head(2)
 # print (meta_lessThan10Acr.shape)
 
 # %% [markdown]
-# # EVI - SG - SR 0.3
+# # EVI - SR 0.3
 
 # %%
 VI_idx = "EVI"
@@ -170,7 +168,7 @@ print (date.today(), "-", datetime.now().strftime("%H:%M:%S"))
 RF_grid_2_confus_tbl_test
 
 # %% [markdown]
-# ## SG - EVI - SR 0.4
+# ## EVI - SR 0.4
 
 # %%
 del(x_train_df, wide_overSample, f_name, x_test_df)
@@ -262,7 +260,7 @@ print (date.today(), "-", datetime.now().strftime("%H:%M:%S"))
 RF_grid_2_confus_tbl_test
 
 # %% [markdown]
-# ## SG - EVI - SR 0.5
+# ## EVI - SR 0.5
 
 # %%
 del(x_train_df, wide_overSample, f_name, x_test_df)
@@ -353,7 +351,7 @@ RF_grid_2_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 RF_grid_2_confus_tbl_test
 
 # %% [markdown]
-# ## SG - EVI - SR 0.6
+# ## EVI - SR 0.6
 
 # %%
 del(x_train_df, wide_overSample, f_name, x_test_df)
@@ -445,7 +443,7 @@ print (date.today(), "-", datetime.now().strftime("%H:%M:%S"))
 RF_grid_2_confus_tbl_test
 
 # %% [markdown]
-# ## SG - EVI - SR 0.7
+# ## EVI - SR 0.7
 
 # %%
 del(x_train_df, wide_overSample, f_name, x_test_df)
@@ -536,7 +534,7 @@ RF_grid_2_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 RF_grid_2_confus_tbl_test
 
 # %% [markdown]
-# ## SG - EVI - SR 0.8
+# ## EVI - SR 0.8
 
 # %%
 del(x_train_df, wide_overSample, f_name, x_test_df)

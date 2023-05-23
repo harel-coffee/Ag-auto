@@ -59,7 +59,7 @@ from dtaidistance import dtw_visualisation as dtwvis
 
 # %%
 meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
-meta = pd.read_csv(meta_dir+"evaluation_set.csv")
+meta = pd.read_csv(meta_dir + "evaluation_set.csv")
 meta_moreThan10Acr=meta[meta.ExctAcr>10]
 print (meta.shape)
 print (meta_moreThan10Acr.shape)

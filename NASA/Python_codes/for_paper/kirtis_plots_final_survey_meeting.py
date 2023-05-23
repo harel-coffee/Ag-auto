@@ -21,21 +21,16 @@
 # %%
 import pandas as pd
 import numpy as np
-import datetime
+import datetime, time, re
 from datetime import date
-import datetime
-import time
 
-import os, os.path
+import os, os.path, sys
 from os import listdir
 from os.path import isfile, join
 
-import re
 # from pprint import pprint
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-
-import sys
 
 # search path for modules
 # look @ https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path

@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown]
-# This was a copy of preds_4SummaryStats_outdated. We finalized double-crop potentials, perennials, etc. and we will have bar plots here as opposed to tables
+# The reason for calling this outdated is that we finalized the double-crop potentials, toss, perennials, etc. and we will go with bar plot as opposed to tables!
 
 # %%
 import numpy as np
@@ -56,8 +56,6 @@ SF_data_dir   = dir_base + "/data_part_of_shapefile/"
 pred_dir_base = dir_base + "/RegionalStatData/"
 pred_dir = pred_dir_base + "02_ML_preds/"
 
-# %%
-
 # %% [markdown]
 # # Read Fields Metadata
 
@@ -70,14 +68,6 @@ pred_dir = pred_dir_base + "02_ML_preds/"
 # meta_6000.head(2)
 
 # %%
-AnnualPerennialToss = pd.read_csv(meta_dir + "AnnualPerennialTossMay122023.csv")
-print (f"{AnnualPerennialToss.shape=}")
-print (AnnualPerennialToss.potential.unique())
-AnnualPerennialToss = AnnualPerennialToss[AnnualPerennialToss.potential!="toss"]
-AnnualPerennialToss.reset_index(drop=False, inplace=True,)
-print (f"{AnnualPerennialToss.shape=}")
-print (AnnualPerennialToss.potential.unique())
-AnnualPerennialToss.head(2)
 
 # %%
 f_names=["AdamBenton2016.csv", "FranklinYakima2018.csv", "Grant2017.csv", "Walla2015.csv"]

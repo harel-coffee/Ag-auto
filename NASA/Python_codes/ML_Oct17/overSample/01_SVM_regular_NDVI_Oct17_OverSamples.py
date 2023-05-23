@@ -27,11 +27,10 @@ from datetime import date
 import time
 
 import random
-from random import seed
-from random import random
+from random import seed, random
 
-import os, os.path
-import shutil
+import pickle, h5py
+import os, os.path, shutil, sys
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -43,9 +42,6 @@ from sklearn.metrics import classification_report
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-
-import h5py
-import sys
 
 # %%
 from sklearn.pipeline import make_pipeline
@@ -60,9 +56,12 @@ import NASA_core as nc
 # # Directories
 
 # %%
+model_dir = "/Users/hn/Documents/01_research_data/NASA/ML_Models_Oct17/overSample/SVM/"
+os.makedirs(model_dir, exist_ok=True)
+
 meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
 VI_idx = "NDVI"
-smooth_type = "SG"
+smooth_type = "regular"
 overSamples_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/overSamples/"
 
 meta = pd.read_csv(meta_dir+"evaluation_set.csv")
@@ -90,8 +89,9 @@ parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               } # , 
 SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), 
                                           parameters, cv=5, verbose=1)
-
 SVM_classifier_balanced_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_balanced_00_Oct17_AccScoring_Oversample_SR3.sav"
+pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))
 
 print (SVM_classifier_balanced_00.best_params_)
 print (SVM_classifier_balanced_00.best_score_)
@@ -99,10 +99,10 @@ print (SVM_classifier_balanced_00.best_score_)
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), 
-                                            parameters, cv=5, verbose=1)
-
+SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), parameters, cv=5, verbose=1)
 SVM_classifier_NoneWeight_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_NoneWeight_00_Oct17_AccScoring_Oversample_SR3.sav"
+pickle.dump(SVM_classifier_NoneWeight_00, open(filename, 'wb'))
 
 print (SVM_classifier_NoneWeight_00.best_params_)
 print (SVM_classifier_NoneWeight_00.best_score_)
@@ -244,8 +244,9 @@ parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               } # , 
 SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), 
                                           parameters, cv=5, verbose=1)
-
 SVM_classifier_balanced_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_balanced_00_Oct17_AccScoring_Oversample_SR4.sav"
+pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))
 
 print (SVM_classifier_balanced_00.best_params_)
 print (SVM_classifier_balanced_00.best_score_)
@@ -253,10 +254,11 @@ print (SVM_classifier_balanced_00.best_score_)
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), 
-                                            parameters, cv=5, verbose=1)
-
+SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), parameters, cv=5, verbose=1)
 SVM_classifier_NoneWeight_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_NoneWeight_00_Oct17_AccScoring_Oversample_SR4.sav"
+pickle.dump(SVM_classifier_NoneWeight_00, open(filename, 'wb'))
+
 
 print (SVM_classifier_NoneWeight_00.best_params_)
 print (SVM_classifier_NoneWeight_00.best_score_)
@@ -393,8 +395,9 @@ parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               } # , 
 SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), 
                                           parameters, cv=5, verbose=1)
-
 SVM_classifier_balanced_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_balanced_00_Oct17_AccScoring_Oversample_SR5.sav"
+pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))
 
 print (SVM_classifier_balanced_00.best_params_)
 print (SVM_classifier_balanced_00.best_score_)
@@ -402,10 +405,10 @@ print (SVM_classifier_balanced_00.best_score_)
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), 
-                                            parameters, cv=5, verbose=1)
-
+SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), parameters, cv=5, verbose=1)
 SVM_classifier_NoneWeight_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_NoneWeight_00_Oct17_AccScoring_Oversample_SR5.sav"
+pickle.dump(SVM_classifier_NoneWeight_00, open(filename, 'wb'))
 
 print (SVM_classifier_NoneWeight_00.best_params_)
 print (SVM_classifier_NoneWeight_00.best_score_)
@@ -541,8 +544,9 @@ parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               } # , 
 SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), 
                                           parameters, cv=5, verbose=1)
-
 SVM_classifier_balanced_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_balanced_00_Oct17_AccScoring_Oversample_SR6.sav"
+pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))
 
 print (SVM_classifier_balanced_00.best_params_)
 print (SVM_classifier_balanced_00.best_score_)
@@ -550,10 +554,10 @@ print (SVM_classifier_balanced_00.best_score_)
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), 
-                                            parameters, cv=5, verbose=1)
-
+SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), parameters, cv=5, verbose=1)
 SVM_classifier_NoneWeight_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_NoneWeight_00_Oct17_AccScoring_Oversample_SR6.sav"
+pickle.dump(SVM_classifier_NoneWeight_00, open(filename, 'wb'))
 
 print (SVM_classifier_NoneWeight_00.best_params_)
 print (SVM_classifier_NoneWeight_00.best_score_)
@@ -688,10 +692,10 @@ y_train_df=EVI_SG_wide_overSample3[["ID", "Vote"]]
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), 
-                                          parameters, cv=5, verbose=1)
-
+SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), parameters, cv=5, verbose=1)
 SVM_classifier_balanced_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_balanced_00_Oct17_AccScoring_Oversample_SR7.sav"
+pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))
 
 print (SVM_classifier_balanced_00.best_params_)
 print (SVM_classifier_balanced_00.best_score_)
@@ -699,10 +703,10 @@ print (SVM_classifier_balanced_00.best_score_)
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), 
-                                            parameters, cv=5, verbose=1)
-
+SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), parameters, cv=5, verbose=1)
 SVM_classifier_NoneWeight_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_NoneWeight_00_Oct17_AccScoring_Oversample_SR7.sav"
+pickle.dump(SVM_classifier_NoneWeight_00, open(filename, 'wb'))
 
 print (SVM_classifier_NoneWeight_00.best_params_)
 print (SVM_classifier_NoneWeight_00.best_score_)
@@ -835,10 +839,10 @@ y_train_df=EVI_SG_wide_overSample3[["ID", "Vote"]]
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), 
-                                          parameters, cv=5, verbose=1)
-
+SVM_classifier_balanced_00 = GridSearchCV(SVC(random_state=0, class_weight='balanced'), parameters, cv=5, verbose=1)
 SVM_classifier_balanced_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_balanced_00_Oct17_AccScoring_Oversample_SR8.sav"
+pickle.dump(SVM_classifier_balanced_00, open(filename, 'wb'))
 
 print (SVM_classifier_balanced_00.best_params_)
 print (SVM_classifier_balanced_00.best_score_)
@@ -846,10 +850,10 @@ print (SVM_classifier_balanced_00.best_score_)
 parameters = {'C':[5, 10, 13, 14, 15, 16, 17, 20, 40, 80],
               'kernel':['linear', 'poly', 'rbf', 'sigmoid'] # 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
               } # , 
-SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), 
-                                            parameters, cv=5, verbose=1)
-
+SVM_classifier_NoneWeight_00 = GridSearchCV(SVC(random_state=0), parameters, cv=5, verbose=1)
 SVM_classifier_NoneWeight_00.fit(x_train_df.iloc[:, 1:], y_train_df.Vote.values)
+filename = model_dir + smooth_type + "_" + VI_idx + "_SVM_NoneWeight_00_Oct17_AccScoring_Oversample_SR8.sav"
+pickle.dump(SVM_classifier_NoneWeight_00, open(filename, 'wb'))
 
 print (SVM_classifier_NoneWeight_00.best_params_)
 print (SVM_classifier_NoneWeight_00.best_score_)

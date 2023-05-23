@@ -77,6 +77,9 @@ winnerModels = pd.read_csv(dir_base + "winnerModels.csv")
 winnerModels.dropna(inplace=True)
 
 # %%
+TS_df.head(2)
+
+# %%
 VI_idx, smooth = "NDVI", "SG"
 
 TS_f_name = VI_idx + "_" + smooth + "_WSUStudentSurvey2022_wide_JFD.csv"
@@ -239,14 +242,63 @@ sorted(list(GT.columns))
 
 # %%
 # GT = GT[["ID"]]
-(list(GT.SecondSu_1.unique()))
+print (len((list(GT_large.SecondSu_1.unique()))))
+(list(GT_large.SecondSu_1.unique()))
 
 # %%
-(list(GT.FirstSur_1.unique()))
+print (len((list(GT_large.FirstSur_1.unique()))))
+(list(GT_large.FirstSur_1.unique()))
 
 # %%
-
 print (f"{GT_large.shape=}")
 print (f"{GT.shape=}")
+
+# %%
+sorted(list(GT_large.columns))
+
+# %%
+GT_large_imp = GT_large[["ID", "Irrigation", "Acres", 
+                         "FirstSurve", "FirstField", "FirstSur_1", 
+                         "SecondSurv", "SecondFiel", "SecondSu_1"]].copy()
+
+GT_large_imp.fillna("NA", inplace=True)
+GT_large_imp["two_sruveys"] = GT_large_imp["FirstSur_1"] + "__" + GT_large_imp["SecondSu_1"]
+out_name = pred_dir + "GT_large_importantData.csv"
+GT_large_imp.to_csv(out_name, index=False)
+
+# %%
+GT_large.SecondSurv
+
+# %%
+GT_large.SecondSu_1
+
+# %%
+GT_large.CropType
+
+# %%
+GT_large_apple = GT_large[GT_large.CropType=="Apple"]
+
+# %%
+GT_large_apple.FirstSur_1.unique()
+
+# %%
+GT_large_apple.SecondSu_1.unique()
+
+# %%
+GT_large_apple[GT_large_apple.FirstSur_1=="Wheat"]
+
+# %%
+GT_large[GT_large.FirstSur_1=="Apple"]
+
+# %%
+A = GT_large.copy()
+A.fillna("NA", inplace=True)
+sorted(list(A.FirstSur_1.unique()))
+
+# %%
+sortedlist(GT.FirstSur_1.unique())
+
+# %%
+GT.PerennialN.unique()
 
 # %%
