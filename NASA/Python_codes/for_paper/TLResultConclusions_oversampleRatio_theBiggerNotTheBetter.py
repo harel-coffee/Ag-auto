@@ -20,12 +20,10 @@
 import numpy as np
 import pandas as pd
 from datetime import date
-from random import seed
-from random import random
+from random import seed, random
 import math
 import time
 import scipy, scipy.signal
-import os, os.path
 import shutil
 import matplotlib
 import matplotlib.pyplot as plt
@@ -54,7 +52,7 @@ from tensorflow.keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
 
 import h5py
-import sys
+import os, os.path, sys
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 # import NASA_plot_core as rcp
@@ -132,8 +130,50 @@ for file in regular_EVI:
 # %%
 best_on_test
 
+# %% [markdown]
+# ## Find best prob. for putting in paper
+
 # %%
-del(current_file)
+SG_EVI_bestSR = "SRatio_7"
+regular_EVI_bestSR = "SRatio_4"
+SG_NDVI_bestSR = "SRatio_5"
+regular_NDVI_bestSR = "SRatio_5"
+
+# %%
+# SG_EVI_bestSR
+current_file = pd.read_csv(in_dir + "02_SG_EVI_TL_count_TFPR_SRatio_7.csv", index_col=0)
+curr_min = current_file.loc["error count"].min()
+print (f"{curr_min=}")
+L = list(current_file.loc["error count"])
+print (f"{L.index(min(L))=}")
+current_file
+
+# %%
+# regular_EVI_bestSR
+current_file = pd.read_csv(in_dir + "02_regular_EVI_TL_count_TFPR_SRatio_4.csv", index_col=0)
+curr_min = current_file.loc["error count"].min()
+print (f"{curr_min=}")
+L = list(current_file.loc["error count"])
+print (f"{L.index(min(L))=}")
+current_file
+
+# %%
+# regular_NDVI_bestSR
+current_file = pd.read_csv(in_dir + "02_regular_NDVI_TL_count_TFPR_SRatio_5.csv", index_col=0)
+curr_min = current_file.loc["error count"].min()
+print (f"{curr_min=}")
+L = list(current_file.loc["error count"])
+print (f"{L.index(min(L))=}")
+current_file
+
+# %%
+# SG_NDVI_bestSR
+current_file = pd.read_csv(in_dir + "02_SG_NDVI_TL_count_TFPR_SRatio_5.csv", index_col=0)
+curr_min = current_file.loc["error count"].min()
+print (f"{curr_min=}")
+L = list(current_file.loc["error count"])
+print (f"{L.index(min(L))=}")
+current_file
 
 # %% [markdown]
 # # Form Confusion Tables
