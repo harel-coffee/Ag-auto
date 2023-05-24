@@ -13,7 +13,8 @@
 # ---
 
 # %% [markdown]
-# This was a copy of preds_4SummaryStats_outdated. We finalized double-crop potentials, perennials, etc. and we will have bar plots here as opposed to tables and we will do oversamples.
+# overSamplePreds_4SummaryStats_irrLarge_TossOut. Here we will only include double-crop potentials
+# that are listed: [here](https://docs.google.com/spreadsheets/d/1ncCDrVImqVFO7bl_YlcbxjG8P_1UT0ls/edit?usp=sharing&ouid=110224975301518346252&rtpof=true&sd=true)
 
 # %%
 import numpy as np
@@ -35,7 +36,7 @@ sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 
 # %%
-plot_dir = "/Users/hn/Documents/01_research_data/NASA/for_paper/plots/overSampleRegionalStats/"
+plot_dir = "/Users/hn/Documents/01_research_data/NASA/for_paper/plots/overSampleRegionalStats/only2Potentials/"
 os.makedirs(plot_dir, exist_ok=True)
 
 # %%
@@ -86,6 +87,13 @@ AnnualPerennialToss.reset_index(drop=True, inplace=True)
 print (f"{AnnualPerennialToss.shape=}")
 print (AnnualPerennialToss.potential.unique())
 AnnualPerennialToss.head(2)
+
+# %%
+only_potentialCrops = AnnualPerennialToss[AnnualPerennialToss.potential=="y"]
+only_potentialCrops.reset_index(drop=True, inplace=True)
+print (f"{only_potentialCrops.shape=}")
+print (f"{only_potentialCrops.potential.unique()=}")
+only_potentialCrops.head(2)
 
 # %%
 f_names=["AdamBenton2016.csv", "FranklinYakima2018.csv", "Grant2017.csv", "Walla2015.csv"]
@@ -141,11 +149,6 @@ print (f"{SF_data_irr_large.ExctAcr.sum()=}")
 
 # %%
 # sorted(list(SF_data_irr.Irrigtn.unique()))
-
-# %%
-# out_name = SF_data_dir + "all_SF_data_concatenated.csv"
-# SF_data.to_csv(out_name, index = False)
-# SF_data.county.unique()
 
 # %% [markdown]
 # # Read predictions
@@ -318,28 +321,6 @@ sorted(list(all_preds.Irrigtn.unique()))
 print (f"{len(sorted(all_preds.CropTyp.unique())) = }")
 print (f"{len(sorted(SF_data.CropTyp.unique()))   = }")
 
-# %% [markdown]
-# # Save to Disk some data
-
-# %%
-out_name = pred_dir_base + "all_preds_overSample.csv"
-all_preds.to_csv(out_name, index = False)
-
-out_name = pred_dir_base + "NDVI_regular_preds_overSample.csv"
-NDVI_regular_preds.to_csv(out_name, index = False)
-
-out_name = pred_dir_base + "EVI_regular_preds_overSample.csv"
-EVI_regular_preds.to_csv(out_name, index = False)
-
-out_name = pred_dir_base + "NDVI_SG_preds_overSample.csv"
-NDVI_SG_preds.to_csv(out_name, index = False)
-
-out_name = pred_dir_base + "EVI_SG_preds_overSample.csv"
-EVI_SG_preds.to_csv(out_name, index = False)
-
-# out_name = SF_data_dir + "irriigated_SF_data_concatenated.csv"
-# SF_data.to_csv(out_name, index = False)
-
 # %%
 # [x for x in badCrops if x in list(all_preds.CropTyp.unique())]
 
@@ -350,20 +331,23 @@ print (Adams.LstSrvD.unique().max())
 sorted(list(SF_data.county.unique()))
 
 # %% [markdown]
-# # Toss bad crops, filter large fields, and irrigated.
+# # Toss bad crops, Hay crops and filter large fields, and irrigated.
 # Clean from this point on.
 # These were not dropped in non-overSample
 
 # %%
+potentialCrops = list(only_potentialCrops.Crop_Type.unique())
+
+# %%
 print (f"{len(all_preds.CropTyp.unique())=}")
-all_preds = all_preds[~all_preds.CropTyp.isin(badCrops)]
+all_preds = all_preds[all_preds.CropTyp.isin(potentialCrops)]
 print (f"{len(all_preds.CropTyp.unique())=}")
 
-EVI_SG_preds = EVI_SG_preds[~EVI_SG_preds.CropTyp.isin(badCrops)]
-EVI_regular_preds = EVI_regular_preds[~EVI_regular_preds.CropTyp.isin(badCrops)]
+EVI_SG_preds = EVI_SG_preds[EVI_SG_preds.CropTyp.isin(potentialCrops)]
+EVI_regular_preds = EVI_regular_preds[EVI_regular_preds.CropTyp.isin(potentialCrops)]
 
-NDVI_SG_preds = NDVI_SG_preds[~NDVI_SG_preds.CropTyp.isin(badCrops)]
-NDVI_regular_preds = NDVI_regular_preds[~NDVI_regular_preds.CropTyp.isin(badCrops)]
+NDVI_SG_preds = NDVI_SG_preds[NDVI_SG_preds.CropTyp.isin(potentialCrops)]
+NDVI_regular_preds = NDVI_regular_preds[NDVI_regular_preds.CropTyp.isin(potentialCrops)]
 
 print (f"{len(EVI_SG_preds.CropTyp.unique())=}")
 print (f"{len(EVI_regular_preds.CropTyp.unique())=}")
@@ -377,6 +361,8 @@ NDVI_SG_preds = NDVI_SG_preds[NDVI_SG_preds.ExctAcr>10]
 NDVI_regular_preds = NDVI_regular_preds[NDVI_regular_preds.ExctAcr>10]
 
 # %%
+
+# %%
 SF_data.reset_index(inplace=True, drop=True)
 
 SF_data_L = SF_data[SF_data.ExctAcr>10].copy()
@@ -388,14 +374,18 @@ print (f"{SF_data_S.ExctAcr.sum()=}")
 SF_data.head(2)
 
 # %%
+
+# %%
 Adams = SF_data[SF_data.county=="Adams"]
 print (Adams.LstSrvD.unique().min())
 print (Adams.LstSrvD.unique().max())
 sorted(list(SF_data.county.unique()))
 
 # %%
+
+# %%
 SF_data = nc.filter_out_nonIrrigated(SF_data)
-SF_data = SF_data[~SF_data.CropTyp.isin(badCrops)]
+SF_data = SF_data[SF_data.CropTyp.isin(potentialCrops)]
 SF_data = SF_data[SF_data.ExctAcr>10]
 
 # %%
@@ -428,9 +418,6 @@ EVI_SG_summary[EVI_SG_summary.columns[2]] = EVI_SG_preds.groupby(\
 EVI_SG_summary[EVI_SG_summary.columns[3]] = EVI_SG_preds.groupby(\
                 [EVI_SG_summary.columns[3], "county"])['ExctAcr'].sum()
 
-#EVI_SG_summary.reset_index(drop=False, inplace=True, col_fill='', names="predicted_label")
-#out_name = pred_dir_base + "EVI_SG_summary_overSample.csv"
-#EVI_SG_summary.to_csv(out_name, index = False)
 EVI_SG_summary.index.rename(['label', 'county'], inplace=True)
 EVI_SG_summary.round()
 
@@ -481,7 +468,7 @@ axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_acreage_countyWise.pdf"
+file_name = plot_dir + "EVI_SG_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -501,10 +488,6 @@ NDVI_SG_summary[NDVI_SG_summary.columns[2]] = \
 NDVI_SG_summary[NDVI_SG_summary.columns[3]] = \
             NDVI_SG_preds.groupby([NDVI_SG_summary.columns[3], "county"])['ExctAcr'].sum()
 
-
-#NDVI_SG_summary.reset_index(drop=False, inplace=True, col_fill='', names="predicted_label")
-# out_name = pred_dir_base + "NDVI_SG_summary_overSample.csv"
-# NDVI_SG_summary.to_csv(out_name, index = False)
 NDVI_SG_summary.index.rename(['label', 'county'], inplace=True)
 NDVI_SG_summary.round()
 
@@ -537,7 +520,7 @@ axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_acreage_countyWise.pdf"
+file_name = plot_dir + "NDVI_SG_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -557,9 +540,6 @@ NDVI_regular_summary[NDVI_regular_summary.columns[2]] = \
 NDVI_regular_summary[NDVI_regular_summary.columns[3]] = \
                      NDVI_regular_preds.groupby([NDVI_regular_summary.columns[3], "county"])['ExctAcr'].sum()
 
-# NDVI_regular_summary.reset_index(drop=False, inplace=True, col_fill='', names="predicted_label")
-# out_name = pred_dir_base + "NDVI_regularular_summary_overSample.csv"
-# NDVI_regular_summary.to_csv(out_name, index = False)
 NDVI_regular_summary.index.rename(['label', 'county'], inplace=True)
 NDVI_regular_summary.round()
 
@@ -592,7 +572,7 @@ axs.set_title("4-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_acreage_countyWise.pdf"
+file_name = plot_dir + "NDVI_regular_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -645,7 +625,7 @@ axs.set_title("4-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_acreage_countyWise.pdf"
+file_name = plot_dir + "EVI_regular_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -706,7 +686,7 @@ axs.set_title("4-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_acreagePerc_countyWise.pdf"
+file_name = plot_dir + "EVI_regular_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -745,7 +725,7 @@ axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_acreagePerc_countyWise.pdf"
+file_name = plot_dir + "EVI_SG_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -783,7 +763,7 @@ axs.set_title("4-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_acreagePerc_countyWise.pdf"
+file_name = plot_dir + "NDVI_regular_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -822,7 +802,7 @@ axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_acreagePerc_countyWise.pdf"
+file_name = plot_dir + "NDVI_SG_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -857,8 +837,6 @@ NDVI_SG_summary_countPerCounty[NDVI_SG_summary_countPerCounty.columns[3]] = \
              NDVI_SG_preds.groupby([NDVI_SG_summary_countPerCounty.columns[3], "county"])['ID'].count()
 # NDVI_SG_summary_countPerCounty.reset_index(drop=False, inplace=True, col_fill='', names="predictedabel")
 
-out_name = pred_dir_base + "NDVI_SG_summary_countPerCounty_overSample.csv"
-# NDVI_SG_summary_countPerCounty.to_csv(out_name, index = False)
 NDVI_SG_summary_countPerCounty.index.rename(['label', 'county'], inplace=True)
 NDVI_SG_summary_countPerCounty.round()
 
@@ -891,7 +869,7 @@ axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_count_countyWise.pdf"
+file_name = plot_dir + "NDVI_SG_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -919,8 +897,6 @@ NDVI_reg_summary_countPerCounty[NDVI_reg_summary_countPerCounty.columns[3]] = \
              NDVI_regular_preds.groupby([NDVI_reg_summary_countPerCounty.columns[3], "county"])['ID'].count()
 # NDVI_reg_summary_countPerCounty.reset_index(drop=False, inplace=True, col_fill='', names="predictedabel")
 
-out_name = pred_dir_base + "NDVI_reg_summary_countPerCounty_overSample.csv"
-# NDVI_reg_summary_countPerCounty.to_csv(out_name, index = False)
 NDVI_reg_summary_countPerCounty.index.rename(['label', 'county'], inplace=True)
 NDVI_reg_summary_countPerCounty.round()
 
@@ -953,7 +929,7 @@ axs.set_title("4-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_count_countyWise.pdf"
+file_name = plot_dir + "NDVI_regular_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -975,8 +951,6 @@ EVI_SG_summary_countPerCounty[EVI_SG_summary_countPerCounty.columns[3]] = \
              EVI_SG_preds.groupby([EVI_SG_summary_countPerCounty.columns[3], "county"])['ID'].count()
 # EVI_SG_summary_countPerCounty.reset_index(drop=False, inplace=True, col_fill='', names="predictedabel")
 
-out_name = pred_dir_base + "EVI_SG_summary_countPerCounty_overSample.csv"
-# EVI_SG_summary_countPerCounty.to_csv(out_name, index = False)
 EVI_SG_summary_countPerCounty.index.rename(['label', 'county'], inplace=True)
 EVI_SG_summary_countPerCounty.round()
 
@@ -1009,7 +983,7 @@ axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_count_countyWise.pdf"
+file_name = plot_dir + "EVI_SG_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1031,8 +1005,6 @@ EVI_reg_summary_countPerCounty[EVI_reg_summary_countPerCounty.columns[3]] = \
              EVI_regular_preds.groupby([EVI_reg_summary_countPerCounty.columns[3], "county"])['ID'].count()
 # EVI_reg_summary_countPerCounty.reset_index(drop=False, inplace=True, col_fill='', names="predictedabel")
 
-out_name = pred_dir_base + "EVI_reg_summary_countPerCounty_overSample.csv"
-# EVI_reg_summary_countPerCounty.to_csv(out_name, index = False)
 EVI_reg_summary_countPerCounty.index.rename(['label', 'county'], inplace=True)
 EVI_reg_summary_countPerCounty.round()
 
@@ -1065,7 +1037,7 @@ axs.set_title("4-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_count_countyWise.pdf"
+file_name = plot_dir + "EVI_regular_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1122,7 +1094,7 @@ axs.set_title("4-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_countPerc_countyWise.pdf"
+file_name = plot_dir + "EVI_regular_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1160,7 +1132,7 @@ axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_countPerc_countyWise.pdf"
+file_name = plot_dir + "EVI_SG_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1198,7 +1170,7 @@ axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_countPerc_countyWise.pdf"
+file_name = plot_dir + "NDVI_SG_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1236,7 +1208,7 @@ axs.set_title("4-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_countPerc_countyWise.pdf"
+file_name = plot_dir + "NDVI_regular_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1469,7 +1441,7 @@ axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_cropWise_Acreage.pdf"
+file_name = plot_dir + "NDVI_SG_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1506,7 +1478,7 @@ axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_cropWise_Acreage.pdf"
+file_name = plot_dir + "EVI_SG_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1544,7 +1516,7 @@ axs.set_title("4-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_cropWise_Acreage.pdf"
+file_name = plot_dir + "NDVI_regular_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1580,7 +1552,7 @@ axs.set_title("4-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_cropWise_Acreage.pdf"
+file_name = plot_dir + "EVI_regular_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1605,10 +1577,6 @@ print (f"{SF_data.ExctAcr.min()=:0.4f}")
 SF_data_grp_area = SF_data.groupby(['CropTyp'])['ExctAcr'].sum()
 SF_data_grp_area = pd.DataFrame(SF_data_grp_area)
 SF_data_grp_area.reset_index(drop=False, inplace=True)
-
-out_name = pred_dir_base + "area_per_crop_LargeFields_LSD.csv"
-SF_data_grp_area.to_csv(out_name, index = False)
-
 SF_data_grp_area.head(2)
 
 # %%
@@ -1795,16 +1763,16 @@ EVI_regular_crop_summary_LSD_2cropped.fillna(0, inplace=True)
 
 # %%
 NDVI_SG_crop_summary_LSD_2cropped = NDVI_SG_crop_summary_LSD_2cropped[\
-                                          ~NDVI_SG_crop_summary_LSD_2cropped.CropTyp.isin(badCrops)]
+                                          NDVI_SG_crop_summary_LSD_2cropped.CropTyp.isin(potentialCrops)]
 
 EVI_SG_crop_summary_LSD_2cropped = EVI_SG_crop_summary_LSD_2cropped[\
-                                            ~EVI_SG_crop_summary_LSD_2cropped.CropTyp.isin(badCrops)]
+                                            EVI_SG_crop_summary_LSD_2cropped.CropTyp.isin(potentialCrops)]
 
 NDVI_regular_crop_summary_LSD_2cropped = NDVI_regular_crop_summary_LSD_2cropped[\
-                                            ~NDVI_regular_crop_summary_LSD_2cropped.CropTyp.isin(badCrops)]
+                                            NDVI_regular_crop_summary_LSD_2cropped.CropTyp.isin(potentialCrops)]
 
 EVI_regular_crop_summary_LSD_2cropped = EVI_regular_crop_summary_LSD_2cropped[\
-                                            ~EVI_regular_crop_summary_LSD_2cropped.CropTyp.isin(badCrops)]
+                                            EVI_regular_crop_summary_LSD_2cropped.CropTyp.isin(potentialCrops)]
 
 # %%
 
@@ -1834,7 +1802,7 @@ axs.set_title("5-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_AcreagePrecent_cropWise.pdf"
+file_name = plot_dir + "NDVI_SG_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1866,7 +1834,7 @@ axs.set_title("5-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_AcreagePrecent_cropWise.pdf"
+file_name = plot_dir + "EVI_SG_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1899,7 +1867,7 @@ axs.set_title("4-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_AcreagePrecent_cropWise.pdf"
+file_name = plot_dir + "EVI_regular_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -1932,7 +1900,7 @@ axs.set_title("4-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_AcreagePrecent_cropWise.pdf"
+file_name = plot_dir + "NDVI_regular_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2046,7 +2014,7 @@ axs.set_xlabel("crop")
 axs.set_title("4-step NDVI")
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_count_cropWise.pdf"
+file_name = plot_dir + "NDVI_regular_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2106,7 +2074,7 @@ axs.set_xlabel("crop")
 axs.set_title("4-step NDVI")
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_count_cropWise.pdf"
+file_name = plot_dir + "NDVI_SG_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2168,7 +2136,7 @@ axs.set_xlabel("crop")
 axs.set_title("4-step EVI")
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_count_cropWise.pdf"
+file_name = plot_dir + "EVI_regular_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2228,7 +2196,7 @@ axs.set_xlabel("crop")
 axs.set_title("5-step EVI")
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_count_cropWise.pdf"
+file_name = plot_dir + "EVI_SG_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2295,7 +2263,7 @@ axs.set_title("4-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_regular_countPerc_cropWise.pdf"
+file_name = plot_dir + "NDVI_regular_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2359,7 +2327,7 @@ axs.set_title("5-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "NDVI_SG_countPerc_cropWise.pdf"
+file_name = plot_dir + "NDVI_SG_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2423,7 +2391,7 @@ axs.set_title("5-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_SG_countPerc_cropWise.pdf"
+file_name = plot_dir + "EVI_SG_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
@@ -2487,10 +2455,12 @@ axs.set_title("4-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-file_name = plot_dir + "EVI_regular_countPerc_cropWise.pdf"
+file_name = plot_dir + "EVI_regular_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
 del(df)
+
+# %%
 
 # %%
