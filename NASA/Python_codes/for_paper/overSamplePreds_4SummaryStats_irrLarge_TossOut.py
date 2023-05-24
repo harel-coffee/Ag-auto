@@ -1036,180 +1036,6 @@ NDVI_regular_crop_summary = pd.merge(NDVI_regular_crop_summary, col4, on=(["labe
 
 NDVI_regular_crop_summary.head(2)
 
-# %% [markdown]
-# ### EVI Regular SVM
-
-# %%
-# EVI_regular_crop_summary.sort_values(by=["label", "SVM_EVI_regular_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_regular_crop_summary[EVI_regular_crop_summary.label==2].sort_values(by=["label", "SVM_EVI_regular_preds"], 
-#                                                                         ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### EVI Regular KNN
-
-# %%
-# EVI_regular_crop_summary.sort_values(by=["label", "KNN_EVI_regular_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_regular_crop_summary[EVI_regular_crop_summary.label==2].sort_values(by=["label", "KNN_EVI_regular_preds"], 
-#                                                                         ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### EVI Regular DL
-
-# %%
-# EVI_regular_crop_summary.sort_values(by=["label", "DL_EVI_regular_prob_point9"], 
-#                                        ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_regular_crop_summary[EVI_regular_crop_summary.label==2].sort_values(by=["label", 
-#                                                                              "DL_EVI_regular_prob_point9"], 
-#                                                                             ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### EVI Regular RF
-
-# %%
-# EVI_regular_crop_summary.sort_values(by=["label", "RF_EVI_regular_preds"], 
-#                                        ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_regular_crop_summary[EVI_regular_crop_summary.label==2].sort_values(by=["label", 
-#                                                                             "RF_EVI_regular_preds"], 
-#                                                                             ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### NDVI Regular SVM
-
-# %%
-# NDVI_regular_crop_summary.sort_values(by=["label", "SVM_NDVI_regular_preds"], 
-#                                         ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_regular_crop_summary[NDVI_regular_crop_summary.label==2].sort_values(by=["label", "SVM_NDVI_regular_preds"], 
-#                                                                         ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### NDVI Regular kNN
-
-# %%
-# NDVI_regular_crop_summary.sort_values(by=["label", "KNN_NDVI_regular_preds"], 
-#                                         ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_regular_crop_summary[NDVI_regular_crop_summary.label==2].sort_values(by=["label", "KNN_NDVI_regular_preds"], 
-#                                                                       ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### NDVI Regular DL
-
-# %%
-# NDVI_regular_crop_summary.sort_values(by=["label", "DL_NDVI_regular_prob_point3"], 
-#                                         ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_regular_crop_summary[NDVI_regular_crop_summary.label==2].sort_values(
-#                                                        by=["label", "DL_NDVI_regular_prob_point3"], 
-#                                                        ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### NDVI Regular RF
-
-# %%
-# NDVI_regular_crop_summary.sort_values(by=["label", "RF_NDVI_regular_preds"], 
-#                                         ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_regular_crop_summary[NDVI_regular_crop_summary.label==2].sort_values(
-#                                                 by=["label", "RF_NDVI_regular_preds"], 
-#                                                 ascending=[True, False]).round().head(5)
-
-# %%
-
-# %% [markdown]
-# ### EVI SG SVM
-
-# %%
-# EVI_SG_crop_summary.sort_values(by=["label", "SVM_EVI_SG_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_SG_crop_summary[EVI_SG_crop_summary.label==2].sort_values(by=["label", "SVM_EVI_SG_preds"], 
-#                                                                   ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### EVI SG kNN
-
-# %%
-# EVI_SG_crop_summary.sort_values(by=["label", "KNN_EVI_SG_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_SG_crop_summary[EVI_SG_crop_summary.label==2].sort_values(by=["label", "KNN_EVI_SG_preds"], 
-#                                                                   ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### EVI SG DL
-
-# %%
-# EVI_SG_crop_summary.sort_values(by=["label", "DL_EVI_SG_prob_point9"], ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_SG_crop_summary[EVI_SG_crop_summary.label==2].sort_values(by=["label", "DL_EVI_SG_prob_point9"], 
-#                                                               ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### EVI SG RF
-
-# %%
-# EVI_SG_crop_summary.sort_values(by=["label", "RF_EVI_SG_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# EVI_SG_crop_summary[EVI_SG_crop_summary.label==2].sort_values(by=["label", "RF_EVI_SG_preds"], 
-#                                                                   ascending=[True, False]).round().head(5)
-
-# %%
-
-# %% [markdown]
-# ### NDVI SG SVM
-
-# %%
-# NDVI_SG_crop_summary.sort_values(by=["label", "SVM_NDVI_SG_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_SG_crop_summary[NDVI_SG_crop_summary.label==2].sort_values(by=["label", "SVM_NDVI_SG_preds"], 
-#                                                                   ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### NDVI SG kNN
-
-# %%
-# NDVI_SG_crop_summary.sort_values(by=["label", "KNN_NDVI_SG_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_SG_crop_summary[NDVI_SG_crop_summary.label==2].sort_values(by=["label", "KNN_NDVI_SG_preds"], 
-#                                                                   ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### NDVI SG DL
-
-# %%
-# NDVI_SG_crop_summary.sort_values(by=["label", "DL_NDVI_SG_prob_point3"], ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_SG_crop_summary[NDVI_SG_crop_summary.label==2].sort_values(by=["label", "DL_NDVI_SG_prob_point3"], 
-#                                                                  ascending=[True, False]).round().head(5)
-
-# %% [markdown]
-# ### NDVI SG RF
-
-# %%
-# NDVI_SG_crop_summary.sort_values(by=["label", "RF_NDVI_SG_preds"], ascending=[True, False]).round().head(5)
-
-# %%
-# NDVI_SG_crop_summary[NDVI_SG_crop_summary.label==2].sort_values(by=["label", "RF_NDVI_SG_preds"], 
-#                                                                   ascending=[True, False]).round().head(5)
-
 # %%
 df = NDVI_SG_crop_summary.copy()
 df = df[df.label==2]
@@ -1217,7 +1043,6 @@ df.fillna(0, inplace=True)
 print (f"{list(df.label.unique())=}")
 print (f"{len(df.CropTyp.unique())=}")
 df.head(3)
-
 
 ################################################################
 fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
@@ -1245,8 +1070,8 @@ axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-# file_name = plot_dir + "NDVI_SG_acreage_cropWise.pdf"
-# plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+file_name = plot_dir + "NDVI_SG_cropWise_Acreage.pdf"
+plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
 del(df)
@@ -1286,8 +1111,8 @@ axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-# file_name = plot_dir + "EVI_SG_acreage_cropWise.pdf"
-# plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+file_name = plot_dir + "EVI_SG_cropWise_Acreage.pdf"
+plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
 del(df)
@@ -1326,8 +1151,8 @@ axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-# file_name = plot_dir + "NDVI_regular_acreage_cropWise.pdf"
-# plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+file_name = plot_dir + "NDVI_regular_cropWise_Acreage.pdf"
+plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
 del(df)
@@ -1366,8 +1191,8 @@ axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 
-# file_name = plot_dir + "EVI_regular_acreage_cropWise.pdf"
-# plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+file_name = plot_dir + "EVI_regular_cropWise_Acreage.pdf"
+plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
 del(df)
@@ -1396,12 +1221,6 @@ out_name = pred_dir_base + "area_per_crop_LargeFields_LSD.csv"
 SF_data_LSD_grp_area.to_csv(out_name, index = False)
 
 SF_data_LSD_grp_area.head(2)
-
-# %%
-# print (len(SF_data_LSD.ID.unique()))
-# print (len(NDVI_SG_preds.ID.unique()))
-# NDVI_SG_preds_LSD = NDVI_SG_preds[NDVI_SG_preds.ID.isin(list(SF_data_LSD.ID))]
-# print (len(NDVI_SG_preds_LSD.ID.unique()))
 
 # %%
 NDVI_SG_crop_summary_LSD = pd.DataFrame(columns=["label", "CropTyp"])
