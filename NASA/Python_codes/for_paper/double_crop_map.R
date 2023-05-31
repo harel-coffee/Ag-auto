@@ -22,59 +22,32 @@ options(digit=9)
 
 
 SF_data_dir = "/Users/hn/Documents/01_research_data/NASA/data_part_of_shapefile/"
-SF_dir = "/Users/hn/Documents/01_research_data/remote_sensing/00_shapeFiles/0002_final_shapeFiles/000_Eastern_WA/"
 pred_dir = "/Users/hn/Documents/01_research_data/NASA/RegionalStatData/"
 
-
-# yrs=seq(2015, 2018)
-# all_centrs = data.table()
-# for (yr in yrs){
-#   WSDA <- readOGR(paste0(SF_dir, "Eastern_", yr, "/Eastern_", yr, ".shp"),
-#                   layer = paste0("Eastern_", yr), 
-#                   GDAL1_integer64_policy = TRUE)
-
-#   centroids <- rgeos::gCentroid(WSDA, byid=TRUE)
-
-#   crs <- CRS("+proj=lcc 
-#              +lat_1=45.83333333333334 
-#              +lat_2=47.33333333333334 
-#              +lat_0=45.33333333333334 
-#              +lon_0=-120.5 +datum=WGS84")
-
-#   centroid_coord <- spTransform(centroids, CRS("+proj=longlat +datum=WGS84"))
-
-#   centroid_coord_dt <- data.table(centroid_coord@coords)
-#   setnames(centroid_coord_dt, old=c("x", "y"), new=c("long", "lat"))
-#   centroid_coord_dt$ID = WSDA@data$ID
-
-#  all_centrs = rbind(all_centrs, centroid_coord_dt)
-    
-#   write.table(centroid_coord_dt, 
-#             paste0(SF_data_dir, "Eastern_", yr, "_centroid.csv"), 
-#             row.names = FALSE, col.names = TRUE, sep=",")
-# }
-# write.table(all_centrs, 
-#             paste0(SF_data_dir, "all_eastern_centroid.csv"), 
-#             row.names = FALSE, col.names = TRUE, sep=",")
-
 all_centrs  = read.csv(paste0(SF_data_dir, "all_eastern_centroid.csv"))
-
 irr_SF_data = read.csv(paste0(SF_data_dir, "irriigated_SF_data_concatenated.csv"))
 irr_SF_data <- dplyr::left_join(x = irr_SF_data, y = all_centrs, by = "ID")
 head(irr_SF_data, 2)
 
 
-all_preds = read.csv(paste0(pred_dir, "all_preds.csv"), header=T, sep=",", as.is=T)
+all_preds = read.csv(paste0(pred_dir, "all_preds_overSample.csv"), header=T, sep=",", as.is=T)
 all_preds <- dplyr::left_join(x = all_preds, y = all_centrs, by = "ID")
 
 length(unique(irr_SF_data$ID))
 length(unique(all_preds$ID))
 
 
-NDVI_reg_cols = c("SVM_NDVI_regular_preds", "KNN_NDVI_regular_preds", "DL_NDVI_regular_prob_point9", "RF_NDVI_regular_preds")
-EVI_reg_cols  = c("SVM_EVI_regular_preds",   "KNN_EVI_regular_preds",  "DL_EVI_regular_prob_point4",  "RF_EVI_regular_preds")
-NDVI_SG_cols  = c("SVM_NDVI_SG_preds",           "KNN_NDVI_SG_preds",      "DL_NDVI_SG_prob_point9",      "RF_NDVI_SG_preds")
-EVI_SG_cols   = c("SVM_EVI_SG_preds",             "KNN_EVI_SG_preds",       "DL_EVI_SG_prob_point4",       "RF_EVI_SG_preds")
+# For non-oversample
+# NDVI_reg_cols = c("SVM_NDVI_regular_preds", "KNN_NDVI_regular_preds", "DL_NDVI_regular_prob_point9", "RF_NDVI_regular_preds")
+# EVI_reg_cols  = c("SVM_EVI_regular_preds",   "KNN_EVI_regular_preds",  "DL_EVI_regular_prob_point4",  "RF_EVI_regular_preds")
+# NDVI_SG_cols  = c("SVM_NDVI_SG_preds",           "KNN_NDVI_SG_preds",      "DL_NDVI_SG_prob_point9",      "RF_NDVI_SG_preds")
+# EVI_SG_cols   = c("SVM_EVI_SG_preds",             "KNN_EVI_SG_preds",       "DL_EVI_SG_prob_point4",       "RF_EVI_SG_preds")
+
+# For non-oversample
+NDVI_reg_cols = c("SVM_NDVI_regular_preds", "KNN_NDVI_regular_preds", "DL_NDVI_regular_prob_point3", "RF_NDVI_regular_preds")
+EVI_reg_cols  = c("SVM_EVI_regular_preds",   "KNN_EVI_regular_preds",  "DL_EVI_regular_prob_point9",  "RF_EVI_regular_preds")
+NDVI_SG_cols  = c("SVM_NDVI_SG_preds",           "KNN_NDVI_SG_preds",      "DL_NDVI_SG_prob_point3",      "RF_NDVI_SG_preds")
+EVI_SG_cols   = c("SVM_EVI_SG_preds",             "KNN_EVI_SG_preds",       "DL_EVI_SG_prob_point9",       "RF_EVI_SG_preds")
 
 NDVI_reg = all_preds[c("ID", "long", "lat", NDVI_reg_cols)]
 EVI_reg  = all_preds[c("ID", "long", "lat", EVI_reg_cols)]
@@ -165,7 +138,7 @@ all_preds_onMap = all_melt %>%
 
 plot_path <- "/Users/hn/Documents/01_research_data/NASA/for_paper/plots/preds_on_map/"
 
-output_name = "all_preds_onMap.png"
+output_name = "all_preds_onMap_overSample.png"
 dim_=8
 ggsave(output_name, all_preds_onMap, path=plot_path, 
        width=8.5, height=6.2, unit="in", dpi = 200)

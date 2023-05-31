@@ -36,9 +36,42 @@ params_dir   = database_dir + "parameters/"
 perry_dir    = database_dir + "Perry_and_Co/"
 
 # %%
-train_labels = pd.read_csv(ML_data_dir + "groundTruth_labels_Oct17_2022.csv")
+SF_data_dir = "/Users/hn/Documents/01_research_data/NASA/data_part_of_shapefile/"
+csv_files = [x for x in os.listdir(SF_data_dir) if x.endswith(".csv")]
+all_data=pd.DataFrame()
+for a_file in csv_files:
+    curr_file = pd.read_csv(SF_data_dir+a_file)
+    all_data=pd.concat([all_data, curr_file])
+    
+print (all_data.shape)
+all_data.head(2)
 
-evaluation_set=pd.read_csv(params_dir+"evaluation_set.csv")
+# %%
+train_labels = pd.read_csv(ML_data_dir + "groundTruth_labels_Oct17_2022.csv")
+evaluation_set = pd.read_csv(params_dir+"evaluation_set.csv")
+print (f"{evaluation_set.shape=}")
+print (f"{len(evaluation_set.CropTyp.unique())=}")
+
+# %%
+AnnualPerennialToss = pd.read_csv(params_dir + "AnnualPerennialTossMay122023.csv")
+print (f"{AnnualPerennialToss.shape=}")
+
+AnnualPerennialToss.rename(columns={"Crop_Type": "CropTyp"}, inplace=True)
+print (AnnualPerennialToss.potential.unique())
+
+# %%
+AnnualPerennialToss.head(2)
+
+# %%
+toss_crops = AnnualPerennialToss[AnnualPerennialToss.potential=="toss"].CropTyp.unique()
+perennial_crops = AnnualPerennialToss[AnnualPerennialToss.potential=="n"].CropTyp.unique()
+annual_crops = AnnualPerennialToss[AnnualPerennialToss.potential=="y"].CropTyp.unique()
+yn_crops = AnnualPerennialToss[AnnualPerennialToss.potential=="yn"].CropTyp.unique()
+
+print (f"{len(toss_crops)=}")
+print (f"{len(perennial_crops)=}")
+print (f"{len(annual_crops)=}")
+print (f"{len(yn_crops)=}")
 
 # %%
 train_labels.head(2)
@@ -52,13 +85,14 @@ print (train_labels.shape)
 print (len(train_labels.ID.unique()))
 
 # %%
-print (len(train_labels.CropTyp.unique()))
+print (f"{len(train_labels.CropTyp.unique())=}")
+print (f"{len(AnnualPerennialToss.CropTyp.unique())=}")
+print (f"{len(evaluation_set.CropTyp.unique())=}")
 
 # %%
-sorted(list(train_labels.CropTyp.unique()))
+[x for x in train_labels.CropTyp.unique() if not(x in annual_crops)]
 
 # %%
-print (len(evaluation_set.CropTyp.unique()))
 
 # %%
 [x for x in evaluation_set.CropTyp.unique() if x not in train_labels.CropTyp.unique()]
@@ -74,6 +108,12 @@ evaluation_set[evaluation_set.CropTyp=="alkali bee bed"].shape
 
 # %%
 evaluation_set[evaluation_set.CropTyp=="caneberry"].shape
+
+# %%
+evaluation_set[evaluation_set.CropTyp=="walnut"].shape
+
+# %%
+sorted(list(evaluation_set.CropTyp.unique()))
 
 # %%
 # train_labels.groupby(['CropTyp'])['CropTyp'].count()

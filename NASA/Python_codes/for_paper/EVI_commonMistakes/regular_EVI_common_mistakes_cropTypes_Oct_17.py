@@ -345,11 +345,6 @@ sorted(SVM_None_y_test_df_A1_P2.CropTyp)
 
 # %%
 size = 15
-title_FontSize = 8
-legend_FontSize = 8
-tick_FontSize = 12
-label_FontSize = 14
-
 params = {'legend.fontsize': 15, # medium, large
           # 'figure.figsize': (6, 4),
           'axes.labelsize': size,

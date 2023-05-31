@@ -26,6 +26,10 @@
 #
 # <p>&nbsp;</p>
 
+# %%
+import shutup
+shutup.please() # kill some of the messages
+
 # %% [markdown] id="c9MAEcsBblEc"
 # # Print Local Time 
 #
@@ -37,8 +41,15 @@
 # !ln -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 # !date
 
+# %%
+# We have pip 23.0.1 and installing google-colab creates a problem.
+# lets see if updating pip helps
+from platform import python_version
+print(python_version())
+# # !pip install pip==21.3.1
+
 # %% [markdown] id="jX3TvMJBe3lZ"
-# # **geopandas and geemap must be installed every time!!!**
+# # geopandas and geemap must be installed every time!!!
 #
 
 # %% colab={"base_uri": "https://localhost:8080/"} id="xMCOiQUYe6XS" outputId="3e126c12-4eda-4dfb-ba61-da3ecfe3fda0"
@@ -54,6 +65,7 @@ except ImportError:
 
     print('geopandas not installed. Must be installed every time to run this notebook. Installing ...')
     subprocess.check_call(["python", '-m', 'pip', 'install', 'geopandas'])
+    subprocess.check_call(["python", '-m', 'pip', 'install', 'google.colab'])
 
 # %% [markdown] id="4_4IBtM4ffpt"
 # # **Authenticate and import libraries**
@@ -61,20 +73,20 @@ except ImportError:
 # We have to impor tthe libraries we need. Moreover, we need to Authenticate every single time!
 
 # %% colab={"base_uri": "https://localhost:8080/", "height": 179} id="ZgTaTGby3lWZ" outputId="dcc40859-f667-4198-b00d-a81480861bde"
+import pandas as pd
 import numpy as np
 import folium
 import geopandas as gpd
 import json, geemap, ee
-import pandas as pd
+
 
 import scipy # we need this for savitzky-golay
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import datetime
+import time, datetime
 from datetime import date
-import datetime
-import time
+
 
 try:
     ee.Initialize()
@@ -88,6 +100,9 @@ except Exception as e:
 # Here we are importing the Python functions that are written by me and are needed; ```NASA core``` and ```NASA plot core```.
 #
 # **Note:** These are on Google Drive now. Perhaps we can import them from GitHub.
+
+# %%
+# pip install google-colab
 
 # %% colab={"base_uri": "https://localhost:8080/"} id="RmVZ8vYg6zWz" outputId="599d99e2-9848-48d3-bed4-5294fe898985"
 # Mount YOUR google drive in Colab
@@ -124,7 +139,8 @@ os.chdir("/content/drive/My Drive/Colab Notebooks/") # Colab Notebooks
 # shp_path = "/Users/hn/Documents/01_research_data/NASA/shapefiles/Grant2017/Grant2017.shp"
 # shp_path = "/content/My Drive/NASA_trends/shapefiles/Grant2017/Grant2017.shp"
 shp_path = "/content/drive/MyDrive/NASA_trends/shapefiles/Grant2017/Grant2017.shp"
-shp_path = "/content/drive/MyDrive/NASA_trends/shapefiles/Grant_4Fields_poly_wCentroids/Grant_4Fields_poly_wCentroids.shp"
+shp_path = "/content/drive/MyDrive/NASA_trends/shapefiles/Grant_4Fields_poly_wCentroids/" + \
+            "Grant_4Fields_poly_wCentroids.shp"
 
 # we read our shapefile in to a geopandas data frame using the geopandas.read_file method
 # we'll make sure it's initiated in the EPSG 4326 CRS
@@ -176,7 +192,7 @@ SF = geemap.geopandas_to_ee(Grant_4Fields_poly_wCentroids)
 
 # %% [markdown] id="NdAnD4s4ASty"
 # ## **WARNING!**
-# For some reason the function ```feature2ee(.)``` does not work ***when*** it is imported from ```core``` module. (However, it works when it is directly written here!!!!) So, What the hell will happen with the rest of functions, e.g. smoothing functions, we want to use here?
+# For some reason the function ```feature2ee(.)``` does not work ***when*** it is imported from ```core``` module. (However, it works when it is directly written here!!!!) So, What the happens with the rest of functions, e.g. smoothing functions, we want to use here?
 
 # %% id="VlsU6nkK7Joz"
 # was named "banke" in https://bikeshbade.com.np/tutorials/Detail/?title=Geo-pandas%20data%20frame%20to%20GEE%20feature%20collection%20using%20Python&code=13
@@ -210,26 +226,26 @@ reduced = gpc.mosaic_and_reduce_IC_mean(imageC, SF, start_date, end_date)
 # # **Export output to Google Drive, only if you want!**
 
 # %% id="TmOxua9os46Y"
+# %%time
 export_raw_data = False
 
 if export_raw_data==True:
-  outfile_name = "Grant_4Fields_poly_wCentroids_colab_output"
-  task = ee.batch.Export.table.toDrive(**{
+    outfile_name = "Grant_4Fields_poly_wCentroids_colab_output"
+    task = ee.batch.Export.table.toDrive(**{
                                       'collection': reduced,
                                       'description': outfile_name,
                                       'folder': "colab_outputs",
                                       'selectors':["ID", "Acres", "county", "CropTyp", "DataSrc", \
                                                     "Irrigtn", "LstSrvD", "EVI", 'NDVI', "system_start_time"],
                                       'fileFormat': 'CSV'})
-  task.start()
-
-  import time 
-  while task.active():
-    print('Polling for task (id: {}). Still breathing'.format(task.id))
-    time.sleep(59)
+    task.start()
+    import time 
+    while task.active():
+        print('Polling for task (id: {}). Still breathing'.format(task.id))
+        time.sleep(59)
 
 # %% [markdown] id="_56djzTM9cdC"
-# #**Smooth the data**
+# # **Smooth the data**
 #
 # This is the end of Earh Engine Part. Below we start smoothing the data and carry on!
 #
@@ -263,7 +279,7 @@ SF_data.drop_duplicates(inplace=True)
 SF_data.shape
 
 # %% [markdown] id="fK8dO0yzc94q"
-# # NA removal
+# **NA removal**
 #
 # Even though logically and intuitively all the bands should be either available or ```NA```, I have seen before that sometimes ```EVI``` is NA while ```NDVI``` is not. Therefore, I had to choose which VI we want to use so that we can clean the data properly. However, I did not see that here.  when I was testing this code for 4 fields.
 #
@@ -275,7 +291,7 @@ reduced = reduced[reduced["EVI"].notna()]
 reduced.reset_index(drop=True, inplace=True)
 
 # %% [markdown] id="SWE3Cw8ChnNs"
-# # Add human readable time to the dataframe
+# **Add human readable time to the dataframe**
 
 # %% colab={"base_uri": "https://localhost:8080/"} id="1IhNPSPCjwK4" outputId="acb52a87-4264-4c7d-acfd-2038eda0902f"
 reduced = nc.add_human_start_time_by_system_start_time(reduced)
@@ -308,14 +324,15 @@ ax.legend(loc="lower right");
 # %% [markdown] id="sBUFPr-Zx2VH"
 # # Efficiency 
 #
-# We can and should make this more efficient. Do some of the calculations in place as opposed to creating a new ```dataframe``` and copying stuff.
+# Can we make this more efficient by doing the calculations in place as opposed to creating a new ```dataframe``` and copying stuff. Perhaps ```.map(.)``` too.
 #
-# #**Remove outliers**
+# **Remove outliers**
 
 # %% id="PschCyKp27bK"
+indeks = "EVI"
+
 reduced["ID"] = reduced["ID"].astype(str)
 IDs = np.sort(reduced["ID"].unique())
-indeks = "EVI"
 
 # %% colab={"base_uri": "https://localhost:8080/"} id="D4JDoe0Sf3YO" outputId="448f2248-26b4-4386-b9cc-37a522e0a85a"
 no_outlier_df = pd.DataFrame(data = None,
@@ -356,7 +373,7 @@ for a_poly in IDs:
 no_outlier_df.drop_duplicates(inplace=True)
 
 # %% [markdown] id="bygnLLy082lH"
-# #**Remove the damn jumps**
+# **Remove the jumps**
 #
 # Maybe we can remove old/previous dataframes to free memory up!
 
@@ -395,7 +412,7 @@ noJump_df.drop_duplicates(inplace=True)
 print ("Shape of noJump_df before dropping duplicates is {}.".format(noJump_df.shape))
 
 # %% [markdown] id="RnrloDSm-7qr"
-# # **Regularize**
+# **Regularize**
 #
 # Here we regularize the data. "Regularization" means pick a value for every 10-days. Doing this ensures 1. all inputs have the same length, 2. by picking maximum value of a VI we are reducing the noise in the time-series by eliminating noisy data points. For example, snow or shaddow can lead to understimating the true VI.
 #
@@ -424,8 +441,7 @@ print('nrows is {}.'.format(nrows))
 regular_df = pd.DataFrame(data = None,
                          index = np.arange(nrows), 
                          columns = reg_cols)
-counter = 0
-row_pointer = 0
+counter, row_pointer = 0, 0
 
 for a_poly in IDs:
     if (counter % 1000 == 0):
@@ -482,7 +498,7 @@ regular_df.reset_index(drop=True, inplace=True)
 
 
 # %% colab={"base_uri": "https://localhost:8080/", "height": 211} id="1B498-me7mMq" outputId="22db33e2-02c6-487a-cfba-ed9198bf23bd"
-#  Pick a fields
+#  Pick a field
 a_field = regular_df[regular_df.ID==reduced.ID.unique()[0]].copy()
 a_field.sort_values(by='human_system_start_time', axis=0, ascending=True, inplace=True)
 
@@ -518,7 +534,7 @@ for a_poly in IDs:
     counter += 1
 
 # %% colab={"base_uri": "https://localhost:8080/", "height": 211} id="yboIMfeWC_WH" outputId="b98d244d-2f33-47ad-ad52-96d346cf9bd2"
-#  Pick a fields
+#  Pick a field
 an_ID = reduced.ID.unique()[0]
 a_field = regular_df[regular_df.ID==an_ID].copy()
 a_field.sort_values(by='human_system_start_time', axis=0, ascending=True, inplace=True)

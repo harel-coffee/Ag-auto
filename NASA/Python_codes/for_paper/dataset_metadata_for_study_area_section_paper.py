@@ -19,11 +19,7 @@ import os
 
 # %%
 data_dir = "/Users/hn/Documents/01_research_data/NASA/data_part_of_shapefile/"
-
-# %%
 csv_files = [x for x in os.listdir(data_dir) if x.endswith(".csv")]
-
-# %%
 all_data=pd.DataFrame()
 for a_file in csv_files:
     curr_file = pd.read_csv(data_dir+a_file)

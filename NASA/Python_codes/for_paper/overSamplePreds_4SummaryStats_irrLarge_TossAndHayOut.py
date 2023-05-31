@@ -36,8 +36,6 @@ sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 
 # %%
-plot_dir = "/Users/hn/Documents/01_research_data/NASA/for_paper/plots/overSampleRegionalStats/only2Potentials/"
-os.makedirs(plot_dir, exist_ok=True)
 
 # %%
 dir_base = "/Users/hn/Documents/01_research_data/NASA/"
@@ -45,6 +43,9 @@ meta_dir = dir_base + "/parameters/"
 SF_data_dir   = dir_base + "/data_part_of_shapefile/"
 pred_dir_base = dir_base + "/RegionalStatData/"
 pred_dir = pred_dir_base + "02_ML_preds_oversampled/"
+
+plot_dir = dir_base + "/for_paper/plots/overSampleRegionalStats/only2Potentials_NumDenom/"
+os.makedirs(plot_dir, exist_ok=True)
 
 # %% [markdown]
 # # Read Fields Metadata
@@ -337,6 +338,9 @@ sorted(list(SF_data.county.unique()))
 
 # %%
 potentialCrops = list(only_potentialCrops.Crop_Type.unique())
+potentialCrops
+
+# %%
 
 # %%
 print (f"{len(all_preds.CropTyp.unique())=}")
@@ -401,25 +405,27 @@ print (EVI_SG_preds.groupby(['DL_EVI_SG_prob_point9'])['ExctAcr'].sum())
 print ("------------------------------------------------------------------------")
 print (EVI_SG_preds.groupby(['RF_EVI_SG_preds'])['ExctAcr'].sum())
 
+# %%
+
 # %% [markdown]
 # # County-Wise Acreage
 
 # %%
-EVI_SG_summary = pd.DataFrame(columns=list(EVI_SG_preds.columns[1:5]))
-EVI_SG_summary[EVI_SG_summary.columns[0]] = EVI_SG_preds.groupby(\
-                                                 [EVI_SG_summary.columns[0], "county"])['ExctAcr'].sum()
+EVI_SG_county_acr_summary = pd.DataFrame(columns=list(EVI_SG_preds.columns[1:5]))
+EVI_SG_county_acr_summary[EVI_SG_county_acr_summary.columns[0]] = EVI_SG_preds.groupby(\
+              [EVI_SG_county_acr_summary.columns[0], "county"])['ExctAcr'].sum()
 
-EVI_SG_summary[EVI_SG_summary.columns[1]] = EVI_SG_preds.groupby(\
-             [EVI_SG_summary.columns[1], "county"])['ExctAcr'].sum()
+EVI_SG_county_acr_summary[EVI_SG_county_acr_summary.columns[1]] = EVI_SG_preds.groupby(\
+             [EVI_SG_county_acr_summary.columns[1], "county"])['ExctAcr'].sum()
 
-EVI_SG_summary[EVI_SG_summary.columns[2]] = EVI_SG_preds.groupby(\
-              [EVI_SG_summary.columns[2], "county"])['ExctAcr'].sum()
+EVI_SG_county_acr_summary[EVI_SG_county_acr_summary.columns[2]] = EVI_SG_preds.groupby(\
+              [EVI_SG_county_acr_summary.columns[2], "county"])['ExctAcr'].sum()
 
-EVI_SG_summary[EVI_SG_summary.columns[3]] = EVI_SG_preds.groupby(\
-                [EVI_SG_summary.columns[3], "county"])['ExctAcr'].sum()
+EVI_SG_county_acr_summary[EVI_SG_county_acr_summary.columns[3]] = EVI_SG_preds.groupby(\
+                [EVI_SG_county_acr_summary.columns[3], "county"])['ExctAcr'].sum()
 
-EVI_SG_summary.index.rename(['label', 'county'], inplace=True)
-EVI_SG_summary.round()
+EVI_SG_county_acr_summary.index.rename(['label', 'county'], inplace=True)
+EVI_SG_county_acr_summary.round()
 
 # %%
 tick_legend_FontSize = 10
@@ -440,7 +446,7 @@ plt.rcParams['ytick.labelleft'] = True
 plt.rcParams.update(params)
 
 # %%
-df = EVI_SG_summary.copy()
+df = EVI_SG_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 ################################################################
@@ -465,8 +471,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("county")
 axs.set_title("5-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -475,24 +481,24 @@ plt.show()
 del(df)
 
 # %%
-NDVI_SG_summary = pd.DataFrame(columns=list(NDVI_SG_preds.columns[1:5]))
-NDVI_SG_summary[NDVI_SG_summary.columns[0]] = \
-             NDVI_SG_preds.groupby([NDVI_SG_summary.columns[0], "county"])['ExctAcr'].sum()
+NDVI_SG_county_acr_summary = pd.DataFrame(columns=list(NDVI_SG_preds.columns[1:5]))
+NDVI_SG_county_acr_summary[NDVI_SG_county_acr_summary.columns[0]] = \
+             NDVI_SG_preds.groupby([NDVI_SG_county_acr_summary.columns[0], "county"])['ExctAcr'].sum()
 
-NDVI_SG_summary[NDVI_SG_summary.columns[1]] = \
-            NDVI_SG_preds.groupby([NDVI_SG_summary.columns[1], "county"])['ExctAcr'].sum()
+NDVI_SG_county_acr_summary[NDVI_SG_county_acr_summary.columns[1]] = \
+            NDVI_SG_preds.groupby([NDVI_SG_county_acr_summary.columns[1], "county"])['ExctAcr'].sum()
 
-NDVI_SG_summary[NDVI_SG_summary.columns[2]] = \
-            NDVI_SG_preds.groupby([NDVI_SG_summary.columns[2], "county"])['ExctAcr'].sum()
+NDVI_SG_county_acr_summary[NDVI_SG_county_acr_summary.columns[2]] = \
+            NDVI_SG_preds.groupby([NDVI_SG_county_acr_summary.columns[2], "county"])['ExctAcr'].sum()
 
-NDVI_SG_summary[NDVI_SG_summary.columns[3]] = \
-            NDVI_SG_preds.groupby([NDVI_SG_summary.columns[3], "county"])['ExctAcr'].sum()
+NDVI_SG_county_acr_summary[NDVI_SG_county_acr_summary.columns[3]] = \
+            NDVI_SG_preds.groupby([NDVI_SG_county_acr_summary.columns[3], "county"])['ExctAcr'].sum()
 
-NDVI_SG_summary.index.rename(['label', 'county'], inplace=True)
-NDVI_SG_summary.round()
+NDVI_SG_county_acr_summary.index.rename(['label', 'county'], inplace=True)
+NDVI_SG_county_acr_summary.round()
 
 # %%
-df = NDVI_SG_summary.copy()
+df = NDVI_SG_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 ################################################################
@@ -517,8 +523,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("county")
 axs.set_title("5-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_SG_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -527,24 +533,24 @@ plt.show()
 del(df)
 
 # %%
-NDVI_regular_summary = pd.DataFrame(columns=list(NDVI_regular_preds.columns[1:5]))
-NDVI_regular_summary[NDVI_regular_summary.columns[0]] = \
-                      NDVI_regular_preds.groupby([NDVI_regular_summary.columns[0], "county"])['ExctAcr'].sum()
-    
-NDVI_regular_summary[NDVI_regular_summary.columns[1]] = \
-                   NDVI_regular_preds.groupby([NDVI_regular_summary.columns[1], "county"])['ExctAcr'].sum()
+NDVI_reg_county_acr_summary = pd.DataFrame(columns=list(NDVI_regular_preds.columns[1:5]))
+NDVI_reg_county_acr_summary[NDVI_reg_county_acr_summary.columns[0]] = \
+              NDVI_regular_preds.groupby([NDVI_reg_county_acr_summary.columns[0], "county"])['ExctAcr'].sum()
 
-NDVI_regular_summary[NDVI_regular_summary.columns[2]] = \
-                    NDVI_regular_preds.groupby([NDVI_regular_summary.columns[2], "county"])['ExctAcr'].sum()
+NDVI_reg_county_acr_summary[NDVI_reg_county_acr_summary.columns[1]] = \
+               NDVI_regular_preds.groupby([NDVI_reg_county_acr_summary.columns[1], "county"])['ExctAcr'].sum()
 
-NDVI_regular_summary[NDVI_regular_summary.columns[3]] = \
-                     NDVI_regular_preds.groupby([NDVI_regular_summary.columns[3], "county"])['ExctAcr'].sum()
+NDVI_reg_county_acr_summary[NDVI_reg_county_acr_summary.columns[2]] = \
+                NDVI_regular_preds.groupby([NDVI_reg_county_acr_summary.columns[2], "county"])['ExctAcr'].sum()
 
-NDVI_regular_summary.index.rename(['label', 'county'], inplace=True)
-NDVI_regular_summary.round()
+NDVI_reg_county_acr_summary[NDVI_reg_county_acr_summary.columns[3]] = \
+                 NDVI_regular_preds.groupby([NDVI_reg_county_acr_summary.columns[3], "county"])['ExctAcr'].sum()
+
+NDVI_reg_county_acr_summary.index.rename(['label', 'county'], inplace=True)
+NDVI_reg_county_acr_summary.round()
 
 # %%
-df = NDVI_regular_summary.copy()
+df = NDVI_reg_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 ################################################################
@@ -569,8 +575,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("county")
 axs.set_title("4-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -579,25 +585,25 @@ plt.show()
 del(df)
 
 # %%
-EVI_regular_summary = pd.DataFrame(columns=list(EVI_regular_preds.columns[1:5]))
+EVI_reg_county_acr_summary = pd.DataFrame(columns=list(EVI_regular_preds.columns[1:5]))
 
-EVI_regular_summary[EVI_regular_summary.columns[0]] = \
-                         EVI_regular_preds.groupby([EVI_regular_summary.columns[0], "county"])['ExctAcr'].sum()
+EVI_reg_county_acr_summary[EVI_reg_county_acr_summary.columns[0]] = \
+            EVI_regular_preds.groupby([EVI_reg_county_acr_summary.columns[0], "county"])['ExctAcr'].sum()
 
-EVI_regular_summary[EVI_regular_summary.columns[1]] = \
-                     EVI_regular_preds.groupby([EVI_regular_summary.columns[1], "county"])['ExctAcr'].sum()
-    
-EVI_regular_summary[EVI_regular_summary.columns[2]] = \
-                      EVI_regular_preds.groupby([EVI_regular_summary.columns[2], "county"])['ExctAcr'].sum()
-    
-EVI_regular_summary[EVI_regular_summary.columns[3]] = \
-                      EVI_regular_preds.groupby([EVI_regular_summary.columns[3], "county"])['ExctAcr'].sum()
-# EVI_regular_summary.reset_index(drop=False, inplace=True, col_fill='', names="predicted_label")
-EVI_regular_summary.index.rename(['label', 'county'], inplace=True)
-EVI_regular_summary.round()
+EVI_reg_county_acr_summary[EVI_reg_county_acr_summary.columns[1]] = \
+             EVI_regular_preds.groupby([EVI_reg_county_acr_summary.columns[1], "county"])['ExctAcr'].sum()
+
+EVI_reg_county_acr_summary[EVI_reg_county_acr_summary.columns[2]] = \
+            EVI_regular_preds.groupby([EVI_reg_county_acr_summary.columns[2], "county"])['ExctAcr'].sum()
+
+EVI_reg_county_acr_summary[EVI_reg_county_acr_summary.columns[3]] = \
+            EVI_regular_preds.groupby([EVI_reg_county_acr_summary.columns[3], "county"])['ExctAcr'].sum()
+# EVI_reg_county_acr_summary.reset_index(drop=False, inplace=True, col_fill='', names="predicted_label")
+EVI_reg_county_acr_summary.index.rename(['label', 'county'], inplace=True)
+EVI_reg_county_acr_summary.round()
 
 # %%
-df = EVI_regular_summary.copy()
+df = EVI_reg_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 ################################################################
@@ -622,8 +628,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("county")
 axs.set_title("4-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_acreage_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -654,7 +660,7 @@ SF_data_grp_area.reset_index(drop=False, inplace=True)
 SF_data_grp_area
 
 # %%
-df = EVI_regular_summary.copy()
+df = EVI_reg_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 
@@ -683,8 +689,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage (%)")
 axs.set_xlabel("county")
 axs.set_title("4-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -693,7 +699,7 @@ plt.show()
 del(df)
 
 # %%
-df = EVI_SG_summary.copy()
+df = EVI_SG_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 
@@ -722,8 +728,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage (%)")
 axs.set_xlabel("county")
 axs.set_title("5-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -732,7 +738,7 @@ plt.show()
 del(df)
 
 # %%
-df = NDVI_regular_summary.copy()
+df = NDVI_reg_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 df = pd.merge(df, SF_data_grp_area, on=(["county"]), how='left')
@@ -760,8 +766,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage (%)")
 axs.set_xlabel("county")
 axs.set_title("4-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -770,7 +776,7 @@ plt.show()
 del(df)
 
 # %%
-df = NDVI_SG_summary.copy()
+df = NDVI_SG_county_acr_summary.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
 
@@ -799,8 +805,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped acreage (%)")
 axs.set_xlabel("county")
 axs.set_title("5-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_SG_acreagePerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -866,8 +872,9 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("county")
 axs.set_title("5-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_SG_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -926,8 +933,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("county")
 axs.set_title("4-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -980,8 +987,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("county")
 axs.set_title("5-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1034,8 +1041,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("county")
 axs.set_title("4-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_count_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1091,8 +1098,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count (%)")
 axs.set_xlabel("county")
 axs.set_title("4-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1129,8 +1136,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count (%)")
 axs.set_xlabel("county")
 axs.set_title("5-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1167,8 +1174,9 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count (%)")
 axs.set_xlabel("county")
 axs.set_title("5-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
+
 
 file_name = plot_dir + "NDVI_SG_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1205,8 +1213,8 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("double-cropped field-count (%)")
 axs.set_xlabel("county")
 axs.set_title("4-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_countPerc_countyWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1438,8 +1446,8 @@ axs.set_xticks(X_axis, df.CropTyp);
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("crop")
 axs.set_title("5-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_SG_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1475,8 +1483,8 @@ axs.set_xticks(X_axis, df.CropTyp);
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("crop")
 axs.set_title("5-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1513,8 +1521,8 @@ axs.set_xticks(X_axis, df.CropTyp);
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("crop")
 axs.set_title("4-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1549,8 +1557,8 @@ axs.set_xticks(X_axis, df.CropTyp);
 axs.set_ylabel("double-cropped acreage")
 axs.set_xlabel("crop")
 axs.set_title("4-step EVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_cropWise_Acreage_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1609,10 +1617,10 @@ NDVI_SG_crop_summary_LSD.iloc[:,2:6] = 100* (NDVI_SG_crop_summary_LSD.iloc[:,2:6
 NDVI_SG_crop_summary_LSD.head(2)
 
 # %%
-print (f"{NDVI_SG_crop_summary.SVM_NDVI_SG_preds.max()=}")
-print (f"{NDVI_SG_crop_summary.SVM_NDVI_SG_preds.idxmax()=}")
-print ("")
-print (NDVI_SG_crop_summary.iloc[NDVI_SG_crop_summary.SVM_NDVI_SG_preds.idxmax()])
+# print (f"{NDVI_SG_crop_summary.SVM_NDVI_SG_preds.max()=}")
+# print (f"{NDVI_SG_crop_summary.SVM_NDVI_SG_preds.idxmax()=}")
+# print ("")
+# print (NDVI_SG_crop_summary.iloc[NDVI_SG_crop_summary.SVM_NDVI_SG_preds.idxmax()])
 
 # %%
 EVI_SG_crop_summary_LSD = pd.DataFrame(columns=["label", "CropTyp"])
@@ -1801,6 +1809,7 @@ axs.set_xlabel("crop")
 axs.set_title("5-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_SG_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1833,6 +1842,7 @@ axs.set_xlabel("crop")
 axs.set_title("5-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1866,6 +1876,7 @@ axs.set_xlabel("crop")
 axs.set_title("4-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -1899,6 +1910,7 @@ axs.set_xlabel("crop")
 axs.set_title("4-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_AcreagePrecent_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2013,6 +2025,7 @@ axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("crop")
 axs.set_title("4-step NDVI")
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2073,6 +2086,7 @@ axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("crop")
 axs.set_title("4-step NDVI")
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_SG_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2135,6 +2149,7 @@ axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("crop")
 axs.set_title("4-step EVI")
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2195,6 +2210,7 @@ axs.set_ylabel("double-cropped field-count")
 axs.set_xlabel("crop")
 axs.set_title("5-step EVI")
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_count_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2262,6 +2278,7 @@ axs.set_xlabel("crop")
 axs.set_title("4-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_regular_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2326,6 +2343,7 @@ axs.set_xlabel("crop")
 axs.set_title("5-step NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "NDVI_SG_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2358,9 +2376,6 @@ EVI_SG_crop_summary_LSD = pd.merge(
 
 EVI_SG_crop_summary_LSD.iloc[:,2:6] = 100 * (EVI_SG_crop_summary_LSD.iloc[:,2:6].div(
                                                   EVI_SG_crop_summary_LSD.field_count, axis=0))
-
-EVI_SG_crop_summary_LSD.head(2)
-
 ################################################
 df = EVI_SG_crop_summary_LSD.copy()
 # df.reset_index(inplace=True)
@@ -2390,6 +2405,7 @@ axs.set_xlabel("crop")
 axs.set_title("5-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_SG_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -2422,9 +2438,6 @@ EVI_regular_crop_summary_LSD = pd.merge(
 
 EVI_regular_crop_summary_LSD.iloc[:,2:6] = 100 * (EVI_regular_crop_summary_LSD.iloc[:,2:6].div(
                                                   EVI_regular_crop_summary_LSD.field_count, axis=0))
-
-EVI_regular_crop_summary_LSD.head(2)
-
 ################################################
 df = EVI_regular_crop_summary_LSD.copy()
 # df.reset_index(inplace=True)
@@ -2454,12 +2467,16 @@ axs.set_xlabel("crop")
 axs.set_title("4-step EVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
 
 file_name = plot_dir + "EVI_regular_countPerc_cropWise_potens.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
 del(df)
+
+# %%
+sorted(list(EVI_regular_preds.CropTyp.unique()))
 
 # %%
 
