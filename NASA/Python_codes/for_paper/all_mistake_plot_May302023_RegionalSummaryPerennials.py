@@ -71,6 +71,9 @@ SF_data.head(2)
 
 # %%
 all_preds = pd.read_csv(pred_dir + "all_preds_overSample.csv")
+all_preds.shape
+all_preds=all_preds[all_preds.ExctAcr>10].copy()
+all_preds.shape
 
 # %%
 # For non-oversample
@@ -183,6 +186,10 @@ landsat_DF = landsat_DF[landsat_DF.ID.isin(list(all_preds.ID.unique()))]
 # %%
 all_preds[all_preds.KNN_NDVI_SG_preds==2].CropTyp.unique()
 all_preds.head(2)
+
+# %%
+all_preds_apple = all_preds[all_preds.CropTyp=="apple"].copy()
+all_preds_apple.shape
 
 # %%
 

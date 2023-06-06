@@ -368,6 +368,9 @@ SF_data = SF_data[SF_data.ExctAcr>10]
 SF_data = nc.filter_out_nonIrrigated(SF_data)
 
 # %%
+badCrops
+
+# %%
 SF_data.reset_index(inplace=True, drop=True)
 SF_data.head(2)
 
@@ -1290,6 +1293,13 @@ SF_data_LSD.reset_index(drop=True, inplace=True)
 print (SF_data_LSD.shape)
 
 # %%
+print (f"{len(NDVI_SG_preds_LSD.CropTyp.unique())=}")
+print (f"{len(NDVI_SG_preds.CropTyp.unique())=}")
+
+# %%
+sorted(list(NDVI_SG_preds_LSD.CropTyp.unique()))
+
+# %%
 print (SF_data.shape)
 Adams = SF_data[SF_data.county=="Adams"]
 print (Adams.LstSrvD.unique().min())
@@ -1369,6 +1379,9 @@ NDVI_SG_crop_summary = pd.merge(NDVI_SG_crop_summary, col4, on=(["label", "CropT
 NDVI_SG_crop_summary.head(2)
 
 # %%
+sorted(list(NDVI_SG_crop_summary.CropTyp.unique()))
+
+# %%
 EVI_SG_crop_summary = pd.DataFrame(columns=["label", "CropTyp"])
 
 col1 = group_sum_area(EVI_SG_preds, [EVI_SG_preds.columns[1], "CropTyp"])
@@ -1414,6 +1427,9 @@ NDVI_regular_crop_summary = pd.merge(NDVI_regular_crop_summary, col4, on=(["labe
 NDVI_regular_crop_summary.head(2)
 
 # %%
+sorted(list(NDVI_SG_crop_summary.CropTyp.unique()))
+
+# %%
 df = NDVI_SG_crop_summary.copy()
 df = df[df.label==2]
 df.fillna(0, inplace=True)
@@ -1451,7 +1467,11 @@ file_name = plot_dir + "NDVI_SG_cropWise_Acreage.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
-del(df)
+# del(df)
+
+# %%
+# sorted(list(df.CropTyp.unique()))
+NDVI_SG_crop_summary
 
 # %%
 df = EVI_SG_crop_summary.copy()
