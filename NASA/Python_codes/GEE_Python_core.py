@@ -180,7 +180,60 @@ def cloudMaskL578_C2L2(image):
 """
 Above this line is Jun 5, 2023 after JS gives memory error
 """
+
+
 ###########################################################
+def mosaic_and_reduce_IC_mean_noWSDA(an_IC, a_feature, start_date, end_date):
+    """Return mosaiced and reduced imageCollection. Reduction is mean within a region.
+    This function is Python version of my functions in JavaScript from forecast project.
+    Here I have deleted the commented lines.
+
+    Arguments
+    ---------
+    an_Ic : imageCollection
+    reduction_geometry : ee.FeatureCollection(SF) where SF is the WSDA shapefile
+
+    Returns
+    ---------
+    reduced  :  imageCollection
+                mosaiced and reduced
+    """
+    an_IC = ee.ImageCollection(an_IC)
+    reduction_geometry = a_feature
+    start_date_DateType = ee.Date(start_date)
+    end_date_DateType = ee.Date(end_date)
+    #######**************************************
+    # Difference in days between start and end_date
+    diff = end_date_DateType.difference(start_date_DateType, "day")
+
+    def list_the_datesish(day):
+        return start_date_DateType.advance(day, "day")
+
+    # Make a list of all dates
+    date_range = ee.List.sequence(0, diff.subtract(1)).map(list_the_datesish)
+
+    # Funtion for iteraton over the range of dates
+    def day_mosaics(date, newlist):
+        # Cast
+        date = ee.Date(date)
+        newlist = ee.List(newlist)
+        # Filter an_IC between date and the next day
+        filtered = an_IC.filterDate(date, date.advance(1, "day"))
+        image = ee.Image(filtered.mosaic())
+        # Make the mosaic
+        # Add the mosaic to a list only if the an_IC has images
+        return ee.List(ee.Algorithms.If(filtered.size(), newlist.add(image), newlist))
+
+    # Iterate over the range to make a new list, and then cast the list to an imagecollection
+    newcol = ee.ImageCollection(ee.List(date_range.iterate(day_mosaics, ee.List([]))))
+
+    def reduce_regions(image):
+        return image.reduceRegions(
+            **{"collection": reduction_geometry, "reducer": ee.Reducer.mean(), "scale": 10}
+        )
+
+    reduced = newcol.map(reduce_regions).flatten()
+    return reduced
 
 
 def mosaic_and_reduce_IC_mean(an_IC, a_feature, start_date, end_date):
@@ -211,7 +264,7 @@ def mosaic_and_reduce_IC_mean(an_IC, a_feature, start_date, end_date):
         return start_date_DateType.advance(day, "day")
 
     # Make a list of all dates
-    range = ee.List.sequence(0, diff.subtract(1)).map(list_the_datesish)
+    date_range = ee.List.sequence(0, diff.subtract(1)).map(list_the_datesish)
 
     # Funtion for iteraton over the range of dates
     def day_mosaics(date, newlist):
@@ -226,7 +279,7 @@ def mosaic_and_reduce_IC_mean(an_IC, a_feature, start_date, end_date):
         return ee.List(ee.Algorithms.If(filtered.size(), newlist.add(image), newlist))
 
     # Iterate over the range to make a new list, and then cast the list to an imagecollection
-    newcol = ee.ImageCollection(ee.List(range.iterate(day_mosaics, ee.List([]))))
+    newcol = ee.ImageCollection(ee.List(date_range.iterate(day_mosaics, ee.List([]))))
 
     def reduce_regions(image):
         return image.reduceRegions(
@@ -494,3 +547,68 @@ def copyProps(index):
     dest = ee.Image(LS_collection.toList(LS_collection.size()).get(index))
     image = ee.Image(dest.copyProperties(source, properties=["system:time_start"]))
     return image
+
+
+def split_feacturecollection_to_blocks(fc, simplify=0, block_size=1000, sel_polygon=True):
+    blocks = dict()
+
+    def sp_simplify(feature):
+        return feature.setGeometry(feature.geometry().simplify(maxError=simplify))
+
+    if simplify > 0:
+        fc = fc.map(sp_simplify)
+
+    feature_count = fc.size().getInfo()  # Get the total number of features
+    num_blocks = feature_count // block_size  # Calculate the number of blocks
+    if feature_count % block_size != 0:
+        num_blocks += 1
+    if num_blocks > 1:
+        print(f"{num_blocks=}")
+    # Iterate over the blocks and export to Google Drive
+    for block_index in range(num_blocks):
+        start_index = block_index * block_size
+        end_index = min((block_index + 1) * block_size, feature_count)
+        # Get the block of features
+        block = fc.toList(block_size, start_index)
+        print(f"block:{block_index} block_size:{len(block.getInfo())}")
+        tmp_geojson = ee.FeatureCollection(block).getInfo()
+        if sel_polygon:
+            tmp_geojson = get_polygons_from_geojson(tmp_geojson)
+        blocks[block_index] = tmp_geojson
+    return blocks
+
+
+def split_SF_to_blocks(fc, block_size=1000):
+    """
+    This is a modification of split_large_feacturecollection_to_blocks() function.
+    The update is that this function will split a shapefile of type geopandas.geodataframe.GeoDataFrame.
+    """
+
+    """Returns a dataframe where data points are interval_size-day apart.
+       This function regularizes the data between the minimum and maximum dates
+       present in the data. 
+
+    Arguments
+    ---------
+    SF : Shapefile 
+           of type geopandas.geodataframe.GeoDataFrame
+
+    Returns
+    -------
+    blocks : dictionary
+               where each entry is a smaller shapefile
+    """
+
+    blocks = dict()
+
+    feature_count = len(fc)  # Get the total number of features
+    num_blocks = feature_count // block_size  # Calculate the number of blocks
+    if feature_count % block_size != 0:
+        num_blocks += 1
+
+    # Iterate over the blocks and export to Google Drive
+    for block_index in range(num_blocks):
+        start_index = block_index * block_size
+        end_index = min((block_index + 1) * block_size, feature_count)
+        blocks[block_index] = fc[start_index:end_index]  # Get FC blocks
+    return blocks

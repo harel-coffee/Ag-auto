@@ -20,8 +20,7 @@
 #
 #
 # split_large_feacturecollection_to_blocks
-
-# %% colab={"base_uri": "https://localhost:8080/"} id="V8R-ynQrv5Y5" outputId="91433276-6c4c-4a0b-a41e-f9f7a09160a5"
+#
 # %who
 
 # %% id="KexkTWOCv98f"
