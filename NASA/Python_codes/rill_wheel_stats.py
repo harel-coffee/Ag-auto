@@ -352,13 +352,9 @@ experts_250_Acr.reset_index(inplace=True)
 experts_250_Acr.sort_values(by=['Irrigtn'], inplace=True)
 experts_250_Acr.head(2)
 
-
-
 # %%
 stats = pd.merge(experts_250_Acr, experts_250_count, on=["Irrigtn"], how='left')
 
 out_name = output_dir + "rill_wheel_stat_expertsSet1_JustIrrType.csv"
 stats.to_csv(out_name, index = False)
 del(stats)
-
-# %%
