@@ -20,7 +20,7 @@ WSDA <- readOGR(paste0(data_dir, "2022_survey_Supriya/", SSF_name, ".shp"),
                 layer = SSF_name, 
                 GDAL1_integer64_policy = TRUE)
 
-
+# ASF - Amin Shapefile
 ASF_name <- "Dcrop_FieldSurveyLocation_WSU_Students_2022"
 ASF <- readOGR(paste0(data_dir, ASF_name, "/", ASF_name, ".shp"),
                layer = ASF_name, 
