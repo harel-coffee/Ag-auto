@@ -41,11 +41,11 @@ import NASA_plot_core as ncp
 ####################################################################################
 
 indeks = sys.argv[1]
-satellite_name = sys.argv[2]
+# satellite_name = sys.argv[2]
 
 print("Terminal Arguments are: ")
 print(indeks)
-print(satellite_name)
+# print(satellite_name)
 print("__________________________________________")
 
 if indeks == "NDVI":
@@ -73,16 +73,24 @@ print("output_dir is: " + output_dir)
 ###                   process data
 ###
 ########################################################################################
-if satellite_name == "L5":
-    f_name = "L5_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
-elif satellite_name == "L7":
-    f_name = "L7_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
-elif satellite_name == "L8":
-    f_name = "L8_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
-else:
-    print("bad f_name!!!")
+# if satellite_name == "L5":
+#     f_name = "L5_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
+# elif satellite_name == "L7":
+#     f_name = "L7_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
+# elif satellite_name == "L8":
+#     f_name = "L8_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01"
+# else:
+#     print("bad f_name!!!")
 
-L578 = pd.read_csv(data_dir + f_name + ".csv")
+# Added July 10. I did not concatenate them before!!!
+L5 = pd.read_csv(data_dir + "L5_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01" + ".csv")
+L7 = pd.read_csv(data_dir + "L7_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01" + ".csv")
+L8 = pd.read_csv(data_dir + "L8_T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01" + ".csv")
+
+
+# L578 = pd.read_csv(data_dir + f_name + ".csv")
+L578 = pd.concat([L5, L7, L8])
+
 L578.drop([NoVI], axis=1, inplace=True)
 L578 = L578[L578[indeks].notna()]
 L578["ID"] = L578["ID"].astype(str)
@@ -136,7 +144,7 @@ for a_poly in IDs:
 ###
 ####################################################################################
 
-out_name = output_dir + "noOutlier_" + f_name + "_" + indeks + ".csv"
+out_name = output_dir + "noOutlier_" + indeks + "_post2008.csv"
 
 output_df.drop_duplicates(inplace=True)
 # output_df.dropna(inplace=True)

@@ -255,6 +255,57 @@ out_name = data_dir_base + "L7_NDVI_pre2008.csv"
 L7_NDVI.to_csv(out_name, index = False)
 
 # %%
+# %%time
+
+out_name = data_dir_base + "L4_EVI_pre2008.csv"
+L4_EVI = pd.read_csv(out_name)
+
+out_name = data_dir_base + "L4_NDVI_pre2008.csv"
+L4_NDVI = pd.read_csv(out_name)
+
+out_name = data_dir_base + "L5_early_EVI_pre2008.csv"
+L5_early_EVI = pd.read_csv(out_name)
+
+out_name = data_dir_base + "L5_early_NDVI_pre2008.csv"
+L5_early_NDVI = pd.read_csv(out_name)
+
+out_name = data_dir_base + "L5_late_EVI_pre2008.csv"
+L5_late_EVI = pd.read_csv(out_name)
+
+out_name = data_dir_base + "L5_late_NDVI_pre2008.csv"
+L5_late_NDVI = pd.read_csv(out_name)
+
+out_name = data_dir_base + "L7_EVI_pre2008.csv"
+L7_EVI = pd.read_csv(out_name)
+
+out_name = data_dir_base + "L7_NDVI_pre2008.csv"
+L7_NDVI = pd.read_csv(out_name)
+
+# %%
+L457_EVI_pre2008 = pd.concat([L4_EVI, L5_early_EVI, L5_late_EVI, L7_EVI])
+L457_NDVI_pre2008 = pd.concat([L4_NDVI, L5_early_NDVI, L5_late_NDVI, L7_NDVI])
+
+# %%
+L457_EVI_pre2008["human_system_start_time"] = pd.to_datetime(L457_EVI_pre2008["human_system_start_time"])
+L457_NDVI_pre2008["human_system_start_time"] = pd.to_datetime(L457_NDVI_pre2008["human_system_start_time"])
+
+# %%
+L457_EVI_pre2008.sort_values(by=["ID", "human_system_start_time"], inplace=True)
+L457_NDVI_pre2008.sort_values(by=["ID", "human_system_start_time"], inplace=True)
+
+# %%
+L457_EVI_pre2008.reset_index(drop=True, inplace=True)
+L457_NDVI_pre2008.reset_index(drop=True, inplace=True)
+
+# %%
+out_name = data_dir_base + "L457_EVI_pre2008.csv"
+L457_EVI_pre2008.to_csv(out_name, index = False)
+
+out_name = data_dir_base + "L457_NDVI_pre2008.csv"
+L457_NDVI_pre2008.to_csv(out_name, index = False)
+
+# %%
+L457_EVI_pre2008.head(2)
 
 # %%
 

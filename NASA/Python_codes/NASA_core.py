@@ -566,7 +566,10 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
     outlier_input["human_system_start_time"] = pd.to_datetime(
         outlier_input["human_system_start_time"]
     )
-    outlier_input.sort_values(by=["human_system_start_time"], inplace=True)
+    assert len(outlier_input.ID.unique()) == 1
+
+    # ID below is for sanity check. otherwise the input must be one field
+    outlier_input.sort_values(by=["ID", "human_system_start_time"], inplace=True)
     outlier_input.reset_index(drop=True, inplace=True)
 
     # 1st block
