@@ -1,8 +1,8 @@
 options(digit=9)
 options(digits=9)
 
-.libPaths("/data/hydro/R_libs35")
-.libPaths()
+.libPaths("/data/hydro/R_libs35") # remove in Kamiak
+.libPaths() # remove in Kamiak
 library(data.table)
 # library(lubridate)
 library(chron)
@@ -17,6 +17,17 @@ library(dplyr)
 ######  /data/hydro/jennylabcommon2/metdata/historical/UI_historical/VIC_Binary_CONUS_to_2016
 ###### observed historical is equivalent to having 8 variables, and years 1979-2016
 ######
+
+###### YOU MUST be careful with start and end years anywhere in this code.
+###### The start and end year are not in the binary files (I am faily certain.)
+###### So, if you start 2100 and end on 2120, it will create a calendar using those
+###### and then read the data and populate the data table and you have observed the future!!!
+
+read_binary_new <- function(file_path, no_vars, start_year, end_year){
+  ymd_file <- create_ymdvalues(start_year, end_year)
+  data <- read_binary_addmdy(file_path, ymd_file, no_vars)
+  return(data.table(data))
+}
 
 read_binary <- function(file_path, hist, no_vars){
   if (no_vars == 8){
