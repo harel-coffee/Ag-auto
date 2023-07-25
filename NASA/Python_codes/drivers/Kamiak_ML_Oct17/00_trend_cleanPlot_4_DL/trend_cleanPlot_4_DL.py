@@ -87,7 +87,7 @@ for curr_ID in data.ID.unique():
 
         # the following line also works
         ax.set_ylim([-0.005, 1])
-
+        counter += 1
         fig_name = out_dir + curr_ID + "_" + str(a_year) + ".jpg"
         plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight", facecolor="w")
         plt.close("all")

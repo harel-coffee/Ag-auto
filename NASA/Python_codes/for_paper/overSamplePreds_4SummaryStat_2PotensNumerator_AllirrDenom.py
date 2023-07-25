@@ -234,6 +234,18 @@ SF_data.head(2)
 sorted(list(EVI_SG_preds.CropTyp.unique()))
 
 # %%
+EVI_SG_preds.head(2)
+
+# %%
+EVI_SG_summary_countyAcr = pd.DataFrame(columns=list(EVI_SG_preds.columns[1:5]))
+EVI_SG_summary_countyAcr
+
+# %%
+EVI_SG_summary_countyAcr[EVI_SG_summary_countyAcr.columns[0]] = EVI_SG_preds.groupby(\
+                                                 [EVI_SG_summary_countyAcr.columns[0], "county"])['ExctAcr'].sum()
+EVI_SG_summary_countyAcr
+
+# %%
 EVI_SG_summary_countyAcr = pd.DataFrame(columns=list(EVI_SG_preds.columns[1:5]))
 EVI_SG_summary_countyAcr[EVI_SG_summary_countyAcr.columns[0]] = EVI_SG_preds.groupby(\
                                                  [EVI_SG_summary_countyAcr.columns[0], "county"])['ExctAcr'].sum()

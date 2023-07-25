@@ -1,11 +1,10 @@
 #!/bin/bash
-#SBATCH --partition=kamiak
-#SBATCH --constraint=cascadelake
-##SBATCH --partition=rajagopalan
+
+#SBATCH --partition=rajagopalan,cahnrs,cahnrs_bigmem,cahnrs_gpu,kamiak,stockle
 #SBATCH --requeue
-#SBATCH --job-name=indeks_smooth_type_batch_no # Job Name
-#SBATCH --time=1-00:00:00    # Wall clock time limit in Days-HH:MM:SS
-#SBATCH --mem=10GB 
+#SBATCH --job-name=SeasVGrid_outer # Job Name
+#SBATCH --time=00-12:00:00    # Wall clock time limit in Days-HH:MM:SS
+#SBATCH --mem=30GB 
 #SBATCH --nodes=1            # Node count required for the job
 #SBATCH --ntasks-per-node=1  # Number of tasks to be launched per Node
 #SBATCH --ntasks=1           # Number of tasks per array job
@@ -13,11 +12,10 @@
 ####SBATCH --array=0-30000
 
 ###SBATCH -k o
-#SBATCH --output=/home/h.noorazar/NASA/trend/clean_plots_4_DL/error/indeks_smooth_type_batch_no.o
-#SBATCH --error=/home/h.noorazar/NASA/trend/clean_plots_4_DL/error/indeks_smooth_type_batch_no.e
-echo
-echo "--- We are now in $PWD ..."
-echo
+
+## Define path for output & error logs
+#SBATCH --error=/home/h.noorazar/NASA/02_remove_outliers_n_jumps/00_intersect_remove_outliers/error/outer_post2008_e
+#SBATCH --output=/home/h.noorazar/NASA/02_remove_outliers_n_jumps/00_intersect_remove_outliers/error/outer_post2008_o
 
 ## echo "I am Slurm job ${SLURM_JOB_ID}, array job ${SLURM_ARRAY_JOB_ID}, and array task ${SLURM_ARRAY_TASK_ID}."
 
@@ -57,10 +55,12 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python /home/h.noorazar/NASA/trend/clean_plots_4_DL/trend_cleanPlot_4_DL.py indeks smooth_type batch_no
+cd /home/h.noorazar/NASA/02_remove_outliers_n_jumps/00_intersect_remove_outliers/
 
-echo
-echo "----- DONE -----"
-echo
+# ----------------------------------------------------------------
+# Run python code for matrix
+# ----------------------------------------------------------------
 
-exit 0
+python3 ./00_remove_outliers_intersect_post2008_kamiak.py indeks
+
+

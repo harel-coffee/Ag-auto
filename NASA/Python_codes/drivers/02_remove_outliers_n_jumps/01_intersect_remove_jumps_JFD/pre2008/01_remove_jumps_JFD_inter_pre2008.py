@@ -106,18 +106,21 @@ L5_early_ = pd.read_csv(data_dir + f_names[1], low_memory=False)
 L5_late_ = pd.read_csv(data_dir + f_names[2], low_memory=False)
 L7_ = pd.read_csv(data_dir + f_names[3], low_memory=False)
 
+L4_.drop(["system_start_time"], axis=1, inplace=True)
+L4_ = L4_[L4_[indeks].notna()]
 
-L5.drop(["system_start_time"], axis=1, inplace=True)
-L5 = L5[L5[indeks].notna()]
 
-L7.drop(["system_start_time"], axis=1, inplace=True)
-L7 = L7[L7[indeks].notna()]
+L5_early_.drop(["system_start_time"], axis=1, inplace=True)
+L5_early_ = L5_early_[L5_early_[indeks].notna()]
 
-L8.drop(["system_start_time"], axis=1, inplace=True)
-L8 = L8[L8[indeks].notna()]
+L5_late_.drop(["system_start_time"], axis=1, inplace=True)
+L5_late_ = L5_late_[L5_late_[indeks].notna()]
 
-L578 = pd.concat([L5, L7, L8])
-del (L5, L7, L8)
+L7_.drop(["system_start_time"], axis=1, inplace=True)
+L7_ = L7_[L7_[indeks].notna()]
+
+L578 = pd.concat([L4_, L5_early_, L5_late_, L7_])
+del (L4_, L5_early_, L5_late_, L7_)
 
 # L578["ID"] = L578["ID"].astype(str)
 L578 = L578[L578.ID.isin(list(batch_IDs.ID))].copy()
