@@ -58,7 +58,7 @@ train80_labels = pd.read_csv(ML_data_dir+"train80_split_2Bconsistent_Oct17.csv")
 test20_labels = pd.read_csv(ML_data_dir+"test20_split_2Bconsistent_Oct17.csv")
 
 # %%
-train80_preds = all_preds[all_preds.ID.isin(list(train80_labels.ID.unique()))].copy()
+# train80_preds = all_preds[all_preds.ID.isin(list(train80_labels.ID.unique()))].copy()
 test20_preds = all_preds[all_preds.ID.isin(list(test20_labels.ID.unique()))].copy()
 
 # %%
@@ -140,11 +140,11 @@ NDVI_SG_cols  = ["SVM_NDVI_SG_preds",      "KNN_NDVI_SG_preds",
 
 
 # %%
-train80_preds = train80_preds[["ID"] + NDVI_SG_cols].copy()
+# train80_preds = train80_preds[["ID"] + NDVI_SG_cols].copy()
 test20_preds  = test20_preds[["ID"]  + NDVI_SG_cols].copy()
 
 # %%
-train80_preds = pd.merge(train80_preds, GT_labels, on=['ID'], how='left')
+# train80_preds = pd.merge(train80_preds, GT_labels, on=['ID'], how='left')
 test20_preds = pd.merge(test20_preds, GT_labels, on=['ID'], how='left')
 
 # %%

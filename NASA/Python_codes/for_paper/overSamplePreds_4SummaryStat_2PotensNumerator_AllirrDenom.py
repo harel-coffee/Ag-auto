@@ -231,7 +231,7 @@ SF_data.head(2)
 # # County-Wise Acreage
 
 # %%
-sorted(list(EVI_SG_preds.CropTyp.unique()))
+# sorted(list(EVI_SG_preds.CropTyp.unique()))
 
 # %%
 EVI_SG_preds.head(2)
@@ -333,7 +333,7 @@ print (f"{SF_data.ExctAcr.min()=:.4f}")
 SF_data.head(2)
 
 # %%
-sorted(list(SF_data.CropTyp.unique()))
+# sorted(list(SF_data.CropTyp.unique()))
 
 # %%
 SF_data_grp_area = SF_data.groupby(['county'])['ExctAcr'].sum()
@@ -359,6 +359,12 @@ plt.rcParams['xtick.labelbottom'] = True
 plt.rcParams['ytick.labelleft'] = True
 plt.rcParams.update(params)
 
+color_dict = {"SVM": "#DDCC77",
+              "kNN": "#E69F00",
+              "DL": "#332288", # "#6699CC",
+              "RF":'#0072B2'
+             }
+
 # %%
 plot_dir
 
@@ -381,18 +387,23 @@ bar_width_ = 1
 step_size_ = 5*bar_width_
 X_axis = np.array(range(0, step_size_*len(df.county), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df.SVM_EVI_regular_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_EVI_regular_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_EVI_regular_prob_point9, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_EVI_regular_preds, color ='c', width = bar_width_, label="RF")
+axs.bar(X_axis - bar_width_*2, df.SVM_EVI_regular_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_EVI_regular_preds, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_EVI_regular_prob_point9, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_EVI_regular_preds, color = color_dict["RF"], width = bar_width_, label="RF")
 
 axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped acreage (%)")
-axs.set_xlabel("county")
+# axs.set_xlabel("county")
 axs.set_title("4-step EVI")
 # axs.set_ylim([0, 105])
+
+# send the guidelines to the back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+1), axisbelow=True);
+
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
 file_name = plot_dir + "EVI_regular_acreagePerc_countyWise_potens_AllIrrDenom.pdf"
@@ -422,18 +433,23 @@ bar_width_ = 1
 step_size_ = 5*bar_width_
 X_axis = np.array(range(0, step_size_*len(df.county), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df.SVM_EVI_SG_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_EVI_SG_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_EVI_SG_prob_point9, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_EVI_SG_preds, color ='c', width = bar_width_, label="RF")
+axs.bar(X_axis - bar_width_*2, df.SVM_EVI_SG_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_EVI_SG_preds, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_EVI_SG_prob_point9, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_EVI_SG_preds, color = color_dict["RF"], width = bar_width_, label="RF")
 
 axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped acreage (%)")
-axs.set_xlabel("county")
+# axs.set_xlabel("county")
 axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
+
+# send the guidelines to the back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+1), axisbelow=True);
+
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none') 
 file_name = plot_dir + "EVI_SG_acreagePerc_countyWise_potens_AllIrrDenom.pdf"
@@ -462,19 +478,25 @@ bar_width_ = 1
 step_size_ = 5*bar_width_
 X_axis = np.array(range(0, step_size_*len(df.county), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_regular_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_NDVI_regular_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_NDVI_regular_prob_point3, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_NDVI_regular_preds, color ='c', width = bar_width_, label="RF")
+axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_regular_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_NDVI_regular_preds, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_NDVI_regular_prob_point3, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_NDVI_regular_preds, color = color_dict["RF"], width = bar_width_, label="RF")
 
 axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped acreage (%)")
-axs.set_xlabel("county")
+# axs.set_xlabel("county")
 axs.set_title("4-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
+
+# send the guidelines to the back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+1), axisbelow=True);
+
+
 axs.xaxis.set_ticks_position('none')
 file_name = plot_dir + "NDVI_regular_acreagePerc_countyWise_potens_AllIrrDenom.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
@@ -503,25 +525,102 @@ bar_width_ = 1
 step_size_ = 5*bar_width_
 X_axis = np.array(range(0, step_size_*len(df.county), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color ='c', width = bar_width_, label="RF")
+axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color = color_dict["RF"], width = bar_width_, label="RF")
 
 axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped acreage (%)")
-axs.set_xlabel("county")
-axs.set_title("5-step NDVI")
+# axs.set_xlabel("county")
+# axs.set_title("NDVI")
 # axs.set_ylim([0, 105])
+# send the guidelines to the back
+
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+1), axisbelow=True);
+
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
 file_name = plot_dir + "NDVI_SG_acreagePerc_countyWise_potens_AllIrrDenom.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
-del(df)
+# del(df)
+
+# %%
+SF_data_grp_area
+
+# %%
+df = NDVI_SG_summary_countyAcr.copy()
+df.reset_index(inplace=True)
+df = df[df.label==2]
+
+df = pd.merge(df, SF_data_grp_area, on=(["county"]), how='left')
+df_copy = df.copy()
+df_copy["county"] = "all counties"
+df_copy.sum()[2:].values
+df.loc[len(df.index)] = ["2", "all counties"] +  list(df_copy.sum()[2:].values)
+df
+
+# %%
+df = NDVI_SG_summary_countyAcr.copy()
+df.reset_index(inplace=True)
+df = df[df.label==2]
+
+df = pd.merge(df, SF_data_grp_area, on=(["county"]), how='left')
+df_copy = df.copy()
+df_copy["county"] = "all counties"
+df_copy.sum()[2:].values
+df.loc[len(df.index)] = ["2", "all counties"] +  list(df_copy.sum()[2:].values)
+
+
+df.iloc[:,2:6] = 100 * (df.iloc[:,2:6].div(df.ExctAcr, axis=0))
+
+################################################################
+fig, axs = plt.subplots(1, 1, figsize=(7, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
+                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+axs.grid(axis='y', which='both')
+
+X_axis = np.arange(len(df.county))
+
+bar_width_ = 1
+step_size_ = 5*bar_width_
+X_axis = np.array(range(0, step_size_*len(df.county), step_size_))
+
+axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color = color_dict["RF"], width = bar_width_, label="RF")
+
+axs.tick_params(axis='x', labelrotation = 0)
+axs.set_xticks(X_axis, df.county)
+
+axs.set_ylabel("double-cropped acreage (%)")
+# axs.set_xlabel("county")
+# axs.set_title("NDVI")
+# axs.set_ylim([0, 105])
+# send the guidelines to the back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+1), axisbelow=True);
+
+axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
+file_name = plot_dir + "NDVI_SG_acreagePerc_countyWise_potens_AllIrrDenom_acllCounties.pdf"
+plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+
+plt.show()
+# del(df)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
 # Adams = SF_data[SF_data.county=="Adams"]
@@ -662,7 +761,7 @@ axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped field-count (%)")
-axs.set_xlabel("county")
+# axs.set_xlabel("county")
 axs.set_title("4-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
@@ -702,7 +801,7 @@ axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped field-count (%)")
-axs.set_xlabel("county")
+# axs.set_xlabel("county")
 axs.set_title("5-step EVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
@@ -742,8 +841,8 @@ axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped field-count (%)")
-axs.set_xlabel("county")
-axs.set_title("5-step NDVI")
+# axs.set_xlabel("county")
+# axs.set_title("NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
@@ -782,7 +881,7 @@ axs.tick_params(axis='x', labelrotation = 0)
 axs.set_xticks(X_axis, df.county)
 
 axs.set_ylabel("double-cropped field-count (%)")
-axs.set_xlabel("county")
+# axs.set_xlabel("county")
 axs.set_title("4-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
@@ -1247,7 +1346,7 @@ axs.set_xticks(X_axis, df.CropTyp)
 
 axs.set_ylabel("double-cropped acreage (%)")
 axs.set_xlabel("crop")
-axs.set_title("5-step NDVI")
+axs.set_title("NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
@@ -1538,7 +1637,7 @@ axs.set_xticks(X_axis, df.CropTyp)
 
 axs.set_ylabel("double-cropped field-count (%)")
 axs.set_xlabel("crop")
-axs.set_title("5-step NDVI")
+# axs.set_title("NDVI")
 axs.set_ylim([0, 105])
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')

@@ -4,7 +4,7 @@
 # Configure PBS options
 # ----------------------------------------------------------------
 ## Define a job name
-#PBS -N outer_indeks_SG_batch_size_JFD
+#PBS -N batchNo_indeks_reg_JFD
 
 ## Define compute options
 #PBS -l nodes=1:ppn=1
@@ -15,8 +15,8 @@
 ## Define path for output & error logs
 #PBS -k o
 
-#PBS -e /home/hnoorazar/NASA/04_SG/error/intersBatch_batch_size_JFD_e
-#PBS -o /home/hnoorazar/NASA/04_SG/error/intersBatch_batch_size_JFD_o
+#PBS -e /home/hnoorazar/NASA/03_regularize_fillGap/error/batchNo_indeks_inters_JFD_pre2008_e
+#PBS -o /home/hnoorazar/NASA/03_regularize_fillGap/error/batchNo_indeks_inters_JFD_pre2008_o
 
 ## Define path for reporting
 ##PBS -M h.noorazar@yahoo.com
@@ -29,7 +29,7 @@ module purge
 module load gcc/7.3.0
 module load python/3.7.1/gcc/7.3.0
 
-cd /home/hnoorazar/NASA/04_SG
+cd /home/hnoorazar/NASA/03_regularize_fillGap
    
 
 # ----------------------------------------------------------------
@@ -52,7 +52,7 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python3 ./02_SG_inters_JFD.py indeks batch_size
+python3 ./02_regularize_inters_JFD_pre2008.py indeks batchNo
 
 
 

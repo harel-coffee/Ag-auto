@@ -19,6 +19,7 @@ from pylab import imshow
 ###
 ####################################################################################
 start_time = time.time()
+
 sys.path.append("/home/h.noorazar/NASA/")
 import NASA_core as nc
 
@@ -46,12 +47,12 @@ if smooth_type == "regular":
 else:
     in_dir = data_base + "VI_TS/05_SG_TS/"
 
-out_dir = data_base + "06_cleanPlots_4_DL/" + indeks + "_" + smooth_type + "_plots/"
+out_dir = data_base + "06_cleanPlots_4_DL_pre2008/" + indeks + "_" + smooth_type + "_plots/"
 os.makedirs(out_dir, exist_ok=True)
 ####################################################################################
 print("--------------------------------------------------------------")
 print(date.today(), "-", datetime.now().strftime("%H:%M:%S"))
-f_name = indeks + "_" + smooth_type + "_intersect_batchNumber" + str(batch_no) + "_JFD.csv"
+f_name = indeks + "_" + smooth_type + "_intersect_batchNumber" + str(batch_no) + "_JFD_pre2008.csv"
 
 data = pd.read_csv(in_dir + f_name)
 data["human_system_start_time"] = pd.to_datetime(data["human_system_start_time"])
@@ -71,25 +72,22 @@ for curr_ID in data.ID.unique():
         crr_fld_yr = crr_fld[crr_fld.human_system_start_time.dt.year == a_year]
         crr_fld_yr.reset_index(drop=True, inplace=True)
         fig, ax = plt.subplots()
-        if counter == 0:
-            print("Line 72")
         fig.set_size_inches(10, 2.5)
         ax.grid(False)
         ax.plot(
             crr_fld_yr["human_system_start_time"], crr_fld_yr[indeks], c="dodgerblue", linewidth=5
         )
         ax.axis("off")
-        if counter == 0:
-            print("Line 79")
         left = crr_fld_yr["human_system_start_time"][0]
         right = crr_fld_yr["human_system_start_time"].values[-1]
         ax.set_xlim([left, right])
-
         # the following line also works
         ax.set_ylim([-0.005, 1])
-        counter += 1
         fig_name = out_dir + curr_ID + "_" + str(a_year) + ".jpg"
         plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight", facecolor="w")
+        if counter == 0:
+            print("Line 88")
+            counter += 1
         plt.close("all")
 
 print(plot_path)

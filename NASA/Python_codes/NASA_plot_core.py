@@ -14,6 +14,93 @@ sys.path.append("/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/")
 import NASA_core as nc
 
 
+def trend_prePost2008(df, ax, ylabel_, title_, color_dictionary, linewidth_=4):
+    """
+    This is created after the meeting on Jan, 10, 2022.
+     Changes made to the previous function (SG_clean_SOS_orchardinPlot):
+           a. Vertical lines for time reference
+           b. Add area of fields to the title of the plots.    (Done in Driver)
+           c. In the title break AdamBenton2016 to one county! (Done in Driver)
+           d. make the previous and next auxiliary years gray backgound.
+    """
+
+    """Returns A plot with of a given VI (NDVI or EVI) with SOS and EOS points.
+
+    Arguments
+    ---------
+    raw_dt : dataframe
+    
+    Returns
+    -------
+    
+    """
+    ax.plot(
+        df.loc[df.year <= 1998, "year"],
+        df.loc[df.year <= 1998, "RF"],
+        c=color_dictionary["RF"],
+        linewidth=linewidth_,
+        label="RF",
+    )
+
+    ax.plot(
+        df.loc[df.year <= 1998, "year"],
+        df.loc[df.year <= 1998, "DL"],
+        c=color_dictionary["DL"],
+        linewidth=linewidth_,
+        label="DL",
+    )
+
+    ax.plot(
+        df.loc[df.year <= 1998, "year"],
+        df.loc[df.year <= 1998, "SVM"],
+        c=color_dictionary["SVM"],
+        linewidth=linewidth_,
+        label="SVM",
+    )
+
+    ax.plot(
+        df.loc[df.year <= 1998, "year"],
+        df.loc[df.year <= 1998, "KNN"],
+        c=color_dictionary["kNN"],
+        linewidth=linewidth_,
+        label="KNN",
+    )
+
+    ax.plot(
+        df.loc[df.year >= 1999, "year"],
+        df.loc[df.year >= 1999, "RF"],
+        c=color_dictionary["RF"],
+        linewidth=linewidth_,
+    )
+
+    ax.plot(
+        df.loc[df.year >= 1999, "year"],
+        df.loc[df.year >= 1999, "DL"],
+        c=color_dictionary["DL"],
+        linewidth=linewidth_,
+    )
+
+    ax.plot(
+        df.loc[df.year >= 1999, "year"],
+        df.loc[df.year >= 1999, "SVM"],
+        c=color_dictionary["SVM"],
+        linewidth=linewidth_,
+    )
+
+    ax.plot(
+        df.loc[df.year >= 1999, "year"],
+        df.loc[df.year >= 1999, "KNN"],
+        c=color_dictionary["kNN"],
+        linewidth=linewidth_,
+    )
+
+    # plt.xlabel("year")
+    plt.ylabel(ylabel_)
+    plt.title(title_)
+    # ax.grid(axis='y', which='both')
+    ax.legend(loc="best")
+
+
 def SG_clean_SOS_orchardinPlot_VerticalLine(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut=0.5):
     """
     This is created after the meeting on Jan, 10, 2022.

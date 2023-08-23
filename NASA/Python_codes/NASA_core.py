@@ -19,6 +19,16 @@ import seaborn as sb
 
 import os, os.path, sys
 
+from tensorflow.keras.utils import to_categorical, load_img, img_to_array
+
+# from keras.models import Sequential, Model, load_model
+# from keras.applications.vgg16 import VGG16
+# import tensorflow as tf
+
+# # from keras.optimizers import SGD
+# from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
+# from tensorflow.keras.optimizers import SGD
+# from keras.preprocessing.image import ImageDataGenerator
 
 ###
 ### These will be more generalized functions of remote_sensing_core.py
@@ -987,3 +997,19 @@ def add_human_start_time_by_system_start_time(HDF):
     """
     HDF.system_start_time = HDF.system_start_time * 1000
     return HDF
+
+
+def DTW_prune(ts1, ts2):
+    d, _ = dtw.warping_paths(ts1, ts2, window=10, use_pruning=True)
+    return d
+
+
+# We need this for DL
+# load and prepare the image
+def load_image(filename):
+    img = load_img(filename, target_size=(224, 224))  # load the image
+    img = img_to_array(img)  # convert to array
+    img = img.reshape(1, 224, 224, 3)  # reshape into a single sample with 3 channels
+    img = img.astype("float32")  # center pixel data
+    img = img - [123.68, 116.779, 103.939]
+    return img

@@ -49,7 +49,7 @@ SF_data_dir   = dir_base + "/data_part_of_shapefile/"
 pred_dir_base = dir_base + "/RegionalStatData/"
 pred_dir = pred_dir_base + "02_ML_preds_oversampled/"
 
-plot_dir = dir_base + "/for_paper/plots/overSampleRegionalStats/cropWise/"
+plot_dir = dir_base + "/for_paper/plots/overSampleRegionalStats/cropWise/seedsLumped/"
 os.makedirs(plot_dir, exist_ok=True)
 
 # %% [markdown]
@@ -125,12 +125,15 @@ print (f"{SF_data.shape}")
 
 SF_data.head(2)
 
+# %%
+# sorted(list(SF_data.CropTyp.unique()))
+
 # %% [markdown]
 # ### Crop-wise need to be filtered by last survey date
 
 # %%
 ### Filter by last survey date 
-county_year_dict = {"Adams":2016, 
+county_year_dict = {"Adams" : 2016, 
                     "Benton":2016,
                     "Franklin":2018,
                     "Grant": 2017, 
@@ -207,6 +210,22 @@ sorted(list(SF_data_LSD_large_irr_includeHay.county.unique()))
 all_preds_overSample = pd.read_csv(pred_dir_base + "all_preds_overSample.csv")
 all_preds_overSample = all_preds_overSample[all_preds_overSample.ExctAcr > 10]
 # sorted(list(all_preds_overSample.Irrigtn.unique()))
+
+# %% [markdown]
+# # Lump together the seeds
+
+# %%
+len(all_preds_overSample.CropTyp.unique())
+
+# %%
+# sorted(list(all_preds_overSample.CropTyp.unique()))
+
+# %%
+seed_idx = all_preds_overSample.loc[all_preds_overSample['CropTyp'].str.contains("seed")].index
+all_preds_overSample.loc[seed_idx, "CropTyp"] = "seed crops"
+len(all_preds_overSample.CropTyp.unique())
+
+# %%
 
 # %%
 preds_LSD_large_irr_noHay = all_preds_overSample[all_preds_overSample.ID.isin(\
@@ -294,6 +313,16 @@ plt.rcParams['ytick.labelleft'] = True
 plt.rcParams.update(params)
 
 # %%
+# "#332288"
+color_dict = {"SVM": "#DDCC77",
+              "kNN": "#E69F00",
+              "DL": "#332288", # "#6699CC",
+              "RF":'#0072B2'
+             }
+
+# %%
+
+# %%
 df = NDVI_SG_summary_cropAcr.copy()
 df.reset_index(inplace=True)
 df = df[df.label==2]
@@ -308,24 +337,30 @@ bar_width_ = 1
 step_size_ = 5*bar_width_
 X_axis = np.array(range(0, step_size_*len(df.CropTyp), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color ='c', width = bar_width_, label="RF")
+axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color =color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color = color_dict["RF"], width = bar_width_, label="RF")
 
 axs.tick_params(axis='x', labelrotation = 90)
 axs.set_xticks(X_axis, df.CropTyp)
 
 axs.set_ylabel("double-cropped acreage")
-axs.set_xlabel("crop type")
-axs.set_title("5-step NDVI")
+
+
+# axs.set_xlabel("crop type")
+# axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
-file_name = plot_dir + "NDVI_SG_acreage_cropWise_wHays.pdf"
+
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+25), axisbelow=True);
+
+file_name = plot_dir + "NDVI_SG_acreage_cropWise_wHays_lumpedSeed.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
-file_name = plot_dir + "NDVI_SG_acreage_cropWise_wHays.png"
+file_name = plot_dir + "NDVI_SG_acreage_cropWise_wHays_lumpedSeed.png"
 plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
 plt.show()
 del(df)
@@ -350,19 +385,15 @@ plot_dir
 sorted(list(SF_data_LSD_large_irr_includeHay.CropTyp.unique()))[:4]
 
 # %%
+seed_idx = SF_data_LSD_large_irr_includeHay.loc[SF_data_LSD_large_irr_includeHay\
+                                                ['CropTyp'].str.contains("seed")].index
+SF_data_LSD_large_irr_includeHay.loc[seed_idx, "CropTyp"] = "seed crops"
+
+# %%
 SF_data_grp_area = SF_data_LSD_large_irr_includeHay.groupby(['CropTyp'])['ExctAcr'].sum()
 SF_data_grp_area = pd.DataFrame(SF_data_grp_area)
 SF_data_grp_area.reset_index(drop=False, inplace=True)
 SF_data_grp_area.head(3)
-
-# %% [markdown]
-# # HERE
-
-# %%
-
-# %%
-
-# %%
 
 # %%
 
@@ -385,78 +416,36 @@ bar_width_ = 1
 step_size_ = 5*bar_width_
 X_axis = np.array(range(0, step_size_*len(df.CropTyp), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color ='c', width = bar_width_, label="RF")
+axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color = color_dict["RF"], width = bar_width_, label="RF")
 
 axs.tick_params(axis='x', labelrotation = 90)
 axs.set_xticks(X_axis, df.CropTyp)
 
 axs.set_ylabel("double-cropped acreage (%)")
-axs.set_xlabel("crop type")
-axs.set_title("5-step NDVI")
+# axs.set_xlabel("crop type")
+# axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
-file_name = plot_dir + "NDVI_SG_acreagePerc_cropWise_wHays.pdf"
+
+# send the guidelines to the back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+25), axisbelow=True);
+
+file_name = plot_dir + "NDVI_SG_acreagePerc_cropWise_wHays_lumpedSeed.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
-file_name = plot_dir + "NDVI_SG_acreagePerc_cropWise_wHays.png"
+file_name = plot_dir + "NDVI_SG_acreagePerc_cropWise_wHays_lumpedSeed.png"
 plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
 
 plt.show()
-del(df)
+# del(df)
 
 # %%
-
-# %%
-df
-
-# %%
-
-
-################################################################
-fig, axs = plt.subplots(1, 1, figsize=(12, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
-                        gridspec_kw={'hspace': 0.35, 'wspace': .05});
-axs.grid(axis='y', which='both')
-
-X_axis = np.arange(len(df.CropTyp))
-
-bar_width_ = 1
-step_size_ = 5*bar_width_
-X_axis = np.array(range(0, step_size_*len(df.CropTyp), step_size_))
-
-axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color ='c', width = bar_width_, label="RF")
-
-axs.tick_params(axis='x', labelrotation = 90)
-axs.set_xticks(X_axis, df.CropTyp)
-
-axs.set_ylabel("double-cropped acreage (%)")
-axs.set_xlabel("crop type")
-axs.set_title("5-step NDVI")
-# axs.set_ylim([0, 105])
-axs.legend(loc="best");
-axs.xaxis.set_ticks_position('none')
-file_name = plot_dir + "NDVI_SG_acreagePerc_cropWise_wHays_lumpedSeeds.pdf"
-plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
-
-file_name = plot_dir + "NDVI_SG_acreagePerc_cropWise_wHays_lumpedSeeds.png"
-plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
-
-
-plt.show()
-del(df)
-
-# %%
-
-# %%
-
-# %%
-plot_dir
+df[df.CropTyp == "seed crops"]
 
 # %% [markdown]
 # # Crop-wise Counts
@@ -488,6 +477,8 @@ NDVI_SG_summary_countPerCrop.round().head(2)
 # All irrigated fields must be there (orchards, alfalfa category, and 2-potens)
 
 # %%
+
+# %%
 SF_data_grp_count = SF_data_LSD_large_irr_includeHay.groupby(['CropTyp'])['ID'].count()
 SF_data_grp_count = pd.DataFrame(SF_data_grp_count)
 SF_data_grp_count.reset_index(drop=False, inplace=True)
@@ -512,30 +503,36 @@ bar_width_ = 1
 step_size_ = 5*bar_width_
 X_axis = np.array(range(0, step_size_*len(df.CropTyp), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color ='dodgerblue', width = bar_width_, label="SVM")
-axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color ='green', width = bar_width_, label="kNN")
-axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color ='orange', width = bar_width_, label="DL")
-axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color ='c', width = bar_width_, label="RF")
+axs.bar(X_axis - bar_width_*2, df.SVM_NDVI_SG_preds, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, df.KNN_NDVI_SG_preds, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, df.DL_NDVI_SG_prob_point3, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, df.RF_NDVI_SG_preds, color = color_dict["RF"], width = bar_width_, label="RF")
 
 axs.tick_params(axis='x', labelrotation = 90)
 axs.set_xticks(X_axis, df.CropTyp)
 
 axs.set_ylabel("double-cropped field-count (%)")
-axs.set_xlabel("crop type")
-axs.set_title("5-step NDVI")
+# axs.set_xlabel("crop type")
+# axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
-file_name = plot_dir + "NDVI_SG_countPerc_CropTypWise_wHays.pdf"
+
+# send the guidelines to the back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+25), axisbelow=True);
+
+file_name = plot_dir + "NDVI_SG_countPerc_CropTypWise_wHays_lumpedSeed.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
-file_name = plot_dir + "NDVI_SG_countPerc_CropTypWise_wHays.png"
+file_name = plot_dir + "NDVI_SG_countPerc_CropTypWise_wHays_lumpedSeed.png"
 plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
 
 plt.show()
 del(df)
 
 # %%
+plot_dir
 
 # %%
 

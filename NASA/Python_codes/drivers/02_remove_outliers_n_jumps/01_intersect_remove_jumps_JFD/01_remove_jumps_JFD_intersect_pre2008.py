@@ -1,6 +1,5 @@
 ####
-#### Nov 16, 2021
-#### Jul 10, 2023
+#### July 25, 2023
 ####
 
 """
@@ -40,7 +39,6 @@ import NASA_plot_core as ncp
 ####################################################################################
 indeks = sys.argv[1]
 batch_number = int(sys.argv[2])
-
 print("Terminal Arguments are: ")
 print(indeks)
 print(batch_number)
@@ -93,34 +91,7 @@ out_name = (
     + "_JFD_pre2008.csv"
 )
 
-# common_part = "T1C2L2_inters_2008_2018_EastIrr_2008-01-01_2022-01-01_"
-f_names = [
-    "noOutlier_" + "L4_" + indeks + ".csv",
-    "noOutlier_" + "L5_early_" + indeks + ".csv",
-    "noOutlier_" + "L5_late_" + indeks + ".csv",
-    "noOutlier_" + "L7_" + indeks + ".csv",
-]
-
-L4_ = pd.read_csv(data_dir + f_names[0], low_memory=False)
-L5_early_ = pd.read_csv(data_dir + f_names[1], low_memory=False)
-L5_late_ = pd.read_csv(data_dir + f_names[2], low_memory=False)
-L7_ = pd.read_csv(data_dir + f_names[3], low_memory=False)
-
-L4_.drop(["system_start_time"], axis=1, inplace=True)
-L4_ = L4_[L4_[indeks].notna()]
-
-
-L5_early_.drop(["system_start_time"], axis=1, inplace=True)
-L5_early_ = L5_early_[L5_early_[indeks].notna()]
-
-L5_late_.drop(["system_start_time"], axis=1, inplace=True)
-L5_late_ = L5_late_[L5_late_[indeks].notna()]
-
-L7_.drop(["system_start_time"], axis=1, inplace=True)
-L7_ = L7_[L7_[indeks].notna()]
-
-L578 = pd.concat([L4_, L5_early_, L5_late_, L7_])
-del (L4_, L5_early_, L5_late_, L7_)
+L578 = pd.read_csv(data_dir + "noOutlier_" + indeks + "_pre2008.csv", low_memory=False)
 
 # L578["ID"] = L578["ID"].astype(str)
 L578 = L578[L578.ID.isin(list(batch_IDs.ID))].copy()

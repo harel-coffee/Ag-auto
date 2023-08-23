@@ -13,32 +13,32 @@
 #     name: python3
 # ---
 
-# %%
-import numpy as np
-import pandas as pd
-
-from datetime import date, datetime
-import time
-
-import random
-from random import seed
-from random import random
-
-import os, os.path, sys, shutil
-
-
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
-
-import matplotlib
-import matplotlib.pyplot as plt
-from pylab import imshow
-import pickle, h5py
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
+# %% [markdown]
+# import numpy as np
+# import pandas as pd
+#
+# from datetime import date, datetime
+# import time
+#
+# import random
+# from random import seed
+# from random import random
+#
+# import os, os.path, sys, shutil
+#
+#
+# from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import GridSearchCV
+# from sklearn.metrics import classification_report
+#
+# import matplotlib
+# import matplotlib.pyplot as plt
+# from pylab import imshow
+# import pickle, h5py
+# from sklearn.metrics import accuracy_score
+# from sklearn.metrics import confusion_matrix
+# from sklearn.pipeline import make_pipeline
+# from sklearn.ensemble import RandomForestClassifier
 
 # %%
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
@@ -57,8 +57,8 @@ from dtaidistance import dtw_visualisation as dtwvis
 
 # %%
 meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
-meta = pd.read_csv(meta_dir+"evaluation_set.csv")
-meta_moreThan10Acr=meta[meta.ExctAcr>10]
+meta = pd.read_csv(meta_dir + "evaluation_set.csv")
+meta_moreThan10Acr = meta[meta.ExctAcr > 10]
 print (meta.shape)
 print (meta_moreThan10Acr.shape)
 meta.head(2)
@@ -123,47 +123,46 @@ x_test_df = pd.read_csv(ML_data_folder + "widen_test_TS/" + VI_idx + "_" + smoot
                         "_wide_test20_split_2Bconsistent_Oct17.csv")
 
 y_test_df = x_test_df[["ID", "Vote"]].copy()
-x_test_df.drop(columns=["Vote"], inplace=True)
+x_test_df.drop(columns = ["Vote"], inplace=True)
 
 RF_grid_2_predictions = RF_grid_2.predict(x_test_df.iloc[:, 1:])
 RF_grid_2_y_test_df=y_test_df.copy()
-RF_grid_2_y_test_df["prediction"]=list(RF_grid_2_predictions)
+RF_grid_2_y_test_df["prediction"] = list(RF_grid_2_predictions)
 
 print ()
 print (RF_grid_2_y_test_df.head(2))
 print ()
 
-true_single_predicted_single=0
-true_single_predicted_double=0
-
-true_double_predicted_single=0
-true_double_predicted_double=0
+true_single_predicted_single = 0
+true_single_predicted_double = 0
+true_double_predicted_single = 0
+true_double_predicted_double = 0
 
 for index_ in RF_grid_2_y_test_df.index:
-    curr_vote=list(RF_grid_2_y_test_df[RF_grid_2_y_test_df.index==index_].Vote)[0]
-    curr_predict=list(RF_grid_2_y_test_df[RF_grid_2_y_test_df.index==index_].prediction)[0]
-    if curr_vote==curr_predict:
-        if curr_vote==1: 
-            true_single_predicted_single+=1
+    curr_vote = list(RF_grid_2_y_test_df[RF_grid_2_y_test_df.index==index_].Vote)[0]
+    curr_predict = list(RF_grid_2_y_test_df[RF_grid_2_y_test_df.index==index_].prediction)[0]
+    if curr_vote == curr_predict:
+        if curr_vote == 1: 
+            true_single_predicted_single += 1
         else:
-            true_double_predicted_double+=1
+            true_double_predicted_double += 1
     else:
-        if curr_vote==1:
-            true_single_predicted_double+=1
+        if curr_vote == 1:
+            true_single_predicted_double += 1
         else:
-            true_double_predicted_single+=1
-            
-RF_grid_2_confus_tbl_test = pd.DataFrame(columns=['None', 'Predict_Single', 'Predict_Double'], 
-                               index=range(2))
+            true_double_predicted_single += 1
+
+RF_grid_2_confus_tbl_test = pd.DataFrame(columns = ['None', 'Predict_Single', 'Predict_Double'], 
+                                         index = range(2))
 RF_grid_2_confus_tbl_test.loc[0, 'None'] = 'Actual_Single'
 RF_grid_2_confus_tbl_test.loc[1, 'None'] = 'Actual_Double'
-RF_grid_2_confus_tbl_test['Predict_Single']=0
-RF_grid_2_confus_tbl_test['Predict_Double']=0
+RF_grid_2_confus_tbl_test['Predict_Single'] = 0
+RF_grid_2_confus_tbl_test['Predict_Double'] = 0
 
-RF_grid_2_confus_tbl_test.loc[0, "Predict_Single"]=true_single_predicted_single
-RF_grid_2_confus_tbl_test.loc[0, "Predict_Double"]=true_single_predicted_double
-RF_grid_2_confus_tbl_test.loc[1, "Predict_Single"]=true_double_predicted_single
-RF_grid_2_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
+RF_grid_2_confus_tbl_test.loc[0, "Predict_Single"] = true_single_predicted_single
+RF_grid_2_confus_tbl_test.loc[0, "Predict_Double"] = true_single_predicted_double
+RF_grid_2_confus_tbl_test.loc[1, "Predict_Single"] = true_double_predicted_single
+RF_grid_2_confus_tbl_test.loc[1, "Predict_Double"] = true_double_predicted_double
 print (date.today(), "-", datetime.now().strftime("%H:%M:%S"))
 RF_grid_2_confus_tbl_test
 

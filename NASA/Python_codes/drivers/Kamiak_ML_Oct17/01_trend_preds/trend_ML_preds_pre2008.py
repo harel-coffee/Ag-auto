@@ -58,7 +58,7 @@ if model != "DL":
     else:
         in_dir = data_base + "VI_TS/05_SG_TS/"
 else:
-    in_dir = data_base + "06_cleanPlots_4_DL/" + VI_idx + "_" + smooth + "_plots/"
+    in_dir = data_base + "06_cleanPlots_4_DL_pre2008/" + VI_idx + "_" + smooth + "_plots/"
 
 out_dir = data_base + "trend_ML_preds/"
 os.makedirs(out_dir, exist_ok=True)
@@ -111,7 +111,7 @@ print("winnerModel=", winnerModel)
 ##    Read Model
 ##
 if winnerModel.endswith(".sav"):
-    f_name = VI_idx + "_" + smooth + "_intersect_batchNumber" + batch_no + "_wide_JFD.csv"
+    f_name = VI_idx + "_" + smooth + "_intersect_batchNumber" + batch_no + "_wide_JFD_pre2008.csv"
     wide_TS = pd.read_csv(in_dir + f_name)
     print("wide_TS.shape: ", wide_TS.shape)
 
@@ -193,7 +193,7 @@ else:
 
 ######  Export Output
 pred_colName = VI_idx + "_" + smooth + "_" + model + "_batchNumber" + batch_no + "_preds"
-out_name = out_dir + pred_colName + ".csv"
+out_name = out_dir + pred_colName + "_pre2008.csv"
 predictions.to_csv(out_name, index=False)
 
 print("--------------------------------------------------------------")
