@@ -15,18 +15,26 @@
 
 # %% [markdown]
 # Duplicate images for oversampling of DL
+#
+# **This code needs to change if you want to re-use it again (Sep 20, 2023)**
+# Initially, I had plotted each field in ground-truth set in different folders for each oversample ratio.
+# I did not need to do this. 
+#
+# I just need to plot them once and then copy them in appropriate folders. So, I deleted the originally plotted figures. 
+
+# %%
+
+# %%
 
 # %%
 import numpy as np
 import pandas as pd
-from datetime import date
-from random import seed
-from random import random
 
-import time
-import scipy, scipy.signal
-import os, os.path
-import shutil
+from datetime import date
+from random import seed, random
+
+import time, scipy, scipy.signal
+import sys, os, os.path, shutil
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -53,9 +61,7 @@ from keras.layers import MaxPooling2D
 from tensorflow.keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
 
-
 import h5py
-import sys
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
 import NASA_core as nc
 import NASA_plot_core as rcp

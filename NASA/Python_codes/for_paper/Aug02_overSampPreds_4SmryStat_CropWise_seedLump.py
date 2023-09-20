@@ -316,8 +316,8 @@ plt.rcParams.update(params)
 # "#332288"
 color_dict = {"SVM": "#DDCC77",
               "kNN": "#E69F00",
-              "DL": "#332288", # "#6699CC",
-              "RF":'#0072B2'
+              "RF": "#332288", # "#6699CC",
+              "DL":'#0072B2'
              }
 
 # %%

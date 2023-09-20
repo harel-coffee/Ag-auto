@@ -3,7 +3,7 @@ import shutup
 shutup.please()
 import numpy as np
 import pandas as pd
-import sys, os, os.path, shutil
+import sys, os, os.path
 from datetime import date, datetime
 
 from sklearn.neighbors import KNeighborsClassifier

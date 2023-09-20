@@ -896,7 +896,7 @@ def plot_oneColumn(raw_dt, ax, idx="NDVI", _label="raw", _color="red"):
     ax.set_ylim(raw_dt[idx].min() - 0.05, 1)
 
 
-def plot_oneColumn_CropTitle(raw_dt, ax, idx="NDVI", _label="raw", _color="red", lineStyle="-"):
+def plot_oneColumn_CropTitle_old(raw_dt, ax, idx="NDVI", _label="raw", _color="red", lineStyle="-"):
     ax.plot(
         raw_dt["human_system_start_time"],
         raw_dt[idx],
@@ -915,3 +915,27 @@ def plot_oneColumn_CropTitle(raw_dt, ax, idx="NDVI", _label="raw", _color="red",
     ax.legend(loc="upper right")
     # ax.xaxis.set_major_locator(mdates.YearLocator(1))
     ax.set_ylim(-0.1, 1.1)
+
+
+def plot_oneColumn_CropTitle(dt, raw_dt, titlee, _label="raw", idx="EVI", _color="dodgerblue"):
+    fig, ax = plt.subplots(
+        1,
+        1,
+        figsize=(15, 4),
+        sharex=False,
+        sharey="col",  # sharex=True, sharey=True,
+        gridspec_kw={"hspace": 0.35, "wspace": 0.05},
+    )
+    ax.grid(True)
+    ax.plot(dt["human_system_start_time"], dt[idx], linewidth=4, color=_color, label=_label)
+
+    ax.scatter(raw_dt["human_system_start_time"], raw_dt[idx], s=20, c="r", label="raw")
+
+    ax.set_title(titlee)
+    ax.set_ylabel(idx)  # , labelpad=20); # fontsize = label_FontSize,
+    ax.tick_params(axis="y", which="major")  # , labelsize = tick_FontSize)
+    ax.tick_params(axis="x", which="major")  # , labelsize = tick_FontSize) #
+    ax.legend(loc="upper right")
+    plt.yticks(np.arange(0, 1.05, 0.2))
+    # ax.xaxis.set_major_locator(mdates.YearLocator(1))
+    ax.set_ylim(-0.1, 1.05)

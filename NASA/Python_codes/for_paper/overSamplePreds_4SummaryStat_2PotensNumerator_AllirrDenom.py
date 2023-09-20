@@ -361,8 +361,8 @@ plt.rcParams.update(params)
 
 color_dict = {"SVM": "#DDCC77",
               "kNN": "#E69F00",
-              "DL": "#332288", # "#6699CC",
-              "RF":'#0072B2'
+              "RF": "#332288", # "#6699CC",
+              "DL":'#0072B2'
              }
 
 # %%
@@ -608,17 +608,71 @@ axs.set(ylim=(ymin-1, ymax+1), axisbelow=True);
 
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
-file_name = plot_dir + "NDVI_SG_acreagePerc_countyWise_potens_AllIrrDenom_acllCounties.pdf"
+file_name = plot_dir + "NDVI_SG_acreagePerc_countyWise_potens_AllIrrDenom_allCounties.pdf"
 plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
 
 plt.show()
 # del(df)
 
 # %%
+df
+
+# %%
+(8.801439 + 8.178002 +  8.453192 + 7.770203)/4
+
+# %%
+dirr_ ="/Users/hn/Documents/01_research_data/NASA/for_paper/plots/overSampleRegionalStats/"
+Supriya_csv = pd.read_csv(dirr_ + "DC_Percent_allfields.csv")
+Supriya_csv.rename(columns={"County": "county"}, inplace=True)
+# Supriya_csv_all_counties = 
+Supriya_csv_all_counties = Supriya_csv.iloc[6, ]
+Supriya_csv.sort_values(by="county", inplace=True)
+Supriya_csv.drop(axis=0, index=6, inplace=True)
+Supriya_csv.reset_index(drop=True, inplace=True)
+Supriya_csv
+
+# %%
+Supriya_csv.loc[len(Supriya_csv.index)] = list(Supriya_csv_all_counties)
+Supriya_csv.loc[Supriya_csv.county=="All_counties", "county"] = "all counties"
+Supriya_csv
 
 # %%
 
 # %%
+fig, axs = plt.subplots(1, 1, figsize=(7, 3), sharex=False,
+                        gridspec_kw={'hspace': 0.35, 'wspace': .05});
+axs.grid(axis='y', which='both')
+
+X_axis = np.arange(len(Supriya_csv.county))
+
+bar_width_ = 1
+step_size_ = 5*bar_width_
+X_axis = np.array(range(0, step_size_*len(Supriya_csv.county), step_size_))
+
+axs.bar(X_axis - bar_width_*2, Supriya_csv.SVM, color = color_dict["SVM"], width = bar_width_, label="SVM")
+axs.bar(X_axis - bar_width_, Supriya_csv.KNN, color = color_dict["kNN"], width = bar_width_, label="kNN")
+axs.bar(X_axis, Supriya_csv.DL, color = color_dict["DL"], width = bar_width_, label="DL")
+axs.bar(X_axis + bar_width_, Supriya_csv.RF, color = color_dict["RF"], width = bar_width_, label="RF")
+
+axs.tick_params(axis='x', labelrotation = 0)
+axs.set_xticks(X_axis, Supriya_csv.county)
+
+axs.set_ylabel("double-cropped acreage (%)")
+# axs.set_xlabel("county")
+# axs.set_title("NDVI")
+# axs.set_ylim([0, 105])
+# send the guidelines to the back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin-1, ymax+1), axisbelow=True);
+axs.yaxis.set_ticks(np.arange(ymin, ymax+1, 2.5))
+
+axs.legend(loc="best");
+axs.xaxis.set_ticks_position('none')
+
+supriya_plot_dir = "/Users/hn/Documents/01_research_data/NASA/for_paper/plots/overSampleRegionalStats/"
+file_name = supriya_plot_dir + "NDVI_SG_acreagePerc_countyWise_AllIrrNumDenom_allCounties.pdf"
+plt.savefig(fname = file_name, dpi=400, bbox_inches='tight', transparent=False);
+plt.show()
 
 # %%
 

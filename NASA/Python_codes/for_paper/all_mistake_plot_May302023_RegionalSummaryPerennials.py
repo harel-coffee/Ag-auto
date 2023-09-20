@@ -192,6 +192,39 @@ all_preds_apple = all_preds[all_preds.CropTyp=="apple"].copy()
 all_preds_apple.shape
 
 # %%
+all_preds_mint_DL = all_preds.copy()
+all_preds_mint_DL = all_preds_mint_DL[["ID", "DL_NDVI_SG_prob_point3", "CropTyp", "ExctAcr"]]
+all_preds_mint_DL = all_preds_mint_DL[all_preds_mint_DL.CropTyp == "mint"]
+all_preds_mint_DL.head(2)
+
+# %%
+print (f"{all_preds_mint_DL.shape=}")
+
+all_preds_mint_DL[all_preds_mint_DL.DL_NDVI_SG_prob_point3==2].shape
+
+# %%
+sorted(list(all_preds.CropTyp.unique()))
+
+# %%
+all_preds_orchardBerries = all_preds[all_preds.CropTyp.isin(["apple", "apricot", "blueberry",
+                                                             "caneberry", "cherry", "grape, juice", 
+                                                             "grape, wine", "nectarine/peach", 
+                                                             "orchard, unknown", "pear", "plum", 
+                                                             "walnut"])].copy()
+
+all_preds_orchardBerries = all_preds_orchardBerries[["ID", "DL_NDVI_SG_prob_point3", "CropTyp", "ExctAcr"]]
+print (f"{all_preds_orchardBerries.shape=}")
+all_preds_orchardBerries = all_preds_orchardBerries[all_preds_orchardBerries.DL_NDVI_SG_prob_point3==2].copy()
+all_preds_orchardBerries.head(2)
+
+# %%
+all_preds_orchardBerries.shape
+
+# %%
+all_preds[all_preds.CropTyp=="mint"].ExctAcr.sum()
+
+# %%
+plot_dir_base
 
 # %%
 size = 15

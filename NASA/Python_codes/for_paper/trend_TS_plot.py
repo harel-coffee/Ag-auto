@@ -92,6 +92,9 @@ EVI_regular_preds.head(2)
 NDVI_SG_preds.head(2)
 
 # %%
+sorted(NDVI_SG_preds.year.unique())
+
+# %%
 NDVI_regular_preds.head(2)
 
 # %%
@@ -183,8 +186,8 @@ plt.rcParams.update(params)
 
 color_dict = {"SVM": "#DDCC77",
               "kNN": "#E69F00",
-              "DL": "#332288", # "#6699CC",
-              "RF":'#0072B2'
+              "RF": "#332288", # "#6699CC",
+              "DL":'#0072B2'
              }
 
 # %%
@@ -221,7 +224,7 @@ NDVI_SG_summary_L.head(2)
 
 # %%
 y_label_ = "area (acreage)"
-title_base = "double-cropped area "
+title_base = "" # "double-cropped area "
 
 # %%
 # NDVI_SG_summary_L_double.plot(
@@ -233,6 +236,8 @@ title_base = "double-cropped area "
 # plt.title(title_base + "(NDVI, 5-step smoothed)")
 # plt.grid(axis="y")
 # #file_name = plot_dir + "NDVI_SG_double_area_trend.pdf"
+
+# %%
 
 # %%
 fig, axs = plt.subplots(1, 1, figsize = fig_size, sharex=False, # sharey='col', # sharex=True, sharey=True,
@@ -986,41 +991,3 @@ plt.savefig(fname=file_name, dpi=400, bbox_inches="tight", transparent=False)
 
 # %%
 EVI_regular_summary_L_double_perc.year.unique()
-
-# %%
-meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
-meta = pd.read_csv(meta_dir+"evaluation_set.csv")
-meta_moreThan10Acr=meta[meta.ExctAcr>10]
-
-
-# %%
-evaluation_set = pd.read_csv("/Users/hn/Documents/01_research_data/NASA/parameters/evaluation_set.csv")
-
-# %%
-SF_train_unique_crops = pd.read_csv("/Users/hn/Documents/01_research_data/NASA/SF_train_unique_crops.csv")
-
-# %%
-ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
-train80 = pd.read_csv(ML_data_folder+"train80_split_2Bconsistent_Oct17.csv")
-test20 = pd.read_csv(ML_data_folder+"test20_split_2Bconsistent_Oct17.csv")
-
-# %%
-trainTest = pd.concat([train80, test20])
-
-# %%
-trainTest_1 = trainTest.copy()
-trainTest_2 = trainTest.copy()
-
-trainTest_1 = pd.merge(trainTest_1, meta, how="left", on="ID")
-trainTest_2 = pd.merge(trainTest_2, evaluation_set, how="left", on="ID")
-trainTest_2.equals(trainTest_1)
-
-# %%
-len(sorted(list(trainTest_1.CropTyp.unique())))
-
-# %%
-sorted(list(trainTest_1.CropTyp.unique()))
-
-# %%
-
-# %%

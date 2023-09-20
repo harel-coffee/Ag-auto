@@ -45,7 +45,7 @@ writeOGR(obj=doublecrop_2018,
 
 ####################################
 ############
-############ FOUR different Crops
+############ Four different Crops
 ############
 some_crops <- c("Apple", "Potato", "Grape, Wine", "Alfalfa Hay")
 

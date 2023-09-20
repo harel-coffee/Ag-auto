@@ -3,7 +3,7 @@ import shutup
 shutup.please()
 import numpy as np
 import pandas as pd
-import sys, os, os.path, shutil
+import sys, os, os.path
 from datetime import date, datetime
 
 from sklearn.neighbors import KNeighborsClassifier
@@ -218,9 +218,7 @@ else:
 
 ######  Export Output
 pred_colName = model + "_" + VI_idx + "_" + smooth + "_preds"
-out_name = (
-    out_dir + pred_colName + "_" + county_.replace(" ", "_") + "_" + size + ".csv"
-)
+out_name = out_dir + pred_colName + "_" + county_.replace(" ", "_") + "_" + size + ".csv"
 predictions.to_csv(out_name, index=False)
 
 print("--------------------------------------------------------------")

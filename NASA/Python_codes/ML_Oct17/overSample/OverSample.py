@@ -127,7 +127,7 @@ for ratios in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8]:
     # DF_over["Vote"]=y_over
     X_over["Vote"]=y_over
 
-    out_name = ML_data_folder + "overSamples/" +  VI_idx +"_" + smooth_type + \
+    out_name = ML_data_folder + "overSamples/" + VI_idx +"_" + smooth_type + \
               "_wide_train80_split_2Bconsistent_Oct17_overSample" + \
                str(int(ratios*10)) + ".csv"    
     X_over.to_csv(out_name, index = False)

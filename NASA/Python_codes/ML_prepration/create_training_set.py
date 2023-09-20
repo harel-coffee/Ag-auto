@@ -169,17 +169,39 @@ all_fields_irr_narrow.head(2)
 not_important_crops = all_fields_irr_narrow.CropTyp.unique()
 
 # %%
+not_important_crops_df = all_fields_irr[all_fields_irr.CropTyp.isin(list(not_important_crops))]
+not_important_crops_df.head(2)
+
+# %%
+print (f"{len(not_important_crops) = }")
+sorted(list(not_important_crops))
+
+# %%
+len([x for x in all_fields_correct_year_irr.CropTyp.unique() if x not in not_important_crops])
+
+# %%
+sorted([x for x in all_fields_correct_year_irr.CropTyp.unique() if x not in not_important_crops])
+
+# %%
 # del(all_fields_irr_narrow, all_fields_irr)
 
 # %%
+LL1 = all_fields_correct_year_irr.CropTyp.unique()
 LL = len(all_fields_correct_year_irr.CropTyp.unique())
 print ("Before tossing low-count-fields, # unique crops is [%(ncrops)d]." % {"ncrops": LL}) 
 
 all_fields_correct_year_irr = \
                      all_fields_correct_year_irr[~(all_fields_correct_year_irr.CropTyp.isin(not_important_crops))]
 
-LL = len(all_fields_correct_year_irr.CropTyp.unique())
+LL2 = all_fields_correct_year_irr.CropTyp.unique()
+LL = len(LL2)
 print ("After tossing low-count-fields, # unique crops is [%(ncrops)d]." % {"ncrops": LL}) 
+
+# %%
+[x for x in  LL1 if not(x in LL2)]
+
+# %%
+95-68
 
 # %%
 # ryegrass_seed = all_fields_correct_year_irr[all_fields_correct_year_irr.CropTyp == "ryegrass seed"]
@@ -293,6 +315,21 @@ randomly_chosen_dt = randomly_chosen_dt[needed_columns]
 # %%
 print (randomly_chosen_dt.shape)
 randomly_chosen_dt.head(2)
+
+# %%
+# randomly_chosen_dt[randomly_chosen_dt.CropTyp.contains("alfalfa")]
+
+alfa_idx = randomly_chosen_dt.loc[randomly_chosen_dt\
+                                                ['CropTyp'].str.contains("alfalfa")].index
+len(alfa_idx)
+
+# %%
+randomly_chosen_dt.loc[alfa_idx, "CropTyp"].unique()
+
+# %%
+randomly_chosen_dt[randomly_chosen_dt.ExctAcr<10].shape
+
+# %%
 
 # %%
 randomly_chosen_dt.sort_values(by=['CropTyp', 'ID', 'county'], inplace=True)
