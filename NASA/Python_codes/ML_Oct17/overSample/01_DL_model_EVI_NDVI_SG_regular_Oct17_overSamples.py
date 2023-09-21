@@ -94,8 +94,6 @@ VI_idx = "EVI"
 smooth_type = "SG"
 
 # %%
-
-# %%
 # %%time
 sample_ratios = [3, 4, 5, 6, 7, 8]
 for sample_ratio in sample_ratios:
@@ -115,7 +113,7 @@ for sample_ratio in sample_ratios:
     train_folder = overSample_plots_dir + "/oversample" + str(sample_ratio) + "/" + \
                      smooth_type + "_groundTruth_images_" + VI_idx + "/"
 
-    print (len(os.listdir(train_folder+"train80/separate_singleDouble/single/"))+\
+    print (len(os.listdir(train_folder+"train80/separate_singleDouble/single/")) + \
            len(os.listdir(train_folder+"train80/separate_singleDouble/double/")))
 
     train_folder_80 = train_folder +"/train80/"
