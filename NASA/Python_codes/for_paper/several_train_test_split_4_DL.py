@@ -20,6 +20,7 @@ import numpy as np
 
 # %%
 dir_ = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
+ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
 
 # %%
 GT_labels = pd.read_csv(dir_ + "groundTruth_labels_Oct17_2022.csv")
@@ -70,6 +71,10 @@ for an_ID in ground_truth_TS.ID.unique():
     
     ground_truth_wide_indx = ground_truth_wide[ground_truth_wide.ID==an_ID].index
     ground_truth_wide.loc[ground_truth_wide_indx, "NDVI_1":"NDVI_36"] = curr_df.NDVI.values[:36]
+    
+ground_truth_wide.head(2)
+
+# %%
 
 # %%
 from sklearn.model_selection import train_test_split
@@ -90,7 +95,6 @@ for state_ in [1, 2, 3, 4, 5]:
     out_name = out_dir + "test20_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
     y_test_df.to_csv(out_name, index = False)
     
-    print ("------------------------------------")
     print (f"{state_ = }")
     print (f"{y_train_df.shape = }")
     print ("------------------------------------")
@@ -136,7 +140,37 @@ y_train_6.to_csv(out_name, index = False)
 out_name = out_dir + "test20_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
 y_test_6.to_csv(out_name, index = False)
 
+# %% [markdown]
+# ## Save wide test sets
+
 # %%
+for state_ in [1, 2, 3, 4, 5, 6]:
+    in_dir = dir_ + "train_test_DL_" + str(state_) + "/"
+    f_name = in_dir + "test20_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
+    
+    test_df = pd.read_csv(f_name)
+    test_wide = ground_truth_wide[ground_truth_wide.ID.isin(list(test_df.ID))].copy()
+    test_wide = pd.merge(test_wide, GT_labels, on=["ID"], how='left')
+    
+    out_dir = ML_data_folder + "overSamples/" + "train_test_DL_" + str(state_) + "/"
+    os.makedirs(out_dir, exist_ok=True)
+    
+    out_file = VI_idx +"_" + smooth_type + \
+                   "_wide_test20_split_2Bconsistent_Oct17.csv"
+    test_wide.to_csv(out_dir + out_file, index = False)
+    
+    out_dir2 = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/widen_test_TS/"
+    
+    out_file = VI_idx +"_" + smooth_type + \
+                   "_wide_test20_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
+    test_wide.to_csv(out_dir2 + out_file, index = False)
+    
+    
+    print (test_wide.shape)
+
+
+# %%
+test_wide.head(2)
 
 # %% [markdown]
 # ### Copy test and train set images into different folders.
@@ -147,8 +181,6 @@ y_test_6.to_csv(out_name, index = False)
 import imblearn
 from imblearn.over_sampling import RandomOverSampler
 # print(imblearn.__version__)
-
-ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
 
 # %% [markdown]
 # ## First oversample
@@ -162,7 +194,8 @@ for state_ in range(6, 7):
 
 # %%
 A = pd.read_csv(dir_ + "overSamples/EVI_regular_wide_train80_split_2Bconsistent_Oct17_overSample3.csv")
-A.shape
+print (A.shape)
+A.head(2)
 
 # %%
 for state_ in range(1, 7):
@@ -188,6 +221,13 @@ for state_ in range(1, 7):
         X_over.to_csv(out_dir + out_file, index = False)
         if state_== 1:
             print (X_over.shape)
+
+# %%
+print (X_over.shape)
+
+# %%
+
+# %%
 
 # %% [markdown]
 # ### Let us train only with 50% over sampling.
@@ -323,6 +363,22 @@ print (len(dir_6_list))
 # %%
 
 # %%
+
+# %%
+# for test time
+test_df["VoteLetter"] = "single"
+double_idx = test_df[test_df.Vote==2].index
+test_df.loc[double_idx, "VoteLetter"] = "double"
+test_df.head(2)
+
+# %%
+
+test_df.head(2)
+
+# %%
+
+# %%
+test_df.head(2)
 
 # %%
 

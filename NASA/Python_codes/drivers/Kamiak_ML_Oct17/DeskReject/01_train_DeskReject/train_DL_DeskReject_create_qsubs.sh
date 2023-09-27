@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/h.noorazar/NASA/trend/01_train_DeskReject
+cd /home/h.noorazar/NASA/DeskReject/01_train_DeskReject
 
 outer=1
 for ML_model in DL

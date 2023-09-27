@@ -4,7 +4,7 @@
 #SBATCH --partition=rajagopalan
 #SBATCH --requeue
 #SBATCH --job-name=indeks_smooth_trainID_SR # Job Name
-#SBATCH --time=00-04:00:00    # Wall clock time limit in Days-HH:MM:SS
+#SBATCH --time=02-00:00:00    # Wall clock time limit in Days-HH:MM:SS
 #SBATCH --mem=16GB 
 #SBATCH --nodes=1            # Node count required for the job
 #SBATCH --ntasks-per-node=1  # Number of tasks to be launched per Node
@@ -13,8 +13,8 @@
 ####SBATCH --array=0-30000
 
 ###SBATCH -k o
-#SBATCH --output=/home/h.noorazar/NASA/trend/01_train_DeskReject/error/indeks_smooth_trainID_SR.o
-#SBATCH  --error=/home/h.noorazar/NASA/trend/01_train_DeskReject/error/indeks_smooth_trainID_SR.e
+#SBATCH --output=/home/h.noorazar/NASA/DeskReject/01_train_DeskReject/error/indeks_smooth_trainID_SR.o
+#SBATCH  --error=/home/h.noorazar/NASA/DeskReject/01_train_DeskReject/error/indeks_smooth_trainID_SR.e
 echo
 echo "--- We are now in $PWD, running an R script ..."
 echo
@@ -57,7 +57,7 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python /home/h.noorazar/NASA/trend/01_train_DeskReject/train_DL_DeskReject.py indeks smooth trainID SR
+python /home/h.noorazar/NASA/DeskReject/01_train_DeskReject/train_DL_DeskReject.py indeks smooth trainID SR
 
 echo
 echo "----- DONE -----"

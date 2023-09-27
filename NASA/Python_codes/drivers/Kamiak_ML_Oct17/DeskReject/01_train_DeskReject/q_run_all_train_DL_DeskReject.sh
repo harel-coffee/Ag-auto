@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/h.noorazar/NASA/trend/01_train_DeskReject/qsubs
+cd /home/h.noorazar/NASA/DeskReject/01_train_DeskReject/qsubs
 
 for ML_model in DL
 do

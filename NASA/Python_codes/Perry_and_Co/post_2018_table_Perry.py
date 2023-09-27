@@ -27,20 +27,21 @@ meta_dir = data_base_dir + "/shapefiles/10_intersect_East_Irr_2008_2018_2cols/"
 # %%
 NDVI_SG_preds = pd.read_csv(data_dir + "NDVI_SG_preds_intersect.csv")
 
-# %%
-prob_NDVI = 0.9
+# prob_NDVI = 0.9
 colName = "NDVI_SG_DL_p9"
+
+prob_NDVI = 0.3
+colName = "NDVI_SG_DL_p3"
+
 NDVI_SG_preds[colName] = -1
 NDVI_SG_preds.loc[NDVI_SG_preds.NDVI_SG_DL_p_single < prob_NDVI, colName] = 2
 NDVI_SG_preds.loc[NDVI_SG_preds.NDVI_SG_DL_p_single >= prob_NDVI, colName] = 1
 NDVI_SG_preds.drop(['NDVI_SG_DL_p_single'], axis=1, inplace=True)
 
-
-# %%
 NDVI_SG_preds.head(2)
 
 # %%
-NDVI_SG_preds = NDVI_SG_preds[["ID", "year", "NDVI_SG_DL_p9"]]
+NDVI_SG_preds = NDVI_SG_preds[["ID", "year", colName]]
 
 # %%
 out_drive = data_base_dir + "Perry_2008_2018/"

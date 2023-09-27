@@ -60,7 +60,7 @@ smooth_type = sys.argv[2]
 train_ID = sys.argv[3]  # we have different training sets: 1, 2, 3, 4, 5, 6
 SR = sys.argv[4]  # sample Ratio 3, 4, 5, 6, 7, 8
 
-print("Passed Args. are: ", VI_idx, ",", smooth, ",", trainID, ",", SR)
+print("Passed Args. are: ", VI_idx, ",", smooth_type, ",", train_ID, ",", SR)
 ####################################################################################
 ###
 ###      Directories
@@ -74,6 +74,14 @@ overSamp_data_base = ML_data_dir_base + "overSamples/"
 model_dir = data_base + "ML_Models_Oct17/DeskReject/"
 os.makedirs(model_dir, exist_ok=True)
 
+train_test_dir = overSamp_data_base + "train_test_DL_" + str(train_ID) + "/"
+
+train_plot_dir = (
+    train_test_dir + "/oversample" + str(SR) + "/" + smooth_type + "_" + VI_idx + "_train/"
+)
+
+train_test_split_dir = ML_data_dir_base + "train_test_DL_" + str(train_ID) + "/"
+
 
 #####################################################################
 ######
@@ -86,26 +94,10 @@ def DTW_prune(ts1, ts2):
     return d
 
 
-train_specific_dir = overSamp_data_base + "train_test_DL_" + str(train_ID) + "/"
+LL = "_wide_train80_split_2Bconsistent_Oct17_overSample"
+train_fileName = VI_idx + "_" + smooth_type + LL + str(SR) + ".csv"
+train80_wide = pd.read_csv(train_test_dir + train_fileName)
 
-train_plot_dir = (
-    train_specific_dir + "/oversample" + str(SR) + "/" + smooth_type + "_" + VI_idx + "_train/"
-)
-
-train_fileName = (
-    VI_idx
-    + "_"
-    + smooth_type
-    + "_wide_train80_split_2Bconsistent_Oct17_overSample"
-    + str(SR)
-    + ".csv"
-)
-train80_wide = pd.read_csv(train_specific_dir + train_fileName)
-
-train_test_split_dir = ML_data_dir_base + "train_test_DL_" + str(train_ID) + "/"
-test_fName = "test20_split_2Bconsistent_Oct17_DL_" + str(train_ID) + ".csv"
-test20 = pd.read_csv(train_test_split_dir + test_fName)
-print(test20.shape)
 print(train80_wide.shape)
 
 train_plot_count = len(os.listdir(train_plot_dir + "/single/")) + len(
