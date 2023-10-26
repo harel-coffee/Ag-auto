@@ -1,7 +1,7 @@
 #!/bin/bash
 cd /home/h.noorazar/NASA/DeskReject/02_apply_DeskReject/qsubs
 
-for ML_model in SVM ###RF KNN
+for ML_model in SVM # RF # KNN
 do
   for indeks in NDVI
   do

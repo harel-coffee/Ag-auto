@@ -242,6 +242,23 @@ del(all_fields_correct_year_irr)
 # # Choose 10% of the fields, randomly
 
 # %%
+all_fields_correct_year_irr_noNass.head(2)
+
+# %%
+sorted(all_fields_correct_year_irr_noNass.CropTyp.unique())
+
+# %%
+out_name = "/Users/hn/Documents/01_research_data/NASA/train_Split_SFs/" + \
+           "all_fields_correct_year_irr_noNass.csv"
+all_fields_correct_year_irr_noNass.to_csv(out_name, index = False)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 # number_of_fields_to_pick = all_fields_correct_year_irr_noNass.shape[0] // 10
 number_of_fields_to_pick = all_fields_irr.shape[0] // 10
 min_count = 50

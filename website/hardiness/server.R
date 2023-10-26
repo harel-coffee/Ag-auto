@@ -76,14 +76,12 @@ shinyServer(function(input, output, session) {
                          modalId = "hard_graph", 
                          toggle =  "open")
 
-             output$hard_plot <- renderImage({
-                                               image_name <- paste0(lat, "-", long, ".png")
-                                               filename <- normalizePath(file.path(observed_plot_dir, 
-                                                                                     image_name))
+             output$hard_plot <- renderImage({image_name <- paste0(lat, "-", long, ".png")
+                                              filename <- normalizePath(file.path(observed_plot_dir, image_name))
                                                list(src = filename, width = 650, height = 400)
-                                             }, 
-                                            deleteFile = FALSE
-                                            )
+                                              }, 
+                                              deleteFile = FALSE
+                                             )
           })
 
   #######################################################

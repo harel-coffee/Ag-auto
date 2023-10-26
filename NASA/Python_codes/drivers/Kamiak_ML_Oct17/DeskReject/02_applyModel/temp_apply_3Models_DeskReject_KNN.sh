@@ -4,8 +4,8 @@
 #SBATCH --partition=rajagopalan
 #SBATCH --requeue
 #SBATCH --job-name=ML_model_trainID_SR_indeks_smooth # Job Name
-#SBATCH --time=06-00:00:00   # Wall clock time limit in Days-HH:MM:SS
-#SBATCH --mem=20GB 
+#SBATCH --time=04-00:00:00    # Wall clock time limit in Days-HH:MM:SS
+#SBATCH --mem=16GB 
 #SBATCH --nodes=1            # Node count required for the job
 #SBATCH --ntasks-per-node=1  # Number of tasks to be launched per Node
 #SBATCH --ntasks=1           # Number of tasks per array job
@@ -13,8 +13,8 @@
 ####SBATCH --array=0-30000
 
 ###SBATCH -k o
-#SBATCH --output=/home/h.noorazar/NASA/DeskReject/01_train_DeskReject/error/ML_model_trainID_SR_indeks_smooth.o
-#SBATCH  --error=/home/h.noorazar/NASA/DeskReject/01_train_DeskReject/error/ML_model_trainID_SR_indeks_smooth.e
+#SBATCH --output=/home/h.noorazar/NASA/DeskReject/02_apply_DeskReject/error/ML_model_trainID_SR_indeks_smooth.o
+#SBATCH  --error=/home/h.noorazar/NASA/DeskReject/02_apply_DeskReject/error/ML_model_trainID_SR_indeks_smooth.e
 echo
 echo "--- We are now in $PWD, running an R script ..."
 echo
@@ -27,9 +27,10 @@ echo
 ## module purge         # Kamiak is not similar to Aeolus. purge on its own cannot be loaded. 
                         # Either leave it out or add "module load StdEnv". Lets see if this works. (Feb 22.)
 ## module load StdEnv
-module load gcc/7.3.0
+
 # module load python3/3.5.0
 # module load python3/3.7.0
+module load gcc/7.3.0
 module load anaconda3
 
 # pip install shutup
@@ -56,7 +57,7 @@ echo "--------- continue on ---------"
 # Run python code for matrix
 # ----------------------------------------------------------------
 
-python /home/h.noorazar/NASA/DeskReject/01_train_DeskReject/train_3ML_DeskReject.py indeks smooth trainID SR ML_model
+python /home/h.noorazar/NASA/DeskReject/02_apply_DeskReject/apply_3Models_DeskReject.py indeks smooth trainID SR ML_model
 
 echo
 echo "----- DONE -----"

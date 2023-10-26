@@ -29,6 +29,9 @@ GT_labels.reset_index(inplace=True, drop=True)
 GT_labels.head(2)
 
 # %%
+GT_labels[GT_labels.ID == "148385_WSDA_SF_2015"]
+
+# %%
 VI_idx = "NDVI"
 smooth_type = "SG"
 data_dir = "/Users/hn/Documents/01_research_data/NASA/VI_TS/05_SG_TS/"
@@ -75,10 +78,9 @@ for an_ID in ground_truth_TS.ID.unique():
 ground_truth_wide.head(2)
 
 # %%
-
-# %%
 from sklearn.model_selection import train_test_split
 
+# %%
 for state_ in [1, 2, 3, 4, 5]:
     x_train_df, x_test_df, y_train_df, y_test_df = train_test_split(ground_truth_wide, 
                                                                     GT_labels, 
@@ -98,9 +100,6 @@ for state_ in [1, 2, 3, 4, 5]:
     print (f"{state_ = }")
     print (f"{y_train_df.shape = }")
     print ("------------------------------------")
-
-# %%
-y_test_df.shape
 
 # %% [markdown]
 # ### Equal 1 and 2 in test set!
@@ -144,6 +143,23 @@ y_test_6.to_csv(out_name, index = False)
 # ## Save wide test sets
 
 # %%
+state_ = 1
+
+in_dir = dir_ + "train_test_DL_" + str(state_) + "/"
+f_name = in_dir + "test20_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
+test_df = pd.read_csv(f_name)
+
+test_df.head(2)
+
+# %%
+test_wide = ground_truth_wide[ground_truth_wide.ID.isin(list(test_df.ID))].copy()
+test_wide.head(2)
+
+# %%
+test_wide = pd.merge(test_wide, GT_labels, on=["ID"], how='left')
+test_wide.head(2)
+
+# %%
 for state_ in [1, 2, 3, 4, 5, 6]:
     in_dir = dir_ + "train_test_DL_" + str(state_) + "/"
     f_name = in_dir + "test20_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
@@ -172,6 +188,20 @@ for state_ in [1, 2, 3, 4, 5, 6]:
 # %%
 test_wide.head(2)
 
+# %%
+GT_labels_cp = GT_labels.copy()
+GT_labels_cp.rename(columns={"Vote": "label"}, inplace=True)
+GT_labels_cp.head(2)
+
+# %%
+test_wide = test_wide.merge(GT_labels_cp, how='left', on='ID')
+test_wide.head(2)
+
+# %%
+sum(test_wide.Vote - test_wide.label)
+
+# %%
+
 # %% [markdown]
 # ### Copy test and train set images into different folders.
 #
@@ -198,6 +228,55 @@ print (A.shape)
 A.head(2)
 
 # %%
+B = A.merge(GT_labels_cp, how='left', on='ID')
+B.head(2)
+
+# %%
+sum(B.Vote - B.label)
+
+# %%
+state_ = 1
+in_dir = dir_ + "train_test_DL_" + str(state_) + "/"
+in_name = in_dir + "train80_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
+y_train_df = pd.read_csv(in_name)
+
+# %%
+y_train_df.head(2)
+
+# %%
+GT_wide = ground_truth_wide[ground_truth_wide.ID.isin(list(y_train_df.ID))].copy()
+GT_wide.head(2)
+
+# %%
+y_train_df.head(2)
+
+# %%
+print (f"{GT_wide.shape=}")
+print (f"{y_train_df.shape=}")
+
+# %%
+GT_wide.sort_values(by=['ID'], inplace=True)
+y_train_df.sort_values(by=['ID'], inplace=True)
+
+# %%
+ratios = 0.3
+oversample = RandomOverSampler(sampling_strategy=ratios, random_state=10)
+X_over, y_over = oversample.fit_resample(GT_wide, y_train_df.Vote)
+X_over["Vote"]=y_over
+
+# %%
+X_over.head(2)
+
+# %%
+X_over = X_over.merge(GT_labels_cp, how='left', on='ID')
+X_over.head(2)
+
+# %%
+sum(X_over.Vote - X_over.label)
+
+# %%
+
+# %%
 for state_ in range(1, 7):
     in_dir = dir_ + "train_test_DL_" + str(state_) + "/"
     in_name = in_dir + "train80_split_2Bconsistent_Oct17_DL_" + str(state_) + ".csv"
@@ -209,6 +288,10 @@ for state_ in range(1, 7):
     GT_wide = ground_truth_wide[ground_truth_wide.ID.isin(list(y_train_df.ID))].copy()
     for ratios in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8]:
         oversample = RandomOverSampler(sampling_strategy=ratios, random_state=10)
+        
+        GT_wide.sort_values(by=['ID'], inplace=True)
+        y_train_df.sort_values(by=['ID'], inplace=True)
+
         X_over, y_over = oversample.fit_resample(GT_wide, y_train_df.Vote)
         X_over["Vote"]=y_over
 
@@ -225,17 +308,29 @@ for state_ in range(1, 7):
 # %%
 print (X_over.shape)
 
-# %%
-
-# %%
-
 # %% [markdown]
-# ### Let us train only with 50% over sampling.
-#
-# Copy plots to proper locations
+# # Copy 
+# plots to proper locations
 
 # %%
 import sys, os, os.path, shutil
+
+# %%
+in_out_dir = dir_ + "overSamples/" + "train_test_DL_" + str(state_) + "/"
+in_out_dir
+
+# %%
+state_ = 1
+in_out_dir = dir_ + "overSamples/" + "train_test_DL_" + str(state_) + "/"
+ratio = 0.3
+
+f_name = VI_idx +"_" + smooth_type + \
+                "_wide_train80_split_2Bconsistent_Oct17_overSample" + str(int(ratio*10)) + ".csv"    
+train_df = pd.read_csv(in_out_dir + f_name)
+train_df.head(2)
+
+# %%
+# %who
 
 # %%
 
@@ -372,7 +467,6 @@ test_df.loc[double_idx, "VoteLetter"] = "double"
 test_df.head(2)
 
 # %%
-
 test_df.head(2)
 
 # %%

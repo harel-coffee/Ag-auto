@@ -28,9 +28,9 @@ echo
                         # Either leave it out or add "module load StdEnv". Lets see if this works. (Feb 22.)
 ## module load StdEnv
 
-module load gcc/7.3.0
 # module load python3/3.5.0
 # module load python3/3.7.0
+module load gcc/7.3.0
 module load anaconda3
 
 # pip install shutup

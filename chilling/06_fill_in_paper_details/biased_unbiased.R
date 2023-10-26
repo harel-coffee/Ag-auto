@@ -133,11 +133,11 @@ diff_from_modeledHist <- diff_from_modeledHist %>%
                          data.table()
 
 diff_from_observed <- diff_from_observed %>%
-                         filter(year >= 2026) %>%
-                         data.table()
+                      filter(year >= 2026) %>%
+                      data.table()
 
 setnames(diff_from_modeledHist, old=c("diffs_modelMedians"), new=c("diffs_modelMedians_fromModeledHist"))
-setnames(diff_from_observed, old=c("diffs_modelMedians"), new=c("diffs_modelMedians_fromObserved"))
+setnames(diff_from_observed,    old=c("diffs_modelMedians"), new=c("diffs_modelMedians_fromObserved"))
 
 
 all_diffs <- dplyr::left_join(x = diff_from_observed, y = diff_from_modeledHist , by = c("year", "city"))

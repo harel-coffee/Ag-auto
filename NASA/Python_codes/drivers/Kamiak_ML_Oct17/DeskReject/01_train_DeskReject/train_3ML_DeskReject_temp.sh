@@ -4,7 +4,7 @@
 #SBATCH --partition=rajagopalan
 #SBATCH --requeue
 #SBATCH --job-name=ML_model_trainID_SR_indeks_smooth # Job Name
-#SBATCH --time=00-04:00:00   # Wall clock time limit in Days-HH:MM:SS
+#SBATCH --time=06-00:00:00   # Wall clock time limit in Days-HH:MM:SS
 #SBATCH --mem=16GB 
 #SBATCH --nodes=1            # Node count required for the job
 #SBATCH --ntasks-per-node=1  # Number of tasks to be launched per Node

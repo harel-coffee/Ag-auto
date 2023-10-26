@@ -83,9 +83,9 @@ omak85 <- unique(omak85)
 
 
 lw1 <- loess(sum_A1 ~ year, data=omak85, degree = 2)
-plot(omak85$sum_A1 ~ omak85$year, data=omak85,pch=19,cex=0.1)
+plot(omak85$sum_A1 ~ omak85$year, data=omak85, pch=19, cex=0.1)
 j <- order(omak85$year)
-lines(omak85$year[j],lw1$fitted[j],col="red",lwd=3)
+lines(omak85$year[j],lw1$fitted[j], col="red", lwd=3)
 
 
 

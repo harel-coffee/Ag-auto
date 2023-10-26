@@ -42,6 +42,8 @@ DL_preds_test.head(2)
 
 # %%
 test_results = {}
+best_params = {}
+
 for a_train_ID in sorted(DL_preds_test.train_ID.unique()):
     a_test_set = DL_preds_test[DL_preds_test.train_ID == a_train_ID].copy()
     
