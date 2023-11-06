@@ -330,9 +330,11 @@ train_df = pd.read_csv(in_out_dir + f_name)
 train_df.head(2)
 
 # %%
-# %who
+train_df = train_df.merge(GT_labels_cp, how="left", on="ID")
+train_df.head(1)
 
 # %%
+sum(train_df.Vote-train_df.label)
 
 # %%
 labeldirs = ['/single/', '/double/']

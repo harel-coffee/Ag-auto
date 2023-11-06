@@ -127,6 +127,19 @@ for an_ID in beet_seed_properYear.ID.unique():
     plt.close()
 
 # %%
+fig, axs = plt.subplots(1, 1, figsize=(12, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
+                   gridspec_kw={'hspace': 0.35, 'wspace': .05});
+axs.grid(axis='y', which='both')
+
+axs.plot(df["human_system_start_time"], df["NDVI"],
+         c="dodgerblue", linewidth=2, label="SG NDVI");
+
+axs.set_ylim([-0.3, 1.15])
+
+axs.set_title(df["CropTyp"].unique()[0] + ", " + \
+              str(df["Acres"].unique()[0]) + " acres, " + \
+              df["ID"].unique()[0]);
+axs.legend(loc="best")
 
 # %%
 

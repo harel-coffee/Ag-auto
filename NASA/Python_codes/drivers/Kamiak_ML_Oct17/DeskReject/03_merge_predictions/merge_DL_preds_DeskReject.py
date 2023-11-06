@@ -36,6 +36,7 @@ os.makedirs(merged_pred_dir, exist_ok=True)
 ######
 #####################################################################
 pred_file_names = [x for x in os.listdir(pred_dir) if x.endswith(".csv")]
+pred_file_names = [x for x in pred_file_names if "DL" in x]
 all_preds = pd.DataFrame()
 
 for a_file in pred_file_names:

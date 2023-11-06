@@ -235,7 +235,7 @@ for a_ML in ["RF", "SVM", "KNN"]:
         elif a_ML == "KNN":
             best_params_KNN["train_ID" + str(a_train_ID)] = best_in_set
         # print ("=============================================================================")
-    
+
 
 # %%
 best_params = {"best_params_RF": best_params_RF,
