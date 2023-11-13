@@ -139,7 +139,8 @@ axs.set_ylim([-0.3, 1.15])
 axs.set_title(df["CropTyp"].unique()[0] + ", " + \
               str(df["Acres"].unique()[0]) + " acres, " + \
               df["ID"].unique()[0]);
-axs.legend(loc="best")
+axs.legend(loc="best");
+
 
 # %%
 
