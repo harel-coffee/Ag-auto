@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,20 +16,21 @@
 # %%
 import numpy as np
 import pandas as pd
-import datetime
-import time
-import scipy
-import scipy.signal
-import os, os.path
-import sys
-from datetime import date, datetime
-# from statsmodels.sandbox.regression.predstd import wls_prediction_std
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, balanced_accuracy_score, classification_report
-# from patsy import cr
+import time, datetime
+import sys, os, os.path
+import scipy, scipy.signal
 
-# from pprint import pprint
+from datetime import date, datetime
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import f1_score, accuracy_score, 
+                            confusion_matrix, balanced_accuracy_score, 
+                            classification_report
 import matplotlib.pyplot as plt
+
+# from patsy import cr
+# from pprint import pprint
+# from statsmodels.sandbox.regression.predstd import wls_prediction_std
 
 # %%
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/')
@@ -41,14 +42,14 @@ import NASA_plot_core as ncp
 
 # %%
 ML_data_folder = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
-meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
+meta_dir = "/Users/hn/Documents/01_research_data/NASA/0000_parameters/"
 train_TS_dir_base = "/Users/hn/Documents/01_research_data/NASA/VI_TS/"
 
 # %% [markdown]
 # ### Metadata
 
 # %%
-meta = pd.read_csv(meta_dir+"evaluation_set.csv")
+meta = pd.read_csv(meta_dir + "evaluation_set.csv")
 meta_moreThan10Acr=meta[meta.ExctAcr>10]
 print (meta.shape)
 print (meta_moreThan10Acr.shape)
@@ -111,6 +112,9 @@ all_season_preds["ID"] = train80.ID.unique()
 # %%
 VI_indices = ["EVI", "NDVI"]
 smooth_types = ["SG", "regular"]
+
+VI_indices = [ "NDVI"]
+smooth_types = ["SG"]
 
 # for threshold in [3, 4, 5, 5.5, 6, 7]:
 thresholds = [3, 4, 5, 6, 7]
@@ -333,6 +337,8 @@ print ("________________________________________________________________________
 # print ("________________________________________________________________________________________")
 
 # %%
+
+# %%
 col="NDVI_SG_season_count3"
 print (col)
 print(confusion_matrix(all_season_preds["Vote"].astype(int), all_season_preds[col].astype(int)))
@@ -511,9 +517,9 @@ for threshold in [5]:
             else:
                 test_TS_dir = test_TS_dir_base + "04_regularized_TS/"
 
-            file_names = [smooth_type + "_Walla2015_" + VI_idx + "_JFD.csv", 
-                          smooth_type + "_AdamBenton2016_" + VI_idx + "_JFD.csv", 
-                          smooth_type + "_Grant2017_" + VI_idx + "_JFD.csv", 
+            file_names = [smooth_type + "_Walla2015_"         + VI_idx + "_JFD.csv", 
+                          smooth_type + "_AdamBenton2016_"    + VI_idx + "_JFD.csv", 
+                          smooth_type + "_Grant2017_"         + VI_idx + "_JFD.csv", 
                           smooth_type + "_FranklinYakima2018_"+ VI_idx +"_JFD.csv"]
 
             all_TS=pd.DataFrame()
@@ -990,7 +996,6 @@ ax1.xaxis.set_major_formatter(DateFormatter('%b'))
 
 
 # %%
-import numpy
 
 
 # %%

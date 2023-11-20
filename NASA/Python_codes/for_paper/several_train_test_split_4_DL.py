@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -17,6 +17,10 @@ import pandas as pd
 import os
 
 import numpy as np
+
+import imblearn
+from imblearn.over_sampling import RandomOverSampler
+# print(imblearn.__version__)
 
 # %%
 dir_ = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
@@ -207,11 +211,6 @@ sum(test_wide.Vote - test_wide.label)
 #
 # Do not forget oversampling
 
-# %%
-import imblearn
-from imblearn.over_sampling import RandomOverSampler
-# print(imblearn.__version__)
-
 # %% [markdown]
 # ## First oversample
 
@@ -309,8 +308,7 @@ for state_ in range(1, 7):
 print (X_over.shape)
 
 # %% [markdown]
-# # Copy 
-# plots to proper locations
+# # Copy plots to proper locations
 
 # %%
 import sys, os, os.path, shutil

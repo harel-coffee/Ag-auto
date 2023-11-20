@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -169,7 +169,7 @@ for a_key in test_results.keys():
 
 
 # %%
-0.679 0.737 0.76 0.806  0.826 .92
+# 0.679 0.737 0.76 0.806  0.826 .92
 
 # %% [markdown]
 # ### Non-DL MLs
