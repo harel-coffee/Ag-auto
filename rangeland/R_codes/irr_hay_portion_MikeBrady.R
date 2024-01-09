@@ -1,4 +1,4 @@
-
+rm(list=ls())
 setwd("/Users/hn/Documents/01_research_data/RangeLand/Data/NASS_downloads/")
 
 library(tidyverse)
@@ -96,7 +96,10 @@ gl_merge$VALUE <- as.numeric(gsub(",","", gl_merge$VALUE))
 gl_merge$harv <- gl_merge$VALUE_I
 gl_merge$harv <- as.numeric(gsub(",","", gl_merge$harv))
 gl_merge$harv <- as.numeric(gl_merge$harv)
-gl_merge$VALUE_Inum <- as.numeric(gsub(",","", gl_merge$VALUE_I))
+gl_merge$VALUE_Inum <- as.numeric(gsub(",","", gl_merge$VALUE_I)) # This is the same as harv. why?
+
+write.csv(gl_merge, file = "gl_merge.csv", row.names=FALSE)
+
 gl_merge <- full_join(gl_merge, glMeanImp, by = c("fips","SHORT_DESC.x"))
 gl_merge <- gl_merge %>% mutate(harv = ifelse(VALUE_I == "(D)", VALUE*meanImp, harv))
 glSum <- gl_merge %>% group_by(fips) %>% summarise(glSum = sum(harv,na.rm=TRUE))

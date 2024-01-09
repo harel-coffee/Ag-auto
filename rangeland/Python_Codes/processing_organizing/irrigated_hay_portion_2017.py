@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -55,6 +55,7 @@ import rangeland_core as rc
 file_full = NASS_dir + "2017_cdqt_data.txt.gz"
 
 # %%
+# %%time
 # deleting [quotechar='"'] does not make any difference
 census_df = pd.read_csv(file_full, compression='gzip', header=0, sep='\t', quotechar='"', low_memory=False)
 census_df.head(2)
@@ -67,14 +68,32 @@ print (f"{census_df.shape = }")
 census_df.head(2)
 
 # %%
-# %%time
-# d <- d %>% unite(fips, STATE_FIPS_CODE, COUNTY_CODE, sep="", na.rm=FALSE)
+# # %%time
+# # d <- d %>% unite(fips, STATE_FIPS_CODE, COUNTY_CODE, sep="", na.rm=FALSE)
 
-census_df = rc.census_stateCntyAnsi_2_countyFips(df=census_df, 
-                                                 state_fip_col="STATE_FIPS_CODE", 
-                                                 county_fip_col="COUNTY_CODE")
+# census_df = rc.census_stateCntyAnsi_2_countyFips(df=census_df, 
+#                                                  state_fip_col="STATE_FIPS_CODE", 
+#                                                  county_fip_col="COUNTY_CODE")
 
-census_df.head(2)
+# census_df.head(2) # took 5 min on iMac. 1.5 min MacBook
+
+# import pickle
+# from datetime import datetime
+
+# filename = NASS_dir + "census_df_irr_hay_cell4.sav"
+
+# export_ = {"census_df": census_df, 
+#            "source_code" : "irrigated_hay_portion_2017",
+#            "Author": "HN",
+#            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+# pickle.dump(export_, open(filename, 'wb'))
+
+# %%
+
+# %%
+census_df = pd.read_pickle(NASS_dir + "census_df_irr_hay_cell4.sav")
+census_df = census_df["census_df"]
 
 # %%
 census_df = census_df[census_df.SECTOR_DESC == "CROPS"]
@@ -249,10 +268,67 @@ hay[(hay.CENSUS_CHAPTER == 2) & (hay.CENSUS_TABLE==24) & (hay.CENSUS_ROW==63) & 
 # %%
 hay_irr_nonIrr_noNA = hay_irr_nonIrr.dropna(how="any")
 hay_irr_nonIrr_noNA.reset_index(drop=True, inplace=True)
-
+print (f"{hay_irr_nonIrr_noNA.CENSUS_TABLE.unique() = }")
 hay_irr_nonIrr_noNA.head(2)
 
 # %%
 hay[(hay.CENSUS_CHAPTER == 2) & (hay.CENSUS_TABLE==26) & (hay.CENSUS_ROW==82) & (hay.county_fips == "10001")]
+
+# %%
+gl_merge = pd.read_csv(NASS_dir + "gl_merge.csv")
+print (f"{gl_merge.shape = }")
+gl_merge.head(2)
+
+# %%
+hay_irr_nonIrr_noNA_26 = hay_irr_nonIrr_noNA[hay_irr_nonIrr_noNA.CENSUS_TABLE == 26].copy()
+print (hay_irr_nonIrr_noNA_26.shape)
+
+# %%
+print (f"{hay_irr_nonIrr_noNA.CENSUS_TABLE.unique() = }")
+print (f"{gl_merge.CENSUS_TABLE.unique() = }")
+
+# %%
+print (f"{len(sorted(hay_irr_nonIrr_noNA.CENSUS_ROW.unique()) )= }")
+print (f"{len(sorted(gl_merge.CENSUS_ROW.unique())) = }")
+
+# %%
+print (len(hay_irr_nonIrr_noNA["SHORT_DESC"].unique()))
+print (len(gl_merge["SHORT_DESC.x"].unique()))
+
+# %%
+gl = census_df[census_df.CENSUS_TABLE == 26]
+print (gl.shape)
+gl_i = gl[gl.SHORT_DESC.isin(["HAY & HAYLAGE, IRRIGATED - ACRES HARVESTED",
+                             "GRASSES & LEGUMES TOTALS, IRRIGATED, SEED - ACRES HARVESTED",
+                             "CORN, SILAGE, IRRIGATED - ACRES HARVESTED", 
+                             "SORGHUM, SILAGE, IRRIGATED - ACRES HARVESTED"])].copy()
+
+gl = gl[gl.SHORT_DESC.isin(["HAY & HAYLAGE - ACRES HARVESTED",
+                                   "GRASSES & LEGUMES TOTALS, SEED - ACRES HARVESTED",
+                                   "CORN, SILAGE - ACRES HARVESTED", 
+                                   "SORGHUM, SILAGE - ACRES HARVESTED"])].copy()
+print (gl.shape)
+
+# %%
+gl_i.rename(columns={"VALUE" : "VALUE_irr"}, inplace=True)
+
+gl_i = gl_i[['CENSUS_CHAPTER', 'CENSUS_TABLE', 'CENSUS_ROW', 'county_fips', 'SHORT_DESC', 'VALUE_irr']] 
+gl = gl[['CENSUS_CHAPTER', 'CENSUS_TABLE', 'STATE_ALPHA', 'CENSUS_ROW', 'county_fips', 'SHORT_DESC', 'VALUE']]
+gl_merge_py = pd.merge(gl, gl_i, on=["county_fips", "CENSUS_CHAPTER","CENSUS_TABLE","CENSUS_ROW"], how="outer")
+
+# %%
+print (gl_merge_py.shape)
+print (gl_merge.shape)
+
+# %%
+gl_merge_py.columns
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
