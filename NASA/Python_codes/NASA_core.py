@@ -110,7 +110,9 @@ def regularize_a_field_annual_basis(
     else:
         regular_cols = ["ID", "human_system_start_time", V_idks]
 
-    regular_df = pd.DataFrame(data=None, index=np.arange(no_steps), columns=regular_cols)
+    regular_df = pd.DataFrame(
+        data=None, index=np.arange(no_steps), columns=regular_cols
+    )
 
     regular_df["ID"] = a_df.ID.unique()[0]
     if "dataset" in a_df.columns:
@@ -136,17 +138,21 @@ def regularize_a_field_annual_basis(
         does not include the last row of sub-dataframe
         """
         dateRange = pd.date_range(
-            start_date, start_date + pd.Timedelta(days=interval_size - 1), freq=str(1) + "D"
+            start_date,
+            start_date + pd.Timedelta(days=interval_size - 1),
+            freq=str(1) + "D",
         )
         assert len(dateRange) == interval_size
 
         curr_time_window = a_df[a_df.human_system_start_time.isin(dateRange)]
         if len(curr_time_window) == 0:
-            regular_df.loc[regular_df.human_system_start_time == start_date, V_idks] = -1.5
+            regular_df.loc[
+                regular_df.human_system_start_time == start_date, V_idks
+            ] = -1.5
         else:
-            regular_df.loc[regular_df.human_system_start_time == start_date, V_idks] = max(
-                curr_time_window[V_idks]
-            )
+            regular_df.loc[
+                regular_df.human_system_start_time == start_date, V_idks
+            ] = max(curr_time_window[V_idks])
     ##### end the for-loop
     regular_df.reset_index(drop=True, inplace=True)
     return regular_df
@@ -424,7 +430,8 @@ def correct_big_jumps_1DaySeries_JFD(dataTMS_jumpie, give_col, maxjump_perDay=0.
     Veg_indks = dataTMS_jumpie[give_col].values.copy()
 
     time_diff = (
-        pd.to_datetime(thyme_vec[1:]) - pd.to_datetime(thyme_vec[0 : len(thyme_vec) - 1])[0]
+        pd.to_datetime(thyme_vec[1:])
+        - pd.to_datetime(thyme_vec[0 : len(thyme_vec) - 1])[0]
     ).days
 
     Veg_indks_diff = Veg_indks[1:] - Veg_indks[0 : len(thyme_vec) - 1]
@@ -467,7 +474,9 @@ def correct_big_jumps_1DaySeries_JFD(dataTMS_jumpie, give_col, maxjump_perDay=0.
                         x1, y1 = thyme_vec[jp_idx], Veg_indks[jp_idx]
                         x2, y2 = thyme_vec[jp_idx + 2], Veg_indks[jp_idx + 2]
 
-                        m = float(y2 - y1) / (x2 - x1).astype(pd.Timedelta)  # slope or float(x2-x1)
+                        m = float(y2 - y1) / (x2 - x1).astype(
+                            pd.Timedelta
+                        )  # slope or float(x2-x1)
                         b = y2 - (m * int(x2))  # intercept
 
                         # replace the big jump with linear interpolation
@@ -485,7 +494,9 @@ def correct_big_jumps_1DaySeries_JFD(dataTMS_jumpie, give_col, maxjump_perDay=0.
                         x1, y1 = thyme_vec[jp_idx - 1], Veg_indks[jp_idx - 1]
                         x2, y2 = thyme_vec[jp_idx + 1], Veg_indks[jp_idx + 1]
 
-                        m = float(y2 - y1) / (x2 - x1).astype(pd.Timedelta)  # slope or float(x2-x1)
+                        m = float(y2 - y1) / (x2 - x1).astype(
+                            pd.Timedelta
+                        )  # slope or float(x2-x1)
                         b = y2 - (m * int(x2))  # intercept
 
                         # replace the big jump with linear interpolation
@@ -522,7 +533,8 @@ def correct_big_jumps_1DaySeries(dataTMS_jumpie, give_col, maxjump_perDay=0.015)
     Veg_indks = dataTMS_jumpie[give_col].values.copy()
 
     time_diff = (
-        pd.to_datetime(thyme_vec[1:]) - pd.to_datetime(thyme_vec[0 : len(thyme_vec) - 1])[0]
+        pd.to_datetime(thyme_vec[1:])
+        - pd.to_datetime(thyme_vec[0 : len(thyme_vec) - 1])[0]
     ).days
 
     Veg_indks_diff = Veg_indks[1:] - Veg_indks[0 : len(thyme_vec) - 1]
@@ -553,7 +565,9 @@ def correct_big_jumps_1DaySeries(dataTMS_jumpie, give_col, maxjump_perDay=0.015)
                 x2, y2 = thyme_vec[jp_idx + 1], Veg_indks[jp_idx + 1]
                 if (x2 - x1).astype(pd.Timedelta) == 0:
                     print(jp_idx)
-                m = float(y2 - y1) / (x2 - x1).astype(pd.Timedelta)  # slope or float(x2-x1)
+                m = float(y2 - y1) / (x2 - x1).astype(
+                    pd.Timedelta
+                )  # slope or float(x2-x1)
                 b = y2 - (m * int(x2))  # intercept
 
                 # replace the big jump with linear interpolation
@@ -622,7 +636,9 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
 
         all_outliers_idx = np.concatenate((high_outlier_inds, low_outlier_inds))
         all_outliers_idx = np.sort(all_outliers_idx)
-        non_outiers = np.arange(len(vec))[~np.in1d(np.arange(len(vec)), all_outliers_idx)]
+        non_outiers = np.arange(len(vec))[
+            ~np.in1d(np.arange(len(vec)), all_outliers_idx)
+        ]
         if len(all_outliers_idx) == 0:
             outlier_input[given_col] = vec
             return outlier_input
@@ -638,7 +654,9 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
 
         all_outliers_idx = np.concatenate((high_outlier_inds, low_outlier_inds))
         all_outliers_idx = np.sort(all_outliers_idx)
-        non_outiers = np.arange(len(vec))[~np.in1d(np.arange(len(vec)), all_outliers_idx)]
+        non_outiers = np.arange(len(vec))[
+            ~np.in1d(np.arange(len(vec)), all_outliers_idx)
+        ]
         if len(all_outliers_idx) == 0:
             outlier_input[given_col] = vec
             return outlier_input
@@ -670,7 +688,8 @@ def interpolate_outliers_EVI_NDVI(outlier_input, given_col):
             slope = y_diff / time_diff.astype(pd.Timedelta)
             intercept = y2 - (slope * int(x2))
             vec[left_pointer + 1 : right_pointer] = (
-                slope * ((time_vec[left_pointer + 1 : right_pointer]).astype(int)) + intercept
+                slope * ((time_vec[left_pointer + 1 : right_pointer]).astype(int))
+                + intercept
             )
     outlier_input[given_col] = vec
     return outlier_input
@@ -770,7 +789,9 @@ def fill_theGap_linearLine(a_regularized_TS, V_idx="NDVI"):
             # values
             # Avoid extra computation!
             #
-            TS_array[left_pointer + 1] = 0.5 * (TS_array[left_pointer] + TS_array[right_pointer])
+            TS_array[left_pointer + 1] = 0.5 * (
+                TS_array[left_pointer] + TS_array[right_pointer]
+            )
             missing_indicies = np.where(TS_array == -1.5)[0]
         else:
             # form y = ax + b
@@ -804,7 +825,9 @@ def is_leap_year(year):
     return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
 
-def regularize_a_field(a_df, V_idks="NDVI", interval_size=10, start_year=2008, end_year=2021):
+def regularize_a_field(
+    a_df, V_idks="NDVI", interval_size=10, start_year=2008, end_year=2021
+):
     """Returns a dataframe where data points are interval_size-day apart.
        This function regularizes the data between the minimum and maximum dates
        present in the data.
@@ -844,7 +867,9 @@ def regularize_a_field(a_df, V_idks="NDVI", interval_size=10, start_year=2008, e
     else:
         regular_cols = ["ID", "human_system_start_time", V_idks]
 
-    regular_df = pd.DataFrame(data=None, index=np.arange(no_steps), columns=regular_cols)
+    regular_df = pd.DataFrame(
+        data=None, index=np.arange(no_steps), columns=regular_cols
+    )
 
     regular_df["ID"] = a_df.ID.unique()[0]
     if "dataset" in a_df.columns:
@@ -890,17 +915,21 @@ def regularize_a_field(a_df, V_idks="NDVI", interval_size=10, start_year=2008, e
         does not include the last row of sub-dataframe
         """
         dateRange = pd.date_range(
-            start_date, start_date + pd.Timedelta(days=interval_size - 1), freq=str(1) + "D"
+            start_date,
+            start_date + pd.Timedelta(days=interval_size - 1),
+            freq=str(1) + "D",
         )
         assert len(dateRange) == interval_size
 
         curr_time_window = a_df[a_df.human_system_start_time.isin(dateRange)]
         if len(curr_time_window) == 0:
-            regular_df.loc[regular_df.human_system_start_time == start_date, V_idks] = -1.5
+            regular_df.loc[
+                regular_df.human_system_start_time == start_date, V_idks
+            ] = -1.5
         else:
-            regular_df.loc[regular_df.human_system_start_time == start_date, V_idks] = max(
-                curr_time_window[V_idks]
-            )
+            regular_df.loc[
+                regular_df.human_system_start_time == start_date, V_idks
+            ] = max(curr_time_window[V_idks])
     ##### end the for-loop
 
     ##
@@ -921,7 +950,9 @@ def regularize_a_field(a_df, V_idks="NDVI", interval_size=10, start_year=2008, e
         freq=str(interval_size) + "D",
     )
 
-    missing_begin_df = pd.DataFrame(data=None, index=np.arange(len(A[:-1])), columns=regular_cols)
+    missing_begin_df = pd.DataFrame(
+        data=None, index=np.arange(len(A[:-1])), columns=regular_cols
+    )
 
     missing_begin_df.human_system_start_time = A[:-1]
     missing_begin_df.ID = regular_df.ID.unique()[0]
@@ -941,13 +972,15 @@ def regularize_a_field(a_df, V_idks="NDVI", interval_size=10, start_year=2008, e
         freq=str(interval_size) + "D",
     )
 
-    missing_end_df = pd.DataFrame(data=None, index=np.arange(len(A[1:])), columns=regular_cols)
+    missing_end_df = pd.DataFrame(
+        data=None, index=np.arange(len(A[1:])), columns=regular_cols
+    )
     missing_end_df.human_system_start_time = A[1:]
     missing_end_df.ID = regular_df.ID.unique()[0]
     mm = max(regular_df.human_system_start_time)
-    missing_end_df[V_idks] = np.array(regular_df[regular_df.human_system_start_time == mm][V_idks])[
-        0
-    ]
+    missing_end_df[V_idks] = np.array(
+        regular_df[regular_df.human_system_start_time == mm][V_idks]
+    )[0]
     if "dataset" in regular_cols:
         missing_end_df.dataset = regular_df.dataset.unique()[0]
 
@@ -982,7 +1015,9 @@ def add_human_start_time_by_system_start_time(HDF):
     """
     HDF.system_start_time = HDF.system_start_time / 1000
     time_array = HDF["system_start_time"].values.copy()
-    human_time_array = [time.strftime("%Y-%m-%d", time.localtime(x)) for x in time_array]
+    human_time_array = [
+        time.strftime("%Y-%m-%d", time.localtime(x)) for x in time_array
+    ]
     HDF["human_system_start_time"] = human_time_array
 
     if type(HDF["human_system_start_time"] == str):

@@ -3,8 +3,7 @@ from datetime import date
 import datetime
 import time
 
-import sys
-import os, os.path
+import os, os.path, sys
 from os import listdir
 from os.path import isfile, join
 import numpy as np
@@ -14,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import seaborn as sb
 
-import rasterio 
+import rasterio
 from rasterio.mask import mask
 from rasterio.plot import show
 

@@ -1,12 +1,22 @@
+
+setwd("/Users/hn/Documents/01_research_data/RangeLand/Data/NASS_downloads/")
+
+library(tidyverse)
+library(data.table)
+library(readr)
+library(readxl)
+options(scipen=999)
+options(digits=2)
+
 # 2017
 
-d <- read_delim("2017_cdqt_data.txt.gz", "\t", escape_double = FALSE, col_types = cols(VALUE = col_character()), trim_ws = TRUE)
+d <- read_delim("2017_cdqt_data.txt.gz", "\t", 
+                escape_double = FALSE, 
+                col_types = cols(VALUE = col_character()), trim_ws = TRUE)
 
 d <- d[d$AGG_LEVEL_DESC == "COUNTY",]
-d <- d[d$STATE_NAME %in% c("ARIZONA","CALIFORNIA","IDAHO", "OREGON","WASHINGTON"),]
+# d <- d[d$STATE_NAME %in% c("ARIZONA","CALIFORNIA","IDAHO", "OREGON","WASHINGTON"),]
 d <- d %>% unite(fips, STATE_FIPS_CODE, COUNTY_CODE, sep="", na.rm=FALSE)
-
- 
 
 #### 2017 ######
 
@@ -43,12 +53,22 @@ field_i <- field_i %>% select(CENSUS_CHAPTER, CENSUS_TABLE, CENSUS_ROW, fips, SH
 
 field_merge <- full_join(field, field_i, by = c("fips", "CENSUS_CHAPTER","CENSUS_TABLE","CENSUS_ROW"))
 field_merge2 <- field_merge %>% filter(str_detect(VALUE, "(D)", negate=TRUE))
+
+# The following line throws an error. character converted to numeric
 field_merge2 <- field_merge2 %>% replace_na(list(VALUE_I = 0, y=c(NA)))
+
+field_merge2$VALUE_I <- as.numeric(gsub(",", "", field_merge2$VALUE_I))
+field_merge2 <- field_merge2 %>% replace_na(list(VALUE_I = 0, y=c(NA)))
+
 field_merge2$VALUE <- as.numeric(gsub(",", "", field_merge2$VALUE))
 
 field_merge2$harv <- field_merge2$VALUE_I # why a new column? why not just rename?
 field_merge2$harv <- as.numeric(gsub(",","", field_merge2$harv))
 field_merge2$harv <- as.numeric(field_merge2$harv)
+
+write.csv(field_merge2, 
+          file = "field_merge2.csv",
+          row.names=FALSE)
 
 field_merge2 <- full_join(field_merge2, fieldMeanImp, by = c("fips","SHORT_DESC.x"))
 field_merge2 <- field_merge2 %>% mutate(harv = ifelse(VALUE_I == "(D)", VALUE*meanImp, harv))
@@ -70,8 +90,8 @@ gl <- subset(gl, SHORT_DESC %in% c("HAY & HAYLAGE - ACRES HARVESTED",
 
 gl_i <- gl_i %>% rename(VALUE_I = VALUE)
 gl_i <- gl_i %>% select(CENSUS_CHAPTER, CENSUS_TABLE, CENSUS_ROW, fips, SHORT_DESC, VALUE_I)
-gl <- gl     %>% select(CENSUS_CHAPTER, CENSUS_TABLE, CENSUS_ROW, fips, SHORT_DESC, VALUE, STATE_ALPHA)
-gl_merge <- full_join(gl, gl_i, by = c("CENSUS_CHAPTER","CENSUS_TABLE","CENSUS_ROW", "fips"))
+gl <- gl %>% select(CENSUS_CHAPTER, CENSUS_TABLE, STATE_ALPHA, CENSUS_ROW, fips, SHORT_DESC, VALUE)
+gl_merge <- full_join(gl, gl_i, by = c("fips", "CENSUS_CHAPTER","CENSUS_TABLE","CENSUS_ROW"))
 gl_merge$VALUE <- as.numeric(gsub(",","", gl_merge$VALUE))
 gl_merge$harv <- gl_merge$VALUE_I
 gl_merge$harv <- as.numeric(gsub(",","", gl_merge$harv))

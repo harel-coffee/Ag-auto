@@ -125,24 +125,22 @@ for (timeP_ty in 1:1){ # annual or wtr_yr?
   box_title <- paste0("% difference between future and historical", 
                       " annual precipitation")
 
-  quans_85 <- find_quantiles(unbias_diff_85, tgt_col= "perc_diff", 
-                             time_type="annual")
-  quans_45 <- find_quantiles(unbias_diff_45, tgt_col= "perc_diff", 
-                             time_type="annual")
+  quans_85 <- find_quantiles(unbias_diff_85, tgt_col= "perc_diff", time_type="annual")
+  quans_45 <- find_quantiles(unbias_diff_45, tgt_col= "perc_diff", time_type="annual")
 
   unbias_perc_diff_85<-ann_wtrYr_chunk_cum_box_cluster_x(dt=unbias_diff_85,
-                                                   y_lab="differences (%)",
-                                                   tgt_col="perc_diff",
-                                                   ttl=box_title, 
-                                                   subttl=box_subtitle) + 
+                                                         y_lab="differences (%)",
+                                                         tgt_col="perc_diff",
+                                                         ttl=box_title, 
+                                                         subttl=box_subtitle) + 
                          ggtitle(box_title) +
                          coord_cartesian(ylim = c(quans_85[1], quans_85[2]))
 
   unbias_perc_diff_45<-ann_wtrYr_chunk_cum_box_cluster_x(dt=unbias_diff_45,
-                                                   y_lab="differences (%)",
-                                                   tgt_col="perc_diff",
-                                                   ttl=box_title, 
-                                                   subttl = box_subtitle) + 
+                                                         y_lab="differences (%)",
+                                                         tgt_col="perc_diff",
+                                                         ttl=box_title, 
+                                                         subttl = box_subtitle) + 
                          ggtitle(box_title) + 
                          coord_cartesian(ylim = c(quans_45[1], quans_45[2]))
   ###########################################
