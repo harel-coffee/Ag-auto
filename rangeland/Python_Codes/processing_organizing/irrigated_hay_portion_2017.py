@@ -246,6 +246,10 @@ hay_irr_nonIrr = pd.merge(hay_irr, hay_nonIrr, on=comm_cols, how="outer")
 hay_irr_nonIrr.head(5)
 
 # %%
+census_df[(census_df.CENSUS_CHAPTER == 2) & (census_df.CENSUS_TABLE == 24)& 
+          (census_df.CENSUS_ROW == 63) & (census_df.county_fips == "01001")]
+
+# %%
 hay_irr_nonIrr.tail(5)
 
 # %%
@@ -326,9 +330,12 @@ gl_merge_py.columns
 # %%
 
 # %%
+gl_merge_py.shape
 
 # %%
+gl_merge_py.dropna(subset=['VALUE']).shape
 
 # %%
+110643 - 107196
 
 # %%
