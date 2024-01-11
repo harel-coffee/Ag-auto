@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown]
-# In this notebook we filter counties that have enough rangeland area and 
+# In this notebook we filter counties that have enough rangeland area and
 #
 #
 #
@@ -23,11 +23,11 @@
 # The final list of the counties was shortlisted after considering the criterion
 #
 #
-# - (Area > 50,000 acres) or (Area <= 50,000 and coverage% >= 10%), where 
+# - (Area > 50,000 acres) or (Area <= 50,000 and coverage% >= 10%), where
 #
-# Area = Area of county covered by rangelands (in acres) 
+# Area = Area of county covered by rangelands (in acres)
 #
-# and 
+# and
 #
 #
 # Coverage % = Area of county covered by Rangelands Total area of the county * 100
@@ -75,7 +75,7 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 # for bold print
 start_b = "\033[1m"
 end_b = "\033[0;0m"
-print ("This is " + start_b + "a_bold_text" + end_b + "!")
+print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
 SoI = [
@@ -118,8 +118,8 @@ for x in SoI:
 # %%
 RA = pd.read_csv(reOrganized_dir + "county_rangeland_and_totalarea_fraction.csv")
 RA.rename(columns={"fips_id": "county_fips"}, inplace=True)
-RA = rc.correct_Mins_county_FIPS(df=RA, col_ = "county_fips")
-print (f"{len(RA.county_fips.unique()) = }")
+RA = rc.correct_Mins_county_FIPS(df=RA, col_="county_fips")
+print(f"{len(RA.county_fips.unique()) = }")
 RA.reset_index(drop=True, inplace=True)
 RA.head(2)
 
@@ -128,11 +128,11 @@ county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 
 county_fips = county_fips["county_fips"]
 
-print (f"{len(county_fips.state.unique()) = }")
+print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
 county_fips.reset_index(drop=True, inplace=True)
-print (f"{len(county_fips.state.unique()) = }")
+print(f"{len(county_fips.state.unique()) = }")
 
 county_fips.head(2)
 
@@ -144,17 +144,19 @@ small_counties = RA[RA.rangeland_acre < 50000].copy()
 small_counties_largeRA = small_counties[small_counties.rangeland_fraction >= 0.1].copy()
 
 # %%
-filtered_counties = pd.concat([large_counties, small_counties_largeRA], ignore_index = True)
+filtered_counties = pd.concat(
+    [large_counties, small_counties_largeRA], ignore_index=True
+)
 filtered_counties.reset_index(drop=True, inplace=True)
 filtered_counties.head(2)
 
 # %%
-print (len(filtered_counties.county_fips))
-print (len(filtered_counties.county_fips.unique()))
+print(len(filtered_counties.county_fips))
+print(len(filtered_counties.county_fips.unique()))
 
 # %%
-print (len(RA.county_fips))
-print (len(RA.county_fips.unique()))
+print(len(RA.county_fips))
+print(len(RA.county_fips.unique()))
 
 # %%
 len(county_fips.state.unique())
@@ -166,27 +168,30 @@ county_fips.head(2)
 filtered_counties.head(2)
 
 # %%
-filtered_counties_29States = filtered_counties[filtered_counties.county_fips.isin(
-                                list(county_fips.county_fips.unique()))].copy()
+filtered_counties_29States = filtered_counties[
+    filtered_counties.county_fips.isin(list(county_fips.county_fips.unique()))
+].copy()
 
 # %%
-print (len(filtered_counties_29States.county_fips))
-print (len(filtered_counties_29States.county_fips.unique()))
+print(len(filtered_counties_29States.county_fips))
+print(len(filtered_counties_29States.county_fips.unique()))
 
 # %%
 import pickle
 from datetime import datetime
 
-filename = param_dir + "filtered_counties.sav"
+filename = param_dir + "filtered_counties_RAsizePallavi.sav"
 
-export_ = {"filtered_counties": filtered_counties,
-           "filtered_counties_29States" : filtered_counties_29States,
-           "SoI" : SoI,
-           "source_code" : "filter_counties_RA_Pallavi",
-           "Author": "HN",
-           "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-           "Desciption" : "Some counties have small portion of RA etc."}
+export_ = {
+    "filtered_counties": filtered_counties,
+    "filtered_counties_29States": filtered_counties_29States,
+    "SoI": SoI,
+    "source_code": "filter_counties_RA_Pallavi",
+    "Author": "HN",
+    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "Desciption": "Some counties have small portion of RA etc.",
+}
 
-pickle.dump(export_, open(filename, 'wb'))
+pickle.dump(export_, open(filename, "wb"))
 
 # %%

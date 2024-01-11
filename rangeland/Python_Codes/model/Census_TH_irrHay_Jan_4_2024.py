@@ -58,7 +58,7 @@ from sklearn import preprocessing
 import statistics
 import statsmodels.api as sm
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -221,6 +221,14 @@ print ("There are {} incomlete counties out of {} for census years!!!".format(li
 # #### Rangeland area and Herb Ratio
 
 # %%
+####################
+
+# This cell is replaced by the one below after filtering counties based on
+# their rangeland area
+
+####################
+
+
 RA = pd.read_csv(reOrganized_dir + "county_rangeland_and_totalarea_fraction.csv")
 RA.rename(columns={"fips_id": "county_fips"}, inplace=True)
 RA = rc.correct_Mins_county_FIPS(df=RA, col_ = "county_fips")
@@ -228,6 +236,13 @@ print (f"{len(RA.county_fips.unique()) = }")
 RA = RA[RA.county_fips.isin(cnty_interest_list)]
 print (f"{len(RA.county_fips.unique()) = }")
 RA.reset_index(drop=True, inplace=True)
+RA.head(2)
+
+# %%
+RA = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
+RA = RA["filtered_counties"]
+
+print (f"{len(RA.county_fips.unique()) = }")
 RA.head(2)
 
 # %%
@@ -386,15 +401,47 @@ for a_col in SW_vars:
 all_df = pd.merge(all_df, seasonal_weather, on=["county_fips", "year"], how="left")
 all_df.head(2)
 
+# %% [markdown]
+# # Irrigated Hay
+
+# %%
+irr_hay = pd.read_pickle(reOrganized_dir + "irr_hay.sav")
+irr_hay = irr_hay["irr_hay"]
+irr_hay.head(2)
+
+# %%
+list(irr_hay.columns)
+
+# %%
+all_df = pd.merge(all_df, irr_hay[['county_fips', 'irr_as_perc']], on=["county_fips"], how="left")
+all_df.head(2)
+
+# %%
+irr_hay[irr_hay.irr_as_perc == irr_hay.irr_as_perc.min()]
+
+# %%
+minn_ = all_df.irr_as_perc.min()
+irr_hay[irr_hay.irr_as_perc == minn_]
+
 # %%
 all_df.describe().round(1)
 
 # %%
-sorted(all_df.columns)
+print (all_df.shape)
+all_df.dropna(how="any").shape
 
 # %%
-controls_noHerb = ["population", "feed_expense", "slaughter", "rangeland_acre"]
-controls_wHerb =  ["population", "feed_expense", "slaughter", "rangeland_acre", "herb_avg"]
+# in all_df there are 279 counties for which irr_hay_perc is missing
+# since we had (D) in the irr_hay table for some counties. Look at irrigated_hay_portion_2017.
+# 
+sum(all_df.irr_as_perc.isna())
+
+# %%
+all_df.dropna(how="any", inplace=True)
+
+# %%
+controls_noHerb = ["population", "feed_expense", "slaughter", "rangeland_acre"] + ["irr_as_perc"]
+controls_wHerb  = controls_noHerb + ["herb_avg"]
 
 NPP_control_vars_noHerb= ["county_total_npp"] + controls_noHerb
 NPP_control_vars_wHerb = ["county_total_npp"] + controls_wHerb
@@ -476,6 +523,15 @@ ks_normal = sm.OLS(Y, X_normal)
 ks_normal_result =ks_normal.fit()
 ks_normal_result.summary()
 
+# %%
+ks_normal_result.conf_int()[1] - ks_normal_result.conf_int()[0]
+
+# %%
+# ks_normal_result.predict()
+# ks_normal_result.get_prediction()
+
+# %%
+
 # %% [markdown]
 # ### NPP and control variables model No herb (normalized)
 
@@ -486,6 +542,9 @@ Y = all_df[y_var].astype(float)
 ks_normal = sm.OLS(Y, X_normal)
 ks_normal_result =ks_normal.fit()
 ks_normal_result.summary()
+
+# %%
+ks_normal_result.conf_int()[1] - ks_normal_result.conf_int()[0]
 
 # %% [markdown]
 # # Side-by-sides
@@ -507,7 +566,10 @@ ks_result = ks.fit()
 ks_result.summary()
 
 # %%
-del(X, ks, ks_result)
+ks_result.conf_int()[1] - ks_result.conf_int()[0]
+
+# %%
+del(X, ks, ks_result, ks_normal_result)
 
 # %% [markdown]
 # ### SW vs ln(y)
@@ -526,6 +588,9 @@ Y = np.log(all_df[y_var].astype(float))
 ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 ks_result.summary()
+
+# %%
+ks_result.conf_int()[1] - ks_result.conf_int()[0]
 
 # %%
 del(X, ks, ks_result)
@@ -562,6 +627,9 @@ ks_result = ks.fit()
 ks_result.summary()
 
 # %%
+ks_result.conf_int()[1] - ks_result.conf_int()[0]
+
+# %%
 del(X, ks, ks_result)
 
 # %% [markdown]
@@ -579,7 +647,7 @@ ks_result = ks.fit()
 ks_result.summary()
 
 # %%
-del(X, ks, ks_result)
+ks_result.conf_int()[1] - ks_result.conf_int()[0]
 
 # %% [markdown]
 # ### SW and controls (with herb) vs ln(y)
@@ -588,6 +656,8 @@ del(X, ks, ks_result)
 SW_control_vars_wHerb_normal
 
 # %%
+del(X, ks, ks_result)
+
 X = all_df[SW_control_vars_wHerb_normal]
 X = sm.add_constant(X)
 Y = np.log(all_df[y_var].astype(float))
@@ -595,10 +665,15 @@ ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 ks_result.summary()
 
+# %%
+ks_result.conf_int()[1] - ks_result.conf_int()[0]
+
 # %% [markdown]
 # ## Include lag ```NPP``` in the model
 #
 # Do we have annual county-level NPP?
+
+# %%
 
 # %%
 

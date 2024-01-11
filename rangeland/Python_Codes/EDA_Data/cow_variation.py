@@ -46,12 +46,37 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 plots_dir = data_dir_base + "plots/"
 
 # %%
-SoI = ["Alabama", "Arizona", "Arkansas", "California",
-       "Colorado", "Florida", "Georgia", "Idaho", "Illinois", "Iowa",
-       "Kansas", "Kentucky", "Louisiana", "Mississippi",
-       "Missouri", "Montana", "Nebraska", "Nevada",
-       "New Mexico", "North Dakota", "Oklahoma", "Oregon", "South Dakota",
-       "Tennessee", "Texas", "Utah", "Virginia", "Washington", "Wyoming"]
+SoI = [
+    "Alabama",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Florida",
+    "Georgia",
+    "Idaho",
+    "Illinois",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Mexico",
+    "North Dakota",
+    "Oklahoma",
+    "Oregon",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Virginia",
+    "Washington",
+    "Wyoming",
+]
 
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
 SoI_abb = []
@@ -59,8 +84,10 @@ for x in SoI:
     SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
 
 # %%
-d = {"state": abb_dict["abb_2_full"].keys(),
-    "full_state": abb_dict["abb_2_full"].values()}
+d = {
+    "state": abb_dict["abb_2_full"].keys(),
+    "full_state": abb_dict["abb_2_full"].values(),
+}
 
 # creating a Dataframe object
 state_abbrFull_df = pd.DataFrame(d)
@@ -201,7 +228,9 @@ print(county_RA_and_TA_fraction.shape)
 county_RA_and_TA_fraction.head(2)
 
 # %%
-county_annual_NPP_Ra = pd.merge(NPP, county_RA_and_TA_fraction, on=["county_fips"], how="left")
+county_annual_NPP_Ra = pd.merge(
+    NPP, county_RA_and_TA_fraction, on=["county_fips"], how="left"
+)
 county_annual_NPP_Ra.head(2)
 
 # %%
@@ -932,7 +961,7 @@ plt.xticks(odd_i, odd_i, rotation="vertical")
 
 fig_name = plots_dir + "shannon_annual_inventory_change.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
-plt.close('all')
+plt.close("all")
 
 # %%
 shannon_annual.head(2)
@@ -942,14 +971,21 @@ shannon_annual.head(2)
 import itertools
 
 num_sub_plots = len(inv_change_state_yr2yr.state.unique())
-fig, axs = plt.subplots(num_sub_plots, 1, figsize=(10, 3 * num_sub_plots), sharex=True,
-                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+fig, axs = plt.subplots(
+    num_sub_plots,
+    1,
+    figsize=(10, 3 * num_sub_plots),
+    sharex=True,
+    gridspec_kw={"hspace": 0.15, "wspace": 0.05},
+)
 
 # state_, full_state_ = "ID", "Idaho"
 for count, state_ in enumerate(shannon_annual.state.unique()):
     axs[count].grid(axis="y", which="both")
     B = shannon_annual[shannon_annual.state == state_]
-    axs[count].plot(B.columns[1:], B.values[0][1:], c="dodgerblue", linewidth=2, label=state_)
+    axs[count].plot(
+        B.columns[1:], B.values[0][1:], c="dodgerblue", linewidth=2, label=state_
+    )
 
     # add every other ticks
     odd_i = itertools.islice(B.columns[1:], 0, None, 2)
@@ -963,7 +999,7 @@ plt.xticks(odd_i, odd_i, rotation="vertical")
 
 fig_name = plots_dir + "shannon_annual_inventory.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
-plt.close('all')
+plt.close("all")
 
 # %%
 inv_change_state_yr2yr.head(2)
