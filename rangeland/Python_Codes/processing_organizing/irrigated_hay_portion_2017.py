@@ -54,6 +54,10 @@ import rangeland_core as rc
 # %%
 file_full = NASS_dir + "2017_cdqt_data.txt.gz"
 
+
+# %%
+census_df      = pd.read_csv(file_full, compression='gzip', header=0, sep='\t', quotechar='"', low_memory=False)
+
 # %%
 # # %%time
 
@@ -325,7 +329,7 @@ hay_merge["value_irr"] = hay_merge["value_irr"].astype(float)
 hay_merge.head(5)
 
 # %%
-hay_merge["irr_as_perc"] = ((hay_merge["value_irr"] / hay_merge["value_total"]) * 100).round(2)
+hay_merge["irr_hay_as_perc"] = ((hay_merge["value_irr"] / hay_merge["value_total"]) * 100).round(2)
 hay_merge.head(5)
 
 # %%
@@ -348,8 +352,8 @@ export_ = {"irr_hay": hay_merge,
 pickle.dump(export_, open(filename, 'wb'))
 
 # %%
-# sorted(hay_merge.irr_as_perc.unique())
-sum(hay_merge.irr_as_perc.isna())
+# sorted(hay_merge.irr_hay_as_perc.unique())
+sum(hay_merge.irr_hay_as_perc.isna())
 
 # %%
 hay_merge.dropna(how="any").shape
@@ -383,65 +387,71 @@ hay_total[(hay_total.county_fips == "20115") & (hay_total.CENSUS_TABLE == 26)]
 # %%
 
 # %%
-hay = census_df[census_df.SHORT_DESC.str.contains(pat="hay", case=False)].copy()
-hay.shape
 
-hay = hay[~(hay["VALUE"].str.contains(pat="(D)", case=False, regex = True))]
-hay.shape
+# %%
 
-hay.CENSUS_TABLE.unique()
+# %%
 
-print (hay[hay.CENSUS_TABLE == 1].shape)
-hay[hay.CENSUS_TABLE == 1].SHORT_DESC.unique()
+# %%
+# hay = census_df[census_df.SHORT_DESC.str.contains(pat="hay", case=False)].copy()
+# hay.shape
 
+# hay = hay[~(hay["VALUE"].str.contains(pat="(D)", case=False, regex = True))]
+# hay.shape
 
-print (hay[hay.CENSUS_TABLE == 2].shape)
-hay[hay.CENSUS_TABLE == 2].SHORT_DESC.unique()
+# hay.CENSUS_TABLE.unique()
 
-
-print (hay[hay.CENSUS_TABLE == 24].shape)
-hay[hay.CENSUS_TABLE == 24].SHORT_DESC.unique()
+# print (hay[hay.CENSUS_TABLE == 1].shape)
+# hay[hay.CENSUS_TABLE == 1].SHORT_DESC.unique()
 
 
-print (hay[hay.CENSUS_TABLE == 26].shape)
-hay[hay.CENSUS_TABLE == 26].SHORT_DESC.unique()
-
-hay_irr = hay[hay.SHORT_DESC.str.contains(pat="IRRIG", case=False)].copy()
-hay_nonIrr = hay[~(hay.SHORT_DESC.str.contains(pat="IRRIG", case=False))].copy()
+# print (hay[hay.CENSUS_TABLE == 2].shape)
+# hay[hay.CENSUS_TABLE == 2].SHORT_DESC.unique()
 
 
-hay_irr.rename(columns={"VALUE" : "VALUE_irr",
-                        "SHORT_DESC": "SHORT_DESC_irr"}, inplace=True)
+# print (hay[hay.CENSUS_TABLE == 24].shape)
+# hay[hay.CENSUS_TABLE == 24].SHORT_DESC.unique()
 
 
-comm_cols = ["CENSUS_CHAPTER", "CENSUS_TABLE", "CENSUS_ROW", "county_fips"]
-hay_irr = hay_irr[comm_cols + ["SHORT_DESC_irr", "VALUE_irr"]]
-hay_nonIrr = hay_nonIrr[comm_cols + ["SHORT_DESC", "VALUE"]]
+# print (hay[hay.CENSUS_TABLE == 26].shape)
+# hay[hay.CENSUS_TABLE == 26].SHORT_DESC.unique()
+
+# hay_irr = hay[hay.SHORT_DESC.str.contains(pat="IRRIG", case=False)].copy()
+# hay_nonIrr = hay[~(hay.SHORT_DESC.str.contains(pat="IRRIG", case=False))].copy()
 
 
-hay_irr_nonIrr = pd.merge(hay_irr, hay_nonIrr, on=comm_cols, how="outer")
-hay_irr_nonIrr.head(5)
+# hay_irr.rename(columns={"VALUE" : "VALUE_irr",
+#                         "SHORT_DESC": "SHORT_DESC_irr"}, inplace=True)
 
 
-census_df[(census_df.CENSUS_CHAPTER == 2) & (census_df.CENSUS_TABLE == 24)& 
-          (census_df.CENSUS_ROW == 63) & (census_df.county_fips == "01001")]
+# comm_cols = ["CENSUS_CHAPTER", "CENSUS_TABLE", "CENSUS_ROW", "county_fips"]
+# hay_irr = hay_irr[comm_cols + ["SHORT_DESC_irr", "VALUE_irr"]]
+# hay_nonIrr = hay_nonIrr[comm_cols + ["SHORT_DESC", "VALUE"]]
 
 
-print (f"{hay_irr.shape = }")
-print (f"{hay_nonIrr.shape = }")
-print (f"{hay_irr_nonIrr.shape = }")
+# hay_irr_nonIrr = pd.merge(hay_irr, hay_nonIrr, on=comm_cols, how="outer")
+# hay_irr_nonIrr.head(5)
 
 
-hay_irr_nonIrr["VALUE"]     = hay_irr_nonIrr["VALUE"].str.replace(",", "")
-hay_irr_nonIrr["VALUE_irr"] = hay_irr_nonIrr["VALUE_irr"].str.replace(",", "")
-
-hay_irr_nonIrr["VALUE"]     = hay_irr_nonIrr["VALUE"].astype(float)
-hay_irr_nonIrr["VALUE_irr"] = hay_irr_nonIrr["VALUE_irr"].astype(float)
-
-hay_irr_nonIrr.head(5)
+# census_df[(census_df.CENSUS_CHAPTER == 2) & (census_df.CENSUS_TABLE == 24)& 
+#           (census_df.CENSUS_ROW == 63) & (census_df.county_fips == "01001")]
 
 
-hay_irr_nonIrr_noNA = hay_irr_nonIrr.dropna(how="any")
-hay_irr_nonIrr_noNA.reset_index(drop=True, inplace=True)
-print (f"{hay_irr_nonIrr_noNA.CENSUS_TABLE.unique() = }")
-hay_irr_nonIrr_noNA.head(2)
+# print (f"{hay_irr.shape = }")
+# print (f"{hay_nonIrr.shape = }")
+# print (f"{hay_irr_nonIrr.shape = }")
+
+
+# hay_irr_nonIrr["VALUE"]     = hay_irr_nonIrr["VALUE"].str.replace(",", "")
+# hay_irr_nonIrr["VALUE_irr"] = hay_irr_nonIrr["VALUE_irr"].str.replace(",", "")
+
+# hay_irr_nonIrr["VALUE"]     = hay_irr_nonIrr["VALUE"].astype(float)
+# hay_irr_nonIrr["VALUE_irr"] = hay_irr_nonIrr["VALUE_irr"].astype(float)
+
+# hay_irr_nonIrr.head(5)
+
+
+# hay_irr_nonIrr_noNA = hay_irr_nonIrr.dropna(how="any")
+# hay_irr_nonIrr_noNA.reset_index(drop=True, inplace=True)
+# print (f"{hay_irr_nonIrr_noNA.CENSUS_TABLE.unique() = }")
+# hay_irr_nonIrr_noNA.head(2)

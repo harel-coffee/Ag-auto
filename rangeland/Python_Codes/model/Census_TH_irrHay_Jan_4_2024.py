@@ -70,6 +70,8 @@ param_dir = data_dir_base + "parameters/"
 Min_data_base = data_dir_base + "Min_Data/"
 reOrganized_dir = data_dir_base + "reOrganized/"
 
+plots_dir = data_dir_base + "plots/"
+
 # %%
 # for bold print
 start_b = "\033[1m"
@@ -197,8 +199,6 @@ inventory.reset_index(drop=True, inplace=True)
 
 census_years = sorted(list(inventory.year.unique()))
 inventory.head(2)
-
-# %%
 
 # %%
 all_cattle_counties = list(inventory.county_fips.unique())
@@ -413,34 +413,82 @@ irr_hay.head(2)
 list(irr_hay.columns)
 
 # %%
-all_df = pd.merge(all_df, irr_hay[['county_fips', 'irr_as_perc']], on=["county_fips"], how="left")
+all_df = pd.merge(all_df, irr_hay[['county_fips', 'irr_hay_as_perc']], on=["county_fips"], how="left")
 all_df.head(2)
 
 # %%
-irr_hay[irr_hay.irr_as_perc == irr_hay.irr_as_perc.min()]
+irr_hay[irr_hay.irr_hay_as_perc == irr_hay.irr_hay_as_perc.min()]
 
 # %%
-minn_ = all_df.irr_as_perc.min()
-irr_hay[irr_hay.irr_as_perc == minn_]
+max_ = irr_hay.irr_hay_as_perc.max()
+print (max_)
+irr_hay[irr_hay.irr_hay_as_perc == max_].shape
+
+# %%
+minn_ = all_df.irr_hay_as_perc.min()
+irr_hay[irr_hay.irr_hay_as_perc == minn_]
 
 # %%
 all_df.describe().round(1)
+
+# %%
+tick_legend_FontSize = 8
+
+params = {
+    "legend.fontsize": tick_legend_FontSize,  # medium, large
+    # 'figure.figsize': (6, 4),
+    "axes.labelsize": tick_legend_FontSize * 1.5,
+    "axes.titlesize": tick_legend_FontSize * 1.3,
+    "xtick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "ytick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "axes.titlepad": 10,
+}
+
+plt.rc("font", family="Palatino")
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["xtick.labelbottom"] = True
+plt.rcParams["ytick.labelleft"] = True
+plt.rcParams.update(params)
+
+# %%
+# fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+# plt.hist(irr_hay.irr_hay_as_perc, bins=300);
+# plt.xticks(np.arange(0, 100, 2), rotation ='vertical');
 
 # %%
 print (all_df.shape)
 all_df.dropna(how="any").shape
 
 # %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+plt.hist(all_df.irr_hay_as_perc, bins=100);
+plt.xticks(np.arange(0, 100, 2), rotation ='vertical');
+
+# fig_name = plots_dir + "all_df_irr_hay_as_perc2.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+# plt.close("all")
+
+
+# %%
+
+# %%
+thresh = 10
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+plt.hist(all_df.loc[all_df["irr_hay_as_perc"] <= thresh, "irr_hay_as_perc"], bins = thresh*3);
+plt.xticks(np.arange(0, thresh+1, 1));# rotation ='vertical'
+
+# %%
 # in all_df there are 279 counties for which irr_hay_perc is missing
 # since we had (D) in the irr_hay table for some counties. Look at irrigated_hay_portion_2017.
 # 
-sum(all_df.irr_as_perc.isna())
+sum(all_df.irr_hay_as_perc.isna())
 
 # %%
 all_df.dropna(how="any", inplace=True)
 
 # %%
-controls_noHerb = ["population", "feed_expense", "slaughter", "rangeland_acre"] + ["irr_as_perc"]
+controls_noHerb = ["population", "feed_expense", "slaughter", "rangeland_acre"] + ["irr_hay_as_perc"]
 controls_wHerb  = controls_noHerb + ["herb_avg"]
 
 NPP_control_vars_noHerb= ["county_total_npp"] + controls_noHerb
@@ -668,12 +716,113 @@ ks_result.summary()
 # %%
 ks_result.conf_int()[1] - ks_result.conf_int()[0]
 
-# %% [markdown]
-# ## Include lag ```NPP``` in the model
-#
-# Do we have annual county-level NPP?
+# %%
+yhat = ks_result.predict()
 
 # %%
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharey=False)
+(ax1, ax2) = axes
+ax1.grid(axis="y", which="both")
+ax2.grid(axis="y", which="both")
+##################################################
+ax1.scatter(Y, yhat, s=5)
+ax1.set_xlabel("Y")
+ax1.set_ylabel("yhat")
+##################################################
+residuals = Y - yhat
+ax2.scatter(Y, residuals, s=5)
+ax2.set_xlabel("Y")
+ax2.set_ylabel("residuals")
+plt.show()
+
+# %% [markdown]
+# ## Cut off based on rr_hay_as_perc?
+
+# %%
+all_df.columns
+
+# %%
+all_df.head(2)
+
+# %% [markdown]
+# ## Include lag ```NPP```, ```1-year-slaughter-lag```, and $\sigma(\text{NPP})$ in the model
+#
+# For NPP I can only have 1 year lag since the NPP data starts at 2001 and census years start at 2002.
+# So for 2002 I need 2000's NPP for 2-year-lag!!!
+
+# %%
+census_years
+
+# %%
+sigma_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
+
+sigma_npp.rename(columns={"county" : "county_fips",
+                                    "MODIS_NPP" : "unit_npp"}, inplace=True)
+sigma_npp = rc.correct_Mins_county_FIPS(df=sigma_npp, col_ = "county_fips")
+
+print (f"{len(sigma_npp.county_fips.unique()) = }")
+sigma_npp = sigma_npp[sigma_npp.county_fips.isin(cnty_interest_list)]
+print (f"{len(sigma_npp.county_fips.unique()) = }")
+
+sigma_npp = pd.merge(sigma_npp, 
+                     RA[["county_fips", "rangeland_acre"]], 
+                     on=["county_fips"], how="left")
+sigma_npp.head(5)
+
+# %%
+sigma_npp = rc.covert_unitNPP_2_total(NPP_df=sigma_npp, 
+                                      npp_unit_col_ = "unit_npp", 
+                                      acr_area_col_ = "rangeland_acre", 
+                                      npp_area_col_ = "county_total_npp")
+
+sigma_npp.head(2)
+
+# %%
+variace_npp_2001_2020 = sigma_npp.groupby("county_fips")["county_total_npp"].var()
+npp_centered = variace_npp_2001_2020 - variace_npp_2001_2020.mean()
+variace_npp_2001_2020 = npp_centered / variace_npp_2001_2020.std(ddof=1)
+variace_npp_2001_2020.rename("variace_npp_2001_2020", inplace=True)
+variace_npp_2001_2020
+
+# %%
+all_df = pd.merge(all_df, variace_npp_2001_2020, on=["county_fips"], how="left")
+all_df.head(2)
+
+# %%
+npp_lag_1yr = sigma_npp[["year", "county_fips", "county_total_npp"]].copy()
+npp_lag_1yr.tail(5)
+
+# %%
+npp_lag_1yr["year"] = npp_lag_1yr["year"] + 1
+npp_lag_1yr.rename(columns={"county_total_npp": "cnty_total_npp_lag_1yr"}, inplace=True)
+npp_lag_1yr.tail(5)
+
+# %%
+npp_lag_1yr_centered = npp_lag_1yr.cnty_total_npp_lag_1yr - npp_lag_1yr.cnty_total_npp_lag_1yr.mean()
+var = npp_lag_1yr.cnty_total_npp_lag_1yr.std(ddof=1)
+npp_lag_1yr['cnty_total_npp_lag_1yr_norm'] = npp_lag_1yr_centered / var
+npp_lag_1yr.tail(5)
+
+# %%
+all_df = pd.merge(all_df, npp_lag_1yr, on=["year", "county_fips"], how="left")
+all_df.head(2)
+
+# %%
+ccc = ["year", "county_fips", "county_total_npp_normal", "cnty_total_npp_lag_1yr_norm"]
+all_df[(all_df.year == 2002) & (all_df.county_fips == "06033")][ccc]
+
+# %%
+npp_lag_1yr[(npp_lag_1yr.year.isin([2001, 2002, 2003])) & (npp_lag_1yr.county_fips == "06033")]
+
+# %%
+slaughter_all = pd.read_pickle(reOrganized_dir + "slaughter_Q1.sav")
+slaughter_all = slaughter_all["slaughter_Q1"]
+slaughter_all.rename(columns={"cattle_on_feed_sale_4_slaughter": "slaughter"}, inplace=True)
+slaughter_all = slaughter_all[["year", "county_fips", "slaughter"]]
+print ("max slaughter sale is [{}]".format(slaughter_all.slaughter.max()))
+slaughter_all.head(2)
+
+slaughter_all.year.unique()
 
 # %%
 
