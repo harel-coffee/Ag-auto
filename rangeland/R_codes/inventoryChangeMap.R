@@ -1,10 +1,11 @@
+rm(list=ls())
 library(usmap)
 library(ggplot2)
 library(colorspace) # for scale_fill_continuous_diverging()
 # library(readspss) # for reading pickles .sav
 library(haven) # for reading pickles .sav
 library(data.table)
-
+library(dplyr)
 # plot US counties like this
 plot_usmap(regions = "counties") + 
 labs(title = "US Counties",
@@ -19,19 +20,18 @@ plot_dir <- paste0(base_dir, "plots/")
 
 
 # Fucking R cannot read this pickled file.
-# Used the Python notebook to create the diffs to plot:
+# Used the Python notebook (inventory_diff_4_MapinR.ipynb) to create the diffs to plot:
 # USDA_data <- haven::read_sav(paste0(data_dir, "USDA_data.sav"))
 
 inventory_AbsChange_2002to2017 <- read.csv(paste0(diff_dir, "inventory_AbsChange_2002to2017.csv"))
-inventory_PercChange_2002_2017 <- read.csv(paste0(diff_dir, "inventory_PercChange_2002_2017.csv"))
+inv_PercChangeShare_2002_2017 <- read.csv(paste0(diff_dir, "inv_PercChangeShare_2002_2017.csv"))
 
 setnames(inventory_AbsChange_2002to2017, old = c('county_fips'), new = c('fips'))
-setnames(inventory_PercChange_2002_2017, old = c('county_fips'), new = c('fips'))
+setnames(inv_PercChangeShare_2002_2017, old = c('county_fips'), new = c('fips'))
 
 
-
-low_lim = min(inventory_AbsChange_2002to2017$cattle_cow_beef_inv_change2002to2017)
-up_lim =  max(inventory_AbsChange_2002to2017$cattle_cow_beef_inv_change2002to2017)
+low_lim = min(inventory_AbsChange_2002to2017$inv_change2002to2017)
+up_lim =  max(inventory_AbsChange_2002to2017$inv_change2002to2017)
 
 SoI_abb <- c('AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 
              'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 
@@ -42,21 +42,24 @@ SoI_abb <- c('AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE',
              'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 
              'DC')
 
-states <- plot_usmap("states", color = "red", fill = alpha(0.01)) 
+states <- plot_usmap("states", color = "red", fill = alpha(0.01))
 
-the_theme <-  theme(legend.title = element_text(size=10, face="bold"),
-                    legend.text = element_text(size=10, face="plain"),
+the_theme <-  theme(legend.title = element_text(size=25, face="bold"),
+                    legend.text = element_text(size=25, face="plain"),
+                    legend.key.size = unit(1, 'cm'), #change legend key size
+                    legend.key.height = unit(1, 'cm'), #change legend key height
+                    legend.key.width = unit(1, 'cm'), #change legend key width
                     axis.text.x = element_blank(),
                     axis.text.y = element_blank(),
                     axis.ticks.x = element_blank(),
                     axis.ticks.y = element_blank(),
                     axis.title.x = element_blank(),
                     axis.title.y = element_blank(),
-                    plot.title = element_text(size=15, lineheight=2, face="bold"))
+                    plot.title = element_text(size=25, lineheight=2, face="bold"))
 
 legend_d <- "Abs. change (2002-2017)"
 map <- usmap::plot_usmap(data = inventory_AbsChange_2002to2017, 
-                         values = "cattle_cow_beef_inv_change2002to2017",
+                         values = "inv_change2002to2017",
                          labels = TRUE, label_color = "orange", # color = "orange"
                          # include = SoI_abb
                          ) + 
@@ -70,21 +73,20 @@ map <- usmap::plot_usmap(data = inventory_AbsChange_2002to2017,
        the_theme + 
        ggtitle(paste0(legend_d, ", outlier: Tulare County, CA"))
       
-map$layers[[2]]$aes_params$size <- 5
+map$layers[[2]]$aes_params$size <- 8
 print (map)
 
 ggsave("InventoryChange_2002_2017_absVal.pdf", map, 
        path=plot_dir, device="pdf",
        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
 
-library(dplyr)
-inventory_AbsChange_2002to2017_NoOutlier = inventory_AbsChange_2002to2017 %>%
-                                           filter(cattle_cow_beef_inv_change2002to2017<20000)
 
+inventory_AbsChange_2002to2017_NoOutlier = inventory_AbsChange_2002to2017 %>%
+                                           filter(inv_change2002to2017<20000)
 
 legend_d <- "Abs. change (2002-2017)"
 map <- usmap::plot_usmap(data = inventory_AbsChange_2002to2017_NoOutlier, 
-                         values = "cattle_cow_beef_inv_change2002to2017",
+                         values = "inv_change2002to2017",
                          labels = TRUE, label_color = "orange", # color = "orange"
                          # include = SoI_abb
                          ) + 
@@ -99,7 +101,7 @@ map <- usmap::plot_usmap(data = inventory_AbsChange_2002to2017_NoOutlier,
 
        ggtitle(legend_d)
       
-map$layers[[2]]$aes_params$size <- 5
+map$layers[[2]]$aes_params$size <- 8
 print (map)
 
 ggsave("InventoryChange_2002_2017_absVal_noOutlier.pdf", map, 
@@ -107,9 +109,174 @@ ggsave("InventoryChange_2002_2017_absVal_noOutlier.pdf", map,
        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
 
 
-legend_d <- "%-wise change (2002-2017)"
-map <- usmap::plot_usmap(data = inventory_PercChange_2002_2017, 
-                         values = "change_2002_2017_asPerc",
+
+legend_d <- "Percentage change (2002-2017)"
+map <- usmap::plot_usmap(data = inventory_AbsChange_2002to2017, 
+                         values = "inv_change2002to2017_asPerc",
+                         labels = TRUE, label_color = "orange", # color = "orange"
+                         # include = SoI_abb
+                         ) + 
+       # labs(title = "US Counties", subtitle = "abs. change (2002-2017)") +
+       geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                    color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+       scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                            space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                            name=legend_d) +
+       scale_colour_continuous_diverging() + 
+       the_theme + 
+
+       ggtitle(legend_d)
+      
+map$layers[[2]]$aes_params$size <- 8
+print (map)
+
+ggsave("percChange_2002_2017.pdf", map, 
+       path=plot_dir, device="pdf",
+       dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+inventory_PercChange_2002to2017_NoOutlier = inventory_AbsChange_2002to2017 %>%
+                                           filter(inv_change2002to2017_asPerc<200)
+
+legend_d <- "Percentage change (2002-2017)"
+map <- usmap::plot_usmap(data = inventory_PercChange_2002to2017_NoOutlier, 
+                         values = "inv_change2002to2017_asPerc",
+                         labels = TRUE, label_color = "orange", # color = "orange"
+                         # include = SoI_abb
+                         ) + 
+       # labs(title = "US Counties", subtitle = "abs. change (2002-2017)") +
+       geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                    color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+       scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                            space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                            name=legend_d) +
+       scale_colour_continuous_diverging() + 
+       the_theme + 
+
+       ggtitle(legend_d)
+      
+map$layers[[2]]$aes_params$size <- 8
+print (map)
+
+ggsave("percChange_2002_2017_noOutlier.pdf", map, 
+       path=plot_dir, device="pdf",
+       dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+########################################
+########################################
+########################################
+#
+# Actual Inventory
+#
+legend_d <- "Inventory: 2002"
+map <- usmap::plot_usmap(data = inventory_AbsChange_2002to2017, 
+                         values = "cattle_cow_beef_inven_2002",
+                         labels = TRUE, label_color = "orange", # color = "orange"
+                         # include = SoI_abb
+                         ) + 
+       # labs(title = "US Counties", subtitle = "abs. change (2002-2017)") +
+       geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                    color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+       scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                            space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                            name=legend_d) +
+       scale_colour_continuous_diverging() + 
+       the_theme + 
+
+       ggtitle(legend_d)
+      
+map$layers[[2]]$aes_params$size <- 8
+print (map)
+
+ggsave("inven_2002.pdf", map, 
+       path=plot_dir, device="pdf",
+       dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+legend_d <- "Inventory: 2017"
+map <- usmap::plot_usmap(data = inventory_AbsChange_2002to2017, 
+                         values = "cattle_cow_beef_inven_2017",
+                         labels = TRUE, label_color = "orange", # color = "orange"
+                         # include = SoI_abb
+                         ) + 
+       geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                    color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+       scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                            space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                            name=legend_d) +
+       scale_colour_continuous_diverging() + 
+       the_theme + 
+
+       ggtitle(legend_d)
+      
+map$layers[[2]]$aes_params$size <- 8
+print (map)
+
+ggsave("inven_2017.pdf", map, 
+       path=plot_dir, device="pdf",
+       dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+########################################
+########################################
+########################################
+###
+### Actual shares
+###
+legend_d <- "%-of national share (2002)"
+map <- usmap::plot_usmap(data = inv_PercChangeShare_2002_2017, 
+                         values = "inv_2002_asPercShare",
+                         labels = TRUE, label_color = "orange", # color = "orange"
+                         # include = SoI_abb
+                         ) + 
+       # labs(title = "US Counties", subtitle = "abs. change (2002-2017)") +
+       geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                    color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+       scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                            space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                            name=legend_d) +
+       scale_colour_continuous_diverging() + 
+       the_theme + 
+       ggtitle(paste0(legend_d))
+      
+map$layers[[2]]$aes_params$size <- 5
+print (map)
+
+ggsave("nationalSharePercent_2002.pdf", map, 
+       path=plot_dir, device="pdf",
+       dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+legend_d <- "%-of national share (2017)"
+map <- usmap::plot_usmap(data = inv_PercChangeShare_2002_2017, 
+                         values = "inv_2017_asPercShare",
+                         labels = TRUE, label_color = "orange", # color = "orange"
+                         # include = SoI_abb
+                         ) + 
+       # labs(title = "US Counties", subtitle = "abs. change (2002-2017)") +
+       geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                    color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+       scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                            space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                            name=legend_d) +
+       scale_colour_continuous_diverging() + 
+       the_theme + 
+       ggtitle(paste0(legend_d))
+      
+map$layers[[2]]$aes_params$size <- 5
+print (map)
+
+ggsave("nationalSharePercent_2017.pdf", map, 
+       path=plot_dir, device="pdf",
+       dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+########################################
+########################################
+########################################
+###
+###  diff in shares
+###
+legend_d <- "%-wise change as national share (2002-2017)"
+map <- usmap::plot_usmap(data = inv_PercChangeShare_2002_2017, 
+                         values = "change_2002_2017_asPercShare",
                          labels = TRUE, label_color = "orange", # color = "orange"
                          # include = SoI_abb
                          ) + 
@@ -126,20 +293,18 @@ map <- usmap::plot_usmap(data = inventory_PercChange_2002_2017,
 map$layers[[2]]$aes_params$size <- 5
 print (map)
 
-ggsave("InventoryChange_2002_2017_percent.pdf", map, 
+ggsave("NationalShareChange_2002_2017_percent.pdf", map, 
        path=plot_dir, device="pdf",
        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
 
 
-inventory_PercChange_2002_2017_noOutlier <- inventory_PercChange_2002_2017 %>%
-                                            filter(change_2002_2017_asPerc < 0.21)
+inv_PercChangeShare_2002_2017_noOutlier <- inv_PercChangeShare_2002_2017 %>%
+                                           filter(change_2002_2017_asPercShare > -0.20)
 
 
-
-
-legend_d <- "%-wise change (2002-2017)"
-map <- usmap::plot_usmap(data = inventory_PercChange_2002_2017_noOutlier, 
-                         values = "change_2002_2017_asPerc",
+legend_d <- "%-wise change as national share (2002-2017)"
+map <- usmap::plot_usmap(data = inv_PercChangeShare_2002_2017_noOutlier, 
+                         values = "change_2002_2017_asPercShare",
                          labels = TRUE, label_color = "orange", # color = "orange"
                          # include = SoI_abb
                          ) + 
@@ -151,18 +316,17 @@ map <- usmap::plot_usmap(data = inventory_PercChange_2002_2017_noOutlier,
                             name=legend_d) +
        scale_colour_continuous_diverging() + 
        the_theme + 
-
        ggtitle(legend_d)
       
 map$layers[[2]]$aes_params$size <- 5
 print (map)
 
-ggsave("InventoryChange_2002_2017_percentNoOutlier.pdf", map, 
+ggsave("NationalShareChange_2002_2017_percent_NoOutlier.pdf", map, 
        path=plot_dir, device="pdf",
        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
 
-inventory_PercChange_2002_2017 %>%
-filter(change_2002_2017_asPerc>0.2)
+inv_PercChangeShare_2002_2017 %>%
+filter(change_2002_2017_asPercShare>0.2)
 
 
 

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -44,7 +44,7 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplac
 
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 
-county_id_name_fips = rc.correct_Mins_FIPS(df=county_id_name_fips, col_="county")
+county_id_name_fips = rc.correct_Mins_county_FIPS(df=county_id_name_fips, col_="county")
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
 county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
@@ -52,6 +52,20 @@ county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 
 county_id_name_fips.reset_index(drop=True, inplace=True)
 print(len(county_id_name_fips.state.unique()))
 county_id_name_fips.head(2)
+
+# %%
+# Shannon county changed to Oglala Lakota county in 2014
+# and is missing from Min's data!
+county_id_name_fips[county_id_name_fips.county_fips == "46102"]
+
+# %%
+county_id_name_fips.tail(3)
+
+# %%
+# county_id_name_fips = county_id_name_fips.append(df2, ignore_index = True) 
+county_id_name_fips.loc[len(county_id_name_fips.index)] = ['46102', "Oglala Lakota County", 
+                                                           "46102", 'SD', '34']
+county_id_name_fips.tail(3)
 
 # %%
 county_id_name_fips["EW"] = "E"
@@ -143,3 +157,5 @@ export_ = {"county_fips": county_id_name_fips,
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 pickle.dump(export_, open(filename, 'wb'))
+
+# %%
