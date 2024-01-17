@@ -30,8 +30,8 @@ setnames(inventory_AbsChange_2002to2017, old = c('county_fips'), new = c('fips')
 setnames(inv_PercChangeShare_2002_2017, old = c('county_fips'), new = c('fips'))
 
 
-low_lim = min(inventory_AbsChange_2002to2017$inv_change2002to2017)
-up_lim =  max(inventory_AbsChange_2002to2017$inv_change2002to2017)
+# low_lim = min(inventory_AbsChange_2002to2017$inv_change2002to2017)
+# up_lim =  max(inventory_AbsChange_2002to2017$inv_change2002to2017)
 
 SoI_abb <- c('AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 
              'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 
@@ -327,6 +327,198 @@ ggsave("NationalShareChange_2002_2017_percent_NoOutlier.pdf", map,
 
 inv_PercChangeShare_2002_2017 %>%
 filter(change_2002_2017_asPercShare>0.2)
+
+##################### All years. 
+##################### Panel is not gonna look good! 
+##################### So, one at a time
+
+
+inventory_AbsChange <- read.csv(paste0(diff_dir, "inventory_AbsChange_4panel.csv"))
+inv_PercChangeShare <- read.csv(paste0(diff_dir, "inventory_ShareChange_4panel.csv"))
+
+setnames(inventory_AbsChange, old = c('county_fips'), new = c('fips'))
+setnames(inv_PercChangeShare, old = c('county_fips'), new = c('fips'))
+
+
+Abs_plot_dir <- paste0(plot_dir, "abs_change_map/")
+if (dir.exists(Abs_plot_dir) == F) {dir.create(path = Abs_plot_dir, recursive = T)}
+share_plot_dir <- paste0(plot_dir, "share_change_map/")
+if (dir.exists(share_plot_dir) == F) {dir.create(path = share_plot_dir, recursive = T)}
+
+for (a_col in colnames(inventory_AbsChange)[4:length(colnames(inventory_AbsChange))]){
+  if (str_detect(a_col, pat="change")){
+    s_year = substr(a_col, start = 11, stop = 14)
+    e_year = substr(a_col, start = 17, stop = 20)
+    if (str_detect(a_col, pat="asPerc")){
+       legend_d <- paste0("Percentage change ", s_year, "_", e_year)
+      } else {
+       legend_d <- paste0("Absolute change ", s_year, "_", e_year)
+      }
+   } else {
+       yr = tail(strsplit(a_col, split = "_")[[1]], 1)
+       legend_d <- paste0("Invenory ", yr)
+
+   }
+
+  inventory_AbsChange_copy = copy(inventory_AbsChange)
+  inventory_AbsChange_copy <- subset(inventory_AbsChange_copy, select = c("fips", a_col))
+  inventory_AbsChange_copy <- inventory_AbsChange_copy %>% drop_na()
+  
+
+
+  
+  map <- usmap::plot_usmap(data = inventory_AbsChange_copy, 
+                           values = a_col,
+                           labels = TRUE, label_color = "orange",
+                           ) + 
+         geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                      color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+         scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                              space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                              name=legend_d) +
+         scale_colour_continuous_diverging() + 
+         the_theme + 
+         ggtitle(legend_d)
+      
+  map$layers[[2]]$aes_params$size <- 8
+
+  ggsave(paste0(gsub("\ ", "_", legend_d), ".pdf"), map, 
+         path=Abs_plot_dir, device="pdf",
+         dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+}
+
+
+
+##### Changes as in National Share
+
+for (a_col in colnames(inv_PercChangeShare)[4:length(colnames(inv_PercChangeShare))]){
+  if (str_detect(a_col, pat="change")){
+    s_year = unlist(strsplit(a_col, split = "_"))[2]
+    e_year = unlist(strsplit(a_col, split = "_"))[3]
+    legend_d <- paste0("Change of share ", s_year, "_", e_year)
+   } else {
+       yr = unlist(strsplit(a_col, split = "_"))[2]
+       legend_d <- paste0("Invenory ", yr, " as percentage share")
+   }
+
+  inv_PercChangeShare_copy = copy(inv_PercChangeShare)
+  inv_PercChangeShare_copy <- subset(inv_PercChangeShare_copy, select = c("fips", a_col))
+  inv_PercChangeShare_copy <- inv_PercChangeShare_copy %>% drop_na()
+  
+  map <- usmap::plot_usmap(data = inv_PercChangeShare_copy, 
+                           values = a_col,
+                           labels = TRUE, label_color = "orange",
+                           ) + 
+         geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                      color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+         scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                              space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                              name=legend_d) +
+         scale_colour_continuous_diverging() + 
+         the_theme + 
+         ggtitle(legend_d)
+      
+  map$layers[[2]]$aes_params$size <- 8
+
+  ggsave(paste0(gsub("\ ", "_", legend_d), ".pdf"), map, 
+         path=share_plot_dir, device="pdf",
+         dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+}
+
+######## Remove max and min in the hope that there is only one outlier
+
+Abs_plot_dir <- paste0(plot_dir, "abs_change_map_NoOutlier/")
+if (dir.exists(Abs_plot_dir) == F) {dir.create(path = Abs_plot_dir, recursive = T)}
+share_plot_dir <- paste0(plot_dir, "share_change_map_NoOutlier/")
+if (dir.exists(share_plot_dir) == F) {dir.create(path = share_plot_dir, recursive = T)}
+
+for (a_col in colnames(inventory_AbsChange)[4:length(colnames(inventory_AbsChange))]){
+  if (str_detect(a_col, pat="change")){
+    s_year = substr(a_col, start = 11, stop = 14)
+    e_year = substr(a_col, start = 17, stop = 20)
+    if (str_detect(a_col, pat="asPerc")){
+       legend_d <- paste0("Percentage change ", s_year, "_", e_year)
+      } else {
+       legend_d <- paste0("Absolute change ", s_year, "_", e_year)
+      }
+   } else {
+       yr = tail(strsplit(a_col, split = "_")[[1]], 1)
+       legend_d <- paste0("Invenory ", yr)
+
+   }
+
+  inventory_AbsChange_copy = copy(inventory_AbsChange)
+  inventory_AbsChange_copy <- subset(inventory_AbsChange_copy, select = c("fips", a_col))
+  inventory_AbsChange_copy <- inventory_AbsChange_copy %>% drop_na()
+
+  minn = min(inventory_AbsChange_copy[, 2])
+  maxx = max(inventory_AbsChange_copy[, 2])
+  inventory_AbsChange_copy <- inventory_AbsChange_copy[inventory_AbsChange_copy[a_col] > minn ,]
+  inventory_AbsChange_copy <- inventory_AbsChange_copy[inventory_AbsChange_copy[a_col] < maxx ,]
+  
+  
+  map <- usmap::plot_usmap(data = inventory_AbsChange_copy, 
+                           values = a_col,
+                           labels = TRUE, label_color = "orange",
+                           ) + 
+         geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                      color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+         scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                              space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                              name=legend_d) +
+         scale_colour_continuous_diverging() + 
+         the_theme + 
+         ggtitle(legend_d)
+      
+  map$layers[[2]]$aes_params$size <- 8
+
+  ggsave(paste0(gsub("\ ", "_", legend_d), "_noOutlier.pdf"), map, 
+         path=Abs_plot_dir, device="pdf",
+         dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+}
+
+
+
+##### Changes as in National Share
+
+for (a_col in colnames(inv_PercChangeShare)[4:length(colnames(inv_PercChangeShare))]){
+  if (str_detect(a_col, pat="change")){
+    s_year = unlist(strsplit(a_col, split = "_"))[2]
+    e_year = unlist(strsplit(a_col, split = "_"))[3]
+    legend_d <- paste0("Change of share ", s_year, "_", e_year)
+   } else {
+       yr = unlist(strsplit(a_col, split = "_"))[2]
+       legend_d <- paste0("Invenory ", yr, " as percentage share")
+   }
+
+  inv_PercChangeShare_copy = copy(inv_PercChangeShare)
+  inv_PercChangeShare_copy <- subset(inv_PercChangeShare_copy, select = c("fips", a_col))
+  inv_PercChangeShare_copy <- inv_PercChangeShare_copy %>% drop_na()
+
+  minn = min(inv_PercChangeShare_copy[, 2])
+  maxx = max(inv_PercChangeShare_copy[, 2])
+  inv_PercChangeShare_copy <- inv_PercChangeShare_copy[inv_PercChangeShare_copy[a_col] > minn ,]
+  inv_PercChangeShare_copy <- inv_PercChangeShare_copy[inv_PercChangeShare_copy[a_col] < maxx ,]
+  
+  map <- usmap::plot_usmap(data = inv_PercChangeShare_copy, 
+                           values = a_col,
+                           labels = TRUE, label_color = "orange",
+                           ) + 
+         geom_polygon(data=states[[1]], aes(x=x, y=y, group=group), 
+                      color = "yellow", fill = alpha(0.01), linewidth = 0.5) + 
+         scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0, 
+                              space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill",
+                              name=legend_d) +
+         scale_colour_continuous_diverging() + 
+         the_theme + 
+         ggtitle(legend_d)
+      
+  map$layers[[2]]$aes_params$size <- 8
+
+  ggsave(paste0(gsub("\ ", "_", legend_d), "_noOutlier.pdf"), map, 
+         path=share_plot_dir, device="pdf",
+         dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+}
 
 
 

@@ -185,75 +185,13 @@ print (invent_2002_2017_asPerc.shape)
 invent_2002_2017_asPerc.head(2)
 
 # %%
-invent_2002_2017_asPerc["change_2002_2017_asPercShare"] = invent_2002_2017_asPerc["inv_2002_asPercShare"] - \
-                                                          invent_2002_2017_asPerc["inv_2017_asPercShare"]
+invent_2002_2017_asPerc["change_2002_2017_asPercShare"] = invent_2002_2017_asPerc["inv_2017_asPercShare"] - \
+                                                          invent_2002_2017_asPerc["inv_2002_asPercShare"]
 invent_2002_2017_asPerc.head(2)
 
 # %%
 out_name = data_dir_base + "data_4_plot/" + "inv_PercChangeShare_2002_2017.csv"
 invent_2002_2017_asPerc.to_csv(out_name, index=False)
-
-# %%
-census_years = [2017, 2012, 2007, 2002]
-census_years = [2017, 2012, 2007, 2002]
-all_df_ = county_fips.copy()
-
-small_yr = census_years.pop()
-yr = 2017
-
-# %%
-cattle_inventory_smYr = cattle_inventory[cattle_inventory.year == small_yr].copy()
-cattle_inventory_Yr = cattle_inventory[cattle_inventory.year == yr].copy()
-
-cattle_inventory_smYr.reset_index(drop=True, inplace=True)
-cattle_inventory_Yr.reset_index(drop=True, inplace=True)
-
-inv_col = "cattle_cow_beef_inventory"
-n_smallYr = "cattle_cow_beef_inven_" + str(small_yr)
-n_Yr = "cattle_cow_beef_inven_" + str(yr)
-cattle_inventory_smYr.rename(columns={inv_col: n_smallYr}, inplace=True)
-cattle_inventory_Yr.rename(columns={inv_col: n_Yr}, inplace=True)
-
-# %%
-invent_smYr_Yr = pd.merge(cattle_inventory_2002[[n_smallYr, "county_fips"]], 
-                                  cattle_inventory_2017[[n_Yr, "county_fips"]], 
-                                  on = ["county_fips"], how = "outer")
-invent_smYr_Yr.dropna(how='any', inplace=True)
-invent_smYr_Yr.reset_index(drop=True, inplace=True)
-invent_smYr_Yr.head(2)
-
-# %%
-change_colN = "inv_change" + str(small_yr) + "to" + str(yr)
-invent_smYr_Yr[change_colN] = invent_smYr_Yr[n_Yr] - invent_smYr_Yr[n_smallYr]
-
-invent_smYr_Yr[change_colN+"_asPerc"] = 100 * invent_smYr_Yr[change_colN] / invent_smYr_Yr[n_smallYr]
-invent_smYr_Yr[change_colN+"_asPerc"] = invent_smYr_Yr[change_colN+"_asPerc"].round(2)
-
-# %%
-all_df_ = pd.merge(all_df_, invent_smYr_Yr, on=["county_fips"], how="outer")
-all_df_.head(2)
-
-# %%
-yr=2012
-
-# %%
-cattle_inventory_smYr = cattle_inventory[cattle_inventory.year == small_yr].copy()
-cattle_inventory_smYr.reset_index(drop=True, inplace=True)
-n_smallYr = "cattle_cow_beef_inven_" + str(small_yr)
-cattle_inventory_smYr.rename(columns={inv_col: n_smallYr}, inplace=True)
-cattle_inventory_smYr.head(2)
-
-# %%
-yr
-
-# %%
-cattle_inventory_Yr = cattle_inventory[cattle_inventory.year == yr].copy()
-cattle_inventory_Yr.reset_index(drop=True, inplace=True)
-n_Yr = "cattle_cow_beef_inven_" + str(yr)
-cattle_inventory_Yr.rename(columns={inv_col: n_Yr}, inplace=True)
-cattle_inventory_Yr.head(2)
-
-# %%
 
 # %% [markdown]
 # # For Kirti's panel
@@ -313,5 +251,95 @@ A.head(2)
 invent_2002_2017.sort_values(by=["county_fips"], inplace=True)
 A.sort_values(by=["county_fips"], inplace=True)
 
+A.reset_index(drop=True, inplace=True)
+invent_2002_2017.reset_index(drop=True, inplace=True)
+
+# %%
+out_name = data_dir_base + "data_4_plot/" + "inventory_AbsChange_4panel.csv"
+all_df_.to_csv(out_name, index=False)
+
+# %% [markdown]
+# # All for panel in terms of national shares
+
+# %%
+census_years = [2017, 2012, 2007, 2002]
+all_df_ = county_fips.copy()
+inv_col = "cattle_cow_beef_inventory"
+while census_years:
+    small_yr = census_years.pop()
+    cattle_inventory_smYr = cattle_inventory[cattle_inventory.year == small_yr].copy()
+    cattle_inventory_smYr.reset_index(drop=True, inplace=True)
+    n_smallYr = "cattle_cow_beef_inven_" + str(small_yr)
+    cattle_inventory_smYr.rename(columns={inv_col: n_smallYr}, inplace=True)
+    inven_smYr_total = cattle_inventory_smYr[n_smallYr].sum()
+
+    n_smallYr_shareCol = "inv_" + str(small_yr) + "_asPercShare"
+    cattle_inventory_smYr[n_smallYr_shareCol] = 100 * (
+        cattle_inventory_smYr[n_smallYr] / inven_smYr_total
+    )
+
+    for yr in census_years:
+        cattle_inventory_Yr = cattle_inventory[cattle_inventory.year == yr].copy()
+        cattle_inventory_Yr.reset_index(drop=True, inplace=True)
+        n_Yr = "cattle_cow_beef_inven_" + str(yr)
+        cattle_inventory_Yr.rename(columns={inv_col: n_Yr}, inplace=True)
+        inven_Yr_total = cattle_inventory_Yr[n_Yr].sum()
+
+        n_Yr_shareCol = "inv_" + str(yr) + "_asPercShare"
+        cattle_inventory_Yr[n_Yr_shareCol] = 100 * (
+            cattle_inventory_Yr[n_Yr] / inven_Yr_total
+        )
+
+        invent_asPerc = pd.merge(
+            cattle_inventory_smYr[[n_smallYr_shareCol, "county_fips"]],
+            cattle_inventory_Yr[[n_Yr_shareCol, "county_fips"]],
+            on=["county_fips"],
+            how="left",
+        )
+
+        invent_asPerc.dropna(how="any", inplace=True)
+
+        diff_colName = "change_" + str(small_yr) + "_" + str(yr) + "_asPercShare"
+        invent_asPerc[diff_colName] = (
+            invent_asPerc[n_Yr_shareCol] - invent_asPerc[n_smallYr_shareCol]
+        )
+
+        needed_cols = ["county_fips", diff_colName]
+        all_df_ = pd.merge(
+            all_df_, invent_asPerc[needed_cols], on=["county_fips"], how="outer"
+        )
+
+        
+census_years = [2017, 2012, 2007, 2002]
+for yr in census_years:
+    cattle_inventory_smYr = cattle_inventory[cattle_inventory.year == yr].copy()
+    cattle_inventory_smYr.reset_index(drop=True, inplace=True)
+    smallYr_inv_NewcolName = "cattle_cow_beef_inven_" + str(yr)
+    cattle_inventory_smYr.rename(
+        columns={inv_col: smallYr_inv_NewcolName}, inplace=True
+    )
+    inven_smYr_total = cattle_inventory_smYr[smallYr_inv_NewcolName].sum()
+
+    smallYr_inv_NewcolName_shareCol = "inv_" + str(yr) + "_asPercShare"
+    cattle_inventory_smYr[smallYr_inv_NewcolName_shareCol] = 100 * (
+        cattle_inventory_smYr[smallYr_inv_NewcolName] / inven_smYr_total
+    )
+    cattle_inventory_smYr = cattle_inventory_smYr[["county_fips", smallYr_inv_NewcolName_shareCol]]
+    
+    all_df_ = pd.merge(all_df_, cattle_inventory_smYr, on=["county_fips"], how="outer")
+
+all_df_.head(2)
+
+# %%
+out_name = data_dir_base + "data_4_plot/" + "inventory_ShareChange_4panel.csv"
+all_df_.to_csv(out_name, index=False)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
