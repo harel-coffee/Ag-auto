@@ -2,9 +2,11 @@ library(data.table)
 library(dplyr)
 options(dplyr.summarise.inform = FALSE)
 
+
 binary_source_path = "/home/h.noorazar/Sid/sidFabio/read_binary_core.R" # Kamiak
 source(binary_source_path)
 options(digits=9)
+
 
 seasonal_weather_aggregate_oneLoc <- function(path_, file_name, start_year, end_year){
 
