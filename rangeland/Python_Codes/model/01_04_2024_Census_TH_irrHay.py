@@ -12,6 +12,8 @@
 #     name: python3
 # ---
 
+# %%
+
 # %% [markdown]
 # This is based on ```Census_TonsorHerath_Dec20_2023.ipynb```.
 #
@@ -231,7 +233,7 @@ print ("There are {} incomlete counties out of {} for census years!!!".format(li
 
 RA = pd.read_csv(reOrganized_dir + "county_rangeland_and_totalarea_fraction.csv")
 RA.rename(columns={"fips_id": "county_fips"}, inplace=True)
-RA = rc.correct_Mins_county_FIPS(df=RA, col_ = "county_fips")
+RA = rc.correct_Mins_county_6digitFIPS(df=RA, col_ = "county_fips")
 print (f"{len(RA.county_fips.unique()) = }")
 RA = RA[RA.county_fips.isin(cnty_interest_list)]
 print (f"{len(RA.county_fips.unique()) = }")
@@ -280,7 +282,7 @@ cty_yr_GPP_NPP_prod = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_produ
 
 cty_yr_GPP_NPP_prod.rename(columns={"county" : "county_fips",
                                     "MODIS_NPP" : "unit_npp"}, inplace=True)
-cty_yr_GPP_NPP_prod = rc.correct_Mins_county_FIPS(df=cty_yr_GPP_NPP_prod, col_ = "county_fips")
+cty_yr_GPP_NPP_prod = rc.correct_Mins_county_6digitFIPS(df=cty_yr_GPP_NPP_prod, col_ = "county_fips")
 
 print (f"{len(cty_yr_GPP_NPP_prod.county_fips.unique()) = }")
 cty_yr_GPP_NPP_prod = cty_yr_GPP_NPP_prod[cty_yr_GPP_NPP_prod.county_fips.isin(cnty_interest_list)]
@@ -758,7 +760,7 @@ sigma_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.cs
 
 sigma_npp.rename(columns={"county" : "county_fips",
                                     "MODIS_NPP" : "unit_npp"}, inplace=True)
-sigma_npp = rc.correct_Mins_county_FIPS(df=sigma_npp, col_ = "county_fips")
+sigma_npp = rc.correct_Mins_county_6digitFIPS(df=sigma_npp, col_ = "county_fips")
 
 print (f"{len(sigma_npp.county_fips.unique()) = }")
 sigma_npp = sigma_npp[sigma_npp.county_fips.isin(cnty_interest_list)]
@@ -823,6 +825,10 @@ print ("max slaughter sale is [{}]".format(slaughter_all.slaughter.max()))
 slaughter_all.head(2)
 
 slaughter_all.year.unique()
+
+# %%
+
+# %%
 
 # %%
 

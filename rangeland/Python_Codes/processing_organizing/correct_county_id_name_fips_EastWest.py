@@ -44,7 +44,9 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplac
 
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 
-county_id_name_fips = rc.correct_Mins_county_FIPS(df=county_id_name_fips, col_="county")
+county_id_name_fips = rc.correct_Mins_county_6digitFIPS(
+    df=county_id_name_fips, col_="county"
+)
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
 county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
@@ -62,9 +64,14 @@ county_id_name_fips[county_id_name_fips.county_fips == "46102"]
 county_id_name_fips.tail(3)
 
 # %%
-# county_id_name_fips = county_id_name_fips.append(df2, ignore_index = True) 
-county_id_name_fips.loc[len(county_id_name_fips.index)] = ['46102', "Oglala Lakota County", 
-                                                           "46102", 'SD', '34']
+# county_id_name_fips = county_id_name_fips.append(df2, ignore_index = True)
+county_id_name_fips.loc[len(county_id_name_fips.index)] = [
+    "46102",
+    "Oglala Lakota County",
+    "46102",
+    "SD",
+    "34",
+]
 county_id_name_fips.tail(3)
 
 # %%
@@ -116,34 +123,58 @@ abb_dict.keys()
 # list(abb_dict["full_2_abb"].keys())[0:4]
 
 n = 4
-{key:value for key,value in list(abb_dict["full_2_abb"].items())[0:n]}
+{key: value for key, value in list(abb_dict["full_2_abb"].items())[0:n]}
 
 # %%
-West_of_Mississippi = ["Alaska", "Washington", "Oregon", "California", "Idaho",
-                       "Nevada", "Utah", "Arizona", "Montana", "Wyoming", 
-                       "Colorado", "New Mexico", "Texas", "North Dakota", "South Dakota", 
-                       "Nebraska", "Kansas", "Oklahoma", "Hawaii"]
+West_of_Mississippi = [
+    "Alaska",
+    "Washington",
+    "Oregon",
+    "California",
+    "Idaho",
+    "Nevada",
+    "Utah",
+    "Arizona",
+    "Montana",
+    "Wyoming",
+    "Colorado",
+    "New Mexico",
+    "Texas",
+    "North Dakota",
+    "South Dakota",
+    "Nebraska",
+    "Kansas",
+    "Oklahoma",
+    "Hawaii",
+]
 len(West_of_Mississippi)
 
 # %%
 len([x for x in West_of_Mississippi if x in abb_dict["full_2_abb"].keys()])
 
 # %%
-West_of_Mississippi_abb = [value for key,value in list(abb_dict["full_2_abb"].items()) if key in
-                           West_of_Mississippi]
+West_of_Mississippi_abb = [
+    value
+    for key, value in list(abb_dict["full_2_abb"].items())
+    if key in West_of_Mississippi
+]
 West_of_Mississippi_abb[:3]
 
 # %%
 county_id_name_fips.head(2)
 
 # %%
-county_id_name_fips.loc[county_id_name_fips.state.isin(West_of_Mississippi_abb), "EW"] = "W"
+county_id_name_fips.loc[
+    county_id_name_fips.state.isin(West_of_Mississippi_abb), "EW"
+] = "W"
 
 # %%
 county_id_name_fips[county_id_name_fips.state.isin(West_of_Mississippi_abb)].EW.unique()
 
 # %%
-county_id_name_fips.loc[~(county_id_name_fips.state.isin(West_of_Mississippi_abb)), "EW"].unique()
+county_id_name_fips.loc[
+    ~(county_id_name_fips.state.isin(West_of_Mississippi_abb)), "EW"
+].unique()
 
 # %%
 import pickle
@@ -151,11 +182,13 @@ from datetime import datetime
 
 filename = reOrganized_dir + "county_fips.sav"
 
-export_ = {"county_fips": county_id_name_fips, 
-           "source_code" : "correct_county_id_name_fips_EastWest.ipynb",
-           "Author": "HN",
-           "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+export_ = {
+    "county_fips": county_id_name_fips,
+    "source_code": "correct_county_id_name_fips_EastWest.ipynb",
+    "Author": "HN",
+    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+}
 
-pickle.dump(export_, open(filename, 'wb'))
+pickle.dump(export_, open(filename, "wb"))
 
 # %%

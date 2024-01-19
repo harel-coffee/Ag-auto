@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -118,7 +118,7 @@ for x in SoI:
 # %%
 RA = pd.read_csv(reOrganized_dir + "county_rangeland_and_totalarea_fraction.csv")
 RA.rename(columns={"fips_id": "county_fips"}, inplace=True)
-RA = rc.correct_Mins_county_FIPS(df=RA, col_="county_fips")
+RA = rc.correct_Mins_county_6digitFIPS(df=RA, col_="county_fips")
 print(f"{len(RA.county_fips.unique()) = }")
 RA.reset_index(drop=True, inplace=True)
 RA.head(2)
@@ -196,6 +196,11 @@ print(len(filtered_counties_29States.county_fips))
 print(len(filtered_counties_29States.county_fips.unique()))
 
 # %%
+filtered_counties
+
+# %%
+
+# %%
 import pickle
 from datetime import datetime
 
@@ -212,5 +217,12 @@ export_ = {
 }
 
 pickle.dump(export_, open(filename, "wb"))
+
+# %%
+filtered_counties_29States.head(2)
+
+# %%
+A = filtered_counties_29States.groupby("state")["county_fips"].count()
+A
 
 # %%

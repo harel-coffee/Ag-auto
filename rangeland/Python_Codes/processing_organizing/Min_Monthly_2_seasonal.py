@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -87,12 +87,16 @@ print (f"{len(county_fips.state.unique()) = }")
 county_fips.head(2)
 
 # %%
+county_fips[county_fips.county_fips == "04001"]
 
 # %%
 county_gridmet_mean_indices = pd.read_csv(Min_data_base + "county_gridmet_mean_indices.csv")
 county_gridmet_mean_indices.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
 county_gridmet_mean_indices.rename(columns={"county": "county_fips"}, inplace=True)
 county_gridmet_mean_indices.head(2)
+
+# %%
+county_gridmet_mean_indices[county_gridmet_mean_indices.county_fips == 104001]
 
 # %%
 sorted(county_gridmet_mean_indices.columns)
@@ -196,6 +200,9 @@ for a_year in county_gridmet_mean_indices.year.unique():
 county_gridmet_mean_indices.head(5)
 
 # %%
+county_gridmet_mean_indices[county_gridmet_mean_indices.county_fips == 104001]
+
+# %%
 # %%time
 
 needed_cols = ['county_fips', 'year', 
@@ -252,12 +259,18 @@ for a_year in county_gridmet_mean_indices.year.unique():
 seasonal.head(5)
 
 # %%
+seasonal[seasonal.county_fips == 104001]
+
+# %%
 for a_col in needed_cols[2:]:
     seasonal[a_col] = seasonal[a_col].astype(float)
 
 seasonal = seasonal.round(decimals=2)
 seasonal = rc.correct_Mins_county_6digitFIPS(df=seasonal, col_="county_fips")
 seasonal.head(5)
+
+# %%
+seasonal[seasonal.county_fips == "04001"]
 
 # %%
 import pickle
@@ -323,6 +336,9 @@ for a_year in county_gridmet_mean_indices.year.unique():
         wide_pointer += 1
 
 annual_temp.head(2)
+
+# %%
+annual_temp[annual_temp.county_fips == 104001]
 
 # %%
 annual_temp["annual_avg_Tavg"] = annual_temp["annual_avg_Tavg"].astype(float)

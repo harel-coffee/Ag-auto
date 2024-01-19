@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -26,8 +26,8 @@
 #
 # ```NPP``` and ```SW``` on county level comes from us. Thus, we have annual data for these.
 #
-# Hence, do not merge inventory with ```NPP``` and ```SW```, otherwise, we miss a lot in
-# the same data table!
+# Hence, do not (left) merge inventory with ```NPP``` and ```SW```, otherwise, we miss a lot in
+# the same data table! Keep them goddamn separate.
 
 # %%
 import shutup
@@ -120,8 +120,8 @@ print (f"{len(county_fips.state.unique()) = }")
 county_fips.head(2)
 
 # %%
-cnty_interest_list = list(county_fips.county_fips.unique())
-len(cnty_interest_list)
+# cnty_interest_list = list(county_fips.county_fips.unique())
+# len(cnty_interest_list)
 
 # %% [markdown]
 # ## Inventory
@@ -141,6 +141,9 @@ print()
 print(f"{len(inventory.state.unique())= }")
 
 inventory.head(2)
+
+# %%
+inventory[inventory.county_fips == "04003"]
 
 # %%
 census_years = sorted(list(inventory.year.unique()))
@@ -182,6 +185,12 @@ inventory.reset_index(drop=True, inplace=True)
 
 census_years = sorted(list(inventory.year.unique()))
 inventory.head(2)
+
+# %%
+inventory[inventory.county_fips == "04001"]
+
+# %%
+inventory[inventory.county_fips == "04003"]
 
 # %%
 all_cattle_counties = list(inventory.county_fips.unique())
@@ -230,7 +239,7 @@ print ("There are {} incomlete counties out of {} for census years!!!".format(li
 ####################
 # RA = pd.read_csv(reOrganized_dir + "county_rangeland_and_totalarea_fraction.csv")
 # RA.rename(columns={"fips_id": "county_fips"}, inplace=True)
-# RA = rc.correct_Mins_county_FIPS(df=RA, col_ = "county_fips")
+# RA = rc.correct_Mins_county_6digitFIPS(df=RA, col_ = "county_fips")
 # print (f"{len(RA.county_fips.unique()) = }")
 # RA = RA[RA.county_fips.isin(cnty_interest_list)]
 # print (f"{len(RA.county_fips.unique()) = }")
@@ -239,11 +248,16 @@ print ("There are {} incomlete counties out of {} for census years!!!".format(li
 
 # %%
 RA = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
-RA = RA["filtered_counties"]
-
+RA = RA["filtered_counties_29States"]
 print (f"{len(RA.county_fips.unique()) = }")
 print (f"{len(RA.state.unique()) = }")
 RA.head(2)
+
+# %%
+RA[RA.county_fips == "04001"]
+
+# %%
+RA[RA.county_fips == "04003"]
 
 # %%
 print (f"{list(RA.state.unique()) = }")
@@ -270,52 +284,84 @@ print ("number of instances are [{}]".format(L))
 
 # %%
 good_size_counties = RA.county_fips.unique()
-inventory_RA_filtered = inventory[inventory.county_fips.isin(good_size_counties)]
-# inventory_RA_filtered = pd.merge(inventory_RA_filtered, 
-#                                  RA[["county_fips", "rangeland_acre", "rangeland_fraction", "state"]], 
-#                                  on=["county_fips"], how="left")
+inventory_Pallavi_filtered = inventory[inventory.county_fips.isin(good_size_counties)]
+# inventory_Pallavi_filtered = pd.merge(inventory_Pallavi_filtered, 
+#                                       RA[["county_fips", "rangeland_acre", "rangeland_fraction", "state"]], 
+#                                       on=["county_fips"], how="left")
 
-inventory_RA_filtered = pd.merge(inventory_RA_filtered,
-                                 county_fips,
-                                 on=["county_fips"], how="left")
+inventory_Pallavi_filtered = pd.merge(inventory_Pallavi_filtered,
+                                      county_fips,
+                                      on=["county_fips"], how="left")
 
-inventory_RA_filtered.reset_index(drop=True, inplace=True)
-inventory_RA_filtered.head(2)
+inventory_Pallavi_filtered.reset_index(drop=True, inplace=True)
+inventory_Pallavi_filtered.head(2)
+
+# %%
+#################################################################################
+#########
+######### We can do this waaay up there to use its
+######### county_fips to filter all other variables.
+#########
+#################################################################################
+inventory_2017 = inventory_Pallavi_filtered[inventory_Pallavi_filtered.year==2017].copy()
+inventory_2017 = inventory_2017[["year", "county_fips", "inventory"]]
+
+inventory_2017 = pd.merge(inventory_2017, county_fips, on=["county_fips"], how="left")
+inventory_2017.head(2)
 
 # %%
 print (len(inventory.county_fips.unique()))
-print (len(inventory_RA_filtered.county_fips.unique()))
+print (len(inventory_Pallavi_filtered.county_fips.unique()))
+print (len(inventory_2017.county_fips.unique()))
 
 # %%
-print (len(inventory_RA_filtered.state.unique()))
-inventory_RA_filtered.head(2)
+print (len(inventory_Pallavi_filtered.state.unique()))
+inventory_Pallavi_filtered.head(2)
 
 # %%
-cty_yr_GPP_NPP_prod = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
+#### To use to filter all other variables:
 
-cty_yr_GPP_NPP_prod.rename(columns={"county" : "county_fips",
+inv_2017_Pallavi_cnty_list = list(inventory_2017.county_fips.unique())
+len(inv_2017_Pallavi_cnty_list)
+
+# %%
+inventory_Pallavi_filtered[inventory_Pallavi_filtered.county_fips == "04001"]
+
+# %%
+inventory_2017[inventory_2017.county_fips == "04001"]
+
+# %%
+cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
+
+cty_yr_npp.rename(columns={"county" : "county_fips",
                                     "MODIS_NPP" : "unit_npp"}, inplace=True)
-cty_yr_GPP_NPP_prod = rc.correct_Mins_county_6digitFIPS(df=cty_yr_GPP_NPP_prod, col_ = "county_fips")
 
-print (f"{len(cty_yr_GPP_NPP_prod.county_fips.unique()) = }")
-cty_yr_GPP_NPP_prod = cty_yr_GPP_NPP_prod[cty_yr_GPP_NPP_prod.county_fips.isin(cnty_interest_list)]
-print (f"{len(cty_yr_GPP_NPP_prod.county_fips.unique()) = }")
-cty_yr_GPP_NPP_prod.head(3)
+cty_yr_npp = rc.correct_Mins_county_6digitFIPS(df=cty_yr_npp, col_ = "county_fips")
 
-# %%
-cty_yr_GPP_NPP_prod = pd.merge(cty_yr_GPP_NPP_prod, 
-                               RA[["county_fips", "rangeland_acre"]], 
-                               on=["county_fips"], how="left")
-
-cty_yr_GPP_NPP_prod = rc.covert_unitNPP_2_total(NPP_df=cty_yr_GPP_NPP_prod, 
-                                                npp_unit_col_ = "unit_npp", 
-                                                acr_area_col_ = "rangeland_acre", 
-                                                npp_area_col_ = "county_total_npp")
-
-cty_yr_GPP_NPP_prod.head(2)
+###################################
+######
+###### Keep the counties that haved passed Pallavi's test
+######
+print (cty_yr_npp.shape)
+cty_yr_npp = cty_yr_npp[cty_yr_npp.county_fips.isin(inv_2017_Pallavi_cnty_list)]
+cty_yr_npp.reset_index(drop=True, inplace=True)
+print (cty_yr_npp.shape)
+print (f"{len(cty_yr_npp.county_fips.unique()) = }")
+cty_yr_npp.head(3)
 
 # %%
-cty_yr_npp = cty_yr_GPP_NPP_prod[["year", "county_fips", "county_total_npp"]]
+cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre", "state"]], 
+                      on=["county_fips"], how="left")
+cty_yr_npp.head(2)
+
+# %%
+cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp, 
+                                       npp_unit_col_ = "unit_npp", 
+                                       acr_area_col_ = "rangeland_acre", 
+                                       npp_area_col_ = "county_total_npp")
+
+# %%
+cty_yr_npp = cty_yr_npp[["year", "county_fips", "county_total_npp"]]
 cty_yr_npp.dropna(how="any", inplace=True)
 cty_yr_npp.reset_index(drop=True, inplace=True)
 cty_yr_npp.head(2)
@@ -326,10 +372,13 @@ cty_yr_npp.head(2)
 # %%
 filename = reOrganized_dir + "county_seasonal_temp_ppt_weighted.sav"
 SW = pd.read_pickle(filename)
-print(f"{SW.keys() = }")
 SW = SW["seasonal"]
-# SW = SW[SW.year >= 2001]
 SW = pd.merge(SW, county_fips,  on=["county_fips"], how="left")
+
+print (f"{len(SW.county_fips.unique())=}")
+SW = SW[SW.county_fips.isin(inv_2017_Pallavi_cnty_list)]
+SW.reset_index(drop=True, inplace=True)
+print (f"{len(SW.county_fips.unique())=}")
 SW.head(2)
 
 # %%
@@ -345,9 +394,8 @@ for a_col in SW_vars:
 
 # %%
 SW["yr_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
-
-# SW["yr_countyMean_avg_Tavg"]     = SW[seasonal_temp_vars].sum(axis=1)
-# SW["yr_countyMean_avg_Tavg"]     = SW["yr_countyMean_avg_Tavg"]/4
+# SW["yr_countyMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
+# SW["yr_countyMean_avg_Tavg"]   = SW["yr_countyMean_avg_Tavg"]/4
 
 SW = SW.round(3)
 SW.head(2)
@@ -387,13 +435,6 @@ cty_yr_npp.head(2)
 SW.head(2)
 
 # %%
-cty_yr_npp = cty_yr_npp[cty_yr_npp.county_fips.isin(inventory_RA_filtered.county_fips.unique())]
-SW = SW[SW.county_fips.isin(inventory_RA_filtered.county_fips.unique())]
-
-cty_yr_npp.reset_index(drop=True, inplace=True)
-SW.reset_index(drop=True, inplace=True)
-
-# %%
 print (len(SW.county_fips.unique()))
 print (len(cty_yr_npp.county_fips.unique()))
 
@@ -403,19 +444,18 @@ NPP_SW.head(2)
 
 # %%
 filename = reOrganized_dir + "county_annual_avg_Tavg.sav"
-county_annual_avg_Tavg = pd.read_pickle(filename)
-county_annual_avg_Tavg = county_annual_avg_Tavg["annual_temp"]
+cnty_yr_avg_Tavg = pd.read_pickle(filename)
+cnty_yr_avg_Tavg = cnty_yr_avg_Tavg["annual_temp"]
 
-cc = inventory_RA_filtered.county_fips.unique()
-county_annual_avg_Tavg = county_annual_avg_Tavg[county_annual_avg_Tavg.county_fips.isin(cc)]
+cnty_yr_avg_Tavg = cnty_yr_avg_Tavg[cnty_yr_avg_Tavg.county_fips.isin(inv_2017_Pallavi_cnty_list)]
 
 # county_annual_avg_Tavg = county_annual_avg_Tavg[county_annual_avg_Tavg.year >= 2001]
 
-county_annual_avg_Tavg.reset_index(drop=True, inplace=True)
-county_annual_avg_Tavg.head(2)
+cnty_yr_avg_Tavg.reset_index(drop=True, inplace=True)
+cnty_yr_avg_Tavg.head(2)
 
 # %%
-NPP_SW = pd.merge(NPP_SW, county_annual_avg_Tavg, on=["year", "county_fips"], how="outer")
+NPP_SW = pd.merge(NPP_SW, cnty_yr_avg_Tavg, on=["year", "county_fips"], how="outer")
 NPP_SW.head(2)
 
 # %% [markdown]
@@ -433,16 +473,20 @@ cnty_grid_mean_idx = pd.read_csv(Min_data_base + "county_gridmet_mean_indices.cs
 cnty_grid_mean_idx.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
 cnty_grid_mean_idx.rename(columns={"county": "county_fips"}, inplace=True)
 cnty_grid_mean_idx = rc.correct_Mins_county_6digitFIPS(df=cnty_grid_mean_idx, col_="county_fips")
-cnty_grid_mean_idx.head(2)
 
-# %%
 cnty_grid_mean_idx = cnty_grid_mean_idx[["year", "month", "county_fips",
                                          "normal", "alert", "danger", "emergency"]]
 
 for a_col in ["normal", "alert", "danger", "emergency"]:
     cnty_grid_mean_idx[a_col] = cnty_grid_mean_idx[a_col].astype(int)
-    
+
+cnty_grid_mean_idx = cnty_grid_mean_idx[cnty_grid_mean_idx.county_fips.isin(inv_2017_Pallavi_cnty_list)]
+cnty_grid_mean_idx.reset_index(drop=True, inplace=True)
 cnty_grid_mean_idx.head(2)
+
+# %%
+# Arizona is safe?
+cnty_grid_mean_idx[(cnty_grid_mean_idx.county_fips == "04005") & (cnty_grid_mean_idx.year == 2017)]
 
 # %%
 cnty_grid_mean_idx["dangerEncy"] = cnty_grid_mean_idx["danger"] + cnty_grid_mean_idx["emergency"]
@@ -458,15 +502,228 @@ NPP_SW_heat = pd.merge(NPP_SW, dangerEncy_yr, on=["year", "county_fips"], how="o
 NPP_SW_heat.head(2)
 
 # %% [markdown]
-# # Model Snapshot
+# # Model Snapshot 
+# **for 2017 Inventory and long run avg of independent variables**
 
 # %%
-inventory_2017 = inventory_RA_filtered[inventory_RA_filtered.year==2017].copy()
-inventory_2017 = inventory_2017[["year", "county_fips", "inventory"]]
+L = len(inventory_2017.state.unique())
+print ("There are " + start_b + "<<< " + str(L) + " >>>" + end_b + " states left in 2017 after all filters!")
+
+# %%
+# print (len(inventory_Pallavi_filtered.state.unique()))
+# mc = [x for x in inventory_Pallavi_filtered.state.unique() if not (x in inventory_2017.state.unique())]
+# inventory_Pallavi_filtered[inventory_Pallavi_filtered.state.isin(mc)]
+
+# %% [markdown]
+# ## Compute long run averages
+#
+# Since ```NPP``` exist after 2001, we filter ```SW``` from 2001 as well. Otherwise, there is no other reason.
+
+# %%
+print (NPP_SW_heat.year.min())
+NPP_SW_heat.head(2)
+
+# %%
+################################################################################
+######
+######   Final Filter check so we have data of the counties in 2017 inventory
+######   that is filtered by Pallavi test.
+######
+print (NPP_SW_heat.shape)
+NPP_SW_heat = NPP_SW_heat[NPP_SW_heat.county_fips.isin(inv_2017_Pallavi_cnty_list)]
+print (NPP_SW_heat.shape)
+
+# %%
+NPP_SW_heat = NPP_SW_heat[NPP_SW_heat.year >= 2001]
+NPP_SW_heat = NPP_SW_heat[NPP_SW_heat.year <= 2017]
+NPP_SW_heat.drop(labels=['county_name', 'state', 'EW'], axis=1, inplace=True)
+NPP_SW_heat.head(2)
+
+# %%
+NPP_SW_heat_avg = NPP_SW_heat.groupby("county_fips").mean()
+NPP_SW_heat_avg.reset_index(drop=False, inplace=True)
+NPP_SW_heat_avg = NPP_SW_heat_avg.round(3)
+
+NPP_SW_heat_avg.drop(labels=['year'], axis=1, inplace=True)
+NPP_SW_heat_avg.head(3)
+
+# %%
+NPP_SW_heat.loc[NPP_SW_heat.county_fips == "04005", "S4_countyMean_total_precip"].mean().round(3)
+
+# %%
+print (len(NPP_SW_heat_avg.index))
+print (len(inventory_2017.county_fips.unique()))
+print (len(NPP_SW_heat_avg.index.unique()) == len(NPP_SW_heat_avg.index))
+
+# %% [markdown]
+# # Model (time, finally)
+
+# %%
+NPP_SW_heat.sort_values(by=["county_fips", "year"], inplace=True)
+NPP_SW_heat_avg.sort_values(by=["county_fips"], inplace=True)
+inventory_2017.sort_values(by=["county_fips"], inplace=True)
 inventory_2017.head(2)
 
 # %%
-NPP_SW_heat.head(2)
+NPP_SW_heat_avg.head(2)
+
+# %%
+print (NPP_SW_heat_avg.shape)
+print (inventory_2017.shape)
+
+# %% [markdown]
+# # CAREFUL
+#
+# Let us merge average data and inventory data. Keep in mind that the year will be 2017 but the data are averaged over the years (except for the inventory). 
+#
+# Merge them so that counties are in the same order. My sick mind!
+
+# %%
+inv_2017_NPP_SW_heat_avg = pd.merge(inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left")
+inv_2017_NPP_SW_heat_avg.head(2)
+
+# %%
+inv_2017_NPP_SW_heat_avg.columns
+
+# %% [markdown]
+# ### Normalize
+
+# %%
+HS_var = ['dangerEncy']
+npp_var = ['county_total_npp']
+AW_vars = ['yr_countyMean_total_precip', 'annual_avg_Tavg']
+
+SW_vars = ['S1_countyMean_total_precip', 'S2_countyMean_total_precip', 
+           'S3_countyMean_total_precip', 'S4_countyMean_total_precip', 
+           'S1_countyMean_avg_Tavg', 'S2_countyMean_avg_Tavg', 
+           'S3_countyMean_avg_Tavg', 'S4_countyMean_avg_Tavg']
+
+all_indp_vars = list(set(HS_var + AW_vars + SW_vars + npp_var))
+all_indp_vars = sorted(all_indp_vars)
+all_indp_vars
+
+# %%
+# standard_indp = preprocessing.scale(all_df[explain_vars_herb]) # this is biased
+inv_2017_NPP_SW_heat_avg_normal = (inv_2017_NPP_SW_heat_avg[all_indp_vars] - \
+                                   inv_2017_NPP_SW_heat_avg[all_indp_vars].mean()) / \
+                                   inv_2017_NPP_SW_heat_avg[all_indp_vars].std(ddof=1)
+inv_2017_NPP_SW_heat_avg_normal.head(2)
+
+# %%
+inv_2017_NPP_SW_heat_avg.head(2)
+
+# %%
+nonControlvars = ['year', 'county_fips', 'inventory', 'county_name', 'state', 'EW']
+inv_2017_NPP_SW_heat_avg_normal[nonControlvars] = inv_2017_NPP_SW_heat_avg[nonControlvars]
+inv_2017_NPP_SW_heat_avg_normal.head(2)
+
+# %% [markdown]
+# ### Inventory vs normal ```NPP``` averaged over 2001-2017
+
+# %%
+indp_vars = ["county_total_npp"]
+y_var = "inventory"
+
+#################################################################
+X_npp = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_npp = sm.add_constant(X_npp)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+npp_inv_model = sm.OLS(Y, X_npp)
+npp_inv_model_result = npp_inv_model.fit()
+npp_inv_model_result.summary()
+
+# %% [markdown]
+# ### Inventory vs normal ```AW``` averaged over 2001-2017
+
+# %%
+del(X_npp, npp_inv_model, npp_inv_model_result)
+
+# %%
+indp_vars = AW_vars
+y_var = "inventory"
+
+#################################################################
+X_AW = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_AW = sm.add_constant(X_AW)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+AW_inv_model = sm.OLS(Y, X_AW)
+AW_inv_model_result = AW_inv_model.fit()
+AW_inv_model_result.summary()
+
+# %%
+del(X_AW, AW_inv_model, AW_inv_model_result)
+
+# %% [markdown]
+# ### Inventory vs normal ```SW``` averaged over 2001-2017
+
+# %%
+indp_vars = SW_vars
+y_var = "inventory"
+
+#################################################################
+X_SW = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_SW = sm.add_constant(X_SW)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+SW_inv_model = sm.OLS(Y, X_SW)
+SW_inv_model_result = SW_inv_model.fit()
+SW_inv_model_result.summary()
+
+# %%
+del(X_SW, SW_inv_model, SW_inv_model_result)
+
+# %% [markdown]
+# ### Inventory vs normal ```NPP``` AND ```dangerEncy``` averaged over 2001-2017
+
+# %%
+indp_vars = npp_var + HS_var
+y_var = "inventory"
+
+#################################################################
+X_npp_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_npp_dangerEncy = sm.add_constant(X_npp_dangerEncy)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+npp_dangerEncy_inv_model = sm.OLS(Y, X_npp_dangerEncy)
+npp_dangerEncy_inv_model_result = npp_dangerEncy_inv_model.fit()
+npp_dangerEncy_inv_model_result.summary()
+
+# %%
+del(X_npp_dangerEncy, npp_dangerEncy_inv_model, npp_dangerEncy_inv_model_result)
+
+# %% [markdown]
+# ### Inventory vs normal ```AW``` AND ```dangerEncy``` averaged over 2001-2017
+
+# %%
+indp_vars = AW_vars + HS_var
+y_var = "inventory"
+
+#################################################################
+X_AW_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_AW_dangerEncy = sm.add_constant(X_AW_dangerEncy)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+AW_dangerEncy_inv_model = sm.OLS(Y, X_AW_dangerEncy)
+AW_dangerEncy_inv_model_result = AW_dangerEncy_inv_model.fit()
+AW_dangerEncy_inv_model_result.summary()
+
+# %%
+del(X_AW_dangerEncy, AW_dangerEncy_inv_model, AW_dangerEncy_inv_model_result)
+
+# %% [markdown]
+# ### Inventory vs normal ```SW``` AND ```dangerEncy``` averaged over 2001-2017
+
+# %%
+indp_vars = SW_vars + HS_var
+y_var = "inventory"
+
+#################################################################
+X_SW_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_SW_dangerEncy = sm.add_constant(X_SW_dangerEncy)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+SW_dangerEncy_inv_model = sm.OLS(Y, X_SW_dangerEncy)
+SW_dangerEncy_inv_model_result = SW_dangerEncy_inv_model.fit()
+SW_dangerEncy_inv_model_result.summary()
+
+# %%
+del(X_SW_dangerEncy, SW_dangerEncy_inv_model, SW_dangerEncy_inv_model_result)
 
 # %%
 
