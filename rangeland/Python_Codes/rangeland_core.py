@@ -101,7 +101,7 @@ def clean_census(df, col_):
     return df
 
 
-def correct_Mins_county_FIPS(df, col_):
+def correct_Mins_county_6digitFIPS(df, col_):
     """
     Min has added a leading 1 to FIPS
     since some FIPs starts with 0.

@@ -24,7 +24,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import calendar
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -38,13 +38,16 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 seasonal_dir = reOrganized_dir + "seasonal_variables/02_merged_mean_over_county/"
 
 # %%
-SoI = ["Alabama", "Arkansas", "California", 
-       "Colorado", "Florida", "Georgia", "Idaho",
-       "Illinois", "Iowa", "Kansas", "Kentucky",
-       "Louisiana", "Mississippi", "Missouri", "Montana", 
-       "Nebraska", "New Mexico", "North Dakota", 
-       "Oklahoma", "Oregon", "South Dakota", "Tennessee",
-       "Texas", "Virginia", "Wyoming"]
+SoI = ["Alabama", "Arizona", "Arkansas",
+       "California", "Colorado", "Florida",
+       "Georgia", "Idaho", "Illinois",
+       "Iowa", "Kansas", "Kentucky",
+       "Louisiana", "Mississippi", "Missouri",
+       "Montana", "Nebraska", "Nevada",
+       "New Mexico", "North Dakota",
+       "Oklahoma", "Oregon", "South Dakota",
+       "Tennessee", "Texas", "Utah",
+       "Virginia", "Washington", "Wyoming"]
 
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
 
@@ -52,12 +55,12 @@ SoI_abb = []
 for x in SoI:
     SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
 
+# %%
 county_id_name_fips = pd.read_csv(Min_data_base + "county_id_name_fips.csv")
 
 print (f"{len(county_id_name_fips.STATE.unique()) = }")
 county_id_name_fips.head(2)
 
-# %%
 county_id_name_fips = county_id_name_fips[county_id_name_fips.STATE.isin(SoI_abb)]
 print (f"{len(county_id_name_fips.STATE.unique()) = }")
 print (f"{len(county_id_name_fips.county.unique()) = }")
@@ -66,8 +69,22 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(' ', '_'), inplac
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
 county_id_name_fips.reset_index(drop=True, inplace=True)
-
 county_id_name_fips.head(2)
+
+# %%
+county_id_name_fips.dropna(how="any", inplace=False).shape
+
+# %%
+county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+county_fips = county_fips["county_fips"]
+
+print (f"{len(county_fips.state.unique()) = }")
+county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
+county_fips.drop_duplicates(inplace=True)
+county_fips.reset_index(drop=True, inplace=True)
+county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
+print (f"{len(county_fips.state.unique()) = }")
+county_fips.head(2)
 
 # %%
 
@@ -190,10 +207,7 @@ needed_cols = ['county_fips', 'year',
 nu_rows = len(county_gridmet_mean_indices.year.unique()) * len(county_gridmet_mean_indices.county_fips.unique())
 seasonal = pd.DataFrame(columns = needed_cols, index=range(nu_rows))
 
-seasonal.head(2)
-
 wide_pointer = 0
-
 for a_year in county_gridmet_mean_indices.year.unique():
     leap_ = calendar.isleap(a_year)
     
@@ -232,9 +246,17 @@ for a_year in county_gridmet_mean_indices.year.unique():
         seasonal.loc[wide_pointer, "S4_countyMean_avg_Tavg"] = \
                                         curr_df_S4.sum_tavg.sum() / no_days_in_each_season["season_4"]
         wide_pointer += 1
+        
+        del(curr_df, curr_df_S1, curr_df_S2, curr_df_S3, curr_df_S4)
+        
+seasonal.head(5)
+
+# %%
+for a_col in needed_cols[2:]:
+    seasonal[a_col] = seasonal[a_col].astype(float)
 
 seasonal = seasonal.round(decimals=2)
-seasonal = rc.correct_Mins_FIPS(df=seasonal, col_="county_fips")
+seasonal = rc.correct_Mins_county_6digitFIPS(df=seasonal, col_="county_fips")
 seasonal.head(5)
 
 # %%
@@ -250,6 +272,81 @@ export_ = {"seasonal": seasonal,
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 pickle.dump(export_, open(filename, 'wb'))
+
+# %%
+seasonal.head(2)
+
+# %%
+county_fips.head(2)
+
+# %%
+seasonal = pd.merge(seasonal, county_fips, on=["county_fips"], how="left")
+seasonal.head(2)
+
+# %%
+len(seasonal.state.unique())
+
+# %%
+seasonal[seasonal.state.isna()]
+
+# %%
+county_gridmet_mean_indices.head(5)
+
+# %% [markdown]
+# # On Jan 12. HN, KR, MB 
+# had a meeting and we wanted to model one year (snapshot) as function of long run averages.
+# Here I am doing annual temp!!!!!
+
+# %%
+# %%time
+
+needed_cols = ['county_fips', 'year', 'annual_avg_Tavg']
+
+nu_rows = len(county_gridmet_mean_indices.year.unique()) * len(county_gridmet_mean_indices.county_fips.unique())
+annual_temp = pd.DataFrame(columns = needed_cols, index=range(nu_rows))
+
+wide_pointer = 0
+for a_year in county_gridmet_mean_indices.year.unique():
+    leap_ = calendar.isleap(a_year)
+    
+    for fip in county_gridmet_mean_indices.county_fips.unique():
+        curr_df = county_gridmet_mean_indices[(county_gridmet_mean_indices.year == a_year) &\
+                                              (county_gridmet_mean_indices.county_fips == fip)]
+
+        annual_temp.loc[wide_pointer, "county_fips"] = fip
+        annual_temp.loc[wide_pointer, "year"] = a_year
+
+        if leap_:
+            annual_temp.loc[wide_pointer, "annual_avg_Tavg"] = curr_df.sum_tavg.sum() / 366
+        else:
+            annual_temp.loc[wide_pointer, "annual_avg_Tavg"] = curr_df.sum_tavg.sum() / 365
+        wide_pointer += 1
+
+annual_temp.head(2)
+
+# %%
+annual_temp["annual_avg_Tavg"] = annual_temp["annual_avg_Tavg"].astype(float)
+annual_temp = annual_temp.round(decimals=2)
+annual_temp = rc.correct_Mins_county_6digitFIPS(df=annual_temp, col_="county_fips")
+annual_temp.head(5)
+
+# %%
+filename = reOrganized_dir + "county_annual_avg_Tavg.sav"
+
+export_ = {"annual_temp": annual_temp, 
+           "source_code" : "Min_Monthly_2_seasonal",
+           "Author": "HN",
+           "Min_file_used" : "county_gridmet_mean_indices.csv",
+           "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+pickle.dump(export_, open(filename, 'wb'))
+
+# %%
+annual_temp
+
+# %%
+
+# %%
 
 # %% [markdown]
 # # Min's inconsistency

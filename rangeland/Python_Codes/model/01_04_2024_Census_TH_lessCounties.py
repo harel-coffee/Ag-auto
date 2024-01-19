@@ -187,8 +187,9 @@ lic = len(incomplete_counties)
 la = len(all_cattle_counties)
 print ("There are {} incomlete counties out of {} for census years!!!".format(lic, la))
 
-# %%
 {key:value for key,value in list(incomplete_counties.items())[0:3]}
+
+# %%
 
 # %% [markdown]
 # ## NPP exist only after 2001! 
@@ -219,9 +220,15 @@ print ("There are {} incomlete counties out of {} for census years!!!".format(li
 
 # %% [markdown]
 # ## Since there are too many incomlete counties, lets just keep them!
+#
+# #### Rangeland area and Herb Ratio
 
 # %% [markdown]
-# #### Rangeland area and Herb Ratio
+# # WARNING. 
+#
+# **Pallavi's filter shrunk 29 states to 22.**
+
+# %%
 
 # %%
 ####################
@@ -230,8 +237,6 @@ print ("There are {} incomlete counties out of {} for census years!!!".format(li
 # their rangeland area
 
 ####################
-
-
 RA = pd.read_csv(reOrganized_dir + "county_rangeland_and_totalarea_fraction.csv")
 RA.rename(columns={"fips_id": "county_fips"}, inplace=True)
 RA = rc.correct_Mins_county_FIPS(df=RA, col_ = "county_fips")
@@ -416,11 +421,13 @@ irr_hay.head(2)
 list(irr_hay.columns)
 
 # %%
-all_df = pd.merge(all_df, irr_hay[['county_fips', 'irr_as_perc']], on=["county_fips"], how="left")
+all_df = pd.merge(all_df, irr_hay[['county_fips', 'irr_hay_as_perc']], on=["county_fips"], how="left")
 all_df.head(2)
 
 # %%
-irr_hay[irr_hay.irr_as_perc == irr_hay.irr_as_perc.min()]
+
+# %%
+irr_hay[irr_hay.irr_hay_as_perc == irr_hay.irr_hay_as_perc.min()]
 
 # %%
 all_df.describe().round(1)
@@ -433,7 +440,7 @@ all_df.dropna(how="any").shape
 # in all_df there are 279 counties for which irr_hay_perc is missing
 # since we had (D) in the irr_hay table for some counties. Look at irrigated_hay_portion_2017.
 # 
-sum(all_df.irr_as_perc.isna())
+sum(all_df.irr_hay_as_perc.isna())
 
 # %%
 all_df.dropna(how="any", inplace=True)

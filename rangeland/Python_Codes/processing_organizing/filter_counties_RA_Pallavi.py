@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -59,7 +59,7 @@ from sklearn import preprocessing
 import statistics
 import statsmodels.api as sm
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -129,7 +129,6 @@ county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 county_fips = county_fips["county_fips"]
 
 print(f"{len(county_fips.state.unique()) = }")
-county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
 county_fips.reset_index(drop=True, inplace=True)
 print(f"{len(county_fips.state.unique()) = }")
@@ -137,11 +136,37 @@ print(f"{len(county_fips.state.unique()) = }")
 county_fips.head(2)
 
 # %%
-large_counties = RA[RA.rangeland_acre >= 50000].copy()
-small_counties = RA[RA.rangeland_acre < 50000].copy()
+RA = pd.merge(RA, county_fips[["county_fips", "state"]], on=["county_fips"], how="left")
 
 # %%
+print (len(RA.state.unique()))
+print (len(county_fips.state.unique()))
+
+# %%
+RA.head(2)
+
+# %%
+RA[RA.state.isna()]
+
+# %%
+RA.dropna(how="any", inplace=True)
+
+county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
+RA = RA[RA.state.isin(SoI_abb)].copy()
+
+print (len(RA.state.unique()))
+print (len(county_fips.state.unique()))
+
+# %%
+
+# %%
+large_counties = RA[RA.rangeland_acre >= 50000].copy()
+small_counties = RA[RA.rangeland_acre < 50000].copy()
 small_counties_largeRA = small_counties[small_counties.rangeland_fraction >= 0.1].copy()
+
+# %%
+print (len(large_counties.state.unique()))
+print (len(small_counties_largeRA.state.unique()))
 
 # %%
 filtered_counties = pd.concat(
@@ -151,21 +176,15 @@ filtered_counties.reset_index(drop=True, inplace=True)
 filtered_counties.head(2)
 
 # %%
+len(filtered_counties.state.unique())
+
+# %%
 print(len(filtered_counties.county_fips))
 print(len(filtered_counties.county_fips.unique()))
 
 # %%
 print(len(RA.county_fips))
 print(len(RA.county_fips.unique()))
-
-# %%
-len(county_fips.state.unique())
-
-# %%
-county_fips.head(2)
-
-# %%
-filtered_counties.head(2)
 
 # %%
 filtered_counties_29States = filtered_counties[
