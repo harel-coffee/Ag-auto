@@ -1,7 +1,6 @@
+# OLD OLD OLD
 # I changed the Python code to include only common counties in pairwise years
 # so that the $ change in national share adds up to zero.
-# New Python notebook is called "inventory_diff_4_MapinR_CommonCountiesInAllYears.ipynb" and
-# old one is called "inventory_diff_4_MapinR.ipynb"
 
 rm(list=ls())
 library(usmap)
@@ -13,9 +12,14 @@ library(data.table)
 library(dplyr)
 library(stringr)
 
+# plot US counties like this
+# plot_usmap(regions = "counties") + 
+# labs(title = "US Counties",
+#      subtitle = "This is a blank map of the counties of the United States.") + 
+# theme(panel.background = element_rect(color = "black", fill = "lightblue"))
 base_dir <- "/Users/hn/Documents/01_research_data/RangeLand/Data/"
 diff_dir <- paste0(base_dir, "data_4_plot/")
-plot_dir <- paste0(base_dir, "plots/")
+# plot_dir <- paste0(base_dir, "plots/")
 
 
 SoI_abb <- c('AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 
@@ -43,6 +47,7 @@ inventory_map <- function(data_, col_, theme_, legend_d_, title_){
   return (m)
 }
 
+
 states <- plot_usmap("states", color = "red", fill = alpha(0.01))
 the_theme <-  theme(legend.title = element_text(size=25, face="bold"),
                     legend.text = element_text(size=25, face="plain"),
@@ -57,6 +62,149 @@ the_theme <-  theme(legend.title = element_text(size=25, face="bold"),
                     axis.title.y = element_blank(),
                     plot.title = element_text(size=25, lineheight=2, face="bold"))
 
+# Fucking R cannot read this pickled file.
+# Used the Python notebook (inventory_diff_4_MapinR.ipynb) to create the diffs to plot:
+# USDA_data <- haven::read_sav(paste0(data_dir, "USDA_data.sav"))
+
+###########$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+###########$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+###########$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+# inventory_AbsChange_2002to2017 <- read.csv(paste0(diff_dir, "inventory_AbsChange_2002to2017.csv"))
+# inv_PercChangeShare_2002_2017 <- read.csv(paste0(diff_dir, "inv_PercChangeShare_2002_2017.csv"))
+# setnames(inventory_AbsChange_2002to2017, old = c('county_fips'), new = c('fips'))
+# setnames(inv_PercChangeShare_2002_2017, old = c('county_fips'), new = c('fips'))
+
+# legend_d <- "Abs. change (2002-2017)"
+# map <- inventory_map(data_=inventory_AbsChange_2002to2017, col_="inv_change2002to2017", 
+#                      theme_=the_theme, legend_d_=legend_d,
+#                      title_ = paste0(legend_d, ", outlier: Tulare County, CA"))
+
+# ggsave("InventoryChange_2002_2017_absVal.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+# inventory_AbsChange_2002to2017_NoOutlier = inventory_AbsChange_2002to2017 %>%
+#                                            filter(inv_change2002to2017<20000)
+
+# legend_d <- "Abs. change (2002-2017)"
+
+# map <- inventory_map(data_=inventory_AbsChange_2002to2017_NoOutlier, col_="inv_change2002to2017", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = legend_d)
+# print (map)
+
+# ggsave("InventoryChange_2002_2017_absVal_noOutlier.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+# legend_d <- "Percentage change (2002-2017)"
+
+# map <- inventory_map(data_=inventory_AbsChange_2002to2017, col_="inv_change2002to2017_asPerc", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = legend_d)
+# print (map)
+
+# ggsave("percChange_2002_2017.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+# inventory_PercChange_2002to2017_NoOutlier = inventory_AbsChange_2002to2017 %>%
+#                                             filter(inv_change2002to2017_asPerc<200)
+
+# legend_d <- "Percentage change (2002-2017)"
+
+# map <- inventory_map(data_=inventory_PercChange_2002to2017_NoOutlier, col_="inv_change2002to2017_asPerc", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = legend_d)
+# print (map)
+
+# ggsave("percChange_2002_2017_noOutlier.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+# ########################################
+# ########################################
+# ########################################
+# #
+# # Actual Inventory
+# #
+# legend_d <- "Inventory: 2002"
+# map <- inventory_map(data_=inventory_AbsChange_2002to2017, col_="cattle_cow_beef_inven_2002", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = legend_d)
+# print (map)
+
+# ggsave("inventory_2002.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+# legend_d <- "Inventory: 2017"
+# map <- inventory_map(data_=inventory_AbsChange_2002to2017, col_="cattle_cow_beef_inven_2017", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = legend_d)
+# print (map)
+# ggsave("inventory_2017.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+# ########################################
+# ########################################
+# ########################################
+# ###
+# ### Actual shares
+# ###
+# legend_d <- "%-of national share (2002)"
+# map <- inventory_map(data_=inv_PercChangeShare_2002_2017, col_="inv_2002_asPercShare", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = legend_d)
+# map$layers[[2]]$aes_params$size <- 5
+# print (map)
+# ggsave("nationalSharePercent_2002.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+# legend_d <- "%-of national share (2017)"
+# map <- inventory_map(data_=inv_PercChangeShare_2002_2017, col_="inv_2017_asPercShare", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = legend_d)
+# map$layers[[2]]$aes_params$size <- 5
+# print (map)
+# ggsave("nationalSharePercent_2017.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+# ########################################
+# ########################################
+# ########################################
+# ###
+# ###  diff in shares
+# ###
+# legend_d <- "%-wise change as national share (2002-2017)"
+# map <- inventory_map(data_=inv_PercChangeShare_2002_2017, col_="change_2002_2017_asPercShare", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ = paste0(legend_d, ", outlier: Tulare County, CA"))
+# map$layers[[2]]$aes_params$size <- 5
+# print (map)
+# ggsave("NationalShareChange_2002_2017_percent.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+
+# inv_PercChangeShare_2002_2017_noOutlier <- inv_PercChangeShare_2002_2017 %>%
+#                                            filter(change_2002_2017_asPercShare > -0.20)
+
+
+# legend_d <- "%-wise change as national share (2002-2017)"
+# map <- inventory_map(data_=inv_PercChangeShare_2002_2017_noOutlier, col_="change_2002_2017_asPercShare", 
+#                      theme_=the_theme, legend_d_=legend_d, title_ =legend_d)
+      
+# map$layers[[2]]$aes_params$size <- 5
+# print (map)
+
+# ggsave("NationalShareChange_2002_2017_percent_NoOutlier.pdf", map, 
+#        path=plot_dir, device="pdf",
+#        dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
+
+# inv_PercChangeShare_2002_2017 %>%
+# filter(change_2002_2017_asPercShare>0.2)
+
 ###########$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 ###########$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 ###########$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -65,8 +213,8 @@ the_theme <-  theme(legend.title = element_text(size=25, face="bold"),
 ###########        Panel is not gonna look good! 
 ###########        So, one at a time
 ###########
-inventory_AbsChange <- read.csv(paste0(diff_dir, "inventory_AbsChange_4panel_commonCounties.csv"))
-inv_PercChangeShare <- read.csv(paste0(diff_dir, "inventory_ShareChange_4panel_commonCounties.csv"))
+inventory_AbsChange <- read.csv(paste0(diff_dir, "inventory_AbsChange_4panel.csv"))
+inv_PercChangeShare <- read.csv(paste0(diff_dir, "inventory_ShareChange_4panel.csv"))
 setnames(inventory_AbsChange, old = c('county_fips'), new = c('fips'))
 setnames(inv_PercChangeShare, old = c('county_fips'), new = c('fips'))
 
@@ -101,6 +249,8 @@ for (a_col in colnames(inventory_AbsChange)[4:length(colnames(inventory_AbsChang
          path=Abs_plot_dir, device="pdf",
          dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
 }
+
+
 
 ##### Changes as in National Share
 
@@ -194,12 +344,15 @@ for (a_col in colnames(inv_PercChangeShare)[4:length(colnames(inv_PercChangeShar
          dpi=300, width=15, height=12, unit="in", limitsize = FALSE)
 }
 
+
+
 ########################################################################
 ########################################################################
 ########################################################################
 ########
 ########    See if you can melt and create a big panel or sth!!!
 ########
+
 
 the_theme <-  theme(legend.title = element_text(size=25, face="plain"),
                     legend.text = element_text(size=25, face="plain"),
@@ -237,8 +390,8 @@ inventory_map_melt <- function(data_, theme_, legend_d_, title_, num_facet_cols,
 #####
 #####   Read
 ##### 
-inventory_AbsChange <- read.csv(paste0(diff_dir, "inventory_AbsChange_4panel_commonCounties.csv"))
-inv_PercChangeShare <- read.csv(paste0(diff_dir, "inventory_ShareChange_4panel_commonCounties.csv"))
+inventory_AbsChange <- read.csv(paste0(diff_dir, "inventory_AbsChange_4panel.csv"))
+inv_PercChangeShare <- read.csv(paste0(diff_dir, "inventory_ShareChange_4panel.csv"))
 setnames(inventory_AbsChange, old = c('county_fips'), new = c('fips'))
 setnames(inv_PercChangeShare, old = c('county_fips'), new = c('fips'))
 
@@ -247,6 +400,7 @@ Abs_plot_dir <- paste0(plot_dir, "abs_change_map/")
 if (dir.exists(Abs_plot_dir) == F) {dir.create(path = Abs_plot_dir, recursive = T)}
 share_plot_dir <- paste0(plot_dir, "share_change_map/")
 if (dir.exists(share_plot_dir) == F) {dir.create(path = share_plot_dir, recursive = T)}
+
 
 colnames(inv_PercChangeShare)
 
@@ -273,6 +427,7 @@ inv_PercChangeShare_df_melt <- melt(data.table(inv_PercChangeShare_df), id = com
 
 invShare_df_melt <- invShare_df_melt %>% tidyr::drop_na()
 inv_PercChangeShare_df_melt <- inv_PercChangeShare_df_melt %>% tidyr::drop_na()
+
 
 ########################################
 ###
@@ -323,11 +478,6 @@ library(stringr)
 base_dir <- "/Users/hn/Documents/01_research_data/RangeLand/Data/"
 diff_dir <- paste0(base_dir, "data_4_plot/")
 plot_dir <- paste0(base_dir, "plots/")
-
-inventory_panel_dir <- paste0(plot_dir, "inventory_panel/")
-if (dir.exists(inventory_panel_dir) == F) {dir.create(path = inventory_panel_dir, recursive = T)}
-
-
 ################################################################################
 SoI_abb <- c('AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 
              'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 
@@ -372,8 +522,8 @@ inventory_map_melt <- function(data_, theme_, legend_d_, title_, num_facet_cols,
 #####
 #####   Read
 ##### 
-inventory_AbsChange <- read.csv(paste0(diff_dir, "inventory_AbsChange_4panel_commonCounties.csv"))
-inv_PercChangeShare <- read.csv(paste0(diff_dir, "inventory_ShareChange_4panel_commonCounties.csv"))
+inventory_AbsChange <- read.csv(paste0(diff_dir, "inventory_AbsChange_4panel.csv"))
+inv_PercChangeShare <- read.csv(paste0(diff_dir, "inventory_ShareChange_4panel.csv"))
 setnames(inventory_AbsChange, old = c('county_fips'), new = c('fips'))
 setnames(inv_PercChangeShare, old = c('county_fips'), new = c('fips'))
 
@@ -395,13 +545,14 @@ inv_change_perc_cols_ <- c("inv_change1997to2017_asPerc", "inv_change1997to2012_
                            "inv_change2007to2017_asPerc", "inv_change2002to2007_asPerc",
                            "inv_change2002to2012_asPerc", "inv_change2002to2017_asPerc")
 
-inv_cols <- c("inven_2017", "inven_2012",
-              "inven_2007", "inven_2002",
-              "inven_1997")
+inv_cols <- c("cattle_cow_beef_inven_2017", "cattle_cow_beef_inven_2012",
+              "cattle_cow_beef_inven_2007",  "cattle_cow_beef_inven_2002",
+              "cattle_cow_beef_inven_1997")
 
 inv_change_cols <- c(common_col, inv_change_cols)
 inv_change_perc_cols_ <- c(common_col, inv_change_perc_cols_)
 inv_cols <- c(common_col, inv_cols)
+
 
 inv_df                   = inventory_AbsChange[inv_cols]
 inventory_Change_df      = inventory_AbsChange[inv_change_cols]
@@ -415,6 +566,7 @@ inventory_Change_perc_df_melt <- melt(data.table(inventory_Change_perc_df), id =
 inv_df_melt                   <- inv_df_melt %>% tidyr::drop_na()
 inventory_Change_df_melt      <- inventory_Change_df_melt %>% tidyr::drop_na()
 inventory_Change_perc_df_melt <- inventory_Change_perc_df_melt %>% tidyr::drop_na()
+
 
 ##### Remove a couple of outliers
 
@@ -453,10 +605,6 @@ ggsave(paste0(gsub("\ ", "_", title_), "_panel.pdf"), map,
 ###
 ###     invetory change in absolute counts
 ###
-inventory_panel_dir <- paste0(plot_dir, "inventory_panel/")
-if (dir.exists(inventory_panel_dir) == F) {dir.create(path = inventory_panel_dir, recursive = T)}
-
-
 legend_d = "inventory change (abs.)"
 title_ = "inventory change"
 map <- inventory_map_melt(data_=inventory_Change_df_melt, theme_=the_theme, 

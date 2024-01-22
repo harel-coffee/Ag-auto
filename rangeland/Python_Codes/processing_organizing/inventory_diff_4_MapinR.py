@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -332,5 +332,73 @@ out_name = data_dir_base + "data_4_plot/" + "inventory_ShareChange_4panel.csv"
 all_df_.to_csv(out_name, index=False)
 
 # %%
+
+# %%
+
+# %% [markdown]
+# # Check add-up to zero
+
+# %%
+all_df_.head(2)
+
+# %%
+need_col = ["county_fips", "change_1997_2017_asPercShare", 
+            "inv_1997_asPercShare", "inv_2017_asPercShare"]
+all_df_1997_2017 = all_df_[need_col].copy()
+all_df_1997_2017.head(2)
+
+# %%
+all_df_1997_2017["change_1997_2017_asPercShare"].sum()
+
+# %%
+
+# %%
+
+# %%
+cattle_inventory.head(2)
+
+# %%
+cattle_inventory_2017 = cattle_inventory[cattle_inventory.year == 2017].copy()
+cattle_inventory_1997 = cattle_inventory[cattle_inventory.year == 1997].copy()
+
+cattle_inventory_1997.reset_index(drop=True, inplace=True)
+cattle_inventory_2017.reset_index(drop=True, inplace=True)
+
+cattle_inventory_2017.head(2)
+
+# %%
+inv_col = "cattle_cow_beef_inventory"
+cattle_inventory_1997.rename(columns={inv_col: "cattle_cow_beef_inven_1997"}, inplace=True)
+cattle_inventory_2017.rename(columns={inv_col: "cattle_cow_beef_inven_2017"}, inplace=True)
+cattle_inventory_2017.head(2)
+
+# %%
+inventory_1997_2017 = pd.merge(cattle_inventory_1997[["county_fips", "cattle_cow_beef_inven_1997"]], 
+                               cattle_inventory_2017[["county_fips", "cattle_cow_beef_inven_2017"]], 
+                               on = ["county_fips"], how = "outer")
+
+inventory_1997_2017.head(2)
+
+# %%
+print (inventory_1997_2017.shape)
+print (inventory_1997_2017.dropna(how='any', inplace=False).shape)
+
+inventory_1997_2017.dropna(how='any', inplace=True)
+
+# %%
+total_1997 = inventory_1997_2017["cattle_cow_beef_inven_1997"].sum()
+total_2017 = inventory_1997_2017["cattle_cow_beef_inven_2017"].sum()
+
+# %%
+total_1997
+
+# %%
+cattle_inventory_1997["cattle_cow_beef_inven_1997"].sum()
+
+# %%
+cattle_inventory_2017["cattle_cow_beef_inven_2017"].sum()
+
+# %%
+total_2017
 
 # %%

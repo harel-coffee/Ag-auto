@@ -218,7 +218,7 @@ print ("There are {} incomlete counties out of {} for census years!!!".format(li
 # And then add heat stress and see what happens. 
 #
 # Then we can add 
-#  - rangeland acre, 
+#  - rangeland acre
 #  - herb ratio
 #  - irrigated hay %
 #  - feed expense
@@ -618,6 +618,8 @@ inv_2017_NPP_SW_heat_avg_normal[nonControlvars] = inv_2017_NPP_SW_heat_avg[nonCo
 inv_2017_NPP_SW_heat_avg_normal.head(2)
 
 # %% [markdown]
+# # Model
+#
 # ### Inventory vs normal ```NPP``` averaged over 2001-2017
 
 # %%
@@ -627,7 +629,19 @@ y_var = "inventory"
 #################################################################
 X_npp = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
 X_npp = sm.add_constant(X_npp)
-Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+Y = np.log(np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)))
+npp_inv_model = sm.OLS(Y, X_npp)
+npp_inv_model_result = npp_inv_model.fit()
+npp_inv_model_result.summary()
+
+# %%
+indp_vars = ["county_total_npp"]
+y_var = "inventory"
+
+#################################################################
+X_npp = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_npp = sm.add_constant(X_npp)
+Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
 npp_inv_model = sm.OLS(Y, X_npp)
 npp_inv_model_result = npp_inv_model.fit()
 npp_inv_model_result.summary()
@@ -637,6 +651,21 @@ npp_inv_model_result.summary()
 
 # %%
 del(X_npp, npp_inv_model, npp_inv_model_result)
+
+# %%
+indp_vars = AW_vars
+y_var = "inventory"
+
+#################################################################
+X_AW = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_AW = sm.add_constant(X_AW)
+Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
+AW_inv_model = sm.OLS(Y, X_AW)
+AW_inv_model_result = AW_inv_model.fit()
+AW_inv_model_result.summary()
+
+# %%
+del(X_AW, AW_inv_model, AW_inv_model_result)
 
 # %%
 indp_vars = AW_vars
@@ -663,7 +692,7 @@ y_var = "inventory"
 #################################################################
 X_SW = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
 X_SW = sm.add_constant(X_SW)
-Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
 SW_inv_model = sm.OLS(Y, X_SW)
 SW_inv_model_result = SW_inv_model.fit()
 SW_inv_model_result.summary()
@@ -671,8 +700,32 @@ SW_inv_model_result.summary()
 # %%
 del(X_SW, SW_inv_model, SW_inv_model_result)
 
+# %%
+indp_vars = SW_vars
+y_var = "inventory"
+
+#################################################################
+X_SW = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_SW = sm.add_constant(X_SW)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+SW_inv_model = sm.OLS(Y, X_SW)
+SW_inv_model_result = SW_inv_model.fit()
+SW_inv_model_result.summary()
+
 # %% [markdown]
 # ### Inventory vs normal ```NPP``` AND ```dangerEncy``` averaged over 2001-2017
+
+# %%
+indp_vars = npp_var + HS_var
+y_var = "inventory"
+
+#################################################################
+X_npp_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_npp_dangerEncy = sm.add_constant(X_npp_dangerEncy)
+Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
+npp_dangerEncy_inv_model = sm.OLS(Y, X_npp_dangerEncy)
+npp_dangerEncy_inv_model_result = npp_dangerEncy_inv_model.fit()
+npp_dangerEncy_inv_model_result.summary()
 
 # %%
 indp_vars = npp_var + HS_var
@@ -699,6 +752,18 @@ y_var = "inventory"
 #################################################################
 X_AW_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
 X_AW_dangerEncy = sm.add_constant(X_AW_dangerEncy)
+Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
+AW_dangerEncy_inv_model = sm.OLS(Y, X_AW_dangerEncy)
+AW_dangerEncy_inv_model_result = AW_dangerEncy_inv_model.fit()
+AW_dangerEncy_inv_model_result.summary()
+
+# %%
+indp_vars = AW_vars + HS_var
+y_var = "inventory"
+
+#################################################################
+X_AW_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_AW_dangerEncy = sm.add_constant(X_AW_dangerEncy)
 Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
 AW_dangerEncy_inv_model = sm.OLS(Y, X_AW_dangerEncy)
 AW_dangerEncy_inv_model_result = AW_dangerEncy_inv_model.fit()
@@ -717,7 +782,7 @@ y_var = "inventory"
 #################################################################
 X_SW_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
 X_SW_dangerEncy = sm.add_constant(X_SW_dangerEncy)
-Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
 SW_dangerEncy_inv_model = sm.OLS(Y, X_SW_dangerEncy)
 SW_dangerEncy_inv_model_result = SW_dangerEncy_inv_model.fit()
 SW_dangerEncy_inv_model_result.summary()
@@ -726,6 +791,16 @@ SW_dangerEncy_inv_model_result.summary()
 del(X_SW_dangerEncy, SW_dangerEncy_inv_model, SW_dangerEncy_inv_model_result)
 
 # %%
+indp_vars = SW_vars + HS_var
+y_var = "inventory"
+
+#################################################################
+X_SW_dangerEncy = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_SW_dangerEncy = sm.add_constant(X_SW_dangerEncy)
+Y = inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float)
+SW_dangerEncy_inv_model = sm.OLS(Y, X_SW_dangerEncy)
+SW_dangerEncy_inv_model_result = SW_dangerEncy_inv_model.fit()
+SW_dangerEncy_inv_model_result.summary()
 
 # %%
 
