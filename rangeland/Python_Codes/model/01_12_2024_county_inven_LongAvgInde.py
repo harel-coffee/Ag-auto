@@ -579,6 +579,9 @@ print (inventory_2017.shape)
 # Merge them so that counties are in the same order. My sick mind!
 
 # %%
+inventory_2017 = inventory_2017[["county_fips", "inventory", "EW"]]
+
+# %%
 inv_2017_NPP_SW_heat_avg = pd.merge(inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left")
 inv_2017_NPP_SW_heat_avg.head(2)
 
@@ -613,7 +616,7 @@ inv_2017_NPP_SW_heat_avg_normal.head(2)
 inv_2017_NPP_SW_heat_avg.head(2)
 
 # %%
-nonControlvars = ['year', 'county_fips', 'inventory', 'county_name', 'state', 'EW']
+nonControlvars = ['county_fips', 'inventory', 'EW']
 inv_2017_NPP_SW_heat_avg_normal[nonControlvars] = inv_2017_NPP_SW_heat_avg[nonControlvars]
 inv_2017_NPP_SW_heat_avg_normal.head(2)
 
@@ -802,66 +805,194 @@ SW_dangerEncy_inv_model = sm.OLS(Y, X_SW_dangerEncy)
 SW_dangerEncy_inv_model_result = SW_dangerEncy_inv_model.fit()
 SW_dangerEncy_inv_model_result.summary()
 
-# %%
-
-# %%
-
 # %% [markdown]
-# ### Herb Ratio
+# # Others (Controls)
+#
+#  - rangeland acre
+#  - herb ratio
+#  - irrigated hay %
+#  - feed expense
+#  - population
+#  - slaughter
 
 # %%
-
-# %%
+RA = RA[["county_fips", "rangeland_fraction"]]
+RA.head(2)
 
 # %%
 herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/county_herb_ratio.sav")
 herb = herb["county_herb_ratio"]
+
+irr_hay = pd.read_pickle(reOrganized_dir + "irr_hay.sav")
+irr_hay = irr_hay["irr_hay"]
+irr_hay = irr_hay[["county_fips", "irr_hay_as_perc"]]
+
+feed_expense = USDA_data["feed_expense"]
+feed_expense = feed_expense[["year", "county_fips", "feed_expense"]]
+
+human_population = pd.read_pickle(reOrganized_dir + "human_population.sav")
+human_population = human_population["human_population"]
+
+slaughter_Q1 = pd.read_pickle(reOrganized_dir + "slaughter_Q1.sav")
+slaughter_Q1 = slaughter_Q1["slaughter_Q1"]
+slaughter_Q1.rename(columns={"cattle_on_feed_sale_4_slaughter": "slaughter"}, inplace=True)
+slaughter_Q1 = slaughter_Q1[["year", "county_fips", "slaughter"]]
+print ("max slaughter sale is [{}]".format(slaughter_Q1.slaughter.max()))
+
+herb = herb[["county_fips", "herb_avg"]]
 herb.head(2)
-print (herb.shape)
-herb = herb[herb.county_fips.isin(cnty_interest_list)]
-print (herb.shape)
-
-herb.dropna(how="any", inplace=True)
-print (herb.shape)
-
-herb.reset_index(drop=True, inplace=True)
-herb.head(3)
 
 # %%
-RA_herb = pd.merge(RA, herb, on=["county_fips"], how="left")
-# RA_herb.dropna(how="any", inplace=True)
-RA_herb.reset_index(drop=True, inplace=True)
-RA_herb.head(2)
+irr_hay.head(2)
 
 # %%
-# RA_herb_outer = pd.merge(RA, herb, on=["county_fips"], how="outer")
-# RA_herb_outer.reset_index(drop=True, inplace=True)
-# RA_herb_outer.head(5)
+controls = pd.merge(human_population, slaughter_Q1, on=["county_fips", "year"], how="outer")
+controls = pd.merge(controls, feed_expense, on=["county_fips", "year"], how="outer")
+controls = pd.merge(controls, irr_hay, on=["county_fips"], how="outer")
+controls = pd.merge(controls, herb, on=["county_fips"], how="outer")
 
-# print (RA_herb_outer.shape)
-# print (RA_herb.shape)
-
-# outer_not_in_left = RA_herb_outer[~RA_herb_outer.county_fips.isin(RA_herb.county_fips)]
-# outer_not_in_left.shape
-# outer_not_in_left
-
-# %%
-inventory_RA_herb = pd.merge(inventory, RA_herb, on=["county_fips"], how="left")
-inventory_RA_herb.head(2)
+controls.head(2)
 
 # %%
 
+# %% [markdown]
+# ## RA is already satisfies Pallavi condition
+
+# %%
+print (f"{controls.shape = }")
+print (f"{len(controls.county_fips.unique()) = }")
+print ()
+controls = controls[controls.county_fips.isin(RA.county_fips)]
+
+controls = pd.merge(controls, RA, on=["county_fips"], how="outer")
+
+###########
+########### NPP stuff are after 2001
+###########
+controls = controls[controls.year>=2001]
+controls = controls[controls.year<=2017]
+controls.reset_index(drop=True, inplace=True)
+
+print (f"{controls.shape = }")
+print (f"{len(controls.county_fips.unique()) = }")
+controls.head(2)
+
+# %%
+irr_hay.head(2)
+
+# %%
+print (controls.dropna(how="any", inplace=False).shape)
+print (len(controls.dropna(how="any", inplace=False).county_fips.unique()))
+
+# %%
+inv_2017_NPP_SW_heat_avg_normal.head(2)
+
+# %%
+inventory_2017.head(2)
+
+# %%
+NPP_SW_heat_avg.head(2)
+
+# %% [markdown]
+# ## One more layer of filter according to 2017 inventory
+
+# %%
+print (f"{controls.shape = }")
+print (f"{len(controls.county_fips.unique()) = }")
+print ()
+
+controls = controls[controls.county_fips.isin(inv_2017_NPP_SW_heat_avg_normal.county_fips.unique())]
+controls.reset_index(drop=True, inplace=True)
+
+print (f"{controls.shape = }")
+print (f"{len(controls.county_fips.unique()) = }")
+
+# %%
+control_counties_allAvailable = controls.dropna(how="any", inplace=False).county_fips.unique()
+counties_wNoControl = [x for x in NPP_SW_heat_avg.county_fips.unique() if not (x in control_counties_allAvailable)]
+len(counties_wNoControl)
+
+# %%
+controls.head(2)
+
+# %% [markdown]
+# # Take Averages then Normalize
+
+# %%
+variable_controls = ["population", "slaughter", "feed_expense"]
+constant_controls = ["herb_avg", "rangeland_fraction", "irr_hay_as_perc"]
+constant_control_df = controls[["county_fips"]  + constant_controls].drop_duplicates()
+
+# %%
+controls_avg = controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
+controls_avg.reset_index(drop=False, inplace=True)
+controls_avg = controls_avg.round(3)
+controls_avg.head(2)
+
+# %%
+controls_avg = pd.merge(controls_avg, constant_control_df, on=["county_fips"], how="left")
+print (controls_avg.shape)
+controls_avg.head(2)
+
+# %%
+controls_avg["irr_hay_as_perc_categ"] = controls_avg["irr_hay_as_perc"]
+
+controls_avg.loc[(controls_avg.irr_hay_as_perc <= 6), "irr_hay_as_perc_categ"] = 0
+
+controls_avg.loc[(controls_avg.irr_hay_as_perc > 6) & \
+                (controls_avg.irr_hay_as_perc <= 96), "irr_hay_as_perc_categ"] = 1
+
+controls_avg.loc[(controls_avg.irr_hay_as_perc > 96), "irr_hay_as_perc_categ"] = 2
+
+controls_avg.head(2)
+
+# %%
+normalize_cols = ["population", "slaughter", "feed_expense", "herb_avg"]
+
+controls_normal = (controls_avg[normalize_cols] - controls_avg[normalize_cols].mean()) / \
+                             controls_avg[normalize_cols].std(ddof=1)
+
+non_controlVars = ["county_fips", "year", "irr_hay_as_perc"]
+controls_normal.head(3)
+
+# %%
+print (controls_normal.shape)
+print (controls_avg.shape)
+
+# %%
+####
+#### form a dataframe that is averaged and then normalized.
+####
+controls_avg_normal = controls_avg.copy()
+controls_avg_normal[normalize_cols] = controls_normal[normalize_cols]
+controls_avg_normal.head(2)
+
+# %%
+inv_2017_NPP_SW_heat_avg_normal.head(2)
+
+# %%
+controls_avg_normal_NATossed = controls_avg_normal.dropna(how="any", inplace=False)
+control_counties = sorted(list(controls_avg_normal_NATossed.county_fips.unique()))
+main_counties = sorted(list(controls_avg_normal.county_fips.unique()))
+control_counties == main_counties
+
+A = [x for x in main_counties if not (x in control_counties)]
+B = [x for x in control_counties if not (x in main_counties)]
+print (f"{len(A)=}, {len(B)=}")
+
+# %%
+
 # %%
 
 # %%
 
 # %%
-inventory_RA_herb.head(2)
 
 # %%
-inventory_RA_herb_NPP = pd.merge(inventory_RA_herb, cty_yr_npp, 
-                                 on=["county_fips", "year"], how="left")
-
-inventory_RA_herb_NPP.head(2)
+print (controls_normal.shape)
+print (controls_normal.dropna(how="any", inplace=False).shape)
+print ()
+print (len(controls_normal.county_fips.unique()))
+print (len(controls_normal.dropna(how="any", inplace=False).county_fips.unique()))
 
 # %%
