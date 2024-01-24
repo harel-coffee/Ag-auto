@@ -6,6 +6,21 @@ from pprint import pprint
 import os, os.path, sys
 
 
+def compute_herbRatio_totalArea(hr):
+    """
+    We want to use average herb ratio and pixel count
+    to compute total herb space.
+    """
+    pixel_length = 250
+    pixel_area = pixel_length**2
+    hr["herb_area_m2"] = pixel_area * hr["pixel_count"] * (hr["herb_avg"] / 100)
+
+    # convert to acres for sake of consistency
+    hr["herb_area_acr"] = hr["herb_area_m2"] / 4047
+    hr.drop(labels=["herb_area_m2"], axis=1, inplace=True)
+    return hr
+
+
 def covert_unitNPP_2_total(NPP_df, npp_unit_col_, acr_area_col_, npp_area_col_):
     """
     Convert the unit NPP to total area.
