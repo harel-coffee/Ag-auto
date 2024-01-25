@@ -12,8 +12,6 @@
 #     name: python3
 # ---
 
-# %%
-
 # %% [markdown]
 # This is based on ```Census_TonsorHerath_Dec20_2023.ipynb```.
 #
@@ -408,7 +406,7 @@ all_df.head(2)
 
 # %%
 irr_hay = pd.read_pickle(reOrganized_dir + "irr_hay.sav")
-irr_hay = irr_hay["irr_hay"]
+irr_hay = irr_hay["irr_hay_perc"]
 irr_hay.head(2)
 
 # %%

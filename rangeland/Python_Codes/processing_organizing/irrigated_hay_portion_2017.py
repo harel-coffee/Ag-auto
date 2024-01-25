@@ -206,6 +206,10 @@ hay_total = census_26[census_26.SHORT_DESC.isin(["HAY & HAYLAGE - ACRES HARVESTE
 hay_irr.head(2)
 
 # %%
+print (len(hay_irr.county_fips))
+print (len(hay_irr.county_fips.unique()))
+
+# %%
 hay_irr.rename(columns={"VALUE" : "VALUE_irr",
                         "SHORT_DESC": "SHORT_DESC_irr"}, inplace=True)
 
@@ -314,25 +318,35 @@ hay_merge = hay_merge[~(hay_merge["value_total"].str.contains(pat="(Z)", case=Fa
 print (hay_merge.shape)
 
 # %%
-hay_merge.reset_index(drop=True, inplace=True)
+print (len(hay_merge.county_fips))
+print (len(hay_merge.county_fips.unique()))
 
 # %%
-hay_merge.head(5)
+hay_merge.reset_index(drop=True, inplace=True)
+hay_merge.head(2)
 
 # %%
 hay_merge["value_total"]     = hay_merge["value_total"].str.replace(",", "")
-hay_merge["value_irr"] = hay_merge["value_irr"].str.replace(",", "")
+hay_merge["value_irr"]       = hay_merge["value_irr"].str.replace(",", "")
 
 hay_merge["value_total"]     = hay_merge["value_total"].astype(float)
-hay_merge["value_irr"] = hay_merge["value_irr"].astype(float)
+hay_merge["value_irr"]       = hay_merge["value_irr"].astype(float)
 
 hay_merge.head(5)
 
 # %%
-hay_merge["irr_hay_as_perc"] = ((hay_merge["value_irr"] / hay_merge["value_total"]) * 100).round(2)
-hay_merge.head(5)
+hay_merge_s = hay_merge[["county_fips", "value_total", "value_irr"]].copy()
+hay_merge_s = hay_merge_s.groupby(["county_fips"]).sum()
+hay_merge_s.reset_index(drop=False, inplace=True)
+hay_merge_s.head(2)
 
 # %%
+print (len(hay_merge_s.county_fips))
+print (len(hay_merge_s.county_fips.unique()))
+
+# %%
+hay_merge_s["irr_hay_as_perc"] = ((hay_merge_s["value_irr"] / hay_merge_s["value_total"]) * 100).round(2)
+hay_merge_s.head(5)
 
 # %%
 import pickle
@@ -343,7 +357,8 @@ filename = reOrganized_dir + "irr_hay.sav"
 desc_ = "after merging irrigated and total, the value_irr is " + \
         "the only one with NA in it; 3318. And 1299 have 'D' in them"
 
-export_ = {"irr_hay": hay_merge, 
+export_ = {"irr_hay_allKinds": hay_merge, 
+           "irr_hay_perc": hay_merge_s, 
            "source_code" : "irrigated_hay_portion_2017",
            "Author": "HN",
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -353,19 +368,19 @@ pickle.dump(export_, open(filename, 'wb'))
 
 # %%
 # sorted(hay_merge.irr_hay_as_perc.unique())
-sum(hay_merge.irr_hay_as_perc.isna())
+sum(hay_merge_s.irr_hay_as_perc.isna())
 
 # %%
-hay_merge.dropna(how="any").shape
+hay_merge_s.dropna(how="any").shape
 
 # %%
-hay_merge.shape
+hay_merge_s.shape
 
 # %%
-census_df[(census_df.county_fips == "20115") & (census_df.CENSUS_TABLE == 26)].shape
+hay_merge_s[(hay_merge_s.county_fips == "20115") & (census_df.CENSUS_TABLE == 26)].shape
 
 # %%
-hay_merge[(hay_merge.county_fips == "20115")].shape
+hay_merge_s[(hay_merge_s.county_fips == "20115")].shape
 
 # %%
 hay_irr[(hay_irr.county_fips == "20115") & (hay_irr.CENSUS_TABLE == 26)]
