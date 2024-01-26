@@ -1285,32 +1285,3 @@ all_df.head(2)
 # %%
 
 # %%
-
-# %%
-
-# %%
-
-# %%
-import scipy
-
-# %%
-x = np.array([0, 0, 100, 0, 0]) / 100
-y = np.array([0, 30, 40, 30, 0]) / 100
-z = np.array([30, 0, 40, 0, 30]) / 100
-
-# %%
-scipy.special.kl_div(x, y)
-
-# %%
-import sklearn
-from sklearn import metrics
-print (sklearn.metrics.mutual_info_score(x, y))
-print (sklearn.metrics.mutual_info_score(x, z))
-
-# %%
-print (scipy.stats.entropy(x, y))
-print (scipy.stats.entropy(x, z))
-
-# %%
-
-# %%
