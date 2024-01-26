@@ -56,7 +56,6 @@ shutup.please()
 
 import pandas as pd
 import numpy as np
-from datetime import datetime
 import os, os.path, pickle, sys
 import seaborn as sns
 
@@ -69,6 +68,11 @@ import statsmodels.api as sm
 
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
+
+from datetime import datetime, date
+current_time = datetime.now().strftime("%H:%M:%S")
+print("Today's date:", date.today())
+print("Current Time =", current_time)
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
