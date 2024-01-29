@@ -1220,6 +1220,27 @@ model_result.summary()
 del(indp_vars, X, Y, model_, model_result, curr_all)
 
 # %%
+
+# %%
+indp_vars = ["county_total_npp"] + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
+y_var = "inventory"
+
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
 indp_vars = SW_vars + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
 y_var = "inventory"
 
@@ -1287,5 +1308,194 @@ del(indp_vars, X, Y, model_, model_result, curr_all)
 all_df.head(2)
 
 # %%
+
+# %%
+indp_vars = ["rangeland_acre"]
+y_var = "inventory"
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+all_df.columns
+
+# %%
+NPP_SW.head(2)
+
+# %%
+npp_unit = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
+
+npp_unit.rename(columns={"county" : "county_fips",
+                           "MODIS_NPP" : "unit_npp"}, inplace=True)
+
+npp_unit = rc.correct_Mins_county_6digitFIPS(df=npp_unit, col_ = "county_fips")
+
+npp_unit = npp_unit.groupby(["county_fips"])["unit_npp"].mean()
+npp_unit = npp_unit.to_frame()
+npp_unit.reset_index(drop=False, inplace=True)
+
+# normalize 
+
+npp_unit["unit_npp"] = (npp_unit["unit_npp"] - npp_unit["unit_npp"].mean()) / \
+                                    npp_unit["unit_npp"].std(ddof=1)
+npp_unit.head(2)
+
+# %%
+all_df = pd.merge(all_df, npp_unit,on=["county_fips"], how="left")
+all_df.head(2)
+
+# %%
+indp_vars = ["unit_npp", "rangeland_acre", "herb_avg", "irr_hay_area", "population"]
+y_var = "inventory"
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+indp_vars = ["unit_npp", "rangeland_acre", "herb_avg", "irr_hay_area", "population", "dangerEncy"]
+y_var = "inventory"
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+# %who
+
+# %%
+
+# %%
+indp_vars = SW_vars + ["rangeland_acre", "herb_avg", "irr_hay_area", "population"]
+y_var = "inventory"
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+indp_vars = ["unit_npp"] + ["rangeland_acre", "irr_hay_area", "herb_area_acr", "population"]
+y_var = "inventory"
+
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+indp_vars = ["unit_npp", "rangeland_acre", "herb_avg", "irr_hay_area", "population"]
+# indp_vars = ["unit_npp"] + ["rangeland_acre", "irr_hay_area", "herb_area_acr", "population"]
+y_var = "inventory"
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+all_df.head(2)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+indp_vars = SW_vars + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
+y_var = "inventory"
+
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+indp_vars = ['unit_npp'] + SW_vars + [ "rangeland_acre"]
+y_var = "inventory"
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+print (len(curr_all.county_fips.unique()))
+curr_all.dropna(how="any", inplace=True)
+print (len(curr_all.county_fips.unique()))
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
 
 # %%
