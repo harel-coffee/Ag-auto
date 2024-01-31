@@ -178,6 +178,8 @@ SW["yr_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
 SW = pd.merge(SW, cnty_yr_avg_Tavg, on=["county_fips", "year"], how="outer")
 del(cnty_yr_avg_Tavg)
 SW = SW.round(3)
+
+SW.drop(labels=['county_name', 'state'], axis=1)
 SW.head(2)
 
 # %%
@@ -193,6 +195,59 @@ for a_col in ["normal", "alert", "danger", "emergency"]:
     cnty_grid_mean_idx[a_col] = cnty_grid_mean_idx[a_col].astype(int)
 cnty_grid_mean_idx.reset_index(drop=True, inplace=True)
 cnty_grid_mean_idx.head(2)
+
+# %%
+S1_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([1, 2, 3])]
+S2_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([4, 5, 6, 7])]
+S3_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([8, 9])]
+S4_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([10, 11, 12])]
+
+S1_heat = S1_heat[['year', 'county_fips', 'normal', 'alert', 'danger', 'emergency']]
+S2_heat = S2_heat[['year', 'county_fips', 'normal', 'alert', 'danger', 'emergency']]
+S3_heat = S3_heat[['year', 'county_fips', 'normal', 'alert', 'danger', 'emergency']]
+S4_heat = S4_heat[['year', 'county_fips', 'normal', 'alert', 'danger', 'emergency']]
+
+S1_heat = S1_heat.groupby(["year", "county_fips"]).sum().reset_index()
+S2_heat = S2_heat.groupby(["year", "county_fips"]).sum().reset_index()
+S3_heat = S3_heat.groupby(["year", "county_fips"]).sum().reset_index()
+S4_heat = S4_heat.groupby(["year", "county_fips"]).sum().reset_index()
+
+S4_heat.head(2)
+
+# %%
+S1_heat.rename(columns={"normal" : "s1_normal",
+                        'alert' : 's1_alert',
+                        'danger' : 's1_danger',
+                        'emergency' : 's1_emergency',}, inplace=True)
+
+S2_heat.rename(columns={"normal" : "s2_normal", 
+                        'alert' : 's2_alert',
+                        'danger' : 's2_danger', 
+                        'emergency' : 's2_emergency',}, inplace=True)
+
+S3_heat.rename(columns={"normal" : "s3_normal", 
+                        'alert' : 's3_alert',
+                        'danger' : 's3_danger', 
+                        'emergency' : 's3_emergency',}, inplace=True)
+
+S4_heat.rename(columns={"normal" : "s4_normal", 
+                        'alert' : 's4_alert',
+                        'danger' : 's4_danger',
+                        'emergency' : 's4_emergency',}, inplace=True)
+
+seasonal_heat = pd.merge(S1_heat, S2_heat, on=["county_fips", "year"], how="outer")
+seasonal_heat = pd.merge(seasonal_heat, S3_heat, on=["county_fips", "year"], how="outer")
+seasonal_heat = pd.merge(seasonal_heat, S4_heat, on=["county_fips", "year"], how="outer")
+
+seasonal_heat.reset_index(drop=True, inplace=True)
+seasonal_heat.head(2)
+
+
+# %%
+annual_heat = cnty_grid_mean_idx.groupby(["year", "county_fips"]).sum().reset_index()
+annual_heat = annual_heat[["year", "county_fips", 'normal', 'alert', 'danger', 'emergency']]
+annual_heat.reset_index(drop=True, inplace=True)
+annual_heat.head(2)
 
 # %% [markdown]
 # # Others (Controls)
@@ -235,6 +290,12 @@ irr_hay.head(2)
 # irr_hay = irr_hay[["county_fips", "irr_hay_as_perc"]]
 
 # %%
+irr_hay[irr_hay.county_fips == "04005"]
+
+# %%
+irr_hay[irr_hay.county_fips == "01001"]
+
+# %%
 feed_expense = USDA_data["feed_expense"]
 feed_expense = feed_expense[["year", "county_fips", "feed_expense"]]
 
@@ -253,9 +314,9 @@ wetLand_area = USDA_data["wetLand_area"]
 FarmOperation = USDA_data["FarmOperation"]
 
 # %%
-# %who
-
-# %%
+RA["Pallavi"] = "N"
+RA.loc[RA.county_fips.isin(RA_Pallavi.county_fips), "Pallavi"] = "Y"
+RA.head(2)
 
 # %%
 import pickle
@@ -273,6 +334,8 @@ export_ = {"AgLand": AgLand,
            "SoI_abb" : SoI_abb,
            "abb_dict" : abb_dict,
            "heat" : cnty_grid_mean_idx,
+           'annual_heat': annual_heat,
+           "seasonal_heat" : seasonal_heat,
            "county_fips" : county_fips,
            "npp" : cty_yr_npp,
            "feed_expense": feed_expense,
@@ -287,6 +350,160 @@ export_ = {"AgLand": AgLand,
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 pickle.dump(export_, open(filename, 'wb'))
+
+# %% [markdown]
+# ## Do the outer join and normalize and save in another file
+#
+# #### First do variables that change over time then constant variables such as rangeland area.
+
+# %%
+AgLand.head(2)
+
+# %%
+print (AgLand.commodity.unique())
+print (AgLand.data_item.unique())
+
+# %%
+AgLand.rename(columns={"value": "AgLand"}, inplace=True)
+AgLand = AgLand[["county_fips", "year", "data_item", "AgLand"]]
+AgLand.head(2)
+
+# %% [markdown]
+# ### Constant Variables
+
+# %%
+RA.head(2)
+
+# %%
+herb.head(2)
+
+# %%
+irr_hay.head(2)
+
+# %%
+constants = pd.merge(RA, herb, on=["county_fips"], how="outer")
+constants = pd.merge(constants, irr_hay, on=["county_fips"], how="outer")
+constants.head(2)
+
+# %% [markdown]
+# ### Annual variables
+
+# %%
+AgLand.head(2)
+
+# %%
+## Leavre Agland out for now. Since we do not know how we want to use it.
+print (len(AgLand.data_item.unique()))
+
+# %%
+FarmOperation.head(2)
+
+# %%
+print (len(FarmOperation.data_item.unique()))
+print (len(FarmOperation.commodity.unique()))
+
+# %%
+FarmOperation.rename(columns={"value": "number_of_FarmOperation"}, inplace=True)
+FarmOperation = FarmOperation[["county_fips", "year", "number_of_FarmOperation"]]
+FarmOperation.head(2)
+
+# %%
+annual_heat.head(2)
+
+# %%
+cty_yr_npp.head(2)
+
+# %%
+cty_yr_npp = cty_yr_npp[["county_fips", 'year', 'unit_npp', 'county_total_npp']]
+cty_yr_npp.head(2)
+
+# %%
+feed_expense.head(2)
+
+# %%
+human_population.head(2)
+
+# %%
+slaughter_Q1.head(2)
+
+# %%
+inventory.head(2)
+
+# %%
+wetLand_area.head(2)
+
+# %%
+print (len(wetLand_area.data_item.unique()))
+print (len(wetLand_area.commodity.unique()))
+
+# %%
+wetLand_area = wetLand_area[["county_fips", "year", "crp_wetland_acr"]]
+wetLand_area.head(2)
+
+# %%
+annual_outer = pd.merge(inventory, cty_yr_npp, on=["county_fips", 'year'], how="outer")
+annual_outer = pd.merge(annual_outer, slaughter_Q1, on=["county_fips", 'year'], how="outer")
+annual_outer = pd.merge(annual_outer, human_population, on=["county_fips", 'year'], how="outer")
+annual_outer = pd.merge(annual_outer, feed_expense, on=["county_fips", 'year'], how="outer")
+annual_outer = pd.merge(annual_outer, annual_heat, on=["county_fips", 'year'], how="outer")
+annual_outer = pd.merge(annual_outer, FarmOperation, on=["county_fips", 'year'], how="outer")
+annual_outer = pd.merge(annual_outer, wetLand_area, on=["county_fips", 'year'], how="outer")
+annual_outer.head(2)
+
+# %% [markdown]
+# ### Seasonal variables
+# #### Seasonal ```NDVI``` to be added.
+
+# %%
+SW.head(2)
+
+# %%
+seasonal_heat.head(2)
+
+# %%
+seasonal_outer = pd.merge(SW, seasonal_heat, on=["county_fips", 'year'], how="outer")
+seasonal_outer.head(2)
+
+# %%
+all_df = pd.merge(annual_outer, seasonal_outer, on=["county_fips", 'year'], how="outer")
+all_df.head(2)
+
+# %%
+all_df = pd.merge(all_df, constants, on=["county_fips"], how="outer")
+all_df.head(2)
+
+# %%
+all_df[all_df.county_fips == "01001"]
+
+# %%
+
+# %%
+import pickle
+from datetime import datetime
+
+filename = reOrganized_dir + "all_data_OuterJoined.sav"
+
+export_ = {"all_df": all_df,
+           "source_code" : "all_vars_oneFile_outerjoin",
+           "Author": "HN",
+           "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+pickle.dump(export_, open(filename, 'wb'))
+
+# %% [markdown]
+# # Maybe we need to think about normalization
+# in case of test and train.
+
+# %%
+all_df_normalized = all_df.copy()
+all_df_normalized.head(2)
+
+non_number_cols = ["EW", "Pallavi", "county_fips", "county_name", "state"]
+numeric_cols = [x for x in sorted(all_df_normalized.columns) if not (x in non_number_cols)]
+
+# %%
+
+# %%
 
 # %%
 
