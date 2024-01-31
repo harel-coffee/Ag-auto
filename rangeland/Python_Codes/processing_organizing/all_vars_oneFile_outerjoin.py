@@ -319,6 +319,14 @@ RA.loc[RA.county_fips.isin(RA_Pallavi.county_fips), "Pallavi"] = "Y"
 RA.head(2)
 
 # %%
+filename = reOrganized_dir + "seasonal_ndvi.sav"
+seasonal_ndvi = pd.read_pickle(filename)
+seasonal_ndvi = seasonal_ndvi["seasonal_ndvi"]
+seasonal_ndvi.head(2)
+
+# %%
+
+# %%
 import pickle
 from datetime import datetime
 
@@ -328,7 +336,7 @@ export_ = {"AgLand": AgLand,
            "FarmOperation": FarmOperation,
            "Pallavi_counties" : Pallavi_counties,
            "RA" : RA,
-           "RA_Pallavi" :RA_Pallavi,
+           "RA_Pallavi" : RA_Pallavi,
            "SW" : SW,
            "SoI" : SoI,
            "SoI_abb" : SoI_abb,
@@ -345,6 +353,7 @@ export_ = {"AgLand": AgLand,
            "slaughter_Q1" : slaughter_Q1,
            "wetLand_area": wetLand_area,
            "cattle_inventory" : inventory,
+           "seasonal_ndvi" : seasonal_ndvi,
            "source_code" : "all_vars_oneFile_outerjoin",
            "Author": "HN",
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -476,6 +485,7 @@ all_df.head(2)
 all_df[all_df.county_fips == "01001"]
 
 # %%
+seasonal_ndvi.he
 
 # %%
 import pickle
