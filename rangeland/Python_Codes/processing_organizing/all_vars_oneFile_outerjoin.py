@@ -485,7 +485,11 @@ all_df.head(2)
 all_df[all_df.county_fips == "01001"]
 
 # %%
-seasonal_ndvi.he
+all_df = pd.merge(all_df, seasonal_ndvi, on=["county_fips", "year"], how="outer")
+print (all_df.shape)
+all_df.head(2)
+
+# %%
 
 # %%
 import pickle

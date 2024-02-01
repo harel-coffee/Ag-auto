@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.dates import MonthLocator, DateFormatter
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -74,7 +74,7 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplac
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
-county_id_name_fips = rc.correct_Mins_FIPS(df=county_id_name_fips, col_="county_fips")
+county_id_name_fips = rc.correct_Mins_county_6digitFIPS(df=county_id_name_fips, col_="county_fips")
 county_id_name_fips.reset_index(drop=True, inplace=True)
 county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
 county_id_name_fips.head(2)
@@ -125,8 +125,8 @@ state_NPP.head(2)
 # %%
 a = ["state_fip", "rangeland_acre", "state_area_acre"]
 state_NPP = pd.merge(state_NPP, state_RA[a], on=["state_fip"], how="left")
-state_NPP = rc.covert_unitNPP_2_total(NPP_df=state_NPP, npp_col_="modis_npp",
-                                      area_col_="rangeland_acre", new_col_="state_rangeland_npp")
+state_NPP = rc.covert_unitNPP_2_total(NPP_df=state_NPP, npp_unit_col_="modis_npp",
+                                      acr_area_col_="rangeland_acre", npp_area_col_="state_rangeland_npp")
 
 ### Security check to not make mistake later:
 state_NPP.drop(columns=["modis_npp"], inplace=True)

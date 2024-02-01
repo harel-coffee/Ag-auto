@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -28,7 +28,7 @@ import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %% [markdown]
@@ -105,10 +105,12 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplac
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
-county_id_name_fips = rc.correct_Mins_FIPS(df=county_id_name_fips, col_="county_fips")
+county_id_name_fips = rc.correct_Mins_county_6digitFIPS(df=county_id_name_fips, col_="county_fips")
 county_id_name_fips.reset_index(drop=True, inplace=True)
-county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
 county_id_name_fips.head(2)
+
+
+# %%
 
 # %%
 USDA_data = pd.read_pickle(reOrganized_dir + "USDA_data.sav")
@@ -146,7 +148,7 @@ cattle_inventory.head(2)
 NPP = pd.read_csv(Min_data_base + "county_annual_MODIS_NPP.csv")
 NPP.rename(columns={"NPP": "modis_npp"}, inplace=True)
 
-NPP = rc.correct_Mins_FIPS(df=NPP, col_="county")
+NPP = rc.correct_Mins_county_6digitFIPS(df=NPP, col_="county")
 NPP.rename(columns={"county": "county_fips"}, inplace=True)
 
 print(f"{NPP.year.min() = }")
@@ -219,27 +221,21 @@ county_RA_and_TA_fraction = pd.read_csv(
 )
 county_RA_and_TA_fraction.rename(columns={"fips_id": "county_fips"}, inplace=True)
 
-county_RA_and_TA_fraction = rc.correct_Mins_FIPS(
-    df=county_RA_and_TA_fraction, col_="county_fips"
-)
+county_RA_and_TA_fraction = rc.correct_Mins_county_6digitFIPS(df=county_RA_and_TA_fraction, col_="county_fips")
 L = len(county_RA_and_TA_fraction.county_fips.unique())
 print("number of counties in county_RA_and_TA_fraction are {}.".format(L))
 print(county_RA_and_TA_fraction.shape)
 county_RA_and_TA_fraction.head(2)
 
 # %%
-county_annual_NPP_Ra = pd.merge(
-    NPP, county_RA_and_TA_fraction, on=["county_fips"], how="left"
-)
+county_annual_NPP_Ra = pd.merge(NPP, county_RA_and_TA_fraction, on=["county_fips"], how="left")
 county_annual_NPP_Ra.head(2)
 
 # %%
-county_annual_NPP_Ra = rc.covert_unitNPP_2_total(
-    NPP_df=county_annual_NPP_Ra,
-    npp_col_="modis_npp",
-    area_col_="rangeland_acre",
-    new_col_="county_rangeland_npp",
-)
+county_annual_NPP_Ra = rc.covert_unitNPP_2_total(NPP_df=county_annual_NPP_Ra,
+                                                 npp_unit_col_="modis_npp",
+                                                 acr_area_col_="rangeland_acre",
+                                                 npp_area_col_="county_rangeland_npp")
 ### Security check to not make mistake later:
 county_annual_NPP_Ra.drop(columns=["modis_npp"], inplace=True)
 county_annual_NPP_Ra.head(2)
