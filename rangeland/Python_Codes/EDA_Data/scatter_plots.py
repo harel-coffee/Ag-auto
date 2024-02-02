@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -105,7 +105,8 @@ sorted(df_OuterJoined.columns)
 # mpl.rcParams.update(mpl.rcParamsDefault)
 
 # %%
-X = df_OuterJoined[['inventory', 'rangeland_acre', 'herb_avg', 'county_total_npp', 'irr_hay_area']]
+X = df_OuterJoined[['inventory', 'rangeland_acre', 'herb_avg', 'herb_area_acr',
+                    'county_total_npp', 'irr_hay_area']]
 
 # %%
 tick_legend_FontSize = 10
@@ -252,5 +253,15 @@ my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4});
 
 fig_name = plots_dir + "snsScatter_SWNPP.png"
 plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%

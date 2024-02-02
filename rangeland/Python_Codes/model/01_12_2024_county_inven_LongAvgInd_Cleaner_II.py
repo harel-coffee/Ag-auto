@@ -360,13 +360,16 @@ SW_inv_model_result = SW_inv_model.fit()
 SW_inv_model_result.summary()
 
 # %%
+SW_inv_model_result.params
+
+# %%
 del(X_SW, SW_inv_model, SW_inv_model_result)
 
 # %% [markdown]
 # ### Inventory vs normal ```NPP``` AND ```dangerEncy``` averaged over 2001-2017
 
 # %%
-indp_vars = npp_cols + HS_var
+indp_vars = ["county_total_npp"] + HS_var
 y_var = "inventory"
 
 #################################################################
@@ -394,6 +397,9 @@ Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
 SW_dangerEncy_inv_model = sm.OLS(Y, X_SW_dangerEncy)
 SW_dangerEncy_inv_model_result = SW_dangerEncy_inv_model.fit()
 SW_dangerEncy_inv_model_result.summary()
+
+# %%
+SW_dangerEncy_inv_model_result.params
 
 # %%
 del(X_SW_dangerEncy, SW_dangerEncy_inv_model, SW_dangerEncy_inv_model_result)
@@ -459,23 +465,12 @@ control_cols = ["county_fips"] + ["year"] + \
 # controls.head(2)
 
 # %%
-
-# %%
-
-# %%
 controls = df_OuterJoined[control_cols].copy()
 controls.head(2)
 
-# %%
-
-# %%
-
 # %% [markdown]
 # ## RA is already satisfies Pallavi condition
-
-# %%
-
-# %% [markdown]
+#
 # ## One more layer of filter according to 2017 inventory
 
 # %%
@@ -668,10 +663,32 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
+model_result.params
+
+# %%
 del(indp_vars, X, Y, model_, model_result, curr_all)
 
 # %%
-indp_vars = ["county_total_npp", "rangeland_acre", "irr_hay_area"]
+indp_vars = ["county_total_npp"] + ["rangeland_acre", "irr_hay_area"]
+y_var = "inventory"
+
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+
+# %%
+indp_vars = ["unit_npp"] + ["rangeland_acre", "herb_area_acr"]
 y_var = "inventory"
 
 #################################################################
@@ -751,6 +768,9 @@ model_ = sm.OLS(Y, X)
 model_result = model_.fit()
 model_result.summary()
 
+
+# %%
+model_result.params
 
 # %%
 del(indp_vars, X, Y, model_, model_result, curr_all)
@@ -872,6 +892,12 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
+model_result.params.round(2)
+
+# %%
+del(indp_vars, X, Y, model_, model_result, curr_all)
+
+# %%
 indp_vars = sw_cols + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
 y_var = "inventory"
 
@@ -957,7 +983,7 @@ model_result.summary()
 all_df.columns
 
 # %%
-indp_vars = ["unit_npp", "rangeland_acre", "herb_avg", "irr_hay_area", "population"]
+indp_vars = ["unit_npp"] + ["rangeland_acre", "herb_avg", "irr_hay_area", "population"]
 y_var = "inventory"
 #################################################################
 curr_all = all_df.copy()
@@ -1011,7 +1037,7 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["unit_npp"] + ["rangeland_acre", "irr_hay_area", "herb_area_acr", "population"]
+indp_vars = ["unit_npp"] + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
 y_var = "inventory"
 
 #################################################################
@@ -1030,23 +1056,6 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["unit_npp", "rangeland_acre", "herb_avg", "irr_hay_area", "population"]
-# indp_vars = ["unit_npp"] + ["rangeland_acre", "irr_hay_area", "herb_area_acr", "population"]
-y_var = "inventory"
-#################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
-print (len(curr_all.county_fips.unique()))
-curr_all.dropna(how="any", inplace=True)
-print (len(curr_all.county_fips.unique()))
-
-X = curr_all[indp_vars]
-X = sm.add_constant(X)
-Y = np.log(curr_all[y_var].astype(float))
-
-model_ = sm.OLS(Y, X)
-model_result = model_.fit()
-model_result.summary()
 
 # %% [markdown]
 # # Export the dataframe above and in the other notebook and see the diff.
@@ -1068,3 +1077,5 @@ Y = np.log(curr_all[y_var].astype(float))
 model_ = sm.OLS(Y, X)
 model_result = model_.fit()
 model_result.summary()
+
+# %%
