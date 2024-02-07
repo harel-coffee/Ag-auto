@@ -263,5 +263,16 @@ plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 # %%
 
 # %%
+from scipy.stats import wasserstein_distance
+import numpy as np
+
+# %%
+wasserstein_distance(np.arange(5), np.arange(5))
+
+# %%
+
+# %%
+
+# %%
 
 # %%
