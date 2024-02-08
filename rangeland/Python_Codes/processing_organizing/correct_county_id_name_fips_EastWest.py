@@ -26,7 +26,7 @@ import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/Rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -56,6 +56,12 @@ print(len(county_id_name_fips.state.unique()))
 county_id_name_fips.head(2)
 
 # %%
+county_id_name_fips[county_id_name_fips.state=="SD"].state_fip.unique()
+
+# %%
+county_id_name_fips[county_id_name_fips.state_fip=="34"].state.unique()
+
+# %%
 # Shannon county changed to Oglala Lakota county in 2014
 # and is missing from Min's data!
 county_id_name_fips[county_id_name_fips.county_fips == "46102"]
@@ -65,14 +71,18 @@ county_id_name_fips.tail(3)
 
 # %%
 # county_id_name_fips = county_id_name_fips.append(df2, ignore_index = True)
-county_id_name_fips.loc[len(county_id_name_fips.index)] = [
-    "46102",
-    "Oglala Lakota County",
-    "46102",
-    "SD",
-    "34",
-]
+county_id_name_fips.loc[len(county_id_name_fips.index)] = ["46102",
+                                                           "Oglala Lakota County",
+                                                           "46102",
+                                                           "SD",
+                                                           "46"]
 county_id_name_fips.tail(3)
+
+# %%
+county_id_name_fips[county_id_name_fips.state=="SD"].state_fip.unique()
+
+# %%
+county_id_name_fips[county_id_name_fips.state_fip=="34"].state.unique()
 
 # %%
 county_id_name_fips["EW"] = "E"
@@ -142,6 +152,22 @@ county_id_name_fips[county_id_name_fips.state.isin(West_of_Mississippi_abb)].EW.
 county_id_name_fips.loc[
     ~(county_id_name_fips.state.isin(West_of_Mississippi_abb)), "EW"
 ].unique()
+
+# %%
+county_id_name_fips[county_id_name_fips.state=="SD"].state_fip.unique()
+
+# %%
+county_id_name_fips[county_id_name_fips.state=="NJ"].state_fip.unique()
+
+# %%
+county_id_name_fips[county_id_name_fips.state_fip=="34"].state.unique()
+
+# %%
+county_id_name_fips[county_id_name_fips.state_fip=="46"].state.unique()
+
+# %%
+
+# %%
 
 # %%
 import pickle

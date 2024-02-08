@@ -134,6 +134,21 @@ def correct_Mins_county_6digitFIPS(df, col_):
     return df
 
 
+def correct_2digit_countyStandAloneFips(df, col_):
+    """
+    If the leading digit is zero, it will be gone.
+    So, stand alone county FIPS can end up being 2 digit.
+    We add zero back and FIPS will be string.
+    """
+    df[col_] = df[col_].astype("str")
+    for idx in df.index:
+        if len(df.loc[idx, col_]) == 2:
+            df.loc[idx, col_] = "0" + df.loc[idx, col_]
+        if len(df.loc[idx, col_]) == 1:
+            df.loc[idx, col_] = "00" + df.loc[idx, col_]
+    return df
+
+
 def correct_4digitFips(df, col_):
     """
     If the leading digit is zero, it will be gone.

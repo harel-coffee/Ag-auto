@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -15,7 +15,13 @@
 # %%
 import pandas as pd
 import numpy as np
-import os
+from datetime import datetime
+import os, os.path, pickle, sys
+
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
+import rangeland_core as rc
+
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -34,8 +40,6 @@ xl = pd.ExcelFile(Shannon_data_dir + "CATINV.xls")
 EX_sheet_names = xl.sheet_names  # see all sheet names
 EX_sheet_names = EX_sheet_names[1:]
 EX_sheet_names
-
-# %%
 
 # %%
 ii = 0
@@ -85,13 +89,10 @@ Beef_Cows_CATINV.to_csv(out_name, index=False)
 years = list(Beef_Cows_CATINV.columns[1:])
 num_years = len(years)
 
-CATINV_df_tall = pd.DataFrame(
-    data=None,
-    index=range(num_years * len(Beef_Cows_CATINV.state.unique())),
-    columns=["state", "year", "inventory"],
-    dtype=None,
-    copy=False,
-)
+CATINV_df_tall = pd.DataFrame(data=None,
+                              index=range(num_years * len(Beef_Cows_CATINV.state.unique())),
+                              columns=["state", "year", "inventory"],
+                              dtype=None, copy=False)
 
 idx_ = 0
 for a_state in Beef_Cows_CATINV.state.unique():

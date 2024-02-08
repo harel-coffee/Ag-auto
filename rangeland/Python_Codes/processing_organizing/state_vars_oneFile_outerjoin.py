@@ -62,7 +62,11 @@ county_fips.reset_index(drop=True, inplace=True)
 county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
 print(f"{len(county_fips.state.unique()) = }")
 
+
+county_fips["state_fips"] = county_fips.county_fips.str.slice(3)
 county_fips.head(2)
+
+# %%
 
 # %% [markdown]
 # ## Inventory
@@ -82,10 +86,13 @@ Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall["CATINV_an
 Shannon_Beef_Cows_fromCATINV_tall.head(2)
 
 # %%
-Shannon_beef_fromCATINV_deltas = Shannon_beef_fromCATINV_deltas["shannon_annual_inventory_deltas"]
-Shannon_beef_fromCATINV_deltas.head(2)
+beef_fromCATINV_csv.head(2)
 
 # %%
+
+# %%
+Shannon_beef_fromCATINV_deltas = Shannon_beef_fromCATINV_deltas["shannon_annual_inventory_deltas"]
+Shannon_beef_fromCATINV_deltas.head(2)
 
 # %%
 # read USDA data
@@ -99,6 +106,33 @@ feed_expense = USDA_data['feed_expense']
 FarmOperation = USDA_data['FarmOperation']
 
 # %% [markdown]
+# ### Herb
+
+# %%
+#####
+##### The following 2 lines are old. Supriya, on Feb 8, created a new
+##### file in which we have both herb and max NDVI DoY.
+#####
+# herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/county_herb_ratio.sav")
+# herb = herb["county_herb_ratio"]
+
+herb = pd.read_pickle(reOrganized_dir + "county_state_NDVIDOY_Herb.sav")
+herb = herb['State_NDVIDOY_Herb']
+
+herb.dropna(how="any", inplace=True)
+herb.head(2)
+
+
+## Compute total herb area.
+herb = rc.compute_herbRatio_totalArea(herb)
+herb.reset_index(drop=True, inplace=True)
+herb = herb.round(3)
+
+# herb = herb[["county_fips", "herb_avg", "herb_area_acr"]]
+herb.drop(columns=["pixel_count"], inplace=True)
+herb.head(2)
+
+# %% [markdown]
 # ### RA
 #
 # We need RA to convert unit NPP to total NPP.
@@ -109,27 +143,16 @@ RA.rename(columns={"fips_id": "county_fips"}, inplace=True)
 RA = rc.correct_Mins_county_6digitFIPS(df=RA, col_="county_fips")
 print(f"{len(RA.county_fips.unique()) = }")
 RA.reset_index(drop=True, inplace=True)
+
+RA["state_fips"] = RA.county_fips.str.slice(start=0, stop=2)
 RA.head(2)
-
-# %%
-#
-# Some data are on state level. So, we cannot distinguish counties.
-#
-# RA_Pallavi = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
-# RA_Pallavi = RA_Pallavi["filtered_counties_29States"]
-# print(f"{len(RA_Pallavi.county_fips.unique()) = }")
-# print(f"{len(RA_Pallavi.state.unique()) = }")
-
-
-# Pallavi_counties = list(RA_Pallavi.county_fips.unique())
-# RA_Pallavi.head(2)
 
 # %%
 cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
 
-cty_yr_npp.rename(
-    columns={"county": "county_fips", "MODIS_NPP": "unit_npp"}, inplace=True
-)
+cty_yr_npp.rename(columns={"county": "county_fips", 
+                           "MODIS_NPP": "unit_npp"}, 
+                  inplace=True)
 
 cty_yr_npp = rc.correct_Mins_county_6digitFIPS(df=cty_yr_npp, col_="county_fips")
 
@@ -142,18 +165,55 @@ cty_yr_npp.reset_index(drop=True, inplace=True)
 cty_yr_npp.head(2)
 
 # %%
-cty_yr_npp = pd.merge(
-    cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left"
-)
+cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre"]], 
+                      on=["county_fips"], how="left")
 
-cty_yr_npp = rc.covert_unitNPP_2_total(
-    NPP_df=cty_yr_npp,
-    npp_unit_col_="unit_npp",
-    acr_area_col_="rangeland_acre",
-    npp_area_col_="county_total_npp",
-)
+cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp,
+                                       npp_unit_col_="unit_npp",
+                                       acr_area_col_="rangeland_acre",
+                                       npp_area_col_="county_total_npp")
 
 cty_yr_npp.head(2)
+
+# %%
+state_yr_npp = cty_yr_npp.copy()
+
+state_yr_npp["state_fips"] = state_yr_npp.county_fips.str.slice(start=0, stop=2)
+state_yr_npp.head(2)
+
+state_yr_npp.drop(labels=["county_fips", "unit_npp"], axis=1, inplace=True)
+state_yr_npp = state_yr_npp.groupby(["state_fips", "year"]).sum().reset_index()
+
+state_yr_npp.rename(columns={"county_total_npp": "state_total_npp"}, 
+                inplace=True)
+state_yr_npp.head(2)
+# del(cty_yr_npp)
+
+# %% [markdown]
+# # WARNING: 
+#
+# Min's RA file (county_rangeland_and_totalarea_fraction.csv) includes some counties that 
+# are not present in NPP file. Thus, if you want total rangeland acre, filter based on NPP!!!
+#
+# Do NOT run the following cell... 
+#  - inconsistency
+#  - Already it is computed above
+
+# %%
+## Convert RA to state level
+# RA_state = RA.copy()
+# RA_state.drop(labels=["county_fips", "rangeland_fraction"], axis=1, inplace=True)
+# RA_state = RA_state.groupby(["state_fips"]).sum().reset_index()
+
+# RA_state.rename(columns={"county_area_acre": "state_area_acre"}, 
+#                 inplace=True)
+# RA_state.head(2)
+
+# %%
+a = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
+
+# %%
+a.keys()
 
 # %% [markdown]
 # ### Weather
@@ -202,7 +262,7 @@ SW = pd.merge(SW, cnty_yr_avg_Tavg, on=["county_fips", "year"], how="outer")
 del cnty_yr_avg_Tavg
 SW = SW.round(3)
 
-SW.drop(labels=["county_name", "state"], axis=1)
+SW.drop(labels=["county_name", "state"], axis=1, inplace=True)
 SW.head(2)
 
 # %%
@@ -281,21 +341,6 @@ annual_heat.head(2)
 #  - feed expense
 #  - population
 #  - slaughter
-#
-#  ### Herb
-
-# %%
-herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/county_herb_ratio.sav")
-herb = herb["county_herb_ratio"]
-herb.dropna(how="any", inplace=True)
-
-## Compute total herb area.
-herb = rc.compute_herbRatio_totalArea(herb)
-herb.reset_index(drop=True, inplace=True)
-herb = herb.round(3)
-
-herb = herb[["county_fips", "herb_avg", "herb_area_acr"]]
-herb.head(2)
 
 # %% [markdown]
 # ### irrigated hay
@@ -350,12 +395,10 @@ seasonal_ndvi = pd.read_pickle(filename)
 seasonal_ndvi = seasonal_ndvi["seasonal_ndvi"]
 seasonal_ndvi.head(2)
 
-# %%
+# %% [markdown]
+# ### Subset to states of interest at the end!
 
 # %%
-import pickle
-from datetime import datetime
-
 filename = reOrganized_dir + "state_data_forOuterJoin.sav"
 
 export_ = {
@@ -532,9 +575,6 @@ all_df.head(2)
 # %%
 
 # %%
-import pickle
-from datetime import datetime
-
 filename = reOrganized_dir + "state_data_OuterJoined.sav"
 
 export_ = {

@@ -264,8 +264,16 @@ annual_heat.head(2)
 #  ### Herb
 
 # %%
-herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/county_herb_ratio.sav")
-herb = herb["county_herb_ratio"]
+#####
+##### The following 2 lines are old. Supriya, on Feb 8, created a new
+##### file in which we have both herb and max NDVI DoY.
+#####
+# herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/county_herb_ratio.sav")
+# herb = herb["county_herb_ratio"]
+
+herb = pd.read_pickle(reOrganized_dir + "county_state_NDVIDOY_Herb.sav")
+herb = herb['County_NDVIDOY_Herb']
+
 herb.dropna(how="any", inplace=True)
 
 ## Compute total herb area.
@@ -273,8 +281,11 @@ herb = rc.compute_herbRatio_totalArea(herb)
 herb.reset_index(drop=True, inplace=True)
 herb = herb.round(3)
 
-herb = herb[["county_fips", "herb_avg", "herb_area_acr"]]
+# herb = herb[["county_fips", "herb_avg", "herb_area_acr"]]
+herb.drop(columns=["pixel_count"],inplace=True)
 herb.head(2)
+
+# %%
 
 # %% [markdown]
 # ### irrigated hay

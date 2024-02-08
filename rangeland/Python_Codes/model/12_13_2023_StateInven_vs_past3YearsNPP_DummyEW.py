@@ -39,7 +39,7 @@ import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/Rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -96,6 +96,12 @@ herb.head(3)
 herb.dropna(how="any", inplace=True)
 herb.reset_index(drop=True, inplace=True)
 herb.head(3)
+
+# %%
+herb[herb.state_fip=="34"]
+
+# %%
+herb[herb.state_fip=="46"]
 
 # %% [markdown]
 # ### Read Rangeland area and Total area:

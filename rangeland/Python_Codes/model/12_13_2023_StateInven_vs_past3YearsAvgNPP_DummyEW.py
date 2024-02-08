@@ -39,7 +39,7 @@ from sklearn import preprocessing
 import statistics
 import statsmodels.api as sm
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/Rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -91,6 +91,12 @@ herb = herb["state_herb_ratio"]
 herb = herb[herb.state_fip.isin(state_SoI_fip)]
 # herb.dropna(how="any", inplace=True)
 herb.head(3)
+
+# %%
+herb[herb.state_fip=="34"]
+
+# %%
+herb[herb.state_fip=="46"]
 
 # %%
 herb.dropna(how="any", inplace=True)

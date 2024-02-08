@@ -19,6 +19,8 @@ import pickle
 from datetime import datetime
 import os, os.path, pickle, sys
 
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 
 # %%
 state_to_abbrev = {"Alabama": "AL", 
@@ -176,6 +178,48 @@ SoI = [
 ]
 
 # %%
+data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
+reOrganized_dir = data_dir_base + "reOrganized/"
+
+county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+county_fips = county_fips["county_fips"]
+
+county_fips = county_fips[['county_fips', 'county_name', 'state', 'state_fip', 'EW']]
+county_fips.head(2)
+
+
+# %%
+county_fips[county_fips.state=="NJ"]
+
+# %%
+county_fips[county_fips.state=="SD"].state_fip.unique()
+
+# %%
+county_id_name_fips = pd.read_csv(data_dir_base + "Min_Data/" + "county_id_name_fips.csv")
+county_id_name_fips.head(2)
+
+# %%
+SD = county_id_name_fips[county_id_name_fips.STATE=="SD"].copy()
+SD.FIPS = SD.FIPS.astype(str)
+SD["state_fip"] = SD.FIPS.str.slice(start=0, stop=2)
+SD.head(2)
+
+# %%
+SD.state_fip.unique()
+
+# %%
+
+# %%
+state_fips = county_fips.copy()
+state_fips = state_fips[["state", "state_fip", 'EW']]
+print (state_fips.shape)
+state_fips.drop_duplicates(inplace=True)
+state_fips.reset_index(drop=True, inplace=True)
+print (state_fips.shape)
+
+state_fips.head(2)
+
+# %%
 import pickle
 from datetime import datetime
 
@@ -188,6 +232,8 @@ export_ = {"full_2_abb" : state_to_abbrev,
            "states_abb_list" : states_abb_list,
            "abb_2_full" : abb_2_full_dict,
            "SoI" : SoI,
+           "county_fips" : county_fips, 
+           "state_fips" : state_fips,
            "source_code": "state_abbreviations",
            "Author": "HN",
            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")

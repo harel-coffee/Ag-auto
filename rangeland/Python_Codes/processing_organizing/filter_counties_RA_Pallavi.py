@@ -103,6 +103,14 @@ print(f"{len(county_fips.state.unique()) = }")
 county_fips.head(2)
 
 # %%
+print (county_fips[county_fips.state=="SD"].state_fip.unique())
+print (county_fips[county_fips.state=="NJ"].state_fip.unique())
+
+# %%
+print (county_fips[county_fips.state_fip=="46"].state.unique())
+print (county_fips[county_fips.state_fip=="34"].state.unique())
+
+# %%
 RA = pd.merge(RA, county_fips[["county_fips", "state"]], on=["county_fips"], how="left")
 
 # %%
@@ -191,5 +199,3 @@ filtered_counties_29States.head(2)
 # %%
 A = filtered_counties_29States.groupby("state")["county_fips"].count()
 A
-
-# %%
