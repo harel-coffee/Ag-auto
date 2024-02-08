@@ -79,42 +79,9 @@ county_id_name_fips["EW"] = "E"
 county_id_name_fips.head(2)
 
 # %%
-SoI = [
-    "Alabama",
-    "Arizona",
-    "Arkansas",
-    "California",
-    "Colorado",
-    "Florida",
-    "Georgia",
-    "Idaho",
-    "Illinois",
-    "Iowa",
-    "Kansas",
-    "Kentucky",
-    "Louisiana",
-    "Mississippi",
-    "Missouri",
-    "Montana",
-    "Nebraska",
-    "Nevada",
-    "New Mexico",
-    "North Dakota",
-    "Oklahoma",
-    "Oregon",
-    "South Dakota",
-    "Tennessee",
-    "Texas",
-    "Utah",
-    "Virginia",
-    "Washington",
-    "Wyoming",
-]
-
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-# SoI_abb = []
-# for x in SoI:
-#     SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
 abb_dict.keys()

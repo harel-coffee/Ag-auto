@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -56,7 +56,7 @@ import os, os.path, pickle, sys
 import matplotlib
 import matplotlib.pyplot as plt
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/Rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -107,6 +107,8 @@ curr_sheet.dropna(axis=0, how = 'all', inplace = True)
 curr_sheet.dropna(subset=['state'], inplace = True)
 shannon_All_Cattle_Calves_CATINV = curr_sheet.copy()
 shannon_All_Cattle_Calves_CATINV.tail(4)
+
+# %%
 
 # %%
 # Q1_P1 = pd.read_csv(dir_ + "Q1_P1.csv", low_memory=False)
@@ -179,17 +181,13 @@ Q5_calves.rename(columns={"value": "cattle_inc_calves_invt"}, inplace=True)
 Q5_calves.head(2)
 
 # %%
-SoI = ["Alabama", "Arkansas", "California", 
-       "Colorado", "Florida", "Georgia", "Idaho",
-       "Illinois", "Iowa", "Kansas", "Kentucky",
-       "Louisiana", "Mississippi", "Missouri", "Montana", 
-       "Nebraska", "New Mexico", "North Dakota", 
-       "Oklahoma", "Oregon", "South Dakota", "Tennessee",
-       "Texas", "Virginia", "Wyoming"]
+abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+SoI = abb_dict['SoI']
+SoI_abb = []
+state_25_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-state_25_abb = [abb_dict["full_2_abb"][x] for x in SoI]
+state_25_abb == 
 
 # %%
 Shannon_Beef_Cows_fromCATINV = pd.read_csv(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV.csv")

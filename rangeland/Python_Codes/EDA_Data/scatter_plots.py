@@ -50,19 +50,9 @@ plots_dir = data_dir_base + "plots/scatterPlots/"
 os.makedirs(plots_dir, exist_ok=True)
 
 # %%
-SoI = ["Alabama", "Arizona", "Arkansas", "California", "Colorado",
-       "Florida", "Georgia", "Idaho", "Illinois", "Iowa", "Kansas",
-       "Kentucky", "Louisiana", "Mississippi",
-       "Missouri", "Montana", "Nebraska",
-       "Nevada", "New Mexico", "North Dakota",
-       "Oklahoma", "Oregon", "South Dakota",
-       "Tennessee", "Texas", "Utah",
-       "Virginia", "Washington", "Wyoming"]
-
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI_abb = []
-for x in SoI:
-    SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
 df_OuterJoined = pd.read_pickle(reOrganized_dir + "all_data_OuterJoined.sav")

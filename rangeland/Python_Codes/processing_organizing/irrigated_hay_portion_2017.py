@@ -56,7 +56,7 @@ file_full = NASS_dir + "2017_cdqt_data.txt.gz"
 
 
 # %%
-census_df      = pd.read_csv(file_full, compression='gzip', header=0, sep='\t', quotechar='"', low_memory=False)
+census_df = pd.read_csv(file_full, compression='gzip', header=0, sep='\t', quotechar='"', low_memory=False)
 
 # %%
 # # %%time

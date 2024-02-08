@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown]
-# # This is copy of Census_TonsorHerath_Dec20_2023 Except we use the counties present in Census_TH_irrHay_Jan_4_2024 which is less than the counties here because some of the irr_har_perc were NAN.
+# ## This is copy of Census_TonsorHerath_Dec20_2023 Except we use the counties present in Census_TH_irrHay_Jan_4_2024 which is less than the counties here because some of the irr_har_perc were NAN.
 #
 #
 # This is based on ```Census_TonsorHerath_Dec20_2023.ipynb```.
@@ -83,42 +83,9 @@ print("This is " + start_b + "a_bold_text" + end_b + "!")
 # # Read the data
 
 # %%
-SoI = [
-    "Alabama",
-    "Arizona",
-    "Arkansas",
-    "California",
-    "Colorado",
-    "Florida",
-    "Georgia",
-    "Idaho",
-    "Illinois",
-    "Iowa",
-    "Kansas",
-    "Kentucky",
-    "Louisiana",
-    "Mississippi",
-    "Missouri",
-    "Montana",
-    "Nebraska",
-    "Nevada",
-    "New Mexico",
-    "North Dakota",
-    "Oklahoma",
-    "Oregon",
-    "South Dakota",
-    "Tennessee",
-    "Texas",
-    "Utah",
-    "Virginia",
-    "Washington",
-    "Wyoming",
-]
-
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI_abb = []
-for x in SoI:
-    SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %% [markdown]
 # #### County FIPS

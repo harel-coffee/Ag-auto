@@ -13,9 +13,7 @@
 # ---
 
 # %% [markdown]
-# **Jan 26, 2024**
-#
-# The Jan 24, 2024 models (long run avg of NPP for 2017 inventory modeling) was a lesson to put all variables in one file and just take outer join of everything.
+# **Feb 8, 2024**
 #
 # **Forgotten lesson** Keep everything: ***all states, not just 25***
 
@@ -27,6 +25,8 @@ import os, os.path, pickle, sys
 
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
+
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -68,17 +68,35 @@ county_fips.head(2)
 # ## Inventory
 
 # %%
+# "Beef_Cows_fromAnnualCattleInventorybyState.csv" and Beef_Cows_fromCATINV.csv are identical
+beef_fromCATINV_csv = pd.read_csv(reOrganized_dir + "Beef_Cows_fromCATINV.csv")
+
+Shannon_Beef_Cows_fromCATINV_tall = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav")
+
+
+f_ = "Shannon_Beef_Cows_fromCATINV_deltas.sav"
+Shannon_beef_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + f_)
+del(f_)
+
+Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall["CATINV_annual_tall"]
+Shannon_Beef_Cows_fromCATINV_tall.head(2)
+
+# %%
+Shannon_beef_fromCATINV_deltas = Shannon_beef_fromCATINV_deltas["shannon_annual_inventory_deltas"]
+Shannon_beef_fromCATINV_deltas.head(2)
+
+# %%
+
+# %%
+# read USDA data
 USDA_data = pd.read_pickle(reOrganized_dir + "USDA_data.sav")
-inventory = USDA_data["cattle_inventory"]
-inventory.rename(columns={"cattle_cow_beef_inventory": "inventory"}, inplace=True)
+USDA_data.keys()
 
-print(f"{inventory.data_item.unique() = }")
-print(f"{inventory.commodity.unique() = }")
-print()
-print(f"{len(inventory.state.unique())= }")
-
-inventory = inventory[["year", "county_fips", "inventory"]]
-inventory.head(2)
+# %%
+AgLand = USDA_data['AgLand']
+wetLand_area = USDA_data['wetLand_area']
+feed_expense = USDA_data['feed_expense']
+FarmOperation = USDA_data['FarmOperation']
 
 # %% [markdown]
 # ### RA
@@ -94,14 +112,17 @@ RA.reset_index(drop=True, inplace=True)
 RA.head(2)
 
 # %%
-RA_Pallavi = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
-RA_Pallavi = RA_Pallavi["filtered_counties_29States"]
-print(f"{len(RA_Pallavi.county_fips.unique()) = }")
-print(f"{len(RA_Pallavi.state.unique()) = }")
+#
+# Some data are on state level. So, we cannot distinguish counties.
+#
+# RA_Pallavi = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
+# RA_Pallavi = RA_Pallavi["filtered_counties_29States"]
+# print(f"{len(RA_Pallavi.county_fips.unique()) = }")
+# print(f"{len(RA_Pallavi.state.unique()) = }")
 
 
-Pallavi_counties = list(RA_Pallavi.county_fips.unique())
-RA_Pallavi.head(2)
+# Pallavi_counties = list(RA_Pallavi.county_fips.unique())
+# RA_Pallavi.head(2)
 
 # %%
 cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
@@ -335,7 +356,7 @@ seasonal_ndvi.head(2)
 import pickle
 from datetime import datetime
 
-filename = reOrganized_dir + "county_data_forOuterJoin.sav"
+filename = reOrganized_dir + "state_data_forOuterJoin.sav"
 
 export_ = {
     "AgLand": AgLand,
@@ -360,12 +381,12 @@ export_ = {
     "wetLand_area": wetLand_area,
     "cattle_inventory": inventory,
     "seasonal_ndvi": seasonal_ndvi,
-    "source_code": "county_vars_oneFile_outerjoin",
+    "source_code": "state_vars_oneFile_outerjoin",
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
 
-pickle.dump(export_, open(filename, "wb"))
+# pickle.dump(export_, open(filename, "wb"))
 
 # %% [markdown]
 # ## Do the outer join and normalize and save in another file
@@ -514,26 +535,13 @@ all_df.head(2)
 import pickle
 from datetime import datetime
 
-filename = reOrganized_dir + "county_data_OuterJoined.sav"
+filename = reOrganized_dir + "state_data_OuterJoined.sav"
 
 export_ = {
     "all_df": all_df,
-    "source_code": "county_vars_oneFile_outerjoin",
+    "source_code": "state_vars_oneFile_outerjoin",
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
 
-pickle.dump(export_, open(filename, "wb"))
-
-# %% [markdown]
-# # Maybe we need to think about normalization
-# in case of test and train.
-
-# %%
-all_df_normalized = all_df.copy()
-all_df_normalized.head(2)
-
-non_number_cols = ["EW", "Pallavi", "county_fips", "county_name", "state"]
-numeric_cols = [
-    x for x in sorted(all_df_normalized.columns) if not (x in non_number_cols)
-]
+# pickle.dump(export_, open(filename, "wb"))

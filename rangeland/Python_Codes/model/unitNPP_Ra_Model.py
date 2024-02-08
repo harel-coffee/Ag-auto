@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -62,19 +62,9 @@ Bhupi.head(2)
 # %%
 
 # %%
-SoI = ["Alabama", "Arkansas", "California", 
-       "Colorado", "Florida", "Georgia", "Idaho",
-       "Illinois", "Iowa", "Kansas", "Kentucky",
-       "Louisiana", "Mississippi", "Missouri", "Montana", 
-       "Nebraska", "New Mexico", "North Dakota", 
-       "Oklahoma", "Oregon", "South Dakota", "Tennessee",
-       "Texas", "Virginia", "Wyoming"]
-
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-
-SoI_abb = []
-for x in SoI:
-    SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
 USDA_data = pd.read_pickle(reOrganized_dir + "USDA_data.sav")
@@ -103,7 +93,7 @@ cattle_inventory = rc.clean_census(df=cattle_inventory, col_="cattle_cow_beef_in
 print (cattle_inventory.shape)
 
 # %% [markdown]
-# ### Min has an extra "1" as leading digit in FIPS!!
+# ### Min has an extra "1" as leading digit in FIPS
 
 # %%
 # county_annual_GPP_NPP_prod = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -68,38 +68,9 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 # Bhupi.head(2)
 
 # %%
-SoI = [
-    "Alabama",
-    "Arkansas",
-    "California",
-    "Colorado",
-    "Florida",
-    "Georgia",
-    "Idaho",
-    "Illinois",
-    "Iowa",
-    "Kansas",
-    "Kentucky",
-    "Louisiana",
-    "Mississippi",
-    "Missouri",
-    "Montana",
-    "Nebraska",
-    "New Mexico",
-    "North Dakota",
-    "Oklahoma",
-    "Oregon",
-    "South Dakota",
-    "Tennessee",
-    "Texas",
-    "Virginia",
-    "Wyoming",
-]
-
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI_abb = []
-for x in SoI:
-    SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %% [markdown]
 # #### List of county names and FIPs

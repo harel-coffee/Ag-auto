@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -128,33 +128,9 @@ pop_2010_2020.drop(["state_fip", "cnty_fip"], axis=1, inplace=True)
 pop_2000_2010.head(2)
 
 # %%
-SoI = [
-    "Alabama",
-    "Arkansas",
-    "California",
-    "Colorado",
-    "Florida",
-    "Georgia",
-    "Idaho",
-    "Illinois",
-    "Iowa",
-    "Kansas",
-    "Kentucky",
-    "Louisiana",
-    "Mississippi",
-    "Missouri",
-    "Montana",
-    "Nebraska",
-    "New Mexico",
-    "North Dakota",
-    "Oklahoma",
-    "Oregon",
-    "South Dakota",
-    "Tennessee",
-    "Texas",
-    "Virginia",
-    "Wyoming",
-]
+abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
 pop_2000_2010 = pop_2000_2010[pop_2000_2010.state.isin(SoI)]

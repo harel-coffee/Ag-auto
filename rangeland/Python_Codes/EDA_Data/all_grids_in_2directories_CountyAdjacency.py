@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -124,13 +124,21 @@ all_grids_in_2directories_state_county.to_csv(f, index=False)
 # # 25 states of Rangeland
 
 # %%
-states_25 = ["Alabama", "Arkansas", "California", 
-             "Colorado", "Florida", "Georgia", "Idaho", 
-             "Illinois", "Iowa", "Kansas", "Kentucky", 
-             "Louisiana", "Missouri", "Mississippi", "Montana", 
-             "Nebraska", "New Mexico", "North Dakota", 
-             "Oklahoma", "Oregon", "South Dakota", "Tennessee", 
-             "Texas", "Virginia", "Wyoming"]
+data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
+census_population_dir = data_dir_base + "census/"
+# Shannon_data_dir = data_dir_base + "Shannon_Data/"
+# USDA_data_dir = data_dir_base + "/NASS_downloads/"
+param_dir = data_dir_base + "parameters/"
+
+abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+states_25 = abb_dict['SoI'] # it was 25 before. then we added 4 more.
+
+# %%
+len(SoI)
+
+# %%
+
+# %%
 
 # %%
 A = all_grids_in_2directories_state_county.copy()

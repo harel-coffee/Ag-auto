@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -104,13 +104,11 @@ cattle_inventory = USDA_data["cattle_inventory"]
 # FarmOperation = USDA_data["FarmOperation"] # not needed. create by NASS guy.
 
 # %%
-SoI = ["Alabama", "Arkansas", "California", 
-       "Colorado", "Florida", "Georgia", "Idaho",
-       "Illinois", "Iowa", "Kansas", "Kentucky",
-       "Louisiana", "Mississippi", "Missouri", "Montana", 
-       "Nebraska", "New Mexico", "North Dakota", 
-       "Oklahoma", "Oregon", "South Dakota", "Tennessee",
-       "Texas", "Virginia", "Wyoming"]
+abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+SoI = abb_dict['SoI']
+SoI_abb = []
+for x in SoI:
+    SoI_abb = SoI_abb + [abb_dict["full_2_abb"][x]]
 
 # %%
 AgLand = AgLand[AgLand.state.isin(SoI)].copy()

@@ -23,6 +23,8 @@ import os, os.path, pickle, sys
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
 census_population_dir = data_dir_base + "census/"
@@ -700,5 +702,7 @@ export_ = {
 }
 
 pickle.dump(export_, open(filename, "wb"))
+
+# %%
 
 # %%
