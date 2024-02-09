@@ -266,7 +266,7 @@ from datetime import datetime
 filename = reOrganized_dir + "county_seasonal_temp_ppt_weighted.sav"
 
 export_ = {"seasonal": seasonal, 
-           "source_code" : "Min_Monthly_2_seasonal",
+           "source_code" : "county_monthly_SW_2_seasonal",
            "Author": "HN",
            "Min_file_used" : "county_gridmet_mean_indices.csv",
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -337,7 +337,7 @@ annual_temp.head(5)
 filename = reOrganized_dir + "county_annual_avg_Tavg.sav"
 
 export_ = {"annual_temp": annual_temp, 
-           "source_code" : "Min_Monthly_2_seasonal",
+           "source_code" : "county_monthly_SW_2_seasonal",
            "Author": "HN",
            "Min_file_used" : "county_gridmet_mean_indices.csv",
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}

@@ -173,12 +173,8 @@ S3.rename(columns={"NDVI": "s3_mean_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_mean_" + new_name}, inplace=True)
 
 seasonal_ndvi_modis = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_modis = pd.merge(
-    seasonal_ndvi_modis, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_modis = pd.merge(
-    seasonal_ndvi_modis, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S4, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_modis.head(2)
 
 # %%
@@ -633,12 +629,8 @@ S3.rename(columns={"NDVI": "s3_sum_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_sum_" + new_name}, inplace=True)
 
 seasonal_ndvi_modis = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_modis = pd.merge(
-    seasonal_ndvi_modis, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_modis = pd.merge(
-    seasonal_ndvi_modis, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S4, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_modis.head(2)
 
 # %%
@@ -664,12 +656,8 @@ seasonal_ndvi_gimms.head(2)
 seasonal_ndvi_modis.head(2)
 
 # %%
-seasonal_ndvi_sum = pd.merge(
-    seasonal_ndvi_avhrr, seasonal_ndvi_gimms, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_sum = pd.merge(
-    seasonal_ndvi_sum, seasonal_ndvi_modis, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_sum = pd.merge(seasonal_ndvi_avhrr, seasonal_ndvi_gimms, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_sum = pd.merge(seasonal_ndvi_sum, seasonal_ndvi_modis, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_sum.head(2)
 
 # %%
@@ -691,11 +679,11 @@ seasonal_ndvi.head(2)
 import pickle
 from datetime import datetime
 
-filename = reOrganized_dir + "seasonal_ndvi.sav"
+filename = reOrganized_dir + "county_seasonal_ndvi.sav"
 
 export_ = {
     "seasonal_ndvi": seasonal_ndvi,
-    "source_code": "monthly_NDVI_to_seasonal",
+    "source_code": "county_monthly_NDVI_2_seasonal",
     "Author": "HN",
     "Note": "The county level NDVI files have missing months in them and are not consistent.",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -704,5 +692,6 @@ export_ = {
 pickle.dump(export_, open(filename, "wb"))
 
 # %%
+seasonal_ndvi.head(2)
 
 # %%

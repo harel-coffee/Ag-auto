@@ -49,17 +49,17 @@ county_id_name_fips = rc.correct_Mins_county_6digitFIPS(
 )
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
-county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
+county_id_name_fips["state_fips"] = county_id_name_fips.county_fips.str.slice(0, 2)
 
 county_id_name_fips.reset_index(drop=True, inplace=True)
 print(len(county_id_name_fips.state.unique()))
 county_id_name_fips.head(2)
 
 # %%
-county_id_name_fips[county_id_name_fips.state=="SD"].state_fip.unique()
+county_id_name_fips[county_id_name_fips.state=="SD"].state_fips.unique()
 
 # %%
-county_id_name_fips[county_id_name_fips.state_fip=="34"].state.unique()
+county_id_name_fips[county_id_name_fips.state_fips=="34"].state.unique()
 
 # %%
 # Shannon county changed to Oglala Lakota county in 2014
@@ -79,10 +79,10 @@ county_id_name_fips.loc[len(county_id_name_fips.index)] = ["46102",
 county_id_name_fips.tail(3)
 
 # %%
-county_id_name_fips[county_id_name_fips.state=="SD"].state_fip.unique()
+county_id_name_fips[county_id_name_fips.state=="SD"].state_fips.unique()
 
 # %%
-county_id_name_fips[county_id_name_fips.state_fip=="34"].state.unique()
+county_id_name_fips[county_id_name_fips.state_fips=="34"].state.unique()
 
 # %%
 county_id_name_fips["EW"] = "E"
@@ -141,33 +141,25 @@ West_of_Mississippi_abb[:3]
 county_id_name_fips.head(2)
 
 # %%
-county_id_name_fips.loc[
-    county_id_name_fips.state.isin(West_of_Mississippi_abb), "EW"
-] = "W"
+county_id_name_fips.loc[county_id_name_fips.state.isin(West_of_Mississippi_abb), "EW"] = "W"
 
 # %%
 county_id_name_fips[county_id_name_fips.state.isin(West_of_Mississippi_abb)].EW.unique()
 
 # %%
-county_id_name_fips.loc[
-    ~(county_id_name_fips.state.isin(West_of_Mississippi_abb)), "EW"
-].unique()
+county_id_name_fips.loc[~(county_id_name_fips.state.isin(West_of_Mississippi_abb)), "EW"].unique()
 
 # %%
-county_id_name_fips[county_id_name_fips.state=="SD"].state_fip.unique()
+county_id_name_fips[county_id_name_fips.state=="SD"].state_fips.unique()
 
 # %%
-county_id_name_fips[county_id_name_fips.state=="NJ"].state_fip.unique()
+county_id_name_fips[county_id_name_fips.state=="NJ"].state_fips.unique()
 
 # %%
-county_id_name_fips[county_id_name_fips.state_fip=="34"].state.unique()
+county_id_name_fips[county_id_name_fips.state_fips=="34"].state.unique()
 
 # %%
-county_id_name_fips[county_id_name_fips.state_fip=="46"].state.unique()
-
-# %%
-
-# %%
+county_id_name_fips[county_id_name_fips.state_fips=="46"].state.unique()
 
 # %%
 import pickle
@@ -183,5 +175,13 @@ export_ = {
 }
 
 pickle.dump(export_, open(filename, "wb"))
+
+# %%
+A = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+A = A['county_fips']
+# A.rename(columns={"state_fip": "state_fips"}, inplace=True)
+A
+
+# %%
 
 # %%

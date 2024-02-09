@@ -45,7 +45,7 @@ print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
 abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %% [markdown]
@@ -125,12 +125,8 @@ cty_yr_npp = pd.merge(
     cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left"
 )
 
-cty_yr_npp = rc.covert_unitNPP_2_total(
-    NPP_df=cty_yr_npp,
-    npp_unit_col_="unit_npp",
-    acr_area_col_="rangeland_acre",
-    npp_area_col_="county_total_npp",
-)
+cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp, npp_unit_col_="unit_npp",
+                                       acr_area_col_="rangeland_acre", npp_area_col_="county_total_npp")
 
 cty_yr_npp.head(2)
 
@@ -220,7 +216,7 @@ S4_heat = S4_heat.groupby(["year", "county_fips"]).sum().reset_index()
 S4_heat.head(2)
 
 # %%
-S1_heat.rename(columns={"normal": "s1_normal", "alert": "s1_alert",
+S1_heat.rename(columns={"normal": "s1_normal", "alert": "s1_alert", 
                         "danger": "s1_danger", "emergency": "s1_emergency"}, inplace=True)
 
 S2_heat.rename(columns={"normal": "s2_normal", "alert": "s2_alert",
@@ -229,16 +225,12 @@ S2_heat.rename(columns={"normal": "s2_normal", "alert": "s2_alert",
 S3_heat.rename(columns={"normal": "s3_normal", "alert": "s3_alert",
                         "danger": "s3_danger", "emergency": "s3_emergency"}, inplace=True)
 
-S4_heat.rename(columns={"normal": "s4_normal", "alert": "s4_alert",
-                        "danger": "s4_danger","emergency": "s4_emergency"}, inplace=True)
+S4_heat.rename(columns={"normal": "s4_normal", "alert": "s4_alert", 
+                        "danger": "s4_danger", "emergency": "s4_emergency"}, inplace=True)
 
 seasonal_heat = pd.merge(S1_heat, S2_heat, on=["county_fips", "year"], how="outer")
-seasonal_heat = pd.merge(
-    seasonal_heat, S3_heat, on=["county_fips", "year"], how="outer"
-)
-seasonal_heat = pd.merge(
-    seasonal_heat, S4_heat, on=["county_fips", "year"], how="outer"
-)
+seasonal_heat = pd.merge(seasonal_heat, S3_heat, on=["county_fips", "year"], how="outer")
+seasonal_heat = pd.merge(seasonal_heat, S4_heat, on=["county_fips", "year"], how="outer")
 
 seasonal_heat.reset_index(drop=True, inplace=True)
 seasonal_heat.head(2)
@@ -272,7 +264,7 @@ annual_heat.head(2)
 # herb = herb["county_herb_ratio"]
 
 herb = pd.read_pickle(reOrganized_dir + "county_state_NDVIDOY_Herb.sav")
-herb = herb['County_NDVIDOY_Herb']
+herb = herb["County_NDVIDOY_Herb"]
 
 herb.dropna(how="any", inplace=True)
 
@@ -282,7 +274,7 @@ herb.reset_index(drop=True, inplace=True)
 herb = herb.round(3)
 
 # herb = herb[["county_fips", "herb_avg", "herb_area_acr"]]
-herb.drop(columns=["pixel_count"],inplace=True)
+herb.drop(columns=["pixel_count"], inplace=True)
 herb.head(2)
 
 # %%
@@ -335,7 +327,7 @@ RA.loc[RA.county_fips.isin(RA_Pallavi.county_fips), "Pallavi"] = "Y"
 RA.head(2)
 
 # %%
-filename = reOrganized_dir + "seasonal_ndvi.sav"
+filename = reOrganized_dir + "county_seasonal_ndvi.sav"
 seasonal_ndvi = pd.read_pickle(filename)
 seasonal_ndvi = seasonal_ndvi["seasonal_ndvi"]
 seasonal_ndvi.head(2)
@@ -469,24 +461,12 @@ wetLand_area.head(2)
 
 # %%
 annual_outer = pd.merge(inventory, cty_yr_npp, on=["county_fips", "year"], how="outer")
-annual_outer = pd.merge(
-    annual_outer, slaughter_Q1, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, human_population, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, feed_expense, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, annual_heat, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, FarmOperation, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, wetLand_area, on=["county_fips", "year"], how="outer"
-)
+annual_outer = pd.merge(annual_outer, slaughter_Q1, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, human_population, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, feed_expense, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, annual_heat, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, FarmOperation, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, wetLand_area, on=["county_fips", "year"], how="outer")
 annual_outer.head(2)
 
 # %% [markdown]
