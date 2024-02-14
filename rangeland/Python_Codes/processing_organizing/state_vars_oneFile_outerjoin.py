@@ -490,7 +490,7 @@ export_ = {
     "SoI": SoI,
     "SoI_abb": SoI_abb,
     "abb_dict": abb_dict,
-2    "npp": state_yr_npp,
+    "npp": state_yr_npp,
     "Min_state_NPP" : Min_state_NPP,
     "feed_expense": feed_expense,
     "herb": herb,
@@ -620,5 +620,8 @@ export_ = {
 }
 
 pickle.dump(export_, open(filename, "wb"))
+
+# %%
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%

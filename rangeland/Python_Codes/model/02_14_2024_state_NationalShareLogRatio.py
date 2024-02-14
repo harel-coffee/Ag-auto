@@ -50,20 +50,20 @@ SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
 filename = reOrganized_dir + "state_data_OuterJoined.sav"
-state_data_OuterJoined = pd.read_pickle(filename)
-state_data_OuterJoined.keys()
+state_data = pd.read_pickle(filename)
+state_data.keys()
 
 # %%
-state_data_OuterJoined["NOTE"]
+state_data["NOTE"]
 
 # %%
-state_data_OuterJoined = state_data_OuterJoined["all_df"]
-print (f"{len(state_data_OuterJoined.columns) = }")
-state_data_OuterJoined.head(2)
+state_data = state_data["all_df"]
+print (f"{len(state_data.columns) = }")
+state_data.head(2)
 
 # %%
-print (state_data_OuterJoined.dropna(subset=['state_unit_NPP'])['year'].min())
-print (state_data_OuterJoined.dropna(subset=['state_unit_NPP'])['year'].max())
+print (state_data.dropna(subset=['state_unit_NPP'])['year'].min())
+print (state_data.dropna(subset=['state_unit_NPP'])['year'].max())
 
 # %% [markdown]
 # ### Subset: 2001 and 2020
@@ -71,11 +71,10 @@ print (state_data_OuterJoined.dropna(subset=['state_unit_NPP'])['year'].max())
 # Since ```NPP``` exist only between 2001 and 2020.
 
 # %%
-state_data_OuterJoined = state_data_OuterJoined[(state_data_OuterJoined.year >= 2001) & \
-                                                (state_data_OuterJoined.year <= 2020)].copy()
+state_data = state_data[(state_data.year >= 2001) & (state_data.year <= 2020)].copy()
 
-state_data_OuterJoined.reset_index(drop=True, inplace=True)
-state_data_OuterJoined.head(2)
+state_data.reset_index(drop=True, inplace=True)
+state_data.head(2)
 
 # %% [markdown]
 # **Subset to states of interest**
@@ -92,14 +91,65 @@ print (f"{len(state_fips_df) = }")
 state_fips_df.head(2)
 
 # %%
-state_data_OuterJoined = state_data_OuterJoined[state_data_OuterJoined.state_fips.isin(state_fips_df.state_fips)]
-state_data_OuterJoined.reset_index(drop=True, inplace=True)
+state_data = state_data[state_data.state_fips.isin(state_fips_df.state_fips)]
+state_data.reset_index(drop=True, inplace=True)
 
-print (f"{len(state_data_OuterJoined.state_fips.unique()) = }")
-state_data_OuterJoined.head(2)
+print (f"{len(state_data.state_fips.unique()) = }")
+state_data.head(2)
 
 # %% [markdown]
 # ## Compute national share of each state
+
+# %%
+total_inv = state_data[['year', 'inventory']].copy()
+total_inv = total_inv.groupby(["year"]).sum().reset_index()
+total_inv.rename(columns={"inventory": "total_inventory"}, inplace=True)
+total_inv.head(2)
+
+# %%
+state_data = pd.merge(state_data, total_inv, on=["year"], how="left")
+state_data.head(2)
+
+# %%
+state_data["inventory_share"] = (state_data["inventory"] / state_data["total_inventory"])*100
+state_data.head(2)
+
+# %%
+### Sort values so we can be sure the ratios are correct
+### we need a for-loop or sth. we cannot just do all of the df
+### since the row at which state changes will be messed up.
+state_data.sort_values(by=["state_fips", "year"], inplace=True)
+
+# %%
+cc = ["year", "state_fips", "log_ratio_of_shares_Y2PrevY"]
+log_ratios_df = pd.DataFrame(columns=cc)
+
+for a_state in state_data.state_fips.unique():
+    curr_df = state_data[state_data.state_fips == a_state].copy()
+    curr_ratios = (curr_df.inventory_share[1:].values / curr_df.inventory_share[:-1].values).astype(float)
+    curr_ratios_log = np.log(curr_ratios)
+    
+    curr_ratio_df = pd.DataFrame(columns=cc)
+    curr_ratio_df["year"] = curr_df.year[1:]
+    curr_ratio_df["log_ratio_of_shares_Y2PrevY"] = curr_ratios_log
+    curr_ratio_df["state_fips"] = a_state
+    log_ratios_df = pd.concat([log_ratios_df, curr_ratio_df])
+    del(curr_ratio_df)
+
+# %%
+log_ratios_df.head(2)
+
+# %%
+state_data = pd.merge(state_data, log_ratios_df, on=["state_fips", "year"], how="left")
+state_data.head(2)
+
+# %%
+a = pd.read_pickle("/Users/hn/Downloads/state_data_OuterJoined.sav")
+a['Date']
+
+# %%
+
+# %%
 
 # %%
 
