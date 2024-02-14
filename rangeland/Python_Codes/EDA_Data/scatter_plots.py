@@ -55,7 +55,7 @@ SoI = abb_dict['SoI']
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
-df_OuterJoined = pd.read_pickle(reOrganized_dir + "all_data_OuterJoined.sav")
+df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_OuterJoined.sav")
 df_OuterJoined = df_OuterJoined["all_df"]
 df_OuterJoined.head(2)
 

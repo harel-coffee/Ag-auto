@@ -184,7 +184,7 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 county_fips = county_fips["county_fips"]
 
-county_fips = county_fips[['county_fips', 'county_name', 'state', 'state_fip', 'EW']]
+county_fips = county_fips[['county_fips', 'county_name', 'state', 'state_fips', 'EW']]
 county_fips.head(2)
 
 
@@ -192,7 +192,16 @@ county_fips.head(2)
 county_fips[county_fips.state=="NJ"]
 
 # %%
-county_fips[county_fips.state=="SD"].state_fip.unique()
+county_fips[county_fips.state=="SD"].state_fips.unique()
+
+# %%
+county_fips[county_fips.state=="NJ"].state_fips.unique()
+
+# %%
+county_fips[county_fips.state_fips=="34"].state.unique()
+
+# %%
+county_fips[county_fips.state_fips=="46"].state.unique()
 
 # %%
 county_id_name_fips = pd.read_csv(data_dir_base + "Min_Data/" + "county_id_name_fips.csv")
@@ -211,7 +220,7 @@ SD.state_fip.unique()
 
 # %%
 state_fips = county_fips.copy()
-state_fips = state_fips[["state", "state_fip", 'EW']]
+state_fips = state_fips[["state", "state_fips", 'EW']]
 print (state_fips.shape)
 state_fips.drop_duplicates(inplace=True)
 state_fips.reset_index(drop=True, inplace=True)

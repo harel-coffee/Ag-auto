@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -15,7 +15,13 @@
 # %%
 import pandas as pd
 import numpy as np
-import os
+from datetime import datetime
+import os, os.path, pickle, sys
+
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
+import rangeland_core as rc
+
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -159,7 +165,7 @@ for a_county in NPP_inventory.county_fips.unique():
     df = NPP_inventory[NPP_inventory.county_fips == a_county]
     if len(df.year.unique()) == 4:
         full_counties = full_counties + [a_county]
-        
+
 
 # %%
 len(full_counties)

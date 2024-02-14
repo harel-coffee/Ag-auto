@@ -17,6 +17,9 @@
 #
 # **Forgotten lesson** Keep everything: ***all states, not just 25***
 
+# %% [markdown]
+# <font color='red'>red</font>, <span style='color:green'>green</span>, $\color{blue}{\text{blue}}$
+
 # %%
 import pandas as pd
 import numpy as np
@@ -62,48 +65,47 @@ county_fips.reset_index(drop=True, inplace=True)
 county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
 print(f"{len(county_fips.state.unique()) = }")
 
-
 county_fips["state_fips"] = county_fips.county_fips.str.slice(3)
 county_fips.head(2)
-
-# %%
 
 # %% [markdown]
 # ## Inventory
 
 # %%
-# "Beef_Cows_fromAnnualCattleInventorybyState.csv" and Beef_Cows_fromCATINV.csv are identical
-beef_fromCATINV_csv = pd.read_csv(reOrganized_dir + "Beef_Cows_fromCATINV.csv")
-
-Shannon_Beef_Cows_fromCATINV_tall = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav")
-
-
-f_ = "Shannon_Beef_Cows_fromCATINV_deltas.sav"
-Shannon_beef_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + f_)
-del(f_)
-
-Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall["CATINV_annual_tall"]
-Shannon_Beef_Cows_fromCATINV_tall.head(2)
-
-# %%
-beef_fromCATINV_csv.head(2)
-
-# %%
-
-# %%
-Shannon_beef_fromCATINV_deltas = Shannon_beef_fromCATINV_deltas["shannon_annual_inventory_deltas"]
-Shannon_beef_fromCATINV_deltas.head(2)
-
-# %%
 # read USDA data
-USDA_data = pd.read_pickle(reOrganized_dir + "USDA_data.sav")
-USDA_data.keys()
+USDA_data = pd.read_pickle(reOrganized_dir + "state_USDA_ShannonCattle.sav")
+sorted(USDA_data.keys())
 
 # %%
 AgLand = USDA_data['AgLand']
-wetLand_area = USDA_data['wetLand_area']
-feed_expense = USDA_data['feed_expense']
 FarmOperation = USDA_data['FarmOperation']
+
+beef_fromCATINV_csv = USDA_data["beef_fromCATINV_csv"]
+Shannon_beef_fromCATINV_deltas = USDA_data["Shannon_beef_fromCATINV_deltas"]
+Shannon_Beef_Cows_fromCATINV_tall = USDA_data["Shannon_Beef_Cows_fromCATINV_tall"]
+
+feed_expense = USDA_data['feed_expense']
+slaughter = USDA_data['slaughter']
+wetLand_area = USDA_data['wetLand_area']
+
+# %%
+AgLand.head(2)
+
+# %%
+wetLand_area.head(2)
+
+# %%
+feed_expense.head(2)
+
+# %%
+FarmOperation.head(2)
+
+# %% [markdown]
+# ### Time-invariants
+#
+# - **Herb ratio** stuff
+# - **Rangeland area** stuff
+# - **Irr Hay** stuff
 
 # %% [markdown]
 # ### Herb
@@ -115,7 +117,6 @@ FarmOperation = USDA_data['FarmOperation']
 #####
 # herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/county_herb_ratio.sav")
 # herb = herb["county_herb_ratio"]
-
 herb = pd.read_pickle(reOrganized_dir + "county_state_NDVIDOY_Herb.sav")
 herb = herb['State_NDVIDOY_Herb']
 
@@ -130,6 +131,7 @@ herb = herb.round(3)
 
 # herb = herb[["county_fips", "herb_avg", "herb_area_acr"]]
 herb.drop(columns=["pixel_count"], inplace=True)
+herb.drop(['state'], axis=1, inplace=True)
 herb.head(2)
 
 # %% [markdown]
@@ -148,6 +150,21 @@ RA["state_fips"] = RA.county_fips.str.slice(start=0, stop=2)
 RA.head(2)
 
 # %%
+Min_state_NPP = pd.read_csv(Min_data_base + "statefips_annual_MODIS_NPP.csv")
+Min_state_NPP.rename(columns={"statefips90m": "state_fips", "NPP": "unit_npp"}, inplace=True)
+Min_state_NPP["state_fips"] = Min_state_NPP["state_fips"].astype(str)
+
+Min_state_NPP["state_fips"] = Min_state_NPP.state_fips.str.slice(start=1, stop=3)
+
+Min_state_NPP.head(2)
+
+# %%
+print (f"{Min_state_NPP.year.min() = }")
+print (f"{Min_state_NPP.year.max() = }")
+
+# %%
+
+# %%
 cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
 
 cty_yr_npp.rename(columns={"county": "county_fips", 
@@ -162,12 +179,11 @@ cty_yr_npp = cty_yr_npp[["year", "county_fips", "unit_npp"]]
 cty_yr_npp.dropna(subset=["unit_npp"], inplace=True)
 cty_yr_npp.reset_index(drop=True, inplace=True)
 
+cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left")
+
 cty_yr_npp.head(2)
 
 # %%
-cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre"]], 
-                      on=["county_fips"], how="left")
-
 cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp,
                                        npp_unit_col_="unit_npp",
                                        acr_area_col_="rangeland_acre",
@@ -175,24 +191,42 @@ cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp,
 
 cty_yr_npp.head(2)
 
+# %% [markdown]
+# ## State-level NPPs
+#
+# **We have county-level unit NPP. We need to compute county-level total NPP, then sum them up to get statel-level total NPP, then divide by the area to get state-level unit-NPP**
+
 # %%
 state_yr_npp = cty_yr_npp.copy()
 
 state_yr_npp["state_fips"] = state_yr_npp.county_fips.str.slice(start=0, stop=2)
 state_yr_npp.head(2)
 
+# %%
 state_yr_npp.drop(labels=["county_fips", "unit_npp"], axis=1, inplace=True)
 state_yr_npp = state_yr_npp.groupby(["state_fips", "year"]).sum().reset_index()
+state_yr_npp.head(2)
 
-state_yr_npp.rename(columns={"county_total_npp": "state_total_npp"}, 
-                inplace=True)
+# %%
+state_yr_npp.rename(columns={"county_total_npp": "state_total_npp"}, inplace=True)
 state_yr_npp.head(2)
 # del(cty_yr_npp)
 
+# %%
+##### Compute state-level unit-NPP
+state_yr_npp["state_unit_NPP"] = state_yr_npp["state_total_npp"] / state_yr_npp["area_m2"]
+state_yr_npp.head(2)
+
+# %%
+state_yr_npp[(state_yr_npp.state_fips=="04") & (state_yr_npp.year==2001)]
+
+# %%
+Min_state_NPP.head(2)
+
 # %% [markdown]
-# # WARNING: 
+# # <font color='red'>Warning</font>
 #
-# Min's RA file (county_rangeland_and_totalarea_fraction.csv) includes some counties that 
+# Min's RA file (```county_rangeland_and_totalarea_fraction.csv```) includes some counties that 
 # are not present in NPP file. Thus, if you want total rangeland acre, filter based on NPP!!!
 #
 # Do NOT run the following cell... 
@@ -209,129 +243,99 @@ state_yr_npp.head(2)
 #                 inplace=True)
 # RA_state.head(2)
 
-# %%
-a = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
-
-# %%
-a.keys()
-
 # %% [markdown]
 # ### Weather
 
 # %%
-filename = reOrganized_dir + "county_annual_avg_Tavg.sav"
-cnty_yr_avg_Tavg = pd.read_pickle(filename)
-cnty_yr_avg_Tavg = cnty_yr_avg_Tavg["annual_temp"]
+filename = reOrganized_dir + "state_annual_avg_Tavg.sav"
+state_yr_avg_Tavg = pd.read_pickle(filename)
+state_yr_avg_Tavg = state_yr_avg_Tavg["annual_temp"]
 
-cnty_yr_avg_Tavg.reset_index(drop=True, inplace=True)
-cnty_yr_avg_Tavg.head(2)
+state_yr_avg_Tavg.reset_index(drop=True, inplace=True)
+state_yr_avg_Tavg.head(2)
 
 # %%
-filename = reOrganized_dir + "county_seasonal_temp_ppt_weighted.sav"
+
+# %%
+filename = reOrganized_dir + "state_seasonal_temp_ppt_weighted.sav"
 SW = pd.read_pickle(filename)
 SW = SW["seasonal"]
-SW = pd.merge(SW, county_fips, on=["county_fips"], how="left")
-
-print(f"{len(SW.county_fips.unique())=}")
 SW.head(2)
 
 # %%
-seasonal_precip_vars = [
-    "S1_countyMean_total_precip",
-    "S2_countyMean_total_precip",
-    "S3_countyMean_total_precip",
-    "S4_countyMean_total_precip",
-]
+seasonal_precip_vars = ["S1_stateMean_total_precip", "S2_stateMean_total_precip",
+                        "S3_stateMean_total_precip", "S4_stateMean_total_precip"]
 
-seasonal_temp_vars = [
-    "S1_countyMean_avg_Tavg",
-    "S2_countyMean_avg_Tavg",
-    "S3_countyMean_avg_Tavg",
-    "S4_countyMean_avg_Tavg",
-]
+seasonal_temp_vars = ["S1_stateMean_avg_Tavg", "S2_stateMean_avg_Tavg",
+                      "S3_stateMean_avg_Tavg", "S4_stateMean_avg_Tavg"]
 
 SW_vars = seasonal_precip_vars + seasonal_temp_vars
 for a_col in SW_vars:
     SW[a_col] = SW[a_col].astype(float)
 
-
-SW["yr_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
-# SW["yr_countyMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
-# SW["yr_countyMean_avg_Tavg"]   = SW["yr_countyMean_avg_Tavg"]/4
-SW = pd.merge(SW, cnty_yr_avg_Tavg, on=["county_fips", "year"], how="outer")
-del cnty_yr_avg_Tavg
+SW["yr_stateMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
+# SW["yr_stateMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
+# SW["yr_stateMean_avg_Tavg"]   = SW["yr_stateMean_avg_Tavg"]/4
+SW = pd.merge(SW, state_yr_avg_Tavg, on=["state_fips", "year"], how="outer")
+del state_yr_avg_Tavg
 SW = SW.round(3)
 
-SW.drop(labels=["county_name", "state"], axis=1, inplace=True)
 SW.head(2)
 
 # %%
-cnty_grid_mean_idx = pd.read_csv(Min_data_base + "county_gridmet_mean_indices.csv")
-cnty_grid_mean_idx.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
-cnty_grid_mean_idx.rename(columns={"county": "county_fips"}, inplace=True)
-cnty_grid_mean_idx = rc.correct_Mins_county_6digitFIPS(
-    df=cnty_grid_mean_idx, col_="county_fips"
-)
+### We already have done this before and have the data in
+### SW.
 
-cnty_grid_mean_idx = cnty_grid_mean_idx[
-    ["year", "month", "county_fips", "normal", "alert", "danger", "emergency"]
-]
+# state_grid_mean_idx = pd.read_csv(Min_data_base + "statefips_gridmet_mean_indices.csv")
+# state_grid_mean_idx.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 
-for a_col in ["normal", "alert", "danger", "emergency"]:
-    cnty_grid_mean_idx[a_col] = cnty_grid_mean_idx[a_col].astype(int)
-cnty_grid_mean_idx.reset_index(drop=True, inplace=True)
-cnty_grid_mean_idx.head(2)
+# state_grid_mean_idx.rename(columns={"statefips": "state_fips"}, inplace=True)
 
-# %%
-S1_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([1, 2, 3])]
-S2_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([4, 5, 6, 7])]
-S3_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([8, 9])]
-S4_heat = cnty_grid_mean_idx[cnty_grid_mean_idx.month.isin([10, 11, 12])]
+# state_grid_mean_idx["state_fips"] = state_grid_mean_idx["state_fips"].astype(str)
+# state_grid_mean_idx["state_fips"] = state_grid_mean_idx["state_fips"].str.slice(start=1, stop=3)
 
-S1_heat = S1_heat[["year", "county_fips", "normal", "alert", "danger", "emergency"]]
-S2_heat = S2_heat[["year", "county_fips", "normal", "alert", "danger", "emergency"]]
-S3_heat = S3_heat[["year", "county_fips", "normal", "alert", "danger", "emergency"]]
-S4_heat = S4_heat[["year", "county_fips", "normal", "alert", "danger", "emergency"]]
-
-S1_heat = S1_heat.groupby(["year", "county_fips"]).sum().reset_index()
-S2_heat = S2_heat.groupby(["year", "county_fips"]).sum().reset_index()
-S3_heat = S3_heat.groupby(["year", "county_fips"]).sum().reset_index()
-S4_heat = S4_heat.groupby(["year", "county_fips"]).sum().reset_index()
-
-S4_heat.head(2)
-
-# %%
-S1_heat.rename(columns={"normal": "s1_normal", "alert": "s1_alert",
-                        "danger": "s1_danger", "emergency": "s1_emergency"}, inplace=True)
-
-S2_heat.rename(columns={"normal": "s2_normal", "alert": "s2_alert",
-                        "danger": "s2_danger", "emergency": "s2_emergency"}, inplace=True)
-
-S3_heat.rename(columns={"normal": "s3_normal", "alert": "s3_alert",
-                        "danger": "s3_danger", "emergency": "s3_emergency"}, inplace=True)
-
-S4_heat.rename(columns={"normal": "s4_normal", "alert": "s4_alert",
-                        "danger": "s4_danger","emergency": "s4_emergency"}, inplace=True)
-
-seasonal_heat = pd.merge(S1_heat, S2_heat, on=["county_fips", "year"], how="outer")
-seasonal_heat = pd.merge(
-    seasonal_heat, S3_heat, on=["county_fips", "year"], how="outer"
-)
-seasonal_heat = pd.merge(
-    seasonal_heat, S4_heat, on=["county_fips", "year"], how="outer"
-)
-
-seasonal_heat.reset_index(drop=True, inplace=True)
-seasonal_heat.head(2)
+# state_grid_mean_idx = state_grid_mean_idx[["year", "month", "state_fips", 
+#                                            "normal", "alert", "danger", "emergency"]]
 
 
-# %%
-annual_heat = cnty_grid_mean_idx.groupby(["year", "county_fips"]).sum().reset_index()
-annual_heat = annual_heat[
-    ["year", "county_fips", "normal", "alert", "danger", "emergency"]
-]
-annual_heat.reset_index(drop=True, inplace=True)
-annual_heat.head(2)
+# for a_col in ["normal", "alert", "danger", "emergency"]:
+#     state_grid_mean_idx[a_col] = state_grid_mean_idx[a_col].astype(float)
+
+# state_grid_mean_idx.reset_index(drop=True, inplace=True)
+# state_grid_mean_idx.head(2)
+
+# state_grid_mean_idx["season"] = "s5"
+# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([1, 2, 3]), 's1', 
+#                                          state_grid_mean_idx.season)
+
+# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([4, 5, 6, 7]), 's2', 
+#                                          state_grid_mean_idx.season)
+
+# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([8, 9]), 's3', 
+#                                          state_grid_mean_idx.season)
+
+# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([10, 11, 12]), 's4', 
+#                                          state_grid_mean_idx.season)
+
+# state_grid_mean_idx.head(2)
+
+# state_grid_mean_idx = state_grid_mean_idx[["year",  "state_fips", "season", "danger", "emergency"]]
+# state_grid_mean_idx = state_grid_mean_idx.groupby(["year", "state_fips", "season"]).sum().reset_index()
+# state_grid_mean_idx.head(2)
+
+
+# state_grid_mean_idx["dangerEncy"] = state_grid_mean_idx["danger"] + state_grid_mean_idx["emergency"]
+
+
+# state_grid_mean_idx = state_grid_mean_idx.pivot(index=['year', 'state_fips'], 
+#                                                 columns='season', values='dangerEncy')
+# state_grid_mean_idx.reset_index(drop=False, inplace=True)
+# state_grid_mean_idx.head(2)
+
+# state_grid_mean_idx.rename(columns={"s1": "s1_dangerEncy", "s2": "s2_dangerEncy",
+#                                     "s3": "s3_dangerEncy", "s4": "s4_dangerEncy"}, 
+#                            inplace=True)
+# state_grid_mean_idx.head(2)
 
 # %% [markdown]
 # # Others (Controls)
@@ -350,49 +354,126 @@ annual_heat.head(2)
 # %%
 irr_hay = pd.read_pickle(reOrganized_dir + "irr_hay.sav")
 irr_hay = irr_hay["irr_hay_perc"]
-
-irr_hay.rename(columns={"value_irr": "irr_hay_area"}, inplace=True)
-
-irr_hay = irr_hay[["county_fips", "irr_hay_area", "irr_hay_as_perc"]]
+irr_hay.head(2)
+irr_hay.rename(columns={"value_irr": "irr_hay_area",
+                        "value_total" : "total_area_irrHayRelated"}, inplace=True)
+irr_hay = irr_hay[["county_fips", "irr_hay_area", "total_area_irrHayRelated"]]
+irr_hay["state_fips"] = irr_hay.county_fips.str.slice(start=0, stop=2)
 
 irr_hay.head(2)
-# irr_hay = irr_hay[["county_fips", "irr_hay_as_perc"]]
 
 # %%
-irr_hay[irr_hay.county_fips == "04005"]
+### Check if irr_hay above is filtered by Pallavi or not
+RA_Pallavi = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
+RA_Pallavi = RA_Pallavi["filtered_counties_29States"]
+RA_Pallavi.head(2)
+
+print (len(RA_Pallavi.county_fips))
+print (len(irr_hay.county_fips))
 
 # %%
-irr_hay[irr_hay.county_fips == "01001"]
+irr_hay = irr_hay[["state_fips", "irr_hay_area", "total_area_irrHayRelated"]]
+irr_hay.head(2)
 
 # %%
-feed_expense = USDA_data["feed_expense"]
-feed_expense = feed_expense[["year", "county_fips", "feed_expense"]]
+irr_hay = irr_hay.groupby(["state_fips"]).sum().reset_index()
+irr_hay.head(2)
 
+# %%
+irr_hay["irr_hay_as_perc"] = irr_hay["irr_hay_area"]*100/irr_hay["total_area_irrHayRelated"]
+irr_hay.head(2)
+
+# %%
+feed_expense.head(2)
+
+# %%
+feed_expense = feed_expense[["year", "state_fips", "feed_expense"]]
+feed_expense.head(2)
+
+# %%
+slaughter = slaughter[["year", "state_fips", "sale_4_slaughter_head"]]
+slaughter.head(2)
+
+# %%
+# Compute state-level population using county-level data we have!
 human_population = pd.read_pickle(reOrganized_dir + "human_population.sav")
 human_population = human_population["human_population"]
 
-slaughter_Q1 = pd.read_pickle(reOrganized_dir + "slaughter_Q1.sav")
-slaughter_Q1 = slaughter_Q1["slaughter_Q1"]
-slaughter_Q1.rename(
-    columns={"cattle_on_feed_sale_4_slaughter": "slaughter"}, inplace=True
-)
-slaughter_Q1 = slaughter_Q1[["year", "county_fips", "slaughter"]]
-print("max slaughter sale is [{}]".format(slaughter_Q1.slaughter.max()))
+human_population["state_fips"] = human_population.county_fips.str.slice(start=0, stop=2)
+
+# drop county_fips
+human_population = human_population[["state_fips", "year", "population"]]
+
+# state-level population
+human_population = human_population.groupby(["state_fips", "year"]).sum().reset_index()
+human_population.head(2)
 
 # %%
-AgLand = USDA_data["AgLand"]
-wetLand_area = USDA_data["wetLand_area"]
-FarmOperation = USDA_data["FarmOperation"]
-
-# %%
-RA["Pallavi"] = "N"
-RA.loc[RA.county_fips.isin(RA_Pallavi.county_fips), "Pallavi"] = "Y"
-RA.head(2)
-
-# %%
-filename = reOrganized_dir + "seasonal_ndvi.sav"
+filename = reOrganized_dir + "state_seasonal_ndvi.sav"
 seasonal_ndvi = pd.read_pickle(filename)
 seasonal_ndvi = seasonal_ndvi["seasonal_ndvi"]
+seasonal_ndvi.head(2)
+
+# %% [markdown]
+# ## State-level RA
+
+# %%
+RA.head(2)
+
+# %% [markdown]
+# # <font color='red'>Warning</font>
+#
+# ### FILTER RA based on the counties that are in county-level NPP?
+
+# %%
+RA_state = RA.copy()
+RA_state = RA_state[["state_fips", "rangeland_acre", "county_area_acre"]]
+RA_state = RA_state.groupby(["state_fips"]).sum().reset_index()
+RA_state.rename(columns={"county_area_acre": "state_area_acre"}, inplace=True)
+RA_state["rangeland_fraction"] = RA_state["rangeland_acre"] / RA_state["state_area_acre"]
+RA_state.head(2)
+
+# %%
+AgLand.head(2)
+
+# %%
+FarmOperation.head(2)
+
+# %%
+RA_state.head(2)
+
+# %%
+SW.head(2)
+
+# %%
+feed_expense.head(2)
+
+# %%
+herb.head(2)
+
+# %%
+irr_hay.head(2)
+
+# %%
+human_population.head(2)
+
+# %%
+slaughter.head(2)
+
+# %%
+wetLand_area.head(2)
+
+# %%
+Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall[["year", "inventory", "state_fips"]]
+Shannon_Beef_Cows_fromCATINV_tall.head(2)
+
+# %%
+Shannon_beef_fromCATINV_deltas.head(2)
+
+# %%
+beef_fromCATINV_csv.head(2)
+
+# %%
 seasonal_ndvi.head(2)
 
 # %% [markdown]
@@ -404,32 +485,29 @@ filename = reOrganized_dir + "state_data_forOuterJoin.sav"
 export_ = {
     "AgLand": AgLand,
     "FarmOperation": FarmOperation,
-    "Pallavi_counties": Pallavi_counties,
-    "RA": RA,
-    "RA_Pallavi": RA_Pallavi,
+    "RA": RA_state,
     "SW": SW,
     "SoI": SoI,
     "SoI_abb": SoI_abb,
     "abb_dict": abb_dict,
-    "heat": cnty_grid_mean_idx,
-    "annual_heat": annual_heat,
-    "seasonal_heat": seasonal_heat,
-    "county_fips": county_fips,
-    "npp": cty_yr_npp,
+2    "npp": state_yr_npp,
+    "Min_state_NPP" : Min_state_NPP,
     "feed_expense": feed_expense,
     "herb": herb,
     "irr_hay": irr_hay,
     "human_population": human_population,
-    "slaughter_Q1": slaughter_Q1,
+    "slaughter": slaughter,
     "wetLand_area": wetLand_area,
-    "cattle_inventory": inventory,
+    "beef_fromCATINV_csv": beef_fromCATINV_csv,
+    "Shannon_beef_fromCATINV_deltas" : Shannon_beef_fromCATINV_deltas,
+    "Shannon_Beef_Cows_fromCATINV_tall" : Shannon_Beef_Cows_fromCATINV_tall,
     "seasonal_ndvi": seasonal_ndvi,
     "source_code": "state_vars_oneFile_outerjoin",
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
 
-# pickle.dump(export_, open(filename, "wb"))
+pickle.dump(export_, open(filename, "wb"))
 
 # %% [markdown]
 # ## Do the outer join and normalize and save in another file
@@ -439,20 +517,11 @@ export_ = {
 # %%
 AgLand.head(2)
 
-# %%
-print(AgLand.commodity.unique())
-print(AgLand.data_item.unique())
-
-# %%
-AgLand.rename(columns={"value": "AgLand"}, inplace=True)
-AgLand = AgLand[["county_fips", "year", "data_item", "AgLand"]]
-AgLand.head(2)
-
 # %% [markdown]
-# ### Constant Variables
+# ### Time-invariant Variables
 
 # %%
-RA.head(2)
+RA_state.head(2)
 
 # %%
 herb.head(2)
@@ -461,41 +530,31 @@ herb.head(2)
 irr_hay.head(2)
 
 # %%
-constants = pd.merge(RA, herb, on=["county_fips"], how="outer")
-constants = pd.merge(constants, irr_hay, on=["county_fips"], how="outer")
+constants = pd.merge(RA_state, herb, on=["state_fips"], how="outer")
+constants = pd.merge(constants, irr_hay, on=["state_fips"], how="outer")
 constants.head(2)
 
 # %% [markdown]
 # ### Annual variables
 
 # %%
+## Leave Agland out for now. Since we do not know how we want to use it.
+print(len(AgLand.data_item.unique()))
+AgLand = AgLand[["state_fips", "year", "AgLand"]]
 AgLand.head(2)
 
 # %%
-## Leavre Agland out for now. Since we do not know how we want to use it.
-print(len(AgLand.data_item.unique()))
-
-# %%
+FarmOperation = FarmOperation[["state_fips", "year", "number_of_FarmOperation"]]
 FarmOperation.head(2)
 
 # %%
-print(len(FarmOperation.data_item.unique()))
-print(len(FarmOperation.commodity.unique()))
 
 # %%
-FarmOperation.rename(columns={"value": "number_of_FarmOperation"}, inplace=True)
-FarmOperation = FarmOperation[["county_fips", "year", "number_of_FarmOperation"]]
-FarmOperation.head(2)
+Min_state_NPP.head(2)
 
 # %%
-annual_heat.head(2)
-
-# %%
-cty_yr_npp.head(2)
-
-# %%
-cty_yr_npp = cty_yr_npp[["county_fips", "year", "unit_npp", "county_total_npp"]]
-cty_yr_npp.head(2)
+state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_NPP", "state_total_npp"]]
+state_yr_npp.head(2)
 
 # %%
 feed_expense.head(2)
@@ -504,42 +563,25 @@ feed_expense.head(2)
 human_population.head(2)
 
 # %%
-slaughter_Q1.head(2)
+slaughter.head(2)
 
 # %%
-inventory.head(2)
+Shannon_Beef_Cows_fromCATINV_tall.head(2)
 
 # %%
+beef_fromCATINV_csv.head(2)
+
+# %%
+wetLand_area = wetLand_area[["state_fips", "year", "crp_wetland_acr"]]
 wetLand_area.head(2)
 
 # %%
-print(len(wetLand_area.data_item.unique()))
-print(len(wetLand_area.commodity.unique()))
-
-# %%
-wetLand_area = wetLand_area[["county_fips", "year", "crp_wetland_acr"]]
-wetLand_area.head(2)
-
-# %%
-annual_outer = pd.merge(inventory, cty_yr_npp, on=["county_fips", "year"], how="outer")
-annual_outer = pd.merge(
-    annual_outer, slaughter_Q1, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, human_population, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, feed_expense, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, annual_heat, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, FarmOperation, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, wetLand_area, on=["county_fips", "year"], how="outer"
-)
+annual_outer = pd.merge(Shannon_Beef_Cows_fromCATINV_tall, state_yr_npp, on=["state_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, slaughter, on=["state_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, human_population, on=["state_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, feed_expense, on=["state_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, FarmOperation, on=["state_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, wetLand_area, on=["state_fips", "year"], how="outer")
 annual_outer.head(2)
 
 # %% [markdown]
@@ -550,25 +592,17 @@ annual_outer.head(2)
 SW.head(2)
 
 # %%
-seasonal_heat.head(2)
-
-# %%
-seasonal_outer = pd.merge(SW, seasonal_heat, on=["county_fips", "year"], how="outer")
-seasonal_outer.head(2)
-
-# %%
-all_df = pd.merge(annual_outer, seasonal_outer, on=["county_fips", "year"], how="outer")
+all_df = pd.merge(annual_outer, SW, on=["state_fips", "year"], how="outer")
 all_df.head(2)
 
 # %%
-all_df = pd.merge(all_df, constants, on=["county_fips"], how="outer")
+all_df = pd.merge(all_df, constants, on=["state_fips"], how="outer")
 all_df.head(2)
 
 # %%
-all_df[all_df.county_fips == "01001"]
 
 # %%
-all_df = pd.merge(all_df, seasonal_ndvi, on=["county_fips", "year"], how="outer")
+all_df = pd.merge(all_df, seasonal_ndvi, on=["state_fips", "year"], how="outer")
 print(all_df.shape)
 all_df.head(2)
 
@@ -580,8 +614,11 @@ filename = reOrganized_dir + "state_data_OuterJoined.sav"
 export_ = {
     "all_df": all_df,
     "source_code": "state_vars_oneFile_outerjoin",
+    "NOTE" : "state NPPs come from HN's computation, not statefips_annual_MODIS_NPP.csv",
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
 
-# pickle.dump(export_, open(filename, "wb"))
+pickle.dump(export_, open(filename, "wb"))
+
+# %%

@@ -433,19 +433,13 @@ feed_expense[(feed_expense.state=="Alabama") & (feed_expense.county=="Washington
 # FarmOperation.drop(["county_ansi", "state_ansi", "ag_district_code"], axis="columns", inplace=True)
 
 # %%
-feed_expense.rename(
-    columns={"value": "feed_expense", "cv_(%)": "feed_expense_cv_(%)"}, inplace=True
-)
+feed_expense.rename(columns={"value": "feed_expense", "cv_(%)": "feed_expense_cv_(%)"}, inplace=True)
 
-wetLand_area.rename(
-    columns={"value": "CRP_wetLand_acr", "cv_(%)": "CRP_wetLand_acr_cv_(%)"},
-    inplace=True,
-)
+wetLand_area.rename(columns={"value": "CRP_wetLand_acr", "cv_(%)": "CRP_wetLand_acr_cv_(%)"}, inplace=True)
 
-cattle_inventory.rename(
-    columns={"value": "cattle_cow_beef_inventory", "cv_(%)": "cattle_cow_beef_inventory_cv_(%)"},
-    inplace=True,
-)
+cattle_inventory.rename(columns={"value": "cattle_cow_beef_inventory", 
+                                 "cv_(%)": "cattle_cow_beef_inventory_cv_(%)"},
+                        inplace=True)
 
 cattle_inventory.head(2)
 
@@ -457,7 +451,7 @@ wetLand_area.head(2)
 
 # %%
 import sys
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/Rangeland/Python_Codes/")
 import rangeland_core as rc
 
 # %%
@@ -485,7 +479,7 @@ print (feed_expense.shape)
 import pickle
 from datetime import datetime
 
-filename = reOrganized_dir + "USDA_data.sav"
+filename = reOrganized_dir + "county_USDA_data.sav"
 
 export_ = {"AgLand": AgLand, 
            "wetLand_area": wetLand_area, 
@@ -503,6 +497,14 @@ feed_expense.county_fips[1]
 
 # %%
 len(cattle_inventory.county_fips.unique())
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
 

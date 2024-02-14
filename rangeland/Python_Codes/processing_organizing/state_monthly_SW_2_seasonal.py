@@ -74,8 +74,9 @@ gridmet_mean_indices.rename(columns={"statefips": "state_fips"}, inplace=True)
 gridmet_mean_indices.state_fips = gridmet_mean_indices.state_fips.astype(str)
 gridmet_mean_indices.state_fips = gridmet_mean_indices.state_fips.str.slice(1, 3)
 
-gridmet_mean_indices = gridmet_mean_indices[gridmet_mean_indices.state_fips.isin(county_fips.state_fips)]
+gridmet_mean_indices = gridmet_mean_indices[gridmet_mean_indices.state_fips.isin(county_fips.state_fips.unique())]
 
+print (gridmet_mean_indices.shape)
 print (f"{len(gridmet_mean_indices.state_fips.unique()) = }")
 gridmet_mean_indices.head(2)
 
@@ -127,11 +128,9 @@ gridmet_mean_indices.head(2)
 # %%time
 for a_year in gridmet_mean_indices.year.unique():
     leap_ = calendar.isleap(a_year)
-    
     for a_month in gridmet_mean_indices.month.unique():
         curr_df = gridmet_mean_indices[(gridmet_mean_indices.year == a_year) &\
                                        (gridmet_mean_indices.month == a_month)]
-        
         curr_locs = curr_df.index
         if leap_:
             if a_month == 2:
@@ -144,6 +143,8 @@ for a_year in gridmet_mean_indices.year.unique():
                                                                          days_per_month[str(a_month)]
             
 gridmet_mean_indices.head(5)
+
+# %%
 
 # %%
 # %%time
@@ -218,6 +219,40 @@ for a_year in gridmet_mean_indices.year.unique():
         del(curr_df, curr_df_S1, curr_df_S2, curr_df_S3, curr_df_S4)
         
 seasonal.head(5)
+
+# %%
+fip="01"
+a_year = 1979
+
+curr_df = gridmet_mean_indices[(gridmet_mean_indices.year == a_year) &\
+                                          (gridmet_mean_indices.state_fips == fip)]
+
+curr_df_S1 = curr_df[curr_df.month.isin(tonsor_seasons["season_1"])]
+curr_df_S2 = curr_df[curr_df.month.isin(tonsor_seasons["season_2"])]
+curr_df_S3 = curr_df[curr_df.month.isin(tonsor_seasons["season_3"])]
+curr_df_S4 = curr_df[curr_df.month.isin(tonsor_seasons["season_4"])]
+
+
+# %%
+print (curr_df_S1.danger.sum())
+print (curr_df_S2.danger.sum())
+print (curr_df_S3.danger.sum())
+print (curr_df_S4.danger.sum())
+print ()
+# emergency
+print (curr_df_S1.emergency.sum())
+print (curr_df_S2.emergency.sum())
+print (curr_df_S3.emergency.sum())
+print (curr_df_S4.emergency.sum())
+
+# %%
+curr_df_S2
+
+# %%
+
+# %%
+
+# %%
 
 # %%
 for a_col in needed_cols[2:]:

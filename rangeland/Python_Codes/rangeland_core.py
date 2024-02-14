@@ -21,6 +21,27 @@ def compute_herbRatio_totalArea(hr):
     return hr
 
 
+def covert_totalNpp_2_unit(NPP_df, npp_total_col_, area_m2_col_, npp_unit_col_name_):
+    """
+    Min has unit NPP on county level.
+
+    So, for state level, we have to compute total NPP first
+    and then unit NPP for the state.
+
+    Convert the total NPP to unit NPP.
+    Total area can be area of rangeland in a county or an state
+
+    Units are Kg * C / m^2
+
+    1 m^2 = 0.000247105 acres
+
+
+
+    """
+    NPP_df[npp_unit_col_name_] = NPP_df[npp_total_col_] / NPP_df[area_m2_col_]
+    return NPP_df
+
+
 def covert_unitNPP_2_total(NPP_df, npp_unit_col_, acr_area_col_, npp_area_col_):
     """
     Convert the unit NPP to total area.

@@ -85,10 +85,7 @@ ndvi = ndvi[["year", "month", "NDVI", "state_fips"]]
 ndvi = ndvi[ndvi.state_fips.isin(county_fips.state_fips.unique())]
 ndvi.reset_index(drop=True, inplace=True)
 
-ndvi.head(2)
-
 ndvi["season"] = "s5"
-
 ndvi['season'] = np.where(ndvi['month'].isin([1, 2, 3]), 's1', ndvi.season)
 ndvi['season'] = np.where(ndvi['month'].isin([4, 5, 6, 7]), 's2', ndvi.season)
 ndvi['season'] = np.where(ndvi['month'].isin([8, 9]), 's3', ndvi.season)
@@ -102,7 +99,6 @@ ndvi = ndvi.pivot(index=['year', 'state_fips'], columns='season', values='NDVI')
 ndvi.reset_index(drop=False, inplace=True)
 ndvi.head(2)
 
-
 if "MODIS" in file_name:
     new_name = "modis_ndvi"
 elif "AVHRR" in file_name:
@@ -114,7 +110,6 @@ ndvi.rename(columns={"s1": "s1_mean_" + new_name,
                      "s2": "s2_mean_" + new_name,
                      "s3": "s3_mean_" + new_name,
                      "s4": "s4_mean_" + new_name}, inplace=True)
-
 
 seasonal_ndvi_avhrr = ndvi.copy()
 del(ndvi)
@@ -586,6 +581,10 @@ print(seasonal_ndvi_avhrr.shape)
 # %%
 seasonal_ndvi = pd.merge(seasonal_ndvi_sum, seasonal_ndvi_mean, on=["state_fips", "year"], how="outer")
 seasonal_ndvi = pd.merge(seasonal_ndvi, seasonal_ndvi_max, on=["state_fips", "year"], how="outer")
+seasonal_ndvi.head(2)
+
+# %%
+seasonal_ndvi.columns = seasonal_ndvi.columns.values
 seasonal_ndvi.head(2)
 
 # %%

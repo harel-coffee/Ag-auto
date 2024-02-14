@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -14,24 +14,17 @@
 
 # %%
 import shutup
-
 shutup.please()
 
 import pandas as pd
 import numpy as np
 from datetime import datetime
 import os, os.path, pickle, sys
-import seaborn as sns
 
-import matplotlib
-import matplotlib.pyplot as plt
-
-from sklearn import preprocessing
-import statistics
-import statsmodels.api as sm
-
-sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
+
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"

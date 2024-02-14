@@ -428,15 +428,13 @@ pop_cols = ["county_fips", "year", "population"]
 slaughter_cols = ["year", "county_fips", "slaughter"]
 
 
-control_cols = (
-    ["county_fips"]
-    + ["year"]
-    + ["rangeland_fraction", "rangeland_acre"]
-    + ["herb_avg", "herb_area_acr"]
-    + ["irr_hay_area", "irr_hay_as_perc"]
-    + ["population"]
-    + ["feed_expense", "slaughter"]
-)
+control_cols = (["county_fips"] + 
+                ["year"] + 
+                ["rangeland_fraction", "rangeland_acre"] + 
+                ["herb_avg", "herb_area_acr"]    + 
+                ["irr_hay_area", "irr_hay_as_perc"] + 
+                ["population"] + 
+                ["feed_expense", "slaughter"])
 
 # %%
 # irr_hay = df_OuterJoined[irr_hay_cols].copy()
@@ -499,31 +497,22 @@ controls.head(2)
 # %%
 variable_controls = ["population", "slaughter", "feed_expense"]
 
-constant_controls = [
-    "herb_avg",
-    "herb_area_acr",
-    "rangeland_fraction",
-    "rangeland_acre",
-    "irr_hay_area",
-    "irr_hay_as_perc",
-]
+constant_controls = ["herb_avg", "herb_area_acr",
+                     "rangeland_fraction", "rangeland_acre",
+                     "irr_hay_area", "irr_hay_as_perc"]
 
 constant_control_df = controls[["county_fips"] + constant_controls].drop_duplicates()
 constant_control_df.reset_index(drop=True, inplace=True)
 constant_control_df.head(2)
 
 # %%
-controls_avg = (
-    controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
-)
+controls_avg = (controls[["county_fips"] + variable_controls].groupby("county_fips").mean())
 controls_avg.reset_index(drop=False, inplace=True)
 controls_avg = controls_avg.round(3)
 controls_avg.head(2)
 
 # %%
-controls_avg = pd.merge(
-    controls_avg, constant_control_df, on=["county_fips"], how="left"
-)
+controls_avg = pd.merge(controls_avg, constant_control_df, on=["county_fips"], how="left")
 print(controls_avg.shape)
 controls_avg.head(2)
 
@@ -532,27 +521,19 @@ controls_avg["irr_hay_as_perc_categ"] = controls_avg["irr_hay_as_perc"]
 
 controls_avg.loc[(controls_avg.irr_hay_as_perc <= 6), "irr_hay_as_perc_categ"] = 0
 
-controls_avg.loc[
-    (controls_avg.irr_hay_as_perc > 6) & (controls_avg.irr_hay_as_perc <= 96),
-    "irr_hay_as_perc_categ",
-] = 1
+controls_avg.loc[(controls_avg.irr_hay_as_perc > 6) & (controls_avg.irr_hay_as_perc <= 96),\
+                 "irr_hay_as_perc_categ",] = 1
 
 controls_avg.loc[(controls_avg.irr_hay_as_perc > 96), "irr_hay_as_perc_categ"] = 2
 
 controls_avg.head(2)
 
 # %%
-normalize_cols = [
-    "population",
-    "slaughter",
-    "feed_expense",
-    "herb_avg",
-    "herb_area_acr",
-    "rangeland_fraction",
-    "rangeland_acre",
-    "irr_hay_area",
-    "irr_hay_as_perc",
-]
+normalize_cols = ["population", "slaughter",
+                  "feed_expense", "herb_avg",
+                  "herb_area_acr", "rangeland_fraction",
+                  "rangeland_acre", "irr_hay_area",
+                  "irr_hay_as_perc"]
 
 controls_avg_normal = controls_avg.copy()
 
@@ -638,6 +619,26 @@ all_df.head(2)
 
 # %%
 indp_vars = ["county_total_npp", "rangeland_acre"]
+y_var = "inventory"
+
+#################################################################
+curr_all = all_df.copy()
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+del (indp_vars, X, Y, model_, model_result, curr_all)
+
+# %%
+indp_vars = ["unit_npp", "rangeland_acre"]
 y_var = "inventory"
 
 #################################################################
@@ -1143,5 +1144,11 @@ Y = np.log(curr_all[y_var].astype(float))
 model_ = sm.OLS(Y, X)
 model_result = model_.fit()
 model_result.summary()
+
+# %%
+
+# %%
+
+# %%
 
 # %%

@@ -99,7 +99,6 @@ RA_Pallavi = RA_Pallavi["filtered_counties_29States"]
 print(f"{len(RA_Pallavi.county_fips.unique()) = }")
 print(f"{len(RA_Pallavi.state.unique()) = }")
 
-
 Pallavi_counties = list(RA_Pallavi.county_fips.unique())
 RA_Pallavi.head(2)
 
@@ -238,11 +237,11 @@ seasonal_heat.head(2)
 
 # %%
 annual_heat = cnty_grid_mean_idx.groupby(["year", "county_fips"]).sum().reset_index()
-annual_heat = annual_heat[
-    ["year", "county_fips", "normal", "alert", "danger", "emergency"]
-]
+annual_heat = annual_heat[["year", "county_fips", "normal", "alert", "danger", "emergency"]]
 annual_heat.reset_index(drop=True, inplace=True)
 annual_heat.head(2)
+
+# %%
 
 # %% [markdown]
 # # Others (Controls)

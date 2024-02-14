@@ -127,19 +127,11 @@ df_OuterJoined.head(2)
 
 # %%
 df_OuterJoined["dangerEncy"] = df_OuterJoined["danger"] + df_OuterJoined["emergency"]
+df_OuterJoined["s1_dangerEncy"] = df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
+df_OuterJoined["s2_dangerEncy"] = df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
+df_OuterJoined["s3_dangerEncy"] = df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
+df_OuterJoined["s4_dangerEncy"] = df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
 
-df_OuterJoined["s1_dangerEncy"] = (
-    df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
-)
-df_OuterJoined["s2_dangerEncy"] = (
-    df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
-)
-df_OuterJoined["s3_dangerEncy"] = (
-    df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
-)
-df_OuterJoined["s4_dangerEncy"] = (
-    df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
-)
 df_OuterJoined.head(2)
 
 # %%
@@ -185,9 +177,7 @@ inventory_snap.head(3)
 #
 #   Filter only the counties in the snapshot.
 #
-df_OuterJoined = df_OuterJoined[
-    df_OuterJoined.county_fips.isin(SnapInv_Pallavi_cnty_list)
-]
+df_OuterJoined = df_OuterJoined[df_OuterJoined.county_fips.isin(SnapInv_Pallavi_cnty_list)]
 
 # %% [markdown]
 # # WARNING.
@@ -414,31 +404,22 @@ controls.head(2)
 # %%
 variable_controls = ["population", "slaughter", "feed_expense"]
 
-constant_controls = [
-    "herb_avg",
-    "herb_area_acr",
-    "rangeland_fraction",
-    "rangeland_acre",
-    "irr_hay_area",
-    "irr_hay_as_perc",
-]
+constant_controls = ["herb_avg", "herb_area_acr",
+                     "rangeland_fraction", "rangeland_acre",
+                     "irr_hay_area", "irr_hay_as_perc"]
 
 constant_control_df = controls[["county_fips"] + constant_controls].drop_duplicates()
 constant_control_df.reset_index(drop=True, inplace=True)
 constant_control_df.head(2)
 
 # %%
-controls_avg = (
-    controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
-)
+controls_avg = controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
 controls_avg.reset_index(drop=False, inplace=True)
 controls_avg = controls_avg.round(3)
 controls_avg.head(2)
 
 # %%
-controls_avg = pd.merge(
-    controls_avg, constant_control_df, on=["county_fips"], how="left"
-)
+controls_avg = pd.merge(controls_avg, constant_control_df, on=["county_fips"], how="left")
 print(controls_avg.shape)
 controls_avg.head(2)
 
@@ -736,5 +717,9 @@ model_result.params
 
 # %%
 df_OuterJoined.shape
+
+# %%
+
+# %%
 
 # %%

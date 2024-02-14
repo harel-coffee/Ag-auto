@@ -22,7 +22,7 @@ data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
 Shannon_data_dir = data_dir_base + "Shannon_Data/"
 Min_data_dir_base = data_dir_base + "Min_Data/"
 NASS_dir = data_dir_base + "NASS_downloads/"
-census_dir = data_dir_base + "census/"
+census_dir = NASS_dir + "census/"
 reOrganized_dir = data_dir_base + "reOrganized/"
 param_dir = data_dir_base + "parameters/"
 os.makedirs(reOrganized_dir, exist_ok=True)
@@ -34,13 +34,7 @@ pop_2010_2020_file = "z_2010-2020-co-est2020.csv"
 pop_2000_file = "z_2000_2009_co-est2009-alldata.csv"
 
 # %%
-
-# %%
-
-# %%
 # encoding can be unicode_escape too.
-
-
 pop_2000 = pd.read_csv(census_dir + pop_2000_file, encoding='latin-1')
 pop_2000_2010 = pd.read_csv(census_dir + pop_2000_2010_file, encoding='latin-1')
 pop_2010_2020 = pd.read_csv(census_dir + pop_2010_2020_file, encoding='latin-1')
@@ -61,7 +55,6 @@ pop_2000_2010.rename(
 pop_2010_2020.rename(
          columns={ "STATE": "state_fip", "COUNTY": "cnty_fip", "STNAME": "state", "CTYNAME": "county"},
         inplace=True)
-
 
 pop_2000.head(2)
 
