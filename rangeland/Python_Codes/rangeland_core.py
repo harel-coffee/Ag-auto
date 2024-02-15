@@ -119,13 +119,25 @@ def clean_census(df, col_):
     col_ = col_.lower()
     # df = df[df[col_] != " (D)"]
     # df = df[df[col_] != " (Z)"]
-    df = df[~(df[col_].str.contains(pat="(D)", case=False))]
-    df = df[~(df[col_].str.contains(pat="(Z)", case=False))]
+
+    # df = df[~(df[col_].str.contains(pat="(D)", case=False))]
+    # df = df[~(df[col_].str.contains(pat="(Z)", case=False))]
+
+    df = df[~(df[col_].str.contains(pat="(D)", case=False, na=False))]
+    df = df[~(df[col_].str.contains(pat="(Z)", case=False, na=False))]
 
     df.reset_index(drop=True, inplace=True)
-    if type(df[col_][0]) == str:
-        df[col_] = df[col_].str.replace(",", "")
-        df[col_] = df[col_].astype(float)
+
+    # this is not good contision. maybe the first one is na whose
+    # type would be float.
+
+    # if type(df[col_][0]) == str:
+    #     df[col_] = df[col_].str.replace(",", "")
+    #     df[col_] = df[col_].astype(float)
+
+    df[col_] = df[col_].astype(str)
+    df[col_] = df[col_].str.replace(",", "")
+    df[col_] = df[col_].astype(float)
 
     if (
         ("state_ansi" in df.columns)

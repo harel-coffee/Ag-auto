@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -214,7 +214,7 @@ state_yr_npp.head(2)
 
 # %%
 ##### Compute state-level unit-NPP
-state_yr_npp["state_unit_NPP"] = state_yr_npp["state_total_npp"] / state_yr_npp["area_m2"]
+state_yr_npp["state_unit_npp"] = state_yr_npp["state_total_npp"] / state_yr_npp["area_m2"]
 state_yr_npp.head(2)
 
 # %%
@@ -273,9 +273,9 @@ SW_vars = seasonal_precip_vars + seasonal_temp_vars
 for a_col in SW_vars:
     SW[a_col] = SW[a_col].astype(float)
 
-SW["yr_stateMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
-# SW["yr_stateMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
-# SW["yr_stateMean_avg_Tavg"]   = SW["yr_stateMean_avg_Tavg"]/4
+SW["annual_stateMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
+# SW["annual_stateMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
+# SW["annual_stateMean_avg_Tavg"]   = SW["annual_stateMean_avg_Tavg"]/4
 SW = pd.merge(SW, state_yr_avg_Tavg, on=["state_fips", "year"], how="outer")
 del state_yr_avg_Tavg
 SW = SW.round(3)
@@ -544,16 +544,17 @@ AgLand = AgLand[["state_fips", "year", "AgLand"]]
 AgLand.head(2)
 
 # %%
-FarmOperation = FarmOperation[["state_fips", "year", "number_of_FarmOperation"]]
+FarmOperation = FarmOperation[["state_fips", "year", "number_of_farm_operation"]]
 FarmOperation.head(2)
 
 # %%
+FarmOperation.head(2)
 
 # %%
 Min_state_NPP.head(2)
 
 # %%
-state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_NPP", "state_total_npp"]]
+state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_npp", "state_total_npp"]]
 state_yr_npp.head(2)
 
 # %%

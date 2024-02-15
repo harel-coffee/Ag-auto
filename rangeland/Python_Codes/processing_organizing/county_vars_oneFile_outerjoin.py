@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -27,6 +27,8 @@ import os, os.path, pickle, sys
 
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
+
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -105,12 +107,8 @@ RA_Pallavi.head(2)
 # %%
 cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
 
-cty_yr_npp.rename(
-    columns={"county": "county_fips", "MODIS_NPP": "unit_npp"}, inplace=True
-)
-
+cty_yr_npp.rename(columns={"county": "county_fips", "MODIS_NPP": "unit_npp"}, inplace=True)
 cty_yr_npp = rc.correct_Mins_county_6digitFIPS(df=cty_yr_npp, col_="county_fips")
-
 cty_yr_npp = cty_yr_npp[["year", "county_fips", "unit_npp"]]
 
 # Some counties do not have unit NPPs
@@ -120,9 +118,7 @@ cty_yr_npp.reset_index(drop=True, inplace=True)
 cty_yr_npp.head(2)
 
 # %%
-cty_yr_npp = pd.merge(
-    cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left"
-)
+cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left")
 
 cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp, npp_unit_col_="unit_npp",
                                        acr_area_col_="rangeland_acre", npp_area_col_="county_total_npp")
@@ -150,28 +146,20 @@ print(f"{len(SW.county_fips.unique())=}")
 SW.head(2)
 
 # %%
-seasonal_precip_vars = [
-    "S1_countyMean_total_precip",
-    "S2_countyMean_total_precip",
-    "S3_countyMean_total_precip",
-    "S4_countyMean_total_precip",
-]
+seasonal_precip_vars = ["S1_countyMean_total_precip", "S2_countyMean_total_precip",
+                        "S3_countyMean_total_precip", "S4_countyMean_total_precip"]
 
-seasonal_temp_vars = [
-    "S1_countyMean_avg_Tavg",
-    "S2_countyMean_avg_Tavg",
-    "S3_countyMean_avg_Tavg",
-    "S4_countyMean_avg_Tavg",
-]
+seasonal_temp_vars = ["S1_countyMean_avg_Tavg", "S2_countyMean_avg_Tavg",
+                      "S3_countyMean_avg_Tavg", "S4_countyMean_avg_Tavg"]
 
 SW_vars = seasonal_precip_vars + seasonal_temp_vars
 for a_col in SW_vars:
     SW[a_col] = SW[a_col].astype(float)
 
 
-SW["yr_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
-# SW["yr_countyMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
-# SW["yr_countyMean_avg_Tavg"]   = SW["yr_countyMean_avg_Tavg"]/4
+SW["annual_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
+# SW["annual_countyMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
+# SW["annual_countyMean_avg_Tavg"]   = SW["annual_countyMean_avg_Tavg"]/4
 SW = pd.merge(SW, cnty_yr_avg_Tavg, on=["county_fips", "year"], how="outer")
 del cnty_yr_avg_Tavg
 SW = SW.round(3)
@@ -332,6 +320,7 @@ seasonal_ndvi = seasonal_ndvi["seasonal_ndvi"]
 seasonal_ndvi.head(2)
 
 # %%
+FarmOperation.head(2)
 
 # %%
 import pickle

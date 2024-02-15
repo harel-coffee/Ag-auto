@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,14 +16,26 @@
 # <font color='red'>red</font>, <span style='color:green'>green</span>, $\color{blue}{\text{blue}}$
 
 # %%
+import shutup
+shutup.please()
+
 import pandas as pd
 import numpy as np
-from datetime import datetime
 import os, os.path, pickle, sys
+from datetime import datetime, date
+
+from sklearn import preprocessing
+import statistics
+import statsmodels.api as sm
 
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
+
+
+current_time = datetime.now().strftime("%H:%M:%S")
+print("Today's date:", date.today())
+print("Current Time =", current_time)
 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
@@ -62,8 +74,8 @@ print (f"{len(state_data.columns) = }")
 state_data.head(2)
 
 # %%
-print (state_data.dropna(subset=['state_unit_NPP'])['year'].min())
-print (state_data.dropna(subset=['state_unit_NPP'])['year'].max())
+print (state_data.dropna(subset=['state_unit_npp'])['year'].min())
+print (state_data.dropna(subset=['state_unit_npp'])['year'].max())
 
 # %% [markdown]
 # ### Subset: 2001 and 2020
@@ -144,13 +156,157 @@ state_data = pd.merge(state_data, log_ratios_df, on=["state_fips", "year"], how=
 state_data.head(2)
 
 # %%
-a = pd.read_pickle("/Users/hn/Downloads/state_data_OuterJoined.sav")
-a['Date']
+state_data = rc.clean_census(df=state_data, col_="number_of_FarmOperation")
+
+# %%
+state_data.columns
+
+# %%
+mean_ndvi_cols = [x for x in state_data.columns if (("ndvi" in x) & ("modis" in x) & ("mean" in x))]
+max_ndvi_cols  = [x for x in state_data.columns if (("ndvi" in x) & ("modis" in x) & ("max" in x ))]
+sum_ndvi_cols  = [x for x in state_data.columns if (("ndvi" in x) & ("modis" in x) & ("sum" in x ))]
+
+# %%
+W_columns = [x for x in state_data.columns if (("precip" in x) or ("Tavg" in x))]
+SW_columns = [x for x in W_columns if not("annual" in x)]
+AW_columns = [x for x in W_columns if "annual" in x]
+
+# %%
+
+# %%
+indp_vars = ["state_unit_npp"]
+y_var = "log_ratio_of_shares_y2prevy"
+#################################################################
+curr_all = state_data[indp_vars + [y_var] + ["state_fips"]].copy()
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = curr_all[y_var].astype(float)
+#################################################################
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+indp_vars = ["state_total_npp"]
+y_var = "log_ratio_of_shares_y2prevy"
+#################################################################
+curr_all = state_data[indp_vars + [y_var] + ["state_fips"]].copy()
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = curr_all[y_var].astype(float)
+#################################################################
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %% [markdown]
+# ## Normalize columns
+
+# %%
+print (state_data.columns)
+
+# %%
+normalize_cols = [
+    'state_unit_npp', 'state_total_npp',
+    'sale_4_slaughter_head', 'population', 'feed_expense',
+    'number_of_farmoperation', 'crp_wetland_acr',
+    's1_statemean_total_precip', 's2_statemean_total_precip',
+    's3_statemean_total_precip', 's4_statemean_total_precip',
+
+    's1_statemean_avg_tavg', 's2_statemean_avg_tavg',
+    's3_statemean_avg_tavg', 's4_statemean_avg_tavg',
+    
+    's1_statemean_total_danger', 's2_statemean_total_danger',
+    's3_statemean_total_danger', 's4_statemean_total_danger',
+    
+    's1_statemean_total_emergency', 's2_statemean_total_emergency',
+    's3_statemean_total_emergency', 's4_statemean_total_emergency',
+    
+    'annual_statemean_total_precip', 'annual_avg_tavg', 
+    
+    'rangeland_acre', 'state_area_acre', 'rangeland_fraction', 
+    
+    'herb_avg', 'herb_std',
+    
+    'maxndvi_doy_statemean', 'maxndvi_doy_statemedian',
+    'maxndvi_doy_statestd', 'maxndvi_doy_statemin', 'maxndvi_doy_statemax',
+
+    'herb_area_acr', 'irr_hay_area', 'total_area_irrhayrelated', 'irr_hay_as_perc', 
+    
+    's1_sum_avhrr_ndvi',  's2_sum_avhrr_ndvi',  's3_sum_avhrr_ndvi',  's4_sum_avhrr_ndvi', 
+    's1_sum_gimms_ndvi',  's2_sum_gimms_ndvi',  's3_sum_gimms_ndvi',  's4_sum_gimms_ndvi',
+    's1_sum_modis_ndvi',  's2_sum_modis_ndvi',  's3_sum_modis_ndvi',  's4_sum_modis_ndvi',
+    's1_mean_avhrr_ndvi', 's2_mean_avhrr_ndvi', 's3_mean_avhrr_ndvi', 's4_mean_avhrr_ndvi', 
+    's1_mean_gimms_ndvi', 's2_mean_gimms_ndvi', 's3_mean_gimms_ndvi', 's4_mean_gimms_ndvi',
+    's1_mean_modis_ndvi', 's2_mean_modis_ndvi', 's3_mean_modis_ndvi', 's4_mean_modis_ndvi', 
+    's1_max_avhrr_ndvi',  's2_max_avhrr_ndvi',  's3_max_avhrr_ndvi',  's4_max_avhrr_ndvi', 
+    's1_max_gimms_ndvi',  's2_max_gimms_ndvi',  's3_max_gimms_ndvi',  's4_max_gimms_ndvi',
+    's1_max_modis_ndvi',  's2_max_modis_ndvi',  's3_max_modis_ndvi',  's4_max_modis_ndvi']
+
+
+
+# %%
+all_df_normalIndp = state_data.copy()
+
+all_df_normalIndp[normalize_cols] = \
+      (all_df_normalIndp[normalize_cols] - all_df_normalIndp[normalize_cols].mean()) / \
+                                   all_df_normalIndp[normalize_cols].std(ddof=1)
+all_df_normalIndp.head(3)
+
+# %%
+del(curr_all, X, Y)
+
+# %%
+indp_vars = ["state_unit_npp"]
+y_var = "log_ratio_of_shares_y2prevy"
+#################################################################
+curr_all = all_df_normalIndp[indp_vars + [y_var] + ["state_fips"]].copy()
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = curr_all[y_var].astype(float)
+#################################################################
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+indp_vars = ["state_total_npp"]
+y_var = "log_ratio_of_shares_y2prevy"
+#################################################################
+curr_all = all_df_normalIndp[indp_vars + [y_var] + ["state_fips"]].copy()
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = curr_all[y_var].astype(float)
+#################################################################
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
 
 # %%
 
 # %%
 
 # %%
+indp_vars = ["state_unit_npp"] + ["rangeland_acre"]
+y_var = "log_ratio_of_shares_y2prevy"
+#################################################################
+curr_all = all_df_normalIndp[indp_vars + [y_var] + ["state_fips"]].copy()
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = curr_all[y_var].astype(float)
+#################################################################
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
 
 # %%

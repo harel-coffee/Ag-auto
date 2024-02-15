@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -582,8 +582,7 @@ indp_vars = ["county_total_npp", "rangeland_acre"]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
 
 X = curr_all[indp_vars]
@@ -602,8 +601,7 @@ indp_vars = ["county_total_npp", "rangeland_acre", "herb_area_acr"]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
 
 X = curr_all[indp_vars]
@@ -622,8 +620,7 @@ indp_vars = ["county_total_npp", "rangeland_acre", "herb_area_acr", "irr_hay_are
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
 
 X = curr_all[indp_vars]
@@ -645,8 +642,7 @@ indp_vars = ["county_total_npp", "rangeland_acre", "irr_hay_area"]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
 
 X = curr_all[indp_vars]
@@ -665,8 +661,7 @@ indp_vars = ["county_total_npp", "population"]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
 
 X = curr_all[indp_vars]
@@ -685,8 +680,7 @@ indp_vars = ["county_total_npp"] + ["rangeland_acre", "population"]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -707,8 +701,7 @@ indp_vars = ["county_total_npp"] + ["rangeland_acre", "herb_area_acr", "populati
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -732,8 +725,7 @@ del (indp_vars, X, Y, model_, model_result, curr_all)
 indp_vars = ["county_total_npp"] + ["rangeland_acre", "irr_hay_area", "population"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -762,8 +754,7 @@ all_df.head(2)
 indp_vars = sw_cols + ["rangeland_acre"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -784,8 +775,7 @@ indp_vars = sw_cols + ["rangeland_acre", "herb_area_acr"]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -806,8 +796,7 @@ indp_vars = sw_cols + ["rangeland_acre", "herb_area_acr", "irr_hay_area"]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -826,17 +815,11 @@ del (indp_vars, X, Y, model_, model_result, curr_all)
 # %%
 
 # %%
-indp_vars = ["county_total_npp"] + [
-    "rangeland_acre",
-    "herb_area_acr",
-    "irr_hay_area",
-    "population",
-]
+indp_vars = ["county_total_npp"] + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population",]
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -860,8 +843,7 @@ indp_vars = sw_cols + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "popul
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -881,8 +863,7 @@ del (indp_vars, X, Y, model_, model_result, curr_all)
 indp_vars = sw_cols + ["rangeland_acre", "population"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -902,8 +883,7 @@ del (indp_vars, X, Y, model_, model_result, curr_all)
 indp_vars = sw_cols + ["rangeland_acre", "herb_area_acr", "population"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -923,8 +903,7 @@ del (indp_vars, X, Y, model_, model_result, curr_all)
 indp_vars = ["rangeland_acre"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -944,8 +923,7 @@ all_df.columns
 indp_vars = ["unit_npp", "rangeland_acre", "herb_avg", "irr_hay_area", "population"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -959,18 +937,10 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
-indp_vars = [
-    "unit_npp",
-    "rangeland_acre",
-    "herb_avg",
-    "irr_hay_area",
-    "population",
-    "dangerEncy",
-]
+indp_vars = ["unit_npp"] + ["rangeland_acre", "herb_avg", "irr_hay_area", "population","dangerEncy"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -987,8 +957,7 @@ model_result.summary()
 indp_vars = sw_cols + ["rangeland_acre", "herb_avg", "irr_hay_area", "population"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -1011,8 +980,7 @@ indp_vars = ["unit_npp"] + [
 y_var = "inventory"
 
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))
@@ -1034,8 +1002,7 @@ model_result.summary()
 indp_vars = ["unit_npp"] + sw_cols + ["rangeland_acre"]
 y_var = "inventory"
 #################################################################
-curr_all = all_df.copy()
-curr_all = all_df[indp_vars + [y_var] + ["county_fips"]]
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
 print(len(curr_all.county_fips.unique()))
 curr_all.dropna(how="any", inplace=True)
 print(len(curr_all.county_fips.unique()))

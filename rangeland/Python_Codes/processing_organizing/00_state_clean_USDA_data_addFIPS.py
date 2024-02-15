@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -50,6 +50,10 @@ shutup.please()
 import pandas as pd
 import numpy as np
 import os
+
+from datetime import datetime, date
+
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -335,6 +339,11 @@ slaughter.rename(columns={"value": "sale_4_slaughter_head",
                           "cv_(%)": "sale_4_slaughter_head_cv_(%)"},
                         inplace=True)
 
+FarmOperation.rename(columns={"state_ansi": "state_fips",
+                              "value" : "number_of_farm_operation",
+                              "cv_(%)" : "number_of_farm_operation_cv_(%)"}, inplace=True)
+
+
 slaughter.head(2)
 
 # %%
@@ -365,6 +374,11 @@ print (slaughter.shape)
 print (feed_expense.shape)
 feed_expense = rc.clean_census(df=feed_expense, col_="feed_expense")
 print (feed_expense.shape)
+
+# %%
+print (FarmOperation.shape)
+FarmOperation = rc.clean_census(df=FarmOperation, col_="number_of_farm_operation")
+print (FarmOperation.shape)
 
 # %%
 # %who
@@ -420,12 +434,8 @@ feed_expense.head(2)
 
 # %%
 print (FarmOperation.data_item.unique())
-FarmOperation.rename(columns={"state_ansi": "state_fips",
-                              "value" : "number_of_FarmOperation",
-                              "cv_(%)" : "number_of_FarmOperation_cv_(%)"}, inplace=True)
-
-FarmOperation = FarmOperation[["year", "state_fips", "data_item", "number_of_FarmOperation", \
-                               "number_of_FarmOperation_cv_(%)"]]
+FarmOperation = FarmOperation[["year", "state_fips", "data_item", "number_of_farm_operation", \
+                               "number_of_farm_operation_cv_(%)"]]
 FarmOperation.head(2)
 
 # %%

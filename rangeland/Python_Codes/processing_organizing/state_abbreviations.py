@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -184,6 +184,8 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 county_fips = county_fips["county_fips"]
 
+county_fips.rename(columns={"state_fip": "state_fips"}, inplace=True)
+
 county_fips = county_fips[['county_fips', 'county_name', 'state', 'state_fips', 'EW']]
 county_fips.head(2)
 
@@ -210,11 +212,11 @@ county_id_name_fips.head(2)
 # %%
 SD = county_id_name_fips[county_id_name_fips.STATE=="SD"].copy()
 SD.FIPS = SD.FIPS.astype(str)
-SD["state_fip"] = SD.FIPS.str.slice(start=0, stop=2)
+SD["state_fips"] = SD.FIPS.str.slice(start=0, stop=2)
 SD.head(2)
 
 # %%
-SD.state_fip.unique()
+SD.state_fips.unique()
 
 # %%
 
