@@ -150,14 +150,14 @@ gridmet_mean_indices.head(5)
 # %%time
 
 needed_cols = ['state_fips', 'year', 
-               'S1_stateMean_total_precip',    'S2_stateMean_total_precip', 
-               'S3_stateMean_total_precip',    'S4_stateMean_total_precip', 
-               'S1_stateMean_avg_Tavg',        'S2_stateMean_avg_Tavg', 
-               'S3_stateMean_avg_Tavg',        'S4_stateMean_avg_Tavg',
-               'S1_stateMean_total_danger',    'S2_stateMean_total_danger', 
-               'S3_stateMean_total_danger',    'S4_stateMean_total_danger',
-               'S1_stateMean_total_emergency', 'S2_stateMean_total_emergency', 
-               'S3_stateMean_total_emergency', 'S4_stateMean_total_emergency']
+               's1_statemean_total_precip',    's2_statemean_total_precip', 
+               's3_statemean_total_precip',    's4_statemean_total_precip', 
+               's1_statemean_avg_tavg',        's2_statemean_avg_tavg', 
+               's3_statemean_avg_tavg',        's4_statemean_avg_tavg',
+               's1_statemean_total_danger',    's2_statemean_total_danger', 
+               's3_statemean_total_danger',    's4_statemean_total_danger',
+               's1_statemean_total_emergency', 's2_statemean_total_emergency', 
+               's3_statemean_total_emergency', 's4_statemean_total_emergency']
 
 nu_rows = len(gridmet_mean_indices.year.unique()) * len(gridmet_mean_indices.state_fips.unique())
 seasonal = pd.DataFrame(columns = needed_cols, index=range(nu_rows))
@@ -170,53 +170,53 @@ for a_year in gridmet_mean_indices.year.unique():
         curr_df = gridmet_mean_indices[(gridmet_mean_indices.year == a_year) &\
                                               (gridmet_mean_indices.state_fips == fip)]
         
-        curr_df_S1 = curr_df[curr_df.month.isin(tonsor_seasons["season_1"])]
-        curr_df_S2 = curr_df[curr_df.month.isin(tonsor_seasons["season_2"])]
-        curr_df_S3 = curr_df[curr_df.month.isin(tonsor_seasons["season_3"])]
-        curr_df_S4 = curr_df[curr_df.month.isin(tonsor_seasons["season_4"])]
+        curr_df_s1 = curr_df[curr_df.month.isin(tonsor_seasons["season_1"])]
+        curr_df_s2 = curr_df[curr_df.month.isin(tonsor_seasons["season_2"])]
+        curr_df_s3 = curr_df[curr_df.month.isin(tonsor_seasons["season_3"])]
+        curr_df_s4 = curr_df[curr_df.month.isin(tonsor_seasons["season_4"])]
         
         seasonal.loc[wide_pointer, "state_fips"] = fip
         seasonal.loc[wide_pointer, "year"] = a_year
 
         # precipitation
-        seasonal.loc[wide_pointer, "S1_stateMean_total_precip"] = curr_df_S1.ppt.sum()
-        seasonal.loc[wide_pointer, "S2_stateMean_total_precip"] = curr_df_S2.ppt.sum()
-        seasonal.loc[wide_pointer, "S3_stateMean_total_precip"] = curr_df_S3.ppt.sum()
-        seasonal.loc[wide_pointer, "S4_stateMean_total_precip"] = curr_df_S4.ppt.sum()
+        seasonal.loc[wide_pointer, "s1_statemean_total_precip"] = curr_df_s1.ppt.sum()
+        seasonal.loc[wide_pointer, "s2_statemean_total_precip"] = curr_df_s2.ppt.sum()
+        seasonal.loc[wide_pointer, "s3_statemean_total_precip"] = curr_df_s3.ppt.sum()
+        seasonal.loc[wide_pointer, "s4_statemean_total_precip"] = curr_df_s4.ppt.sum()
         
         # danger
-        seasonal.loc[wide_pointer, "S1_stateMean_total_danger"] = curr_df_S1.danger.sum()
-        seasonal.loc[wide_pointer, "S2_stateMean_total_danger"] = curr_df_S2.danger.sum()
-        seasonal.loc[wide_pointer, "S3_stateMean_total_danger"] = curr_df_S3.danger.sum()
-        seasonal.loc[wide_pointer, "S4_stateMean_total_danger"] = curr_df_S4.danger.sum()
+        seasonal.loc[wide_pointer, "s1_statemean_total_danger"] = curr_df_s1.danger.sum()
+        seasonal.loc[wide_pointer, "s2_statemean_total_danger"] = curr_df_s2.danger.sum()
+        seasonal.loc[wide_pointer, "s3_statemean_total_danger"] = curr_df_s3.danger.sum()
+        seasonal.loc[wide_pointer, "s4_statemean_total_danger"] = curr_df_s4.danger.sum()
         
         # emergency
-        seasonal.loc[wide_pointer, "S1_stateMean_total_emergency"] = curr_df_S1.emergency.sum()
-        seasonal.loc[wide_pointer, "S2_stateMean_total_emergency"] = curr_df_S2.emergency.sum()
-        seasonal.loc[wide_pointer, "S3_stateMean_total_emergency"] = curr_df_S3.emergency.sum()
-        seasonal.loc[wide_pointer, "S4_stateMean_total_emergency"] = curr_df_S4.emergency.sum()
+        seasonal.loc[wide_pointer, "s1_statemean_total_emergency"] = curr_df_s1.emergency.sum()
+        seasonal.loc[wide_pointer, "s2_statemean_total_emergency"] = curr_df_s2.emergency.sum()
+        seasonal.loc[wide_pointer, "s3_statemean_total_emergency"] = curr_df_s3.emergency.sum()
+        seasonal.loc[wide_pointer, "s4_statemean_total_emergency"] = curr_df_s4.emergency.sum()
 
         
         if leap_:
-            seasonal.loc[wide_pointer, "S1_stateMean_avg_Tavg"] = \
-                                        curr_df_S1.sum_tavg.sum() / (no_days_in_each_season["season_1"]+1)
+            seasonal.loc[wide_pointer, "s1_statemean_avg_tavg"] = \
+                                        curr_df_s1.sum_tavg.sum() / (no_days_in_each_season["season_1"]+1)
         else:
-            seasonal.loc[wide_pointer, "S1_stateMean_avg_Tavg"] = \
-                                        curr_df_S1.sum_tavg.sum() / no_days_in_each_season["season_1"]
+            seasonal.loc[wide_pointer, "s1_statemean_avg_tavg"] = \
+                                        curr_df_s1.sum_tavg.sum() / no_days_in_each_season["season_1"]
             
-        seasonal.loc[wide_pointer, "S2_stateMean_avg_Tavg"] = \
-                                        curr_df_S2.sum_tavg.sum() / no_days_in_each_season["season_2"]
+        seasonal.loc[wide_pointer, "s2_statemean_avg_tavg"] = \
+                                        curr_df_s2.sum_tavg.sum() / no_days_in_each_season["season_2"]
         
         
-        seasonal.loc[wide_pointer, "S3_stateMean_avg_Tavg"] = \
-                                        curr_df_S3.sum_tavg.sum() / no_days_in_each_season["season_3"]
+        seasonal.loc[wide_pointer, "s3_statemean_avg_tavg"] = \
+                                        curr_df_s3.sum_tavg.sum() / no_days_in_each_season["season_3"]
         
         
-        seasonal.loc[wide_pointer, "S4_stateMean_avg_Tavg"] = \
-                                        curr_df_S4.sum_tavg.sum() / no_days_in_each_season["season_4"]
+        seasonal.loc[wide_pointer, "s4_statemean_avg_tavg"] = \
+                                        curr_df_s4.sum_tavg.sum() / no_days_in_each_season["season_4"]
         wide_pointer += 1
         
-        del(curr_df, curr_df_S1, curr_df_S2, curr_df_S3, curr_df_S4)
+        del(curr_df, curr_df_s1, curr_df_s2, curr_df_s3, curr_df_s4)
         
 seasonal.head(5)
 
@@ -307,7 +307,7 @@ gridmet_mean_indices.head(5)
 # %%
 # %%time
 
-needed_cols = ['state_fips', 'year', 'annual_avg_Tavg']
+needed_cols = ['state_fips', 'year', 'annual_avg_tavg']
 
 nu_rows = len(gridmet_mean_indices.year.unique()) * len(gridmet_mean_indices.state_fips.unique())
 annual_temp = pd.DataFrame(columns = needed_cols, index=range(nu_rows))
@@ -324,15 +324,15 @@ for a_year in gridmet_mean_indices.year.unique():
         annual_temp.loc[wide_pointer, "year"] = a_year
 
         if leap_:
-            annual_temp.loc[wide_pointer, "annual_avg_Tavg"] = curr_df.sum_tavg.sum() / 366
+            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = curr_df.sum_tavg.sum() / 366
         else:
-            annual_temp.loc[wide_pointer, "annual_avg_Tavg"] = curr_df.sum_tavg.sum() / 365
+            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = curr_df.sum_tavg.sum() / 365
         wide_pointer += 1
 
 annual_temp.head(2)
 
 # %%
-annual_temp["annual_avg_Tavg"] = annual_temp["annual_avg_Tavg"].astype(float)
+annual_temp["annual_avg_tavg"] = annual_temp["annual_avg_tavg"].astype(float)
 annual_temp = annual_temp.round(decimals=2)
 # annual_temp = rc.correct_Mins_county_6digitFIPS(df=annual_temp, col_="county_fips")
 annual_temp.head(5)
@@ -359,10 +359,10 @@ annual_temp.head(2)
 len(annual_temp.state_fips.unique())
 
 # %%
-d_ = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
-A_csv = pd.read_csv(d_ + "county_adjacency_cleaned_corrected.csv")
-Adj_25 = pd.read_pickle(d_ + "adjacency_binary_matrix_strict25states.sav")
-Adj = pd.read_pickle(d_ + "county_adjacency_binary_matrix.sav")
+# d_ = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
+# A_csv = pd.read_csv(d_ + "county_adjacency_cleaned_corrected.csv")
+# Adj_25 = pd.read_pickle(d_ + "adjacency_binary_matrix_strict25states.sav")
+# Adj = pd.read_pickle(d_ + "county_adjacency_binary_matrix.sav")
 
 # %%
 

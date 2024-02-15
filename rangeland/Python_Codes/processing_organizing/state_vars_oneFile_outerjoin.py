@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -263,19 +263,19 @@ SW = SW["seasonal"]
 SW.head(2)
 
 # %%
-seasonal_precip_vars = ["S1_stateMean_total_precip", "S2_stateMean_total_precip",
-                        "S3_stateMean_total_precip", "S4_stateMean_total_precip"]
+seasonal_precip_vars = ["s1_statemean_total_precip", "s2_statemean_total_precip",
+                        "s3_statemean_total_precip", "s4_statemean_total_precip"]
 
-seasonal_temp_vars = ["S1_stateMean_avg_Tavg", "S2_stateMean_avg_Tavg",
-                      "S3_stateMean_avg_Tavg", "S4_stateMean_avg_Tavg"]
+seasonal_temp_vars = ["s1_statemean_avg_tavg", "s2_statemean_avg_tavg",
+                      "s3_statemean_avg_tavg", "s4_statemean_avg_tavg"]
 
 SW_vars = seasonal_precip_vars + seasonal_temp_vars
 for a_col in SW_vars:
     SW[a_col] = SW[a_col].astype(float)
 
-SW["annual_stateMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
-# SW["annual_stateMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
-# SW["annual_stateMean_avg_Tavg"]   = SW["annual_stateMean_avg_Tavg"]/4
+SW["annual_statemean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
+# SW["annual_statemean_avg_tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
+# SW["annual_statemean_avg_tavg"]   = SW["annual_statemean_avg_tavg"]/4
 SW = pd.merge(SW, state_yr_avg_Tavg, on=["state_fips", "year"], how="outer")
 del state_yr_avg_Tavg
 SW = SW.round(3)
@@ -542,6 +542,9 @@ constants.head(2)
 print(len(AgLand.data_item.unique()))
 AgLand = AgLand[["state_fips", "year", "AgLand"]]
 AgLand.head(2)
+
+# %%
+FarmOperation.head(2)
 
 # %%
 FarmOperation = FarmOperation[["state_fips", "year", "number_of_farm_operation"]]

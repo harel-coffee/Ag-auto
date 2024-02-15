@@ -26,6 +26,7 @@ import calendar
 
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -105,12 +106,12 @@ print (len(missing))
 sorted(missing)[:5]
 
 # %%
-# %%time
+# # %%time
 
-missing = [x for x in county_id_name_fips.county_fips.unique()\
-                                          if not(x in county_gridmet_mean_indices.county_fips.unique())]
-print (len(missing))
-sorted(missing)[:5]
+# missing = [x for x in county_id_name_fips.county_fips.unique()\
+#                                           if not(x in county_gridmet_mean_indices.county_fips.unique())]
+# print (len(missing))
+# sorted(missing)[:5]
 
 # %% [markdown]
 # ### Subset counties that are in the states of interest
@@ -189,14 +190,18 @@ county_gridmet_mean_indices.head(5)
 # %%
 county_gridmet_mean_indices[county_gridmet_mean_indices.county_fips == 104001]
 
+# %% [markdown]
+# # <font color='red'>Warning</font>
+# Takes about 5 min
+
 # %%
 # %%time
 
 needed_cols = ['county_fips', 'year', 
-               'S1_countyMean_total_precip', 'S2_countyMean_total_precip', 
-               'S3_countyMean_total_precip', 'S4_countyMean_total_precip', 
-               'S1_countyMean_avg_Tavg', 'S2_countyMean_avg_Tavg', 
-               'S3_countyMean_avg_Tavg', 'S4_countyMean_avg_Tavg']
+               's1_countymean_total_precip', 's2_countymean_total_precip', 
+               's3_countymean_total_precip', 's4_countymean_total_precip', 
+               's1_countymean_avg_tavg', 's2_countymean_avg_tavg', 
+               's3_countymean_avg_tavg', 's4_countymean_avg_tavg']
 
 nu_rows = len(county_gridmet_mean_indices.year.unique()) * len(county_gridmet_mean_indices.county_fips.unique())
 seasonal = pd.DataFrame(columns = needed_cols, index=range(nu_rows))
@@ -209,39 +214,39 @@ for a_year in county_gridmet_mean_indices.year.unique():
         curr_df = county_gridmet_mean_indices[(county_gridmet_mean_indices.year == a_year) &\
                                               (county_gridmet_mean_indices.county_fips == fip)]
         
-        curr_df_S1 = curr_df[curr_df.month.isin(tonsor_seasons["season_1"])]
-        curr_df_S2 = curr_df[curr_df.month.isin(tonsor_seasons["season_2"])]
-        curr_df_S3 = curr_df[curr_df.month.isin(tonsor_seasons["season_3"])]
-        curr_df_S4 = curr_df[curr_df.month.isin(tonsor_seasons["season_4"])]
+        curr_df_s1 = curr_df[curr_df.month.isin(tonsor_seasons["season_1"])]
+        curr_df_s2 = curr_df[curr_df.month.isin(tonsor_seasons["season_2"])]
+        curr_df_s3 = curr_df[curr_df.month.isin(tonsor_seasons["season_3"])]
+        curr_df_s4 = curr_df[curr_df.month.isin(tonsor_seasons["season_4"])]
         
         seasonal.loc[wide_pointer, "county_fips"] = fip
         seasonal.loc[wide_pointer, "year"] = a_year
         
-        seasonal.loc[wide_pointer, "S1_countyMean_total_precip"] = curr_df_S1.ppt.sum()
-        seasonal.loc[wide_pointer, "S2_countyMean_total_precip"] = curr_df_S2.ppt.sum()
-        seasonal.loc[wide_pointer, "S3_countyMean_total_precip"] = curr_df_S3.ppt.sum()
-        seasonal.loc[wide_pointer, "S4_countyMean_total_precip"] = curr_df_S4.ppt.sum()
+        seasonal.loc[wide_pointer, "s1_countymean_total_precip"] = curr_df_s1.ppt.sum()
+        seasonal.loc[wide_pointer, "s2_countymean_total_precip"] = curr_df_s2.ppt.sum()
+        seasonal.loc[wide_pointer, "s3_countymean_total_precip"] = curr_df_s3.ppt.sum()
+        seasonal.loc[wide_pointer, "s4_countymean_total_precip"] = curr_df_s4.ppt.sum()
         
         if leap_:
-            seasonal.loc[wide_pointer, "S1_countyMean_avg_Tavg"] = \
-                                        curr_df_S1.sum_tavg.sum() / (no_days_in_each_season["season_1"]+1)
+            seasonal.loc[wide_pointer, "s1_countymean_avg_tavg"] = \
+                                        curr_df_s1.sum_tavg.sum() / (no_days_in_each_season["season_1"]+1)
         else:
-            seasonal.loc[wide_pointer, "S1_countyMean_avg_Tavg"] = \
-                                        curr_df_S1.sum_tavg.sum() / no_days_in_each_season["season_1"]
+            seasonal.loc[wide_pointer, "s1_countymean_avg_tavg"] = \
+                                        curr_df_s1.sum_tavg.sum() / no_days_in_each_season["season_1"]
             
-        seasonal.loc[wide_pointer, "S2_countyMean_avg_Tavg"] = \
-                                        curr_df_S2.sum_tavg.sum() / no_days_in_each_season["season_2"]
+        seasonal.loc[wide_pointer, "s2_countymean_avg_tavg"] = \
+                                        curr_df_s2.sum_tavg.sum() / no_days_in_each_season["season_2"]
         
         
-        seasonal.loc[wide_pointer, "S3_countyMean_avg_Tavg"] = \
-                                        curr_df_S3.sum_tavg.sum() / no_days_in_each_season["season_3"]
+        seasonal.loc[wide_pointer, "s3_countymean_avg_tavg"] = \
+                                        curr_df_s3.sum_tavg.sum() / no_days_in_each_season["season_3"]
         
         
-        seasonal.loc[wide_pointer, "S4_countyMean_avg_Tavg"] = \
-                                        curr_df_S4.sum_tavg.sum() / no_days_in_each_season["season_4"]
+        seasonal.loc[wide_pointer, "s4_countymean_avg_tavg"] = \
+                                        curr_df_s4.sum_tavg.sum() / no_days_in_each_season["season_4"]
         wide_pointer += 1
         
-        del(curr_df, curr_df_S1, curr_df_S2, curr_df_S3, curr_df_S4)
+        del(curr_df, curr_df_s1, curr_df_s2, curr_df_s3, curr_df_s4)
         
 seasonal.head(5)
 
@@ -300,7 +305,7 @@ county_gridmet_mean_indices.head(5)
 # %%
 # %%time
 
-needed_cols = ['county_fips', 'year', 'annual_avg_Tavg']
+needed_cols = ['county_fips', 'year', 'annual_avg_tavg']
 
 nu_rows = len(county_gridmet_mean_indices.year.unique()) * len(county_gridmet_mean_indices.county_fips.unique())
 annual_temp = pd.DataFrame(columns = needed_cols, index=range(nu_rows))
@@ -317,9 +322,9 @@ for a_year in county_gridmet_mean_indices.year.unique():
         annual_temp.loc[wide_pointer, "year"] = a_year
 
         if leap_:
-            annual_temp.loc[wide_pointer, "annual_avg_Tavg"] = curr_df.sum_tavg.sum() / 366
+            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = curr_df.sum_tavg.sum() / 366
         else:
-            annual_temp.loc[wide_pointer, "annual_avg_Tavg"] = curr_df.sum_tavg.sum() / 365
+            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = curr_df.sum_tavg.sum() / 365
         wide_pointer += 1
 
 annual_temp.head(2)
@@ -328,13 +333,13 @@ annual_temp.head(2)
 annual_temp[annual_temp.county_fips == 104001]
 
 # %%
-annual_temp["annual_avg_Tavg"] = annual_temp["annual_avg_Tavg"].astype(float)
+annual_temp["annual_avg_tavg"] = annual_temp["annual_avg_tavg"].astype(float)
 annual_temp = annual_temp.round(decimals=2)
 annual_temp = rc.correct_Mins_county_6digitFIPS(df=annual_temp, col_="county_fips")
 annual_temp.head(5)
 
 # %%
-filename = reOrganized_dir + "county_annual_avg_Tavg.sav"
+filename = reOrganized_dir + "county_annual_avg_tavg.sav"
 
 export_ = {"annual_temp": annual_temp, 
            "source_code" : "county_monthly_SW_2_seasonal",
@@ -390,5 +395,7 @@ col_ = "productivity"
 print (cnty_annual_GPP_NPP_prod[cnty_annual_GPP_NPP_prod[col_].isna()].shape)
 print (len(cnty_annual_GPP_NPP_prod[cnty_annual_GPP_NPP_prod[col_].isna()].county.unique()))
 cnty_annual_GPP_NPP_prod[cnty_annual_GPP_NPP_prod[col_].isna()]
+
+# %%
 
 # %%

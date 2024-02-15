@@ -118,7 +118,7 @@ county_fips.head(2)
 # ## Inventory
 
 # %%
-USDA_data = pd.read_pickle(reOrganized_dir + "USDA_data.sav")
+USDA_data = pd.read_pickle(reOrganized_dir + "county_USDA_data.sav")
 inventory = USDA_data["cattle_inventory"]
 inventory.rename(columns={"cattle_cow_beef_inventory": "inventory"}, inplace=True)
 
@@ -348,20 +348,20 @@ print (f"{len(SW.county_fips.unique())=}")
 SW.head(2)
 
 # %%
-seasonal_precip_vars = ["S1_countyMean_total_precip", "S2_countyMean_total_precip",
-                        "S3_countyMean_total_precip", "S4_countyMean_total_precip",]
+seasonal_precip_vars = ["s1_countymean_total_precip", "s2_countymean_total_precip",
+                        "s3_countymean_total_precip", "s4_countymean_total_precip",]
 
-seasonal_temp_vars = ["S1_countyMean_avg_Tavg", "S2_countyMean_avg_Tavg",
-                      "S3_countyMean_avg_Tavg", "S4_countyMean_avg_Tavg"]
+seasonal_temp_vars = ["s1_countymean_avg_tavg", "s2_countymean_avg_tavg",
+                      "s3_countymean_avg_tavg", "s4_countymean_avg_tavg"]
 
 SW_vars = seasonal_precip_vars + seasonal_temp_vars
 for a_col in SW_vars:
     SW[a_col] = SW[a_col].astype(float)
 
 # %%
-SW["yr_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
-# SW["yr_countyMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
-# SW["yr_countyMean_avg_Tavg"]   = SW["yr_countyMean_avg_Tavg"]/4
+SW["annual_countymean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
+# SW["annual_countymean_avg_tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
+# SW["annual_countymean_avg_tavg"]   = SW["annual_countymean_avg_tavg"]/4
 
 SW = SW.round(3)
 SW.head(2)
@@ -523,7 +523,7 @@ NPP_SW_heat_avg.drop(labels=['year'], axis=1, inplace=True)
 NPP_SW_heat_avg.head(3)
 
 # %%
-NPP_SW_heat.loc[NPP_SW_heat.county_fips == "04005", "S4_countyMean_total_precip"].mean().round(3)
+NPP_SW_heat.loc[NPP_SW_heat.county_fips == "04005", "s4_countymean_total_precip"].mean().round(3)
 
 # %%
 print (len(NPP_SW_heat_avg.index))
@@ -572,16 +572,19 @@ inv_2017_NPP_SW_heat_avg.columns
 # %%
 HS_var = ['dangerEncy']
 npp_var = ['county_total_npp']
-AW_vars = ['yr_countyMean_total_precip', 'annual_avg_Tavg']
+AW_vars = ['annual_countymean_total_precip', 'annual_avg_tavg']
 
-SW_vars = ['S1_countyMean_total_precip', 'S2_countyMean_total_precip', 
-           'S3_countyMean_total_precip', 'S4_countyMean_total_precip', 
-           'S1_countyMean_avg_Tavg', 'S2_countyMean_avg_Tavg', 
-           'S3_countyMean_avg_Tavg', 'S4_countyMean_avg_Tavg']
+SW_vars = ['s1_countymean_total_precip', 's2_countymean_total_precip', 
+           's3_countymean_total_precip', 's4_countymean_total_precip', 
+           's1_countymean_avg_tavg', 's2_countymean_avg_tavg', 
+           's3_countymean_avg_tavg', 's4_countymean_avg_tavg']
 
 all_indp_vars = list(set(HS_var + AW_vars + SW_vars + npp_var))
 all_indp_vars = sorted(all_indp_vars)
 all_indp_vars
+
+# %%
+inv_2017_NPP_SW_heat_avg.head(2)
 
 # %%
 inv_2017_NPP_SW_heat_avg_normal = inv_2017_NPP_SW_heat_avg.copy()
@@ -1485,5 +1488,13 @@ Y = np.log(curr_all[y_var].astype(float))
 model_ = sm.OLS(Y, X)
 model_result = model_.fit()
 model_result.summary()
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -70,7 +70,7 @@ county_fips.head(2)
 # ## Inventory
 
 # %%
-USDA_data = pd.read_pickle(reOrganized_dir + "USDA_data.sav")
+USDA_data = pd.read_pickle(reOrganized_dir + "county_USDA_data.sav")
 inventory = USDA_data["cattle_inventory"]
 inventory.rename(columns={"cattle_cow_beef_inventory": "inventory"}, inplace=True)
 
@@ -146,20 +146,20 @@ print(f"{len(SW.county_fips.unique())=}")
 SW.head(2)
 
 # %%
-seasonal_precip_vars = ["S1_countyMean_total_precip", "S2_countyMean_total_precip",
-                        "S3_countyMean_total_precip", "S4_countyMean_total_precip"]
+seasonal_precip_vars = ["s1_countymean_total_precip", "s2_countymean_total_precip",
+                        "s3_countymean_total_precip", "s4_countymean_total_precip"]
 
-seasonal_temp_vars = ["S1_countyMean_avg_Tavg", "S2_countyMean_avg_Tavg",
-                      "S3_countyMean_avg_Tavg", "S4_countyMean_avg_Tavg"]
+seasonal_temp_vars = ["s1_countymean_avg_tavg", "s2_countymean_avg_tavg",
+                      "s3_countymean_avg_tavg", "s4_countymean_avg_tavg"]
 
 SW_vars = seasonal_precip_vars + seasonal_temp_vars
 for a_col in SW_vars:
     SW[a_col] = SW[a_col].astype(float)
 
 
-SW["annual_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
-# SW["annual_countyMean_avg_Tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
-# SW["annual_countyMean_avg_Tavg"]   = SW["annual_countyMean_avg_Tavg"]/4
+SW["annual_countymean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
+# SW["annual_countymean_avg_tavg"]   = SW[seasonal_temp_vars].sum(axis=1)
+# SW["annual_countymean_avg_tavg"]   = SW["annual_countymean_avg_Tavg"]/4
 SW = pd.merge(SW, cnty_yr_avg_Tavg, on=["county_fips", "year"], how="outer")
 del cnty_yr_avg_Tavg
 SW = SW.round(3)
@@ -410,8 +410,8 @@ print(len(FarmOperation.data_item.unique()))
 print(len(FarmOperation.commodity.unique()))
 
 # %%
-FarmOperation.rename(columns={"value": "number_of_FarmOperation"}, inplace=True)
-FarmOperation = FarmOperation[["county_fips", "year", "number_of_FarmOperation"]]
+FarmOperation.rename(columns={"value": "number_of_farm_operation"}, inplace=True)
+FarmOperation = FarmOperation[["county_fips", "year", "number_of_farm_operation"]]
 FarmOperation.head(2)
 
 # %%
@@ -516,3 +516,5 @@ non_number_cols = ["EW", "Pallavi", "county_fips", "county_name", "state"]
 numeric_cols = [
     x for x in sorted(all_df_normalized.columns) if not (x in non_number_cols)
 ]
+
+# %%

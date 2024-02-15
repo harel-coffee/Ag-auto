@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -156,7 +156,7 @@ state_data = pd.merge(state_data, log_ratios_df, on=["state_fips", "year"], how=
 state_data.head(2)
 
 # %%
-state_data = rc.clean_census(df=state_data, col_="number_of_FarmOperation")
+# state_data = rc.clean_census(df=state_data, col_="number_of_farm_operation")
 
 # %%
 state_data.columns
@@ -175,7 +175,7 @@ AW_columns = [x for x in W_columns if "annual" in x]
 
 # %%
 indp_vars = ["state_unit_npp"]
-y_var = "log_ratio_of_shares_y2prevy"
+y_var = "log_ratio_of_shares_Y2PrevY"
 #################################################################
 curr_all = state_data[indp_vars + [y_var] + ["state_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
@@ -190,7 +190,7 @@ model_result.summary()
 
 # %%
 indp_vars = ["state_total_npp"]
-y_var = "log_ratio_of_shares_y2prevy"
+y_var = "log_ratio_of_shares_Y2PrevY"
 #################################################################
 curr_all = state_data[indp_vars + [y_var] + ["state_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
@@ -213,7 +213,7 @@ print (state_data.columns)
 normalize_cols = [
     'state_unit_npp', 'state_total_npp',
     'sale_4_slaughter_head', 'population', 'feed_expense',
-    'number_of_farmoperation', 'crp_wetland_acr',
+    'number_of_farm_operation', 'crp_wetland_acr',
     's1_statemean_total_precip', 's2_statemean_total_precip',
     's3_statemean_total_precip', 's4_statemean_total_precip',
 
@@ -232,10 +232,10 @@ normalize_cols = [
     
     'herb_avg', 'herb_std',
     
-    'maxndvi_doy_statemean', 'maxndvi_doy_statemedian',
-    'maxndvi_doy_statestd', 'maxndvi_doy_statemin', 'maxndvi_doy_statemax',
+    'maxNDVI_DoY_stateMean', 'maxNDVI_DoY_stateMedian',
+    'maxNDVI_DoY_stateStd', 'maxNDVI_DoY_stateMin', 'maxNDVI_DoY_stateMax',
 
-    'herb_area_acr', 'irr_hay_area', 'total_area_irrhayrelated', 'irr_hay_as_perc', 
+    'herb_area_acr', 'irr_hay_area', 'total_area_irrHayRelated', 'irr_hay_as_perc', 
     
     's1_sum_avhrr_ndvi',  's2_sum_avhrr_ndvi',  's3_sum_avhrr_ndvi',  's4_sum_avhrr_ndvi', 
     's1_sum_gimms_ndvi',  's2_sum_gimms_ndvi',  's3_sum_gimms_ndvi',  's4_sum_gimms_ndvi',
@@ -262,7 +262,7 @@ del(curr_all, X, Y)
 
 # %%
 indp_vars = ["state_unit_npp"]
-y_var = "log_ratio_of_shares_y2prevy"
+y_var = "log_ratio_of_shares_Y2PrevY"
 #################################################################
 curr_all = all_df_normalIndp[indp_vars + [y_var] + ["state_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
@@ -277,7 +277,7 @@ model_result.summary()
 
 # %%
 indp_vars = ["state_total_npp"]
-y_var = "log_ratio_of_shares_y2prevy"
+y_var = "log_ratio_of_shares_Y2PrevY"
 #################################################################
 curr_all = all_df_normalIndp[indp_vars + [y_var] + ["state_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
@@ -296,7 +296,7 @@ model_result.summary()
 
 # %%
 indp_vars = ["state_unit_npp"] + ["rangeland_acre"]
-y_var = "log_ratio_of_shares_y2prevy"
+y_var = "log_ratio_of_shares_Y2PrevY"
 #################################################################
 curr_all = all_df_normalIndp[indp_vars + [y_var] + ["state_fips"]].copy()
 curr_all.dropna(how="any", inplace=True)
