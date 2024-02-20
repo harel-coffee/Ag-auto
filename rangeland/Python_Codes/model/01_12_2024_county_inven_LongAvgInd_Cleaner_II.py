@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -135,27 +135,21 @@ df_OuterJoined.head(2)
 # %%
 df_OuterJoined["dangerEncy"] = df_OuterJoined["danger"] + df_OuterJoined["emergency"]
 
-df_OuterJoined["s1_dangerEncy"] = (
-    df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
-)
-df_OuterJoined["s2_dangerEncy"] = (
-    df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
-)
-df_OuterJoined["s3_dangerEncy"] = (
-    df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
-)
-df_OuterJoined["s4_dangerEncy"] = (
-    df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
-)
+df_OuterJoined["s1_dangerEncy"] = (df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"])
+df_OuterJoined["s2_dangerEncy"] = (df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"])
+df_OuterJoined["s3_dangerEncy"] = (df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"])
+df_OuterJoined["s4_dangerEncy"] = (df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"])
 df_OuterJoined.head(2)
 
 # %%
-df_OuterJoined.drop(labels=[ "normal", "alert", "danger", "emergency",
+df_OuterJoined.drop(labels=["normal", "alert", "danger", "emergency",
                             "s1_normal", "s1_alert", "s1_danger", "s1_emergency",
                             "s2_normal", "s2_alert", "s2_danger", "s2_emergency",
                             "s3_normal", "s3_alert", "s3_danger", "s3_emergency",
                             "s4_normal", "s4_alert", "s4_danger", "s4_emergency"],
                     axis=1, inplace=True)
+
+df_OuterJoined.head(2)
 
 # %% [markdown]
 # ## Inventory
@@ -176,9 +170,7 @@ print(inventory_2017.shape)
 inventory_2017.head(3)
 
 # %%
-df_OuterJoined = df_OuterJoined[
-    df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)
-]
+df_OuterJoined = df_OuterJoined[df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)]
 
 # %% [markdown]
 # # WARNING.
@@ -227,17 +219,17 @@ inventory_2017.head(2)
 # Since ```NPP``` exist after 2001, we filter ```SW``` from 2001 as well. Otherwise, there is no other reason.
 
 # %%
-npp_cols = ["county_total_npp", "unit_npp"]
+npp_cols = ["county_total_npp", "unit_npp", "unit_npp_std", "county_total_npp_std"]
 
 sw_cols = [
-    "S1_countyMean_total_precip",
-    "S2_countyMean_total_precip",
-    "S3_countyMean_total_precip",
-    "S4_countyMean_total_precip",
-    "S1_countyMean_avg_Tavg",
-    "S2_countyMean_avg_Tavg",
-    "S3_countyMean_avg_Tavg",
-    "S4_countyMean_avg_Tavg",
+    "s1_countymean_total_precip",
+    "s2_countymean_total_precip",
+    "s3_countymean_total_precip",
+    "s4_countymean_total_precip",
+    "s1_countymean_avg_tavg",
+    "s2_countymean_avg_tavg",
+    "s3_countymean_avg_tavg",
+    "s4_countymean_avg_tavg",
 ]
 
 
@@ -302,9 +294,7 @@ print(inventory_2017.shape)
 inventory_2017.head(2)
 
 # %%
-inv_2017_NPP_SW_heat_avg = pd.merge(
-    inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left"
-)
+inv_2017_NPP_SW_heat_avg = pd.merge(inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left")
 inv_2017_NPP_SW_heat_avg.head(2)
 
 # %% [markdown]
@@ -318,12 +308,38 @@ all_indp_vars = list(set(HS_var + sw_cols + npp_cols))  # AW_vars
 all_indp_vars
 
 # %%
+print (inv_2017_NPP_SW_heat_avg.unit_npp_std.min())
+print (inv_2017_NPP_SW_heat_avg.unit_npp_std.max())
+print ()
+print (inv_2017_NPP_SW_heat_avg.unit_npp.min())
+print (inv_2017_NPP_SW_heat_avg.unit_npp.max())
+print ()
+print (inv_2017_NPP_SW_heat_avg.county_total_npp_std.min())
+print (inv_2017_NPP_SW_heat_avg.county_total_npp_std.max())
+print ()
+print (inv_2017_NPP_SW_heat_avg.county_total_npp.min())
+print (inv_2017_NPP_SW_heat_avg.county_total_npp.max())
+
+# %%
 inv_2017_NPP_SW_heat_avg_normal = inv_2017_NPP_SW_heat_avg.copy()
 inv_2017_NPP_SW_heat_avg_normal[all_indp_vars] = (
     inv_2017_NPP_SW_heat_avg_normal[all_indp_vars]
     - inv_2017_NPP_SW_heat_avg_normal[all_indp_vars].mean()
 ) / inv_2017_NPP_SW_heat_avg_normal[all_indp_vars].std(ddof=1)
 inv_2017_NPP_SW_heat_avg_normal.head(2)
+
+# %%
+print (inv_2017_NPP_SW_heat_avg_normal.unit_npp_std.min())
+print (inv_2017_NPP_SW_heat_avg_normal.unit_npp_std.max())
+print ()
+print (inv_2017_NPP_SW_heat_avg_normal.unit_npp.min())
+print (inv_2017_NPP_SW_heat_avg_normal.unit_npp.max())
+print ()
+print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp_std.min())
+print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp_std.max())
+print ()
+print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp.min())
+print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp.max())
 
 # %% [markdown]
 # # Model
@@ -335,6 +351,21 @@ inv_2017_NPP_SW_heat_avg_normal.head(2)
 
 # %%
 indp_vars = ["county_total_npp"]
+y_var = "inventory"
+
+#################################################################
+X_npp = inv_2017_NPP_SW_heat_avg_normal[indp_vars]
+X_npp = sm.add_constant(X_npp)
+Y = np.log(inv_2017_NPP_SW_heat_avg_normal[y_var].astype(float))
+npp_inv_model = sm.OLS(Y, X_npp)
+npp_inv_model_result = npp_inv_model.fit()
+npp_inv_model_result.summary()
+
+# %%
+del (X_npp, npp_inv_model, npp_inv_model_result)
+
+# %%
+indp_vars = ["county_total_npp", "county_total_npp_std"]
 y_var = "inventory"
 
 #################################################################
@@ -636,7 +667,45 @@ model_result.summary()
 del (indp_vars, X, Y, model_, model_result, curr_all)
 
 # %%
+indp_vars = ["county_total_npp", "rangeland_acre", "county_total_npp_std"]
+y_var = "inventory"
+
+#################################################################
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+del (indp_vars, X, Y, model_, model_result, curr_all)
+
+# %%
 indp_vars = ["unit_npp", "rangeland_acre"]
+y_var = "inventory"
+
+#################################################################
+curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
+curr_all.dropna(how="any", inplace=True)
+
+X = curr_all[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(curr_all[y_var].astype(float))
+
+model_ = sm.OLS(Y, X)
+model_result = model_.fit()
+model_result.summary()
+
+# %%
+del (indp_vars, X, Y, model_, model_result, curr_all)
+
+# %%
+indp_vars = ["unit_npp", "rangeland_acre", "unit_npp_std"]
 y_var = "inventory"
 
 #################################################################
@@ -1118,6 +1187,10 @@ Y = np.log(curr_all[y_var].astype(float))
 model_ = sm.OLS(Y, X)
 model_result = model_.fit()
 model_result.summary()
+
+# %%
+
+# %%
 
 # %%
 

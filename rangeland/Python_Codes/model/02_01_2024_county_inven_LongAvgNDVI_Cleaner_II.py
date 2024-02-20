@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -138,19 +138,17 @@ df_OuterJoined.head(2)
 (df_OuterJoined.columns)
 
 # %%
-df_OuterJoined.drop(labels=["normal", "alert", "danger", "emergency",
-                            "s1_normal", "s1_alert", "s1_danger", "s1_emergency",
-                            "s2_normal", "s2_alert", "s2_danger", "s2_emergency",
-                            "s3_normal", "s3_alert", "s3_danger", "s3_emergency",
-                            "s4_normal", "s4_alert", "s4_danger", "s4_emergency",
-                            "s1_sum_avhrr_ndvi", "s2_sum_avhrr_ndvi", "s3_sum_avhrr_ndvi", "s4_sum_avhrr_ndvi",
-                            "s1_sum_gimms_ndvi", "s2_sum_gimms_ndvi", "s3_sum_gimms_ndvi", "s4_sum_gimms_ndvi",
-                            "s1_max_avhrr_ndvi", "s2_max_avhrr_ndvi", "s3_max_avhrr_ndvi", "s4_max_avhrr_ndvi",
-                            "s1_max_gimms_ndvi", "s2_max_gimms_ndvi", "s3_max_gimms_ndvi", "s4_max_gimms_ndvi",
-                            "s1_mean_avhrr_ndvi", "s2_mean_avhrr_ndvi", "s3_mean_avhrr_ndvi", "s4_mean_avhrr_ndvi",
-                            "s1_mean_gimms_ndvi", "s2_mean_gimms_ndvi", "s3_mean_gimms_ndvi", "s4_mean_gimms_ndvi"
-                           ],
-                    axis=1, inplace=True)
+gimms_cols = [x for x in (df_OuterJoined.columns) if "gimms" in x]
+avhrr_cols = [x for x in (df_OuterJoined.columns) if "avhrr" in x]
+
+# %%
+LL = gimms_cols + avhrr_cols + \
+     ["normal", "alert", "danger", "emergency",
+      "s1_normal", "s1_alert", "s1_danger", "s1_emergency",
+      "s2_normal", "s2_alert", "s2_danger", "s2_emergency",
+      "s3_normal", "s3_alert", "s3_danger", "s3_emergency",
+      "s4_normal", "s4_alert", "s4_danger", "s4_emergency"]
+df_OuterJoined.drop(labels = LL, axis=1, inplace=True)
 
 # %%
 (df_OuterJoined.columns)
@@ -228,11 +226,8 @@ sw_cols = [
     "S4_countyMean_avg_Tavg",
 ]
 
-
+sw_cols = [x.lower() for x in sw_cols]
 heat_cols = ["dangerEncy"]
-
-# %%
-mean_ndvi_cols
 
 # %%
 common_cols = ["county_fips", "year"]
@@ -282,9 +277,7 @@ print(inventory_snap.shape)
 inventory_snap.head(2)
 
 # %%
-inv_snap_ndvi_SW_heat_avg = pd.merge(
-    inventory_snap, ndvi_SW_heat_avg, on=["county_fips"], how="left"
-)
+inv_snap_ndvi_SW_heat_avg = pd.merge(inventory_snap, ndvi_SW_heat_avg, on=["county_fips"], how="left")
 inv_snap_ndvi_SW_heat_avg.head(2)
 
 # %%
@@ -324,6 +317,24 @@ mean_ndvi_cols
 
 # %%
 indp_vars = mean_ndvi_cols
+y_var = "inventory"
+
+#################################################################
+X = inv_snap_ndvi_SW_heat_avg_normal[indp_vars]
+X = sm.add_constant(X)
+Y = np.log(inv_snap_ndvi_SW_heat_avg_normal[y_var].astype(float))
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
+
+# %%
+del (X, model, model_result)
+
+# %%
+inv_snap_ndvi_SW_heat_avg_normal.columns
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_month_modis", "ndvi_std_modis"]
 y_var = "inventory"
 
 #################################################################
