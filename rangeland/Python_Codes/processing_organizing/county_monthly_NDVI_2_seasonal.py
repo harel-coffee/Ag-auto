@@ -49,10 +49,37 @@ Min_files
 
 # %%
 file_name = Min_files[0]
+print (file_name)
 ndvi = pd.read_csv(Min_data_base + file_name)
 ndvi.rename(columns={"county": "county_fips"}, inplace=True)
 ndvi = rc.correct_Mins_county_6digitFIPS(df=ndvi, col_="county_fips")
 
+###### Three new vars (Max NDVI, Max NDVI DoY, and NDVI std)
+max_ndvi_per_yr_idx_df = ndvi.groupby(["county_fips", "year"])["NDVI"].idxmax().reset_index()
+max_ndvi_per_yr_idx_df.rename(columns={"NDVI": "max_ndvi_per_year_idx"}, inplace=True)
+max_ndvi_per_yr_idx_df.head(2)
+
+
+max_ndvi_per_yr = ndvi.loc[max_ndvi_per_yr_idx_df.max_ndvi_per_year_idx]
+
+max_ndvi_per_yr.rename(columns={"month" : "max_ndvi_month",
+                                "NDVI" : "max_ndvi_in_year" }, inplace=True)
+
+max_ndvi_per_yr = max_ndvi_per_yr[["county_fips", "year", "max_ndvi_month", "max_ndvi_in_year"]]
+max_ndvi_per_yr.sort_values(by=["county_fips", "year"], inplace=True)
+max_ndvi_per_yr.reset_index(drop=True, inplace=True)
+max_ndvi_per_yr.head(2)
+
+ndvi_variance = ndvi.groupby(["county_fips"])["NDVI"].std(ddof=1).reset_index()
+ndvi_variance.rename(columns={"NDVI": "ndvi_std"}, inplace=True)
+ndvi_variance.head(2)
+
+# ndvi_variance.to_frame()
+
+ndvi_three_vars = pd.merge(max_ndvi_per_yr, ndvi_variance, on=["county_fips"], how="outer")
+ndvi_three_vars.head(2)
+
+##################################################################################
 S1 = ndvi[ndvi.month.isin([1, 2, 3])]
 S2 = ndvi[ndvi.month.isin([4, 5, 6, 7])]
 S3 = ndvi[ndvi.month.isin([8, 9])]
@@ -70,11 +97,11 @@ S3 = S3.groupby(["year", "county_fips"]).mean().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).mean().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_mean_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_mean_" + new_name}, inplace=True)
@@ -82,22 +109,50 @@ S3.rename(columns={"NDVI": "s3_mean_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_mean_" + new_name}, inplace=True)
 
 seasonal_ndvi_avhrr = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_avhrr = pd.merge(
-    seasonal_ndvi_avhrr, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_avhrr = pd.merge(
-    seasonal_ndvi_avhrr, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_avhrr = pd.merge(seasonal_ndvi_avhrr, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_avhrr = pd.merge(seasonal_ndvi_avhrr, S4, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_avhrr = pd.merge(seasonal_ndvi_avhrr, ndvi_three_vars, on=["county_fips", "year"], how="outer")
+
+postfix = "_" + file_name.split("_")[2].lower()
+seasonal_ndvi_avhrr.rename(columns={"max_ndvi_month" : "max_ndvi_month" + postfix,
+                                    "max_ndvi_in_year" : "max_ndvi_in_year" + postfix,
+                                    "ndvi_std" : "ndvi_std" + postfix}, inplace=True)
+
 seasonal_ndvi_avhrr.head(2)
 
 # %%
-del (S1, S2, S3, S4, ndvi)
+del (S1, S2, S3, S4, ndvi, ndvi_three_vars)
 
-# %%
 file_name = Min_files[1]
 ndvi = pd.read_csv(Min_data_base + file_name)
 ndvi.rename(columns={"county": "county_fips"}, inplace=True)
 ndvi = rc.correct_Mins_county_6digitFIPS(df=ndvi, col_="county_fips")
+###### Three new vars (Max NDVI, Max NDVI DoY, and NDVI std)
+max_ndvi_per_yr_idx_df = ndvi.groupby(["county_fips", "year"])["NDVI"].idxmax().reset_index()
+max_ndvi_per_yr_idx_df.rename(columns={"NDVI": "max_ndvi_per_year_idx"}, inplace=True)
+max_ndvi_per_yr_idx_df.head(2)
+
+
+max_ndvi_per_yr = ndvi.loc[max_ndvi_per_yr_idx_df.max_ndvi_per_year_idx]
+
+max_ndvi_per_yr.rename(columns={"month" : "max_ndvi_month",
+                                "NDVI" : "max_ndvi_in_year" }, inplace=True)
+
+max_ndvi_per_yr = max_ndvi_per_yr[["county_fips", "year", "max_ndvi_month", "max_ndvi_in_year"]]
+max_ndvi_per_yr.sort_values(by=["county_fips", "year"], inplace=True)
+max_ndvi_per_yr.reset_index(drop=True, inplace=True)
+max_ndvi_per_yr.head(2)
+
+ndvi_variance = ndvi.groupby(["county_fips"])["NDVI"].std(ddof=1).reset_index()
+ndvi_variance.rename(columns={"NDVI": "ndvi_std"}, inplace=True)
+ndvi_variance.head(2)
+
+# ndvi_variance.to_frame()
+
+ndvi_three_vars = pd.merge(max_ndvi_per_yr, ndvi_variance, on=["county_fips"], how="outer")
+ndvi_three_vars.head(2)
+
+##################################################################################
 
 S1 = ndvi[ndvi.month.isin([1, 2, 3])]
 S2 = ndvi[ndvi.month.isin([4, 5, 6, 7])]
@@ -116,11 +171,12 @@ S3 = S3.groupby(["year", "county_fips"]).mean().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).mean().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
+
 
 S1.rename(columns={"NDVI": "s1_mean_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_mean_" + new_name}, inplace=True)
@@ -128,21 +184,52 @@ S3.rename(columns={"NDVI": "s3_mean_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_mean_" + new_name}, inplace=True)
 
 seasonal_ndvi_gimms = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_gimms = pd.merge(
-    seasonal_ndvi_gimms, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_gimms = pd.merge(
-    seasonal_ndvi_gimms, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S4, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, ndvi_three_vars, on=["county_fips", "year"], how="outer")
+
+postfix = "_" + file_name.split("_")[2].lower()
+seasonal_ndvi_gimms.rename(columns={"max_ndvi_month" : "max_ndvi_month" + postfix,
+                                    "max_ndvi_in_year" : "max_ndvi_in_year" + postfix,
+                                    "ndvi_std" : "ndvi_std" + postfix}, inplace=True)
+
 seasonal_ndvi_gimms.head(2)
 
-del (S1, S2, S3, S4, ndvi)
+# %%
+del (S1, S2, S3, S4, ndvi, ndvi_three_vars)
 
 # %%
 file_name = Min_files[2]
 ndvi = pd.read_csv(Min_data_base + file_name)
 ndvi.rename(columns={"county": "county_fips"}, inplace=True)
 ndvi = rc.correct_Mins_county_6digitFIPS(df=ndvi, col_="county_fips")
+
+###### Three new vars (Max NDVI, Max NDVI DoY, and NDVI std)
+max_ndvi_per_yr_idx_df = ndvi.groupby(["county_fips", "year"])["NDVI"].idxmax().reset_index()
+max_ndvi_per_yr_idx_df.rename(columns={"NDVI": "max_ndvi_per_year_idx"}, inplace=True)
+max_ndvi_per_yr_idx_df.head(2)
+
+
+max_ndvi_per_yr = ndvi.loc[max_ndvi_per_yr_idx_df.max_ndvi_per_year_idx]
+
+max_ndvi_per_yr.rename(columns={"month" : "max_ndvi_month",
+                                "NDVI" : "max_ndvi_in_year" }, inplace=True)
+
+max_ndvi_per_yr = max_ndvi_per_yr[["county_fips", "year", "max_ndvi_month", "max_ndvi_in_year"]]
+max_ndvi_per_yr.sort_values(by=["county_fips", "year"], inplace=True)
+max_ndvi_per_yr.reset_index(drop=True, inplace=True)
+max_ndvi_per_yr.head(2)
+
+ndvi_variance = ndvi.groupby(["county_fips"])["NDVI"].std(ddof=1).reset_index()
+ndvi_variance.rename(columns={"NDVI": "ndvi_std"}, inplace=True)
+ndvi_variance.head(2)
+
+# ndvi_variance.to_frame()
+
+ndvi_three_vars = pd.merge(max_ndvi_per_yr, ndvi_variance, on=["county_fips"], how="outer")
+ndvi_three_vars.head(2)
+
+##################################################################################
 
 S1 = ndvi[ndvi.month.isin([1, 2, 3])]
 S2 = ndvi[ndvi.month.isin([4, 5, 6, 7])]
@@ -161,11 +248,11 @@ S3 = S3.groupby(["year", "county_fips"]).mean().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).mean().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_mean_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_mean_" + new_name}, inplace=True)
@@ -175,7 +262,17 @@ S4.rename(columns={"NDVI": "s4_mean_" + new_name}, inplace=True)
 seasonal_ndvi_modis = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S3, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S4, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, ndvi_three_vars, on=["county_fips", "year"], how="outer")
+
+postfix = "_" + file_name.split("_")[2].lower()
+seasonal_ndvi_modis.rename(columns={"max_ndvi_month" : "max_ndvi_month" + postfix,
+                                    "max_ndvi_in_year" : "max_ndvi_in_year" + postfix,
+                                    "ndvi_std" : "ndvi_std" + postfix}, inplace=True)
+
 seasonal_ndvi_modis.head(2)
+
+# %%
+del (S1, S2, S3, S4, ndvi, ndvi_three_vars)
 
 # %%
 print(f"{seasonal_ndvi_avhrr.shape = }")
@@ -322,12 +419,8 @@ seasonal_ndvi_gimms.head(2)
 seasonal_ndvi_modis.head(2)
 
 # %%
-seasonal_ndvi_mean = pd.merge(
-    seasonal_ndvi_avhrr, seasonal_ndvi_gimms, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_mean = pd.merge(
-    seasonal_ndvi_mean, seasonal_ndvi_modis, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_mean = pd.merge(seasonal_ndvi_avhrr, seasonal_ndvi_gimms, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_mean = pd.merge(seasonal_ndvi_mean, seasonal_ndvi_modis, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_mean.head(2)
 
 # %%
@@ -364,11 +457,11 @@ S3 = S3.groupby(["year", "county_fips"]).max().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).max().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_max_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_max_" + new_name}, inplace=True)
@@ -376,12 +469,8 @@ S3.rename(columns={"NDVI": "s3_max_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_max_" + new_name}, inplace=True)
 
 seasonal_ndvi_avhrr = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_avhrr = pd.merge(
-    seasonal_ndvi_avhrr, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_avhrr = pd.merge(
-    seasonal_ndvi_avhrr, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_avhrr = pd.merge(seasonal_ndvi_avhrr, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_avhrr = pd.merge(seasonal_ndvi_avhrr, S4, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_avhrr.head(2)
 
 # %%
@@ -410,11 +499,11 @@ S3 = S3.groupby(["year", "county_fips"]).max().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).max().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_max_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_max_" + new_name}, inplace=True)
@@ -422,12 +511,8 @@ S3.rename(columns={"NDVI": "s3_max_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_max_" + new_name}, inplace=True)
 
 seasonal_ndvi_gimms = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_gimms = pd.merge(
-    seasonal_ndvi_gimms, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_gimms = pd.merge(
-    seasonal_ndvi_gimms, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S4, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_gimms.head(2)
 
 del (S1, S2, S3, S4, ndvi)
@@ -455,11 +540,11 @@ S3 = S3.groupby(["year", "county_fips"]).max().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).max().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_max_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_max_" + new_name}, inplace=True)
@@ -467,12 +552,8 @@ S3.rename(columns={"NDVI": "s3_max_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_max_" + new_name}, inplace=True)
 
 seasonal_ndvi_modis = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_modis = pd.merge(
-    seasonal_ndvi_modis, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_modis = pd.merge(
-    seasonal_ndvi_modis, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_modis = pd.merge(seasonal_ndvi_modis, S4, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_modis.head(2)
 
 # %%
@@ -484,12 +565,8 @@ print(f"{seasonal_ndvi_modis.shape = }")
 seasonal_ndvi_modis.head(2)
 
 # %%
-seasonal_ndvi_max = pd.merge(
-    seasonal_ndvi_avhrr, seasonal_ndvi_gimms, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_max = pd.merge(
-    seasonal_ndvi_max, seasonal_ndvi_modis, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_max = pd.merge(seasonal_ndvi_avhrr, seasonal_ndvi_gimms, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_max = pd.merge(seasonal_ndvi_max, seasonal_ndvi_modis, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_max.head(2)
 
 # %%
@@ -526,11 +603,11 @@ S3 = S3.groupby(["year", "county_fips"]).sum().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).sum().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_sum_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_sum_" + new_name}, inplace=True)
@@ -538,12 +615,8 @@ S3.rename(columns={"NDVI": "s3_sum_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_sum_" + new_name}, inplace=True)
 
 seasonal_ndvi_avhrr = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_avhrr = pd.merge(
-    seasonal_ndvi_avhrr, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_avhrr = pd.merge(
-    seasonal_ndvi_avhrr, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_avhrr = pd.merge(seasonal_ndvi_avhrr, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_avhrr = pd.merge(seasonal_ndvi_avhrr, S4, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_avhrr.head(2)
 
 # %%
@@ -572,11 +645,11 @@ S3 = S3.groupby(["year", "county_fips"]).sum().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).sum().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_sum_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_sum_" + new_name}, inplace=True)
@@ -584,12 +657,8 @@ S3.rename(columns={"NDVI": "s3_sum_" + new_name}, inplace=True)
 S4.rename(columns={"NDVI": "s4_sum_" + new_name}, inplace=True)
 
 seasonal_ndvi_gimms = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_gimms = pd.merge(
-    seasonal_ndvi_gimms, S3, on=["county_fips", "year"], how="outer"
-)
-seasonal_ndvi_gimms = pd.merge(
-    seasonal_ndvi_gimms, S4, on=["county_fips", "year"], how="outer"
-)
+seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S3, on=["county_fips", "year"], how="outer")
+seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S4, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_gimms.head(2)
 
 del (S1, S2, S3, S4, ndvi)
@@ -617,11 +686,11 @@ S3 = S3.groupby(["year", "county_fips"]).sum().reset_index()
 S4 = S4.groupby(["year", "county_fips"]).sum().reset_index()
 
 if "MODIS" in file_name:
-    new_name = "modis_ndvi"
+    new_name = "ndvi_modis"
 elif "AVHRR" in file_name:
-    new_name = "avhrr_ndvi"
+    new_name = "ndvi_avhrr"
 elif "GIMMS" in file_name:
-    new_name = "gimms_ndvi"
+    new_name = "ndvi_gimms"
 
 S1.rename(columns={"NDVI": "s1_sum_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_sum_" + new_name}, inplace=True)
@@ -671,7 +740,7 @@ print(seasonal_ndvi_sum.shape)
 print(seasonal_ndvi_avhrr.shape)
 
 # %%
-seasonal_ndvi = pd.merge(seasonal_ndvi_sum, seasonal_ndvi_mean, on=["county_fips", "year"], how="outer")
+seasonal_ndvi = pd.merge(seasonal_ndvi_mean, seasonal_ndvi_sum, on=["county_fips", "year"], how="outer")
 seasonal_ndvi = pd.merge(seasonal_ndvi, seasonal_ndvi_max, on=["county_fips", "year"], how="outer")
 seasonal_ndvi.head(2)
 
@@ -686,8 +755,7 @@ export_ = {
     "source_code": "county_monthly_NDVI_2_seasonal",
     "Author": "HN",
     "Note": "The county level NDVI files have missing months in them and are not consistent.",
-    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-}
+    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 pickle.dump(export_, open(filename, "wb"))
 

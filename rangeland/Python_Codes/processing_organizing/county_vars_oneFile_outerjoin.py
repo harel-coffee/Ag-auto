@@ -126,6 +126,25 @@ cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp, npp_unit_col_="unit_np
 cty_yr_npp.head(2)
 
 # %% [markdown]
+# ## add NPP std
+
+# %%
+npp_unit_std = cty_yr_npp.groupby(["county_fips"])["unit_npp"].std(ddof=1).reset_index()
+cty_yr_npp.head(2)
+
+
+# %%
+npp_total_std = cty_yr_npp.groupby(["county_fips"])["county_total_npp"].std(ddof=1).reset_index()
+npp_unit_std.rename(columns={"unit_npp": "unit_npp_std"}, inplace=True)
+npp_total_std.rename(columns={"county_total_npp": "county_total_npp_std"}, inplace=True)
+npp_std = pd.merge(npp_unit_std, npp_total_std, on=["county_fips"], how="left")
+npp_std.head(2)
+
+# %%
+cty_yr_npp = pd.merge(cty_yr_npp, npp_std, on=["county_fips"], how="left")
+cty_yr_npp.head(2)
+
+# %% [markdown]
 # ### Weather
 
 # %%
@@ -171,13 +190,8 @@ SW.head(2)
 cnty_grid_mean_idx = pd.read_csv(Min_data_base + "county_gridmet_mean_indices.csv")
 cnty_grid_mean_idx.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 cnty_grid_mean_idx.rename(columns={"county": "county_fips"}, inplace=True)
-cnty_grid_mean_idx = rc.correct_Mins_county_6digitFIPS(
-    df=cnty_grid_mean_idx, col_="county_fips"
-)
-
-cnty_grid_mean_idx = cnty_grid_mean_idx[
-    ["year", "month", "county_fips", "normal", "alert", "danger", "emergency"]
-]
+cnty_grid_mean_idx = rc.correct_Mins_county_6digitFIPS(df=cnty_grid_mean_idx, col_="county_fips")
+cnty_grid_mean_idx = cnty_grid_mean_idx[["year", "month", "county_fips", "normal", "alert", "danger", "emergency"]]
 
 for a_col in ["normal", "alert", "danger", "emergency"]:
     cnty_grid_mean_idx[a_col] = cnty_grid_mean_idx[a_col].astype(int)
@@ -297,9 +311,7 @@ human_population = human_population["human_population"]
 
 slaughter_Q1 = pd.read_pickle(reOrganized_dir + "slaughter_Q1.sav")
 slaughter_Q1 = slaughter_Q1["slaughter_Q1"]
-slaughter_Q1.rename(
-    columns={"cattle_on_feed_sale_4_slaughter": "slaughter"}, inplace=True
-)
+slaughter_Q1.rename(columns={"cattle_on_feed_sale_4_slaughter": "slaughter"}, inplace=True)
 slaughter_Q1 = slaughter_Q1[["year", "county_fips", "slaughter"]]
 print("max slaughter sale is [{}]".format(slaughter_Q1.slaughter.max()))
 
@@ -338,10 +350,10 @@ export_ = {
     "SoI": SoI,
     "SoI_abb": SoI_abb,
     "abb_dict": abb_dict,
-    "heat": cnty_grid_mean_idx,
+    "heat" : cnty_grid_mean_idx,
     "annual_heat": annual_heat,
-    "seasonal_heat": seasonal_heat,
-    "county_fips": county_fips,
+    "seasonal_heat" : seasonal_heat,
+    "county_fips" : county_fips,
     "npp": cty_yr_npp,
     "feed_expense": feed_expense,
     "herb": herb,
@@ -421,7 +433,8 @@ annual_heat.head(2)
 cty_yr_npp.head(2)
 
 # %%
-cty_yr_npp = cty_yr_npp[["county_fips", "year", "unit_npp", "county_total_npp"]]
+cty_yr_npp = cty_yr_npp[["county_fips", "year", "unit_npp", "county_total_npp", 
+                         "unit_npp_std", "county_total_npp_std"]]
 cty_yr_npp.head(2)
 
 # %%
@@ -488,6 +501,7 @@ print(all_df.shape)
 all_df.head(2)
 
 # %%
+all_df.sort_values(by=["county_fips", "year"], inplace=True)
 
 # %%
 import pickle
@@ -504,6 +518,12 @@ export_ = {
 
 pickle.dump(export_, open(filename, "wb"))
 
+# %%
+all_df.sort_values(by=["county_fips", "year"], inplace=True)
+all_df.head(2)
+
+# %%
+
 # %% [markdown]
 # # Maybe we need to think about normalization
 # in case of test and train.
@@ -513,8 +533,6 @@ all_df_normalized = all_df.copy()
 all_df_normalized.head(2)
 
 non_number_cols = ["EW", "Pallavi", "county_fips", "county_name", "state"]
-numeric_cols = [
-    x for x in sorted(all_df_normalized.columns) if not (x in non_number_cols)
-]
+numeric_cols = [x for x in sorted(all_df_normalized.columns) if not (x in non_number_cols)]
 
 # %%
