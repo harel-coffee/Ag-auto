@@ -82,11 +82,32 @@ FarmOperation = USDA_data['FarmOperation']
 
 beef_fromCATINV_csv = USDA_data["beef_fromCATINV_csv"]
 Shannon_beef_fromCATINV_deltas = USDA_data["Shannon_beef_fromCATINV_deltas"]
-Shannon_Beef_Cows_fromCATINV_tall = USDA_data["Shannon_Beef_Cows_fromCATINV_tall"]
+Shannon_cows_tall = USDA_data["Shannon_Beef_Cows_fromCATINV_tall"]
 
 feed_expense = USDA_data['feed_expense']
 slaughter = USDA_data['slaughter']
 wetLand_area = USDA_data['wetLand_area']
+
+# %%
+beef_fromCATINV_csv.head(2)
+
+# %%
+beef_fromCATINV_csv.state.unique()
+
+# %%
+Shannon_cows_tall.state.unique()
+
+# %%
+Shannon_cows_tall = Shannon_cows_tall[Shannon_cows_tall.state != "US"]
+beef_fromCATINV_csv = beef_fromCATINV_csv[beef_fromCATINV_csv.state != "US"]
+Shannon_cows_tall.state_fips.unique()
+
+# %%
+beef_fromCATINV_csv.state_fips.unique()
+
+# %%
+Shannon_cows_tall.reset_index(drop=True, inplace=True)
+beef_fromCATINV_csv.reset_index(drop=True, inplace=True)
 
 # %%
 AgLand.head(2)
@@ -133,6 +154,20 @@ herb = herb.round(3)
 herb.drop(columns=["pixel_count"], inplace=True)
 herb.drop(['state'], axis=1, inplace=True)
 herb.head(2)
+
+# %%
+herb2 = pd.read_pickle(reOrganized_dir + "county_state_NDVIDOY_Herb.sav")
+herb2.keys()
+
+# %%
+County_NDVIDOY_Herb = herb2['County_NDVIDOY_Herb']
+County_NDVIDOY_Herb.head(2)
+
+# %%
+County_NDVIDOY_Herb["state_fips"] = County_NDVIDOY_Herb.county_fips.str.slice(start=0, stop=2)
+County_NDVIDOY_Herb.head(2)
+WA_County_NDVIDOY_Herb = County_NDVIDOY_Herb[County_NDVIDOY_Herb.state_fips == "53"]
+sorted(WA_County_NDVIDOY_Herb.maxNDVI_DoY_countyMean.unique())
 
 # %% [markdown]
 # ### RA
@@ -464,8 +499,8 @@ slaughter.head(2)
 wetLand_area.head(2)
 
 # %%
-Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall[["year", "inventory", "state_fips"]]
-Shannon_Beef_Cows_fromCATINV_tall.head(2)
+Shannon_cows_tall = Shannon_cows_tall[["year", "inventory", "state_fips"]]
+Shannon_cows_tall.head(2)
 
 # %%
 Shannon_beef_fromCATINV_deltas.head(2)
@@ -570,7 +605,7 @@ human_population.head(2)
 slaughter.head(2)
 
 # %%
-Shannon_Beef_Cows_fromCATINV_tall.head(2)
+Shannon_cows_tall.head(2)
 
 # %%
 beef_fromCATINV_csv.head(2)
@@ -580,7 +615,7 @@ wetLand_area = wetLand_area[["state_fips", "year", "crp_wetland_acr"]]
 wetLand_area.head(2)
 
 # %%
-annual_outer = pd.merge(Shannon_Beef_Cows_fromCATINV_tall, state_yr_npp, on=["state_fips", "year"], how="outer")
+annual_outer = pd.merge(Shannon_cows_tall, state_yr_npp, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, slaughter, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, human_population, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, feed_expense, on=["state_fips", "year"], how="outer")
@@ -627,5 +662,11 @@ pickle.dump(export_, open(filename, "wb"))
 
 # %%
 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+# %%
+
+# %%
+
+# %%
 
 # %%

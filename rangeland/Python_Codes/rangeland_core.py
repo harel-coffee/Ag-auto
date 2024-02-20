@@ -34,9 +34,6 @@ def covert_totalNpp_2_unit(NPP_df, npp_total_col_, area_m2_col_, npp_unit_col_na
     Units are Kg * C / m^2
 
     1 m^2 = 0.000247105 acres
-
-
-
     """
     NPP_df[npp_unit_col_name_] = NPP_df[npp_total_col_] / NPP_df[area_m2_col_]
     return NPP_df

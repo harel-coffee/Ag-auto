@@ -207,10 +207,8 @@ for a_year in gridmet_mean_indices.year.unique():
         seasonal.loc[wide_pointer, "s2_statemean_avg_tavg"] = \
                                         curr_df_s2.sum_tavg.sum() / no_days_in_each_season["season_2"]
         
-        
         seasonal.loc[wide_pointer, "s3_statemean_avg_tavg"] = \
                                         curr_df_s3.sum_tavg.sum() / no_days_in_each_season["season_3"]
-        
         
         seasonal.loc[wide_pointer, "s4_statemean_avg_tavg"] = \
                                         curr_df_s4.sum_tavg.sum() / no_days_in_each_season["season_4"]
