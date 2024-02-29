@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -58,7 +58,6 @@ ndvi = rc.correct_Mins_county_6digitFIPS(df=ndvi, col_="county_fips")
 max_ndvi_per_yr_idx_df = ndvi.groupby(["county_fips", "year"])["NDVI"].idxmax().reset_index()
 max_ndvi_per_yr_idx_df.rename(columns={"NDVI": "max_ndvi_per_year_idx"}, inplace=True)
 max_ndvi_per_yr_idx_df.head(2)
-
 
 max_ndvi_per_yr = ndvi.loc[max_ndvi_per_yr_idx_df.max_ndvi_per_year_idx]
 
@@ -121,6 +120,67 @@ seasonal_ndvi_avhrr.rename(columns={"max_ndvi_month" : "max_ndvi_month" + postfi
 seasonal_ndvi_avhrr.head(2)
 
 # %%
+seasonal_ndvi_avhrr["max_ndvi_season_avhrr"] = 666
+seasonal_ndvi_avhrr['max_ndvi_season_avhrr'] = np.where(
+    seasonal_ndvi_avhrr['max_ndvi_month_avhrr'].isin([1, 2, 3]), 1, seasonal_ndvi_avhrr.max_ndvi_season_avhrr)
+
+seasonal_ndvi_avhrr['max_ndvi_season_avhrr'] = np.where(
+    seasonal_ndvi_avhrr['max_ndvi_month_avhrr'].isin([4, 5, 6, 7]), 2, seasonal_ndvi_avhrr.max_ndvi_season_avhrr)
+
+seasonal_ndvi_avhrr['max_ndvi_season_avhrr'] = np.where(
+    seasonal_ndvi_avhrr['max_ndvi_month_avhrr'].isin([8, 9]), 3, seasonal_ndvi_avhrr.max_ndvi_season_avhrr)
+
+seasonal_ndvi_avhrr['max_ndvi_season_avhrr'] = np.where(
+    seasonal_ndvi_avhrr['max_ndvi_month_avhrr'].isin([10, 11, 12]), 4, seasonal_ndvi_avhrr.max_ndvi_season_avhrr)
+
+######################################################################
+seasonal_ndvi_avhrr["max_ndvi_season_avhrr_str"] = seasonal_ndvi_avhrr["max_ndvi_season_avhrr"].astype(str)
+seasonal_ndvi_avhrr["max_ndvi_season_avhrr_str"] = "s" + seasonal_ndvi_avhrr["max_ndvi_season_avhrr_str"]
+######################################################################
+L = list(seasonal_ndvi_avhrr.columns)
+L.pop()
+seasonal_ndvi_avhrr = seasonal_ndvi_avhrr.pivot(index=L, 
+                                                columns='max_ndvi_season_avhrr_str', 
+                                                values='max_ndvi_season_avhrr')
+
+seasonal_ndvi_avhrr.reset_index(drop=False, inplace=True)
+seasonal_ndvi_avhrr.columns = seasonal_ndvi_avhrr.columns.values
+
+seasonal_ndvi_avhrr.rename(columns={"s1": "max_ndvi_season_avhrr_s1",
+                                    "s2": "max_ndvi_season_avhrr_s2",
+                                    "s3": "max_ndvi_season_avhrr_s3",
+                                    "s4": "max_ndvi_season_avhrr_s4"}, inplace=True)
+
+seasonal_ndvi_avhrr.head(2)
+######################################################################
+
+seasonal_ndvi_avhrr.fillna(value = {"max_ndvi_season_avhrr_s1": 0,
+                                    "max_ndvi_season_avhrr_s2": 0,
+                                    "max_ndvi_season_avhrr_s3": 0, 
+                                    "max_ndvi_season_avhrr_s4": 0},
+                          inplace=True)
+
+c = "max_ndvi_season_avhrr_s1"
+seasonal_ndvi_avhrr[c] = np.where(seasonal_ndvi_avhrr[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_avhrr[c])
+seasonal_ndvi_avhrr[c] = seasonal_ndvi_avhrr[c].astype(int)
+
+c = "max_ndvi_season_avhrr_s2"
+seasonal_ndvi_avhrr[c] = np.where(seasonal_ndvi_avhrr[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_avhrr[c])
+seasonal_ndvi_avhrr[c] = seasonal_ndvi_avhrr[c].astype(int)
+
+c = "max_ndvi_season_avhrr_s3"
+seasonal_ndvi_avhrr[c] = np.where(seasonal_ndvi_avhrr[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_avhrr[c])
+seasonal_ndvi_avhrr[c] = seasonal_ndvi_avhrr[c].astype(int)
+
+c = "max_ndvi_season_avhrr_s4"
+seasonal_ndvi_avhrr[c] = np.where(seasonal_ndvi_avhrr[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_avhrr[c])
+seasonal_ndvi_avhrr[c] = seasonal_ndvi_avhrr[c].astype(int)
+
+seasonal_ndvi_avhrr.head(2)
+
+# %%
+
+# %%
 del (S1, S2, S3, S4, ndvi, ndvi_three_vars)
 
 file_name = Min_files[1]
@@ -131,7 +191,6 @@ ndvi = rc.correct_Mins_county_6digitFIPS(df=ndvi, col_="county_fips")
 max_ndvi_per_yr_idx_df = ndvi.groupby(["county_fips", "year"])["NDVI"].idxmax().reset_index()
 max_ndvi_per_yr_idx_df.rename(columns={"NDVI": "max_ndvi_per_year_idx"}, inplace=True)
 max_ndvi_per_yr_idx_df.head(2)
-
 
 max_ndvi_per_yr = ndvi.loc[max_ndvi_per_yr_idx_df.max_ndvi_per_year_idx]
 
@@ -148,12 +207,10 @@ ndvi_variance.rename(columns={"NDVI": "ndvi_std"}, inplace=True)
 ndvi_variance.head(2)
 
 # ndvi_variance.to_frame()
-
 ndvi_three_vars = pd.merge(max_ndvi_per_yr, ndvi_variance, on=["county_fips"], how="outer")
 ndvi_three_vars.head(2)
 
 ##################################################################################
-
 S1 = ndvi[ndvi.month.isin([1, 2, 3])]
 S2 = ndvi[ndvi.month.isin([4, 5, 6, 7])]
 S3 = ndvi[ndvi.month.isin([8, 9])]
@@ -177,7 +234,6 @@ elif "AVHRR" in file_name:
 elif "GIMMS" in file_name:
     new_name = "ndvi_gimms"
 
-
 S1.rename(columns={"NDVI": "s1_mean_" + new_name}, inplace=True)
 S2.rename(columns={"NDVI": "s2_mean_" + new_name}, inplace=True)
 S3.rename(columns={"NDVI": "s3_mean_" + new_name}, inplace=True)
@@ -192,6 +248,65 @@ postfix = "_" + file_name.split("_")[2].lower()
 seasonal_ndvi_gimms.rename(columns={"max_ndvi_month" : "max_ndvi_month" + postfix,
                                     "max_ndvi_in_year" : "max_ndvi_in_year" + postfix,
                                     "ndvi_std" : "ndvi_std" + postfix}, inplace=True)
+
+seasonal_ndvi_gimms.head(2)
+
+# %%
+seasonal_ndvi_gimms["max_ndvi_season_gimms"] = 666
+seasonal_ndvi_gimms['max_ndvi_season_gimms'] = np.where(
+    seasonal_ndvi_gimms['max_ndvi_month_gimms'].isin([1, 2, 3]), 1, seasonal_ndvi_gimms.max_ndvi_season_gimms)
+
+seasonal_ndvi_gimms['max_ndvi_season_gimms'] = np.where(
+    seasonal_ndvi_gimms['max_ndvi_month_gimms'].isin([4, 5, 6, 7]), 2, seasonal_ndvi_gimms.max_ndvi_season_gimms)
+
+seasonal_ndvi_gimms['max_ndvi_season_gimms'] = np.where(
+    seasonal_ndvi_gimms['max_ndvi_month_gimms'].isin([8, 9]), 3, seasonal_ndvi_gimms.max_ndvi_season_gimms)
+
+seasonal_ndvi_gimms['max_ndvi_season_gimms'] = np.where(
+    seasonal_ndvi_gimms['max_ndvi_month_gimms'].isin([10, 11, 12]), 4, seasonal_ndvi_gimms.max_ndvi_season_gimms)
+
+######################################################################
+seasonal_ndvi_gimms["max_ndvi_season_gimms_str"] = seasonal_ndvi_gimms["max_ndvi_season_gimms"].astype(str)
+seasonal_ndvi_gimms["max_ndvi_season_gimms_str"] = "s" + seasonal_ndvi_gimms["max_ndvi_season_gimms_str"]
+######################################################################
+L = list(seasonal_ndvi_gimms.columns)
+L.pop()
+seasonal_ndvi_gimms = seasonal_ndvi_gimms.pivot(index=L, 
+                                                columns='max_ndvi_season_gimms_str', 
+                                                values='max_ndvi_season_gimms')
+
+seasonal_ndvi_gimms.reset_index(drop=False, inplace=True)
+seasonal_ndvi_gimms.columns = seasonal_ndvi_gimms.columns.values
+
+seasonal_ndvi_gimms.rename(columns={"s1": "max_ndvi_season_gimms_s1",
+                                    "s2": "max_ndvi_season_gimms_s2",
+                                    "s3": "max_ndvi_season_gimms_s3",
+                                    "s4": "max_ndvi_season_gimms_s4"}, inplace=True)
+
+seasonal_ndvi_gimms.head(2)
+######################################################################
+
+seasonal_ndvi_gimms.fillna(value = {"max_ndvi_season_gimms_s1": 0,
+                                    "max_ndvi_season_gimms_s2": 0,
+                                    "max_ndvi_season_gimms_s3": 0, 
+                                    "max_ndvi_season_gimms_s4": 0},
+                          inplace=True)
+
+c = "max_ndvi_season_gimms_s1"
+seasonal_ndvi_gimms[c] = np.where(seasonal_ndvi_gimms[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_gimms[c])
+seasonal_ndvi_gimms[c] = seasonal_ndvi_gimms[c].astype(int)
+
+c = "max_ndvi_season_gimms_s2"
+seasonal_ndvi_gimms[c] = np.where(seasonal_ndvi_gimms[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_gimms[c])
+seasonal_ndvi_gimms[c] = seasonal_ndvi_gimms[c].astype(int)
+
+c = "max_ndvi_season_gimms_s3"
+seasonal_ndvi_gimms[c] = np.where(seasonal_ndvi_gimms[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_gimms[c])
+seasonal_ndvi_gimms[c] = seasonal_ndvi_gimms[c].astype(int)
+
+c = "max_ndvi_season_gimms_s4"
+seasonal_ndvi_gimms[c] = np.where(seasonal_ndvi_gimms[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_gimms[c])
+seasonal_ndvi_gimms[c] = seasonal_ndvi_gimms[c].astype(int)
 
 seasonal_ndvi_gimms.head(2)
 
@@ -268,6 +383,65 @@ postfix = "_" + file_name.split("_")[2].lower()
 seasonal_ndvi_modis.rename(columns={"max_ndvi_month" : "max_ndvi_month" + postfix,
                                     "max_ndvi_in_year" : "max_ndvi_in_year" + postfix,
                                     "ndvi_std" : "ndvi_std" + postfix}, inplace=True)
+
+seasonal_ndvi_modis.head(2)
+
+# %%
+seasonal_ndvi_modis["max_ndvi_season_modis"] = 666
+seasonal_ndvi_modis['max_ndvi_season_modis'] = np.where(
+    seasonal_ndvi_modis['max_ndvi_month_modis'].isin([1, 2, 3]), 1, seasonal_ndvi_modis.max_ndvi_season_modis)
+
+seasonal_ndvi_modis['max_ndvi_season_modis'] = np.where(
+    seasonal_ndvi_modis['max_ndvi_month_modis'].isin([4, 5, 6, 7]), 2, seasonal_ndvi_modis.max_ndvi_season_modis)
+
+seasonal_ndvi_modis['max_ndvi_season_modis'] = np.where(
+    seasonal_ndvi_modis['max_ndvi_month_modis'].isin([8, 9]), 3, seasonal_ndvi_modis.max_ndvi_season_modis)
+
+seasonal_ndvi_modis['max_ndvi_season_modis'] = np.where(
+    seasonal_ndvi_modis['max_ndvi_month_modis'].isin([10, 11, 12]), 4, seasonal_ndvi_modis.max_ndvi_season_modis)
+
+######################################################################
+seasonal_ndvi_modis["max_ndvi_season_modis_str"] = seasonal_ndvi_modis["max_ndvi_season_modis"].astype(str)
+seasonal_ndvi_modis["max_ndvi_season_modis_str"] = "s" + seasonal_ndvi_modis["max_ndvi_season_modis_str"]
+######################################################################
+L = list(seasonal_ndvi_modis.columns)
+L.pop()
+seasonal_ndvi_modis = seasonal_ndvi_modis.pivot(index=L, 
+                                                columns='max_ndvi_season_modis_str', 
+                                                values='max_ndvi_season_modis')
+
+seasonal_ndvi_modis.reset_index(drop=False, inplace=True)
+seasonal_ndvi_modis.columns = seasonal_ndvi_modis.columns.values
+
+seasonal_ndvi_modis.rename(columns={"s1": "max_ndvi_season_modis_s1",
+                                    "s2": "max_ndvi_season_modis_s2",
+                                    "s3": "max_ndvi_season_modis_s3",
+                                    "s4": "max_ndvi_season_modis_s4"}, inplace=True)
+
+seasonal_ndvi_modis.head(2)
+######################################################################
+
+seasonal_ndvi_modis.fillna(value = {"max_ndvi_season_modis_s1": 0,
+                                    "max_ndvi_season_modis_s2": 0,
+                                    "max_ndvi_season_modis_s3": 0, 
+                                    "max_ndvi_season_modis_s4": 0},
+                          inplace=True)
+
+c = "max_ndvi_season_modis_s1"
+seasonal_ndvi_modis[c] = np.where(seasonal_ndvi_modis[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_modis[c])
+seasonal_ndvi_modis[c] = seasonal_ndvi_modis[c].astype(int)
+
+c = "max_ndvi_season_modis_s2"
+seasonal_ndvi_modis[c] = np.where(seasonal_ndvi_modis[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_modis[c])
+seasonal_ndvi_modis[c] = seasonal_ndvi_modis[c].astype(int)
+
+c = "max_ndvi_season_modis_s3"
+seasonal_ndvi_modis[c] = np.where(seasonal_ndvi_modis[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_modis[c])
+seasonal_ndvi_modis[c] = seasonal_ndvi_modis[c].astype(int)
+
+c = "max_ndvi_season_modis_s4"
+seasonal_ndvi_modis[c] = np.where(seasonal_ndvi_modis[c].isin([1, 2, 3, 4]), 1, seasonal_ndvi_modis[c])
+seasonal_ndvi_modis[c] = seasonal_ndvi_modis[c].astype(int)
 
 seasonal_ndvi_modis.head(2)
 
@@ -513,9 +687,9 @@ S4.rename(columns={"NDVI": "s4_max_" + new_name}, inplace=True)
 seasonal_ndvi_gimms = pd.merge(S1, S2, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S3, on=["county_fips", "year"], how="outer")
 seasonal_ndvi_gimms = pd.merge(seasonal_ndvi_gimms, S4, on=["county_fips", "year"], how="outer")
-seasonal_ndvi_gimms.head(2)
 
 del (S1, S2, S3, S4, ndvi)
+seasonal_ndvi_gimms.head(2)
 
 # %%
 file_name = Min_files[2]
@@ -743,6 +917,9 @@ print(seasonal_ndvi_avhrr.shape)
 seasonal_ndvi = pd.merge(seasonal_ndvi_mean, seasonal_ndvi_sum, on=["county_fips", "year"], how="outer")
 seasonal_ndvi = pd.merge(seasonal_ndvi, seasonal_ndvi_max, on=["county_fips", "year"], how="outer")
 seasonal_ndvi.head(2)
+
+# %%
+seasonal_ndvi.columns
 
 # %%
 import pickle
