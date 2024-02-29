@@ -13,11 +13,16 @@
 # ---
 
 # %% [markdown]
+# **<span style='color:red'>Feb 29, 2024 update</span>:** Use Min's state level data (not conversion of county to state-level)
+#
+# ------------------------------------------------------
 # **Jan 26, 2024**
 #
 # The Jan 24, 2024 models (long run avg of NPP for 2017 inventory modeling) was a lesson to put all variables in one file and just take outer join of everything.
 #
 # **Forgotten lesson** Keep everything: ***all states, not just 25***
+#
+# <font color='red'>red</font>, <span style='color:green'>green</span>, $\color{blue}{\text{blue}}$
 
 # %%
 import pandas as pd
@@ -335,9 +340,6 @@ seasonal_ndvi.head(2)
 FarmOperation.head(2)
 
 # %%
-import pickle
-from datetime import datetime
-
 filename = reOrganized_dir + "county_data_forOuterJoin.sav"
 
 export_ = {
@@ -424,6 +426,7 @@ print(len(FarmOperation.commodity.unique()))
 # %%
 FarmOperation.rename(columns={"value": "number_of_farm_operation"}, inplace=True)
 FarmOperation = FarmOperation[["county_fips", "year", "number_of_farm_operation"]]
+FarmOperation = rc.clean_census(df=FarmOperation, col_="number_of_farm_operation", col_to_lower=False)
 FarmOperation.head(2)
 
 # %%
@@ -504,35 +507,271 @@ all_df.head(2)
 all_df.sort_values(by=["county_fips", "year"], inplace=True)
 
 # %%
-import pickle
-from datetime import datetime
-
-filename = reOrganized_dir + "county_data_OuterJoined.sav"
-
-export_ = {
-    "all_df": all_df,
-    "source_code": "county_vars_oneFile_outerjoin",
-    "Author": "HN",
-    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-}
-
-pickle.dump(export_, open(filename, "wb"))
 
 # %%
 all_df.sort_values(by=["county_fips", "year"], inplace=True)
 all_df.head(2)
 
 # %%
+(list(all_df.columns))
+
+# %%
+cc = ["county_fips", "max_ndvi_season_avhrr_s1", "max_ndvi_season_avhrr_s2", 
+      "max_ndvi_season_avhrr_s3", "max_ndvi_season_avhrr_s4"]
+all_df.loc[all_df.year==2000, cc]
+
+# %%
+cc = ["county_fips", "max_ndvi_season_avhrr_s1", "max_ndvi_season_avhrr_s2", 
+      "max_ndvi_season_avhrr_s3", "max_ndvi_season_avhrr_s4"]
+(all_df.loc[(all_df.county_fips=="01009") & (all_df.year==2002)])
 
 # %% [markdown]
-# # Maybe we need to think about normalization
-# in case of test and train.
+# # Normalization
+# Maybe we need to think about normalization in case of test and train.
+# For now, apply to all.
 
 # %%
 all_df_normalized = all_df.copy()
 all_df_normalized.head(2)
 
-non_number_cols = ["EW", "Pallavi", "county_fips", "county_name", "state"]
-numeric_cols = [x for x in sorted(all_df_normalized.columns) if not (x in non_number_cols)]
+# %%
+list(all_df_normalized.columns)
+
+# %%
+all_df_normalized.max_ndvi_season_avhrr.unique()
+
+# %%
+non_normal_cols = [
+    'year',
+    'county_fips',
+    'inventory',
+     'county_name',
+     'state',
+     'EW',
+     'Pallavi',
+     'max_ndvi_month_avhrr',
+     'max_ndvi_season_avhrr',
+     'max_ndvi_season_avhrr_s1',
+     'max_ndvi_season_avhrr_s2',
+     'max_ndvi_season_avhrr_s3',
+     'max_ndvi_season_avhrr_s4',
+     'max_ndvi_month_gimms',
+     'max_ndvi_season_gimms',
+     'max_ndvi_season_gimms_s1',
+     'max_ndvi_season_gimms_s2',
+     'max_ndvi_season_gimms_s3',
+     'max_ndvi_season_gimms_s4',
+     'max_ndvi_month_modis',
+     'max_ndvi_season_modis',
+     'max_ndvi_season_modis_s1',
+     'max_ndvi_season_modis_s2',
+     'max_ndvi_season_modis_s3',
+     'max_ndvi_season_modis_s4']
+
+numeric_cols = [x for x in sorted(all_df_normalized.columns) if not (x in non_normal_cols)]
+
+# %%
+numeric_cols
+
+# %%
+len(numeric_cols) + len(non_normal_cols) == len(all_df_normalized.columns)
+
+# %%
+
+# %%
+all_df_normalized[numeric_cols] = (all_df_normalized[numeric_cols] - all_df_normalized[numeric_cols].mean()) / \
+                                   all_df_normalized[numeric_cols].std(ddof=1)
+all_df_normalized.head(2)
+
+# %%
+filename = reOrganized_dir + "county_data_and_normalData_OuterJoined.sav"
+
+export_ = {"all_df": all_df,
+           "all_df_normalized": all_df_normalized,
+           "source_code": "county_vars_oneFile_outerjoin",
+           "Author": "HN",
+           "normalized_columns" : numeric_cols,
+           "non_normalized_columns": non_normal_cols,
+           "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+pickle.dump(export_, open(filename, "wb"))
+
+# %% [markdown]
+# # Compute differences/deltas and then normalize
+
+# %%
+list(all_df.columns)
+
+# %%
+all_df.head(2)
+all_df[(all_df.year==2002) & (all_df.county_fips=="01001")]
+all_df.loc[(all_df.county_fips=="56045"), "maxNDVI_DoY_countyMean"][0:5]
+# ["maxNDVI_DoY_countyMean"]
+
+# %%
+all_df.loc[(all_df.county_fips=="01001"), "crp_wetland_acr"][0:5]
+
+# %%
+all_df.loc[(all_df.county_fips=="01001"), "number_of_farm_operation"][0:5]
+
+# %%
+all_df["max_ndvi_season_avhrr_s2"].unique()
+
+# %%
+# %%
+delta_cols = ['year',
+              'county_fips',
+              'inventory',
+              'unit_npp',
+              'county_total_npp',
+              'slaughter',
+              'population',
+              'feed_expense',
+              'normal',
+              'alert',
+              'danger',
+              'emergency',
+              'number_of_farm_operation',
+              'crp_wetland_acr',
+              's1_countymean_total_precip',
+              's2_countymean_total_precip',
+              's3_countymean_total_precip',
+              's4_countymean_total_precip',
+              's1_countymean_avg_tavg',
+              's2_countymean_avg_tavg',
+              's3_countymean_avg_tavg',
+              's4_countymean_avg_tavg',
+              'annual_countymean_total_precip',
+              'annual_avg_tavg',
+              's1_normal',
+              's1_alert',
+              's1_danger',
+              's1_emergency',
+              's2_normal',
+              's2_alert',
+              's2_danger',
+              's2_emergency',
+              's3_normal',
+              's3_alert',
+              's3_danger',
+              's3_emergency',
+              's4_normal',
+              's4_alert',
+              's4_danger',
+              's4_emergency',
+              's1_mean_ndvi_avhrr',
+              's2_mean_ndvi_avhrr',
+              's3_mean_ndvi_avhrr',
+              's4_mean_ndvi_avhrr',
+              'max_ndvi_month_avhrr',
+              'max_ndvi_in_year_avhrr',
+              'max_ndvi_season_avhrr',
+              'max_ndvi_season_avhrr_s1',
+              'max_ndvi_season_avhrr_s2',
+              'max_ndvi_season_avhrr_s3',
+              'max_ndvi_season_avhrr_s4',
+              's1_mean_ndvi_gimms',
+              's2_mean_ndvi_gimms',
+              's3_mean_ndvi_gimms',
+              's4_mean_ndvi_gimms',
+              'max_ndvi_month_gimms',
+              'max_ndvi_in_year_gimms',
+              'max_ndvi_season_gimms',
+              'max_ndvi_season_gimms_s1',
+              'max_ndvi_season_gimms_s2',
+              'max_ndvi_season_gimms_s3',
+              'max_ndvi_season_gimms_s4',
+              's1_mean_ndvi_modis',
+              's2_mean_ndvi_modis',
+              's3_mean_ndvi_modis',
+              's4_mean_ndvi_modis',
+              'max_ndvi_month_modis',
+              'max_ndvi_in_year_modis',
+              'max_ndvi_season_modis',
+              'max_ndvi_season_modis_s1',
+              'max_ndvi_season_modis_s2',
+              'max_ndvi_season_modis_s3',
+              'max_ndvi_season_modis_s4',
+              's1_sum_ndvi_avhrr',
+              's2_sum_ndvi_avhrr',
+              's3_sum_ndvi_avhrr',
+              's4_sum_ndvi_avhrr',
+              's1_sum_ndvi_gimms',
+              's2_sum_ndvi_gimms',
+              's3_sum_ndvi_gimms',
+              's4_sum_ndvi_gimms',
+              's1_sum_ndvi_modis',
+              's2_sum_ndvi_modis',
+              's3_sum_ndvi_modis',
+              's4_sum_ndvi_modis',
+              's1_max_ndvi_avhrr',
+              's2_max_ndvi_avhrr',
+              's3_max_ndvi_avhrr',
+              's4_max_ndvi_avhrr',
+              's1_max_ndvi_gimms',
+              's2_max_ndvi_gimms',
+              's3_max_ndvi_gimms',
+              's4_max_ndvi_gimms',
+              's1_max_ndvi_modis',
+              's2_max_ndvi_modis',
+              's3_max_ndvi_modis',
+              's4_max_ndvi_modis']
+
+# %%
+non_delta_cols = ['year', 'county_fips'] + [x for x in all_df.columns if not (x in delta_cols)]
+print (len(non_delta_cols))
+non_delta_cols
+
+# %%
+# %%time
+ind_deltas_df = pd.DataFrame(columns=delta_cols)
+ind_deltas_df.head(2)
+
+for a_county in all_df.county_fips.unique():
+    curr_df = all_df[all_df.county_fips == a_county].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+    
+    curr_diff = curr_df.loc[curr_df.index[1:], delta_cols[2:]].values - \
+                curr_df.loc[curr_df.index[:-1], delta_cols[2:]].values
+    curr_diff = pd.DataFrame(curr_diff, columns=delta_cols[2:])
+    curr_diff["year"] = curr_df.year[1:].values
+    curr_diff["county_fips"] = a_county
+    ind_deltas_df = pd.concat([ind_deltas_df, curr_diff])
+    del(curr_diff)
+
+# %%
+nonDelta_df = all_df.copy()
+
+nonDelta_df = nonDelta_df[non_delta_cols]
+nonDelta_df.head(3)
+
+# %%
+delta_data = pd.merge(ind_deltas_df, nonDelta_df, on=["year", "county_fips"], how="left")
+delta_data.head(3)
+
+# %%
+print (f"{all_df.shape = }")
+print (f"{ind_deltas_df.shape = }")
+print (f"{delta_data.shape = }")
+
+# %%
+delta_data_normal = delta_data.copy()
+delta_data_normal[numeric_cols] = (delta_data_normal[numeric_cols] - delta_data_normal[numeric_cols].mean()) / \
+                                   delta_data_normal[numeric_cols].std(ddof=1)
+delta_data_normal.head(2)
+
+# %%
+filename = reOrganized_dir + "county_delta_and_normalDelta_OuterJoined.sav"
+
+export_ = {"delta_data": delta_data,
+           "delta_data_normal": delta_data_normal,
+           "delta_cols": delta_cols,
+           "normalized_columns" : numeric_cols,
+           "non_normalized_columns": non_normal_cols,
+           "source_code": "county_vars_oneFile_outerjoin",
+           "Author": "HN",
+           "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+pickle.dump(export_, open(filename, "wb"))
 
 # %%

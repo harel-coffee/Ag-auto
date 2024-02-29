@@ -13,6 +13,9 @@
 # ---
 
 # %% [markdown]
+# **<span style='color:red'>Feb 29, 2024 update</span>:** Use Min's state level data (not conversion of county to state-level)
+#
+# -------------------------------------------------------
 # **Feb 8, 2024**
 #
 # **Forgotten lesson** Keep everything: ***all states, not just 25***
@@ -62,11 +65,15 @@ print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
 county_fips.reset_index(drop=True, inplace=True)
-county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
 print(f"{len(county_fips.state.unique()) = }")
 
-county_fips["state_fips"] = county_fips.county_fips.str.slice(3)
-county_fips.head(2)
+county_fips = county_fips[["county_fips", "county_name", "state_fips", "EW"]]
+print(f"{len(county_fips.state_fips.unique()) = }")
+
+# %%
+county_fips
+
+# %%
 
 # %% [markdown]
 # ## Inventory
@@ -87,6 +94,9 @@ Shannon_cows_tall = USDA_data["Shannon_Beef_Cows_fromCATINV_tall"]
 feed_expense = USDA_data['feed_expense']
 slaughter = USDA_data['slaughter']
 wetLand_area = USDA_data['wetLand_area']
+
+# %%
+slaughter.rename(columns={"sale_4_slaughter_head": "slaughter"}, inplace=True)
 
 # %%
 beef_fromCATINV_csv.head(2)
@@ -298,6 +308,9 @@ SW = SW["seasonal"]
 SW.head(2)
 
 # %%
+SW.columns
+
+# %%
 seasonal_precip_vars = ["s1_statemean_total_precip", "s2_statemean_total_precip",
                         "s3_statemean_total_precip", "s4_statemean_total_precip"]
 
@@ -426,7 +439,7 @@ feed_expense = feed_expense[["year", "state_fips", "feed_expense"]]
 feed_expense.head(2)
 
 # %%
-slaughter = slaughter[["year", "state_fips", "sale_4_slaughter_head"]]
+slaughter = slaughter[["year", "state_fips", "slaughter"]]
 slaughter.head(2)
 
 # %%
@@ -444,7 +457,7 @@ human_population = human_population.groupby(["state_fips", "year"]).sum().reset_
 human_population.head(2)
 
 # %%
-filename = reOrganized_dir + "state_seasonal_ndvi.sav"
+filename = reOrganized_dir + "state_seasonal_ndvi_V2MinBased.sav"
 seasonal_ndvi = pd.read_pickle(filename)
 seasonal_ndvi = seasonal_ndvi["seasonal_ndvi"]
 seasonal_ndvi.head(2)
@@ -511,6 +524,22 @@ beef_fromCATINV_csv.head(2)
 # %%
 seasonal_ndvi.head(2)
 
+# %%
+SW.head(2)
+
+# %%
+SW['annual_statemean_total_danger'] = SW['s1_statemean_total_danger'] + \
+                                      SW['s2_statemean_total_danger'] + \
+                                      SW['s3_statemean_total_danger'] + \
+                                      SW['s4_statemean_total_danger']
+
+SW['annual_statemean_total_emergency'] = SW['s1_statemean_total_emergency'] + \
+                                         SW['s2_statemean_total_emergency'] + \
+                                         SW['s3_statemean_total_emergency'] + \
+                                         SW['s4_statemean_total_emergency']
+
+# %%
+
 # %% [markdown]
 # ### Subset to states of interest at the end!
 
@@ -535,7 +564,7 @@ export_ = {
     "wetLand_area": wetLand_area,
     "beef_fromCATINV_csv": beef_fromCATINV_csv,
     "Shannon_beef_fromCATINV_deltas" : Shannon_beef_fromCATINV_deltas,
-    "Shannon_Beef_Cows_fromCATINV_tall" : Shannon_Beef_Cows_fromCATINV_tall,
+    "Shannon_Beef_Cows_fromCATINV_tall" : Shannon_cows_tall,
     "seasonal_ndvi": seasonal_ndvi,
     "source_code": "state_vars_oneFile_outerjoin",
     "Author": "HN",
@@ -645,15 +674,81 @@ all_df = pd.merge(all_df, seasonal_ndvi, on=["state_fips", "year"], how="outer")
 print(all_df.shape)
 all_df.head(2)
 
-# %%
+# %% [markdown]
+# # normalization, normalize
 
 # %%
-filename = reOrganized_dir + "state_data_OuterJoined.sav"
+print (len(list(all_df.columns)))
+
+# %%
+state_fips_ = county_fips.copy()
+state_fips_ = state_fips_[["state_fips", "EW"]]
+state_fips_.drop_duplicates(inplace=True)
+state_fips_.reset_index(drop=True, inplace=True)
+print (f"{state_fips_.shape = }")
+state_fips_.head(2)
+
+# %%
+all_df = pd.merge(all_df, state_fips_, on=["state_fips"], how="left")
+
+# %%
+# This is the one came from TIFF file!
+all_df[all_df.state_fips == "01"].maxNDVI_DoY_stateMean.unique()
+
+# %%
+list(all_df.columns)
+
+# %%
+non_normal_cols = [
+    'year',
+    'state_fips',
+    'inventory',
+    'EW',
+    'max_ndvi_month_avhrr',
+    'max_ndvi_season_avhrr',
+    'max_ndvi_season_avhrr_s1',
+    'max_ndvi_season_avhrr_s2',
+    'max_ndvi_season_avhrr_s3',
+    'max_ndvi_season_avhrr_s4',
+    'max_ndvi_month_gimms',
+    'max_ndvi_season_gimms',
+    'max_ndvi_season_gimms_s1',
+    'max_ndvi_season_gimms_s2',
+    'max_ndvi_season_gimms_s3',
+    'max_ndvi_season_gimms_s4',
+    'max_ndvi_month_modis',
+    'max_ndvi_season_modis',
+    'max_ndvi_season_modis_s1',
+    'max_ndvi_season_modis_s2',
+    'max_ndvi_season_modis_s3',
+    'max_ndvi_season_modis_s4']
+
+numeric_cols = [x for x in sorted(all_df.columns) if not (x in non_normal_cols)]
+
+# %%
+numeric_cols
+
+# %%
+all_df_normalized = all_df.copy()
+
+all_df_normalized[numeric_cols] = (all_df_normalized[numeric_cols] - all_df_normalized[numeric_cols].mean()) / \
+                                   all_df_normalized[numeric_cols].std(ddof=1)
+all_df_normalized[all_df_normalized.year==2002].head(2)
+
+# %%
+all_df[all_df.year == 2002].head(2)
+
+# %%
+filename = reOrganized_dir + "state_data_and_normalData_OuterJoined.sav"
 
 export_ = {
     "all_df": all_df,
+    "all_df_normalized": all_df_normalized,
     "source_code": "state_vars_oneFile_outerjoin",
     "NOTE" : "state NPPs come from HN's computation, not statefips_annual_MODIS_NPP.csv",
+    "normal_cols" : numeric_cols,
+    "non_normal_cols" : non_normal_cols,
+
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
@@ -664,9 +759,183 @@ pickle.dump(export_, open(filename, "wb"))
 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
+numeric_cols
+
+# %% [markdown]
+# # Compute differences/deltas and then normalize
+
+# %%
+# %%
+delta_cols = ['year',
+              'state_fips',
+              'inventory',
+              'state_unit_npp',
+              'state_total_npp',
+              'slaughter',
+              'population',
+              'feed_expense',
+              'number_of_farm_operation',
+              'crp_wetland_acr',
+              's1_statemean_total_precip',
+              's2_statemean_total_precip',
+              's3_statemean_total_precip',
+              's4_statemean_total_precip',
+              's1_statemean_avg_tavg',
+              's2_statemean_avg_tavg',
+              's3_statemean_avg_tavg',
+              's4_statemean_avg_tavg',
+              'annual_statemean_total_precip',
+              'annual_avg_tavg',
+
+              'annual_statemean_total_danger',
+              'annual_statemean_total_emergency',
+              
+              's1_statemean_total_danger',
+              's2_statemean_total_danger',
+              's3_statemean_total_danger',
+              's4_statemean_total_danger',
+              's1_statemean_total_emergency',
+              's2_statemean_total_emergency',
+              's3_statemean_total_emergency',
+              's4_statemean_total_emergency',
+
+              's1_mean_avhrr_ndvi',
+              's2_mean_avhrr_ndvi',
+              's3_mean_avhrr_ndvi',
+              's4_mean_avhrr_ndvi',
+              'max_ndvi_month_avhrr',
+              'max_ndvi_in_year_avhrr',
+              'max_ndvi_season_avhrr',
+              'max_ndvi_season_avhrr_s1',
+              'max_ndvi_season_avhrr_s2',
+              'max_ndvi_season_avhrr_s3',
+              'max_ndvi_season_avhrr_s4',
+              's1_mean_gimms_ndvi',
+              's2_mean_gimms_ndvi',
+              's3_mean_gimms_ndvi',
+              's4_mean_gimms_ndvi',
+              'max_ndvi_month_gimms',
+              'max_ndvi_in_year_gimms',
+              'max_ndvi_season_gimms',
+              'max_ndvi_season_gimms_s1',
+              'max_ndvi_season_gimms_s2',
+              'max_ndvi_season_gimms_s3',
+              'max_ndvi_season_gimms_s4',
+              's1_mean_modis_ndvi',
+              's2_mean_modis_ndvi',
+              's3_mean_modis_ndvi',
+              's4_mean_modis_ndvi',
+              'max_ndvi_month_modis',
+              'max_ndvi_in_year_modis',
+              'max_ndvi_season_modis',
+              'max_ndvi_season_modis_s1',
+              'max_ndvi_season_modis_s2',
+              'max_ndvi_season_modis_s3',
+              'max_ndvi_season_modis_s4',
+              's1_sum_avhrr_ndvi',
+              's2_sum_avhrr_ndvi',
+              's3_sum_avhrr_ndvi',
+              's4_sum_avhrr_ndvi',
+              's1_sum_gimms_ndvi',
+              's2_sum_gimms_ndvi',
+              's3_sum_gimms_ndvi',
+              's4_sum_gimms_ndvi',
+              's1_sum_modis_ndvi',
+              's2_sum_modis_ndvi',
+              's3_sum_modis_ndvi',
+              's4_sum_modis_ndvi',
+              's1_max_avhrr_ndvi',
+              's2_max_avhrr_ndvi',
+              's3_max_avhrr_ndvi',
+              's4_max_avhrr_ndvi',
+              's1_max_gimms_ndvi',
+              's2_max_gimms_ndvi',
+              's3_max_gimms_ndvi',
+              's4_max_gimms_ndvi',
+              's1_max_modis_ndvi',
+              's2_max_modis_ndvi',
+              's3_max_modis_ndvi',
+              's4_max_modis_ndvi']
+
+# %%
+non_delta_cols = ['year', 'state_fips'] + [x for x in all_df.columns if not (x in delta_cols)]
+print (len(non_delta_cols))
+non_delta_cols
+
+# %%
+len(set(non_delta_cols+delta_cols))
+
+# %%
+len(all_df.columns)
+
+# %%
+[x for x in delta_cols if not (x in all_df.columns)]
+
+# %%
+# %%time
+ind_deltas_df = pd.DataFrame(columns=delta_cols)
+ind_deltas_df.head(2)
+
+for a_state in all_df.state_fips.unique():
+    curr_df = all_df[all_df.state_fips == a_state].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+    
+    curr_diff = curr_df.loc[curr_df.index[1:], delta_cols[2:]].values - \
+                curr_df.loc[curr_df.index[:-1], delta_cols[2:]].values
+    curr_diff = pd.DataFrame(curr_diff, columns=delta_cols[2:])
+    curr_diff["year"] = curr_df.year[1:].values
+    curr_diff["state_fips"] = a_state
+    ind_deltas_df = pd.concat([ind_deltas_df, curr_diff])
+    del(curr_diff)
+
+# %%
+nonDelta_df = all_df.copy()
+
+nonDelta_df = nonDelta_df[non_delta_cols]
+nonDelta_df.head(3)
+
+# %%
+delta_data = pd.merge(ind_deltas_df, nonDelta_df, on=["year", "state_fips"], how="left")
+delta_data.head(3)
+
+# %%
+print (f"{all_df.shape = }")
+print (f"{ind_deltas_df.shape = }")
+print (f"{delta_data.shape = }")
+
+# %%
+for a_col in numeric_cols:
+    delta_data[a_col] = delta_data[a_col].astype(float)
+    
 
 # %%
 
 # %%
+delta_data_normal = delta_data.copy()
+delta_data_normal[numeric_cols] = (delta_data_normal[numeric_cols] - delta_data_normal[numeric_cols].mean()) / \
+                                   delta_data_normal[numeric_cols].std(ddof=1)
+delta_data_normal.head(2)
+
+# %%
+delta_data_normal[delta_data_normal.year == 2002].head(2)
+
+# %%
+delta_data[delta_data.year == 2002].head(2)
+
+# %%
+
+# %%
+filename = reOrganized_dir + "state_delta_and_normalDelta_OuterJoined.sav"
+
+export_ = {"delta_data": delta_data,
+           "delta_data_normal": delta_data_normal,
+           "delta_cols": delta_cols,
+           "normalized_columns" : numeric_cols,
+           "non_normalized_columns": non_normal_cols,
+           "source_code": "state_vars_oneFile_outerjoin",
+           "Author": "HN",
+           "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+pickle.dump(export_, open(filename, "wb"))
 
 # %%

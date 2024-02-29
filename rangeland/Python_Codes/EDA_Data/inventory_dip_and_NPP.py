@@ -65,8 +65,9 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplac
 
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
-
 county_id_name_fips = rc.correct_Mins_county_6digitFIPS(df=county_id_name_fips, col_="county_fips")
+
+
 county_id_name_fips.reset_index(drop=True, inplace=True)
 county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
 county_id_name_fips.head(2)

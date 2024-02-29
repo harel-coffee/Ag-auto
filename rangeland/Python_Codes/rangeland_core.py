@@ -100,13 +100,14 @@ def census_stateCntyAnsi_2_countyFips(
     return df
 
 
-def clean_census(df, col_):
+def clean_census(df, col_, col_to_lower=True):
     """
     Census data is weird;
         - Column can have ' (D)' or ' (Z)' in it.
         - Numbers are as strings.
     """
-    df.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+    if col_to_lower == True:
+        df.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
     if "state" in df.columns:
         df.state = df.state.str.title()
     if "county" in df.columns:

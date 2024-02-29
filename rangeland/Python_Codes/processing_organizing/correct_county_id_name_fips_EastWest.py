@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -160,6 +160,13 @@ county_id_name_fips[county_id_name_fips.state_fips=="34"].state.unique()
 
 # %%
 county_id_name_fips[county_id_name_fips.state_fips=="46"].state.unique()
+
+# %%
+len(county_id_name_fips.state_fips.unique())
+
+# %%
+
+# %%
 
 # %%
 import pickle
