@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -45,26 +45,27 @@ EX_sheet_names
 ii = 0
 sheet_name_ = EX_sheet_names[ii]
 
-curr_sheet = pd.read_excel(
-    io=Shannon_data_dir + "CATINV.xls", sheet_name=sheet_name_, header=0, skiprows=0
-)
+curr_sheet = pd.read_excel(io=Shannon_data_dir + "CATINV.xls", sheet_name=sheet_name_, header=0, skiprows=0)
 curr_sheet_columns = list(curr_sheet.columns)
-named_columns = curr_sheet_columns[
-    0
-]  # [x for x in curr_sheet_columns if not("Unnamed" in x)]
+named_columns = curr_sheet_columns[0]  # [x for x in curr_sheet_columns if not("Unnamed" in x)]
 named_columns
+
+# %%
+curr_sheet.head(2)
+
+# %%
+curr_sheet_columns[:10]
+
+# %%
 
 # %%
 curr_sheet.columns = list(curr_sheet.iloc[1,].astype(str))
 curr_sheet = curr_sheet[2:].copy()
 curr_sheet.rename({"nan": "state"}, axis=1, inplace=True)
-curr_sheet.rename(
-    columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True
-)
+curr_sheet.rename(columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True)
 curr_sheet.reset_index(drop=True, inplace=True)
 curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] = (
-    curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000
-)
+             curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000)
 
 # Drop rows that are entirely NA
 curr_sheet.dropna(axis=0, how="all", inplace=True)
@@ -158,9 +159,6 @@ CATINV_df_tall.head(2)
 # %%
 
 # %%
-from datetime import datetime
-import pickle
-
 filename = reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav"
 
 export_ = {

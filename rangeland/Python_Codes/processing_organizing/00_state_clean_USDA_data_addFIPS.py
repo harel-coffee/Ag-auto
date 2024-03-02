@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -52,6 +52,11 @@ import numpy as np
 import os
 
 from datetime import datetime, date
+
+import os, os.path, pickle, sys
+
+sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
+import rangeland_core as rc
 
 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
