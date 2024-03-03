@@ -181,6 +181,12 @@ grain_feed_cost["prev_year"] = grain_feed_cost.date.str.slice(start=0, stop=4).a
 grain_feed_cost["year"] = grain_feed_cost["prev_year"] + 1
 grain_feed_cost.head(3)
 
+# %% [markdown]
+# # Not Monthly
+#
+# Before 1949, there was no monthly data. So, we cannot get calendar-year prices. So, we need
+# to drop those rows/years.
+
 # %%
 grain_feed_cost.dropna(subset=['May'], inplace=True)
 grain_feed_cost.reset_index(drop=True, inplace=True)
@@ -284,7 +290,7 @@ delta_df.columns = delta_cols
 delta_df.head(2)
 
 # %%
-delta_df["delta_year"] = list(beefPrice_hayCost.year[1:].astype(str).values + \
+delta_df["year"] = list(beefPrice_hayCost.year[1:].astype(str).values + \
                               "_" + \
                               beefPrice_hayCost.year[:-1].astype(str).values)
 
@@ -292,16 +298,133 @@ delta_df["delta_year"] = list(beefPrice_hayCost.year[1:].astype(str).values + \
 delta_df.head(3)
 
 # %%
+
+# %%
+import matplotlib
+import matplotlib.pyplot as plt
+
+# %%
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+axes.grid(axis="y", which="both")
+axes.set_axisbelow(True) # sends the grids underneath the plot
+
+plt.hist(delta_df['allHay_wtAvg_2_$perTon_calendar_yr'], bins=200);
+# plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+
+axes.title.set_text("deltas of allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_xlabel("deltas of allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_ylabel("count")
+fig.tight_layout()
+
+# fig_name = plots_dir + "xxxxx.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+axes.grid(axis="y", which="both")
+axes.set_axisbelow(True) # sends the grids underneath the plot
+
+plt.hist(beefPrice_hayCost['allHay_wtAvg_2_$perTon_calendar_yr'], bins=200);
+# plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+
+axes.title.set_text("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_xlabel("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_ylabel("count")
+fig.tight_layout()
+
+# fig_name = plots_dir + "xxxxx.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+beefPrice_hayCost.head(2)
+
+# %%
+ind_vars = list(beefPrice_hayCost.columns)
+ind_vars.remove("year")
+############################################################
+normal_df = (beefPrice_hayCost[ind_vars] - beefPrice_hayCost[ind_vars].mean()) / \
+                        beefPrice_hayCost[ind_vars].std(ddof=1)
+normal_df.head(2)
+
+normal_cols = [i + j for i, j in zip(ind_vars, ["_normal"] * len(ind_vars))]
+normal_cols
+
+beefPrice_hayCost[normal_cols] = normal_df
+beefPrice_hayCost.head(2)
+
+# %%
+ind_vars = list(delta_df.columns)
+ind_vars.remove("year")
+ind_vars
+############################################################
+normal_df = (delta_df[ind_vars] - delta_df[ind_vars].mean()) / delta_df[ind_vars].std(ddof=1)
+normal_df.head(2)
+
+normal_cols = [i + j for i, j in zip(ind_vars, ["_normal"] * len(ind_vars))]
+normal_cols
+
+delta_df[normal_cols] = normal_df
+delta_df.head(2)
+
+# %% [markdown]
+# ## Reorder columns
+
+# %%
+delta_df_cols_ = list(delta_df.columns)
+delta_df_cols_.remove("year")
+delta_df_cols_ = ["year"] + delta_df_cols_
+delta_df = delta_df[delta_df_cols_]
+delta_df.head(2)
+
+# %%
+beefPrice_hayCost.head(2)
+
+# %%
 filename = reOrganized_dir + "beef_hay_cost_fromMikeLinkandFile.sav"
 
-export_ = {"beef_hay_cost_fromMikeLinkandFile" : delta_df,
-           "beef_hay_costDeltas_fromMikeLinkandFile" : beefPrice_hayCost,
-           "source_code": "03_01_2024_BeefPriceFeedPriceClean",
+export_ = {"beef_hay_cost_MikeLinkandFile" : beefPrice_hayCost,
+           "beef_hay_costDeltas_MikeLinkandFile" : delta_df,
+           "source_code": "03_01_2024_BeefPriceFeedPriceClean.ipynb",
            "Author": "HN",
            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 pickle.dump(export_, open(filename, "wb"))
 
 # %%
+beefPrice_hayCost.head(2)
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+axes.grid(axis="y", which="both")
+axes.set_axisbelow(True) # sends the grids underneath the plot
+
+plt.hist((beefPrice_hayCost['allHay_wtAvg_2_$perTon_calendar_yr_normal']), bins=200);
+# plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+
+axes.title.set_text("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_xlabel("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_ylabel("count")
+fig.tight_layout()
+
+# fig_name = plots_dir + "xxxxx.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+axes.grid(axis="y", which="both")
+axes.set_axisbelow(True) # sends the grids underneath the plot
+
+plt.hist((beefPrice_hayCost['allHay_wtAvg_2_$perTon_calendar_yr']), bins=200);
+# plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+
+axes.title.set_text("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_xlabel("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_ylabel("count")
+fig.tight_layout()
+
+# fig_name = plots_dir + "xxxxx.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%

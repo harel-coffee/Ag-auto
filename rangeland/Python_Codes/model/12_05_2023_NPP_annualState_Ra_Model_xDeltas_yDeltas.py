@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -89,9 +89,7 @@ county_id_name_fips.head(2)
 # %%
 county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
 
-county_id_name_fips = county_id_name_fips.drop(
-    columns=["county_name", "county_fips", "fips"]
-)
+county_id_name_fips = county_id_name_fips.drop(columns=["county_name", "county_fips", "fips"])
 county_id_name_fips.drop_duplicates(inplace=True)
 county_id_name_fips.reset_index(drop=True, inplace=True)
 

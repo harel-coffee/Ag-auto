@@ -77,10 +77,20 @@ Beef_Cows_CATINV = curr_sheet.copy()
 Beef_Cows_CATINV.tail(4)
 
 # %%
-print(sorted(Beef_Cows_CATINV.state.unique()))
+(sorted(Beef_Cows_CATINV.state.unique()))
+
+# %% [markdown]
+# ## Drop US
+
+# %%
+Beef_Cows_CATINV = Beef_Cows_CATINV[Beef_Cows_CATINV.state != "US"].copy()
+Beef_Cows_CATINV.reset_index(drop=True, inplace=True)
 
 # %%
 Beef_Cows_CATINV.shape
+
+# %%
+Beef_Cows_CATINV.head(2)
 
 # %%
 out_name = reOrganized_dir + "Shannon_Beef_Cows_fromCATINV.csv"
@@ -121,25 +131,35 @@ import sys
 sys.path.append("/Users/hn/Documents/00_GitHub/Rangeland/Python_Codes/")
 import rangeland_core as rc
 
+# county_id_name_fips = pd.read_csv(Min_data_dir_base + "county_id_name_fips.csv")
+# county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 
-county_id_name_fips = pd.read_csv(Min_data_dir_base + "county_id_name_fips.csv")
-county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+# county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 
-county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
+# county_id_name_fips = rc.correct_Mins_county_6digitFIPS(df=county_id_name_fips, col_="county")
+# county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
-county_id_name_fips = rc.correct_Mins_county_6digitFIPS(
-    df=county_id_name_fips, col_="county"
-)
-county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
+# county_id_name_fips["state_fips"] = county_id_name_fips.county_fips.str.slice(0, 2)
 
-county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
+# print(len(county_id_name_fips.state.unique()))
 
-print(len(county_id_name_fips.state.unique()))
+# county_id_name_fips = county_id_name_fips.drop(columns=["county_name", "county_fips", "fips"])
+# county_id_name_fips.drop_duplicates(inplace=True)
+# county_id_name_fips.reset_index(drop=True, inplace=True)
+# county_id_name_fips.head(2)
 
-county_id_name_fips = county_id_name_fips.drop(
-    columns=["county_name", "county_fips", "fips"]
-)
+# %%
+param_dir = data_dir_base + "parameters/"
+abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
+
+county_id_name_fips = abb_dict ["county_fips"]
+
+county_id_name_fips = county_id_name_fips[["state", "state_fips"]].copy()
+
 county_id_name_fips.drop_duplicates(inplace=True)
+# county_id_name_fips = county_id_name_fips[county_id_name_fips.state.isin(SoI_abb)]
 county_id_name_fips.reset_index(drop=True, inplace=True)
 county_id_name_fips.head(2)
 
@@ -155,8 +175,6 @@ CATINV_df_tall.year = CATINV_df_tall.year.astype(int)
 
 # %%
 CATINV_df_tall.head(2)
-
-# %%
 
 # %%
 filename = reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav"

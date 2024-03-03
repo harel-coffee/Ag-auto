@@ -329,6 +329,9 @@ for idx in slaughter.index:
 slaughter[["state", "state_ansi"]].head(5)
 
 # %%
+slaughter.head(2)
+
+# %%
 feed_expense[(feed_expense.state=="Alabama")]
 
 # %%
@@ -397,20 +400,18 @@ beef_fromCATINV_csv.head(2)
 
 # %%
 Shannon_Beef_Cows_fromCATINV_tall = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav")
+print (Shannon_Beef_Cows_fromCATINV_tall.keys())
 Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall["CATINV_annual_tall"]
 Shannon_Beef_Cows_fromCATINV_tall.head(2)
 
 # %%
 f_ = "Shannon_Beef_Cows_fromCATINV_deltas.sav"
-Shannon_beef_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + f_)
+Shannon_beef_fromCATINV_deltas_ratios = pd.read_pickle(reOrganized_dir + f_)
 del(f_)
 
-Shannon_beef_fromCATINV_deltas = Shannon_beef_fromCATINV_deltas["shannon_annual_inventory_deltas"]
+Shannon_beef_fromCATINV_ratios = Shannon_beef_fromCATINV_deltas_ratios["shannon_annual_inventory_ratios"]
+Shannon_beef_fromCATINV_deltas = Shannon_beef_fromCATINV_deltas_ratios["shannon_annual_inventory_deltas"]
 Shannon_beef_fromCATINV_deltas.head(2)
-
-# %%
-Shannon_beef_fromCATINV_deltas.rename(columns={"state_fip": "state_fips"}, inplace=True)
-Shannon_Beef_Cows_fromCATINV_tall.rename(columns={"state_fip": "state_fips"}, inplace=True)
 
 # %%
 beef_fromCATINV_csv = pd.merge(beef_fromCATINV_csv, 
@@ -474,6 +475,7 @@ export_ = {"AgLand": AgLand,
            "slaughter" : slaughter,
            "beef_fromCATINV_csv" : beef_fromCATINV_csv,
            "Shannon_beef_fromCATINV_deltas" : Shannon_beef_fromCATINV_deltas,
+           "Shannon_beef_fromCATINV_ratios" : Shannon_beef_fromCATINV_ratios,
            "Shannon_Beef_Cows_fromCATINV_tall" : Shannon_Beef_Cows_fromCATINV_tall,
            "source_code" : "00_state_clean_USDA_data_addFIPS",
            "Author": "HN",
