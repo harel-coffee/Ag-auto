@@ -90,7 +90,7 @@ SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 abb_dict.keys()
 
 # %%
-f_ = "Shannon_Beef_Cows_fromCATINV_deltas.sav"
+f_ = "state_USDA_ShannonCattle.sav"
 Shannon_Beef_Cows_fromCATINV_deltaRatios = pd.read_pickle(reOrganized_dir + f_)
 list(Shannon_Beef_Cows_fromCATINV_deltaRatios.keys())
 
@@ -162,5 +162,26 @@ inventoryRatio_beefHayCostDeltas.dropna(how="any", inplace=True)
 inventoryRatio_beefHayCostDeltas.reset_index(drop=True, inplace=True)
 print (f"{inventoryRatio_beefHayCostDeltas.shape = }")
 inventoryRatio_beefHayCostDeltas.head(2)
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
+axes.grid(axis="y", which="both")
+axes.set_axisbelow(True) # sends the grids underneath the plot
+
+plt.hist((inventoryRatio_beefHayCostDeltas['inventory_ratio']), bins=200);
+# plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+
+axes.title.set_text("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_xlabel("allHay_wtAvg_2_$perTon_calendar_yr")
+axes.set_ylabel("count")
+fig.tight_layout()
+
+# fig_name = plots_dir + "xxxxx.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %% [markdown]
+# # Model
+#
+# We are using national beef and hay prices for all states! if it's the same for all states, what's the diff between including and excluding them.
 
 # %%

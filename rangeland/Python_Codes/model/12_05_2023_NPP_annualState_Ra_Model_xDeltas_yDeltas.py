@@ -238,7 +238,7 @@ print(sorted(state_NPPdelta_Ra_herb.year.unique()))
 # # Read inventory deltas
 
 # %%
-Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_deltas.sav")
+Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + "state_USDA_ShannonCattle.sav")
 Shannon_CATINV_deltas = Shannon_Beef_Cows_fromCATINV_deltas["shannon_annual_inventory_deltas_tall"]
 Shannon_CATINV_deltas = Shannon_CATINV_deltas[Shannon_CATINV_deltas.state_fip.isin(state_SoI_fip)]
 Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(np.float32)

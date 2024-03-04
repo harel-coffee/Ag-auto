@@ -62,12 +62,154 @@ datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
+param_dir = data_dir_base + "parameters/"
 Shannon_data_dir = data_dir_base + "Shannon_Data/"
 Min_data_dir_base = data_dir_base + "Min_Data/"
 NASS_downloads = data_dir_base + "/NASS_downloads/"
 NASS_downloads_state = data_dir_base + "/NASS_downloads_state/"
 reOrganized_dir = data_dir_base + "reOrganized/"
 os.makedirs(reOrganized_dir, exist_ok=True)
+
+# %% [markdown]
+# # First
+# do annual_stateLevel_inventoryDeltas. This was a different notebook called ```annual_state_level_inventory_deltas.ipynb```
+
+# %%
+abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+SoI = abb_dict['SoI']
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
+
+county_id_name_fips = abb_dict["county_fips"]
+county_id_name_fips.head(2)
+
+# %%
+state_abb_state_fips = county_id_name_fips[["state", "state_fips", "EW"]]
+state_abb_state_fips.drop_duplicates(inplace=True)
+state_abb_state_fips.reset_index(drop=True, inplace=True)
+print (state_abb_state_fips.shape)
+state_abb_state_fips.head(2)
+
+# %% [markdown]
+# ### Read inventory
+#
+# ```Beef_Cows_fromCATINV.csv``` and ```Shannon_Beef_Cows_fromCATINV.csv``` are the same.
+
+# %%
+shannon_annual = pd.read_csv(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV.csv")
+shannon_annual = shannon_annual[shannon_annual.state.isin(list(state_abb_state_fips.state.unique()))]
+print (shannon_annual.state.unique())
+shannon_annual.reset_index(drop=True, inplace=True)
+shannon_annual.head(2)
+
+# %% [markdown]
+# ## Compute deltas
+
+# %%
+# form deltas: inventort(t+1) - inventory (t)
+inv_deltas = shannon_annual[list(shannon_annual.columns)[2:]].values - \
+               shannon_annual[list(shannon_annual.columns)[1:-1]].values
+
+delta_columns = [(str(x) + "_" + str(x-1)) for x in np.arange(1921, 2022)]
+# form deltas dataframe
+inventory_annual_deltas = pd.DataFrame(data = inv_deltas, columns=delta_columns)
+inventory_annual_deltas["state"] = shannon_annual["state"]
+
+# re-order columns
+inventory_annual_deltas = inventory_annual_deltas[["state"]+delta_columns]
+inventory_annual_deltas.head(2)
+
+# %% [markdown]
+# ## Compute Ratios
+
+# %%
+# form deltas: inventort(t+1) - inventory (t)
+inv_ratios = shannon_annual[list(shannon_annual.columns)[2:]].values / \
+               shannon_annual[list(shannon_annual.columns)[1:-1]].values
+
+delta_columns = [(str(x) + "_" + str(x-1)) for x in np.arange(1921, 2022)]
+# form ratios dataframe
+inventory_annual_ratios = pd.DataFrame(data = inv_ratios, columns=delta_columns)
+inventory_annual_ratios["state"] = shannon_annual["state"]
+
+# re-order columns
+inventory_annual_ratios = inventory_annual_ratios[["state"]+delta_columns]
+inventory_annual_ratios.head(2)
+
+# %%
+shannon_annual.head(2)
+
+# %% [markdown]
+# ### convert to tall format
+
+# %%
+years = list(inventory_annual_deltas.columns[1:])
+num_years = len(years)
+
+inventory_deltas_tall=pd.DataFrame(data=None, index=range(num_years*len(inventory_annual_deltas.state.unique())), 
+                                    columns=["state", "year", "inventory_delta"], 
+                                    dtype=None, copy=False)
+
+idx_ = 0 
+for a_state in inventory_annual_deltas.state.unique():
+    curr = inventory_annual_deltas[inventory_annual_deltas.state == a_state]
+    inventory_deltas_tall.loc[idx_: idx_ + num_years - 1 , "inventory_delta"] = curr[years].values[0]
+    inventory_deltas_tall.loc[idx_: idx_ + num_years - 1 , "state"] = a_state
+    inventory_deltas_tall.loc[idx_: idx_ + num_years - 1 , "year"] = years
+    idx_ = idx_ + num_years
+    
+inventory_deltas_tall.head(2)
+
+# %%
+years = list(inventory_annual_ratios.columns[1:])
+num_years = len(years)
+
+inventory_ratios_tall=pd.DataFrame(data=None, index=range(num_years*len(inventory_annual_ratios.state.unique())), 
+                                     columns=["state", "year", "inventory_ratio"], 
+                                     dtype=None, copy=False)
+
+idx_ = 0 
+for a_state in inventory_annual_ratios.state.unique():
+    curr = inventory_annual_ratios[inventory_annual_ratios.state == a_state]
+    inventory_ratios_tall.loc[idx_: idx_ + num_years - 1 , "inventory_ratio"] = curr[years].values[0]
+    inventory_ratios_tall.loc[idx_: idx_ + num_years - 1 , "state"] = a_state
+    inventory_ratios_tall.loc[idx_: idx_ + num_years - 1 , "year"] = years
+    idx_ = idx_ + num_years
+    
+inventory_ratios_tall.head(2)
+
+# %%
+print (state_abb_state_fips.shape)
+state_abb_state_fips.head(2)
+
+# %%
+inventory_annual_deltas = pd.merge(inventory_annual_deltas, state_abb_state_fips, on = ["state"], how = "left")
+inventory_deltas_tall = pd.merge(inventory_deltas_tall, state_abb_state_fips, on = ["state"], how = "left")
+inventory_annual_deltas.head(2)
+
+# %%
+inventory_annual_ratios = pd.merge(inventory_annual_ratios, state_abb_state_fips, on = ["state"], how = "left")
+inventory_ratios_tall = pd.merge(inventory_ratios_tall, state_abb_state_fips, on = ["state"], how = "left")
+inventory_annual_ratios.head(2)
+
+# %%
+# filename = reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_deltas.sav"
+
+# export_ = {"shannon_annual_inventory_deltas": inventory_annual_deltas, 
+#            "shannon_annual_inventory_deltas_tall": inventory_deltas_tall,
+
+#            "shannon_annual_inventory_ratios" : inventory_annual_ratios,
+#            "shannon_annual_inventory_ratios_tall" : inventory_ratios_tall,
+           
+#            "source_code" : "annual_state_level_inventory_deltas",
+#            "Author": "HN",
+#            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+# pickle.dump(export_, open(filename, 'wb'))
+
+# %%
+
+# %% [markdown]
+# # Second: USDA data
 
 # %%
 USDA_files = sorted([x for x in os.listdir(NASS_downloads_state) if x.endswith(".csv")])
@@ -107,8 +249,6 @@ print ((feed_expense.columns == AgLand.columns).all())
 print ((feed_expense.columns == wetLand_area.columns).all())
 print ((feed_expense.columns == FarmOperation.columns).all())
 print ((feed_expense.columns == slaughter.columns).all())
-
-# %%
 
 # %%
 print (AgLand.zip_code.unique())
@@ -236,8 +376,6 @@ FarmOperation["state_ansi"] = FarmOperation["state_ansi"].astype('int32')
 FarmOperation["state_ansi"] = FarmOperation["state_ansi"].astype('str')
 FarmOperation.state = FarmOperation.state.str.title()
 FarmOperation[["state", "state_ansi"]].head(5)
-
-# %%
 
 # %%
 for idx in FarmOperation.index:
@@ -388,37 +526,15 @@ print (FarmOperation.shape)
 FarmOperation = rc.clean_census(df=FarmOperation, col_="number_of_farm_operation")
 print (FarmOperation.shape)
 
-# %%
-# %who
-
 # %% [markdown]
 # ### Beef inventory
 
 # %%
-beef_fromCATINV_csv = pd.read_csv(reOrganized_dir + "Beef_Cows_fromCATINV.csv")
-beef_fromCATINV_csv.head(2)
+shannon_annual = pd.merge(shannon_annual, 
+                          state_abb_state_fips[["state", "state_fips"]], 
+                          on=["state"], how="left")
 
-# %%
-Shannon_Beef_Cows_fromCATINV_tall = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav")
-print (Shannon_Beef_Cows_fromCATINV_tall.keys())
-Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall["CATINV_annual_tall"]
-Shannon_Beef_Cows_fromCATINV_tall.head(2)
-
-# %%
-f_ = "Shannon_Beef_Cows_fromCATINV_deltas.sav"
-Shannon_beef_fromCATINV_deltas_ratios = pd.read_pickle(reOrganized_dir + f_)
-del(f_)
-
-Shannon_beef_fromCATINV_ratios = Shannon_beef_fromCATINV_deltas_ratios["shannon_annual_inventory_ratios"]
-Shannon_beef_fromCATINV_deltas = Shannon_beef_fromCATINV_deltas_ratios["shannon_annual_inventory_deltas"]
-Shannon_beef_fromCATINV_deltas.head(2)
-
-# %%
-beef_fromCATINV_csv = pd.merge(beef_fromCATINV_csv, 
-                               Shannon_beef_fromCATINV_deltas[["state", "state_fips"]], 
-                               on=["state"], how="left")
-
-beef_fromCATINV_csv.head(2)
+shannon_annual.head(2)
 
 # %%
 AgLand.rename(columns={"state_ansi": "state_fips", 
@@ -454,18 +570,18 @@ slaughter = slaughter[["year", "state_fips", "data_item", "sale_4_slaughter_head
 slaughter.head(2)
 
 # %%
-beef_fromCATINV_csv.head(2)
+shannon_annual.head(2)
 
 # %%
-Shannon_beef_fromCATINV_deltas.head(2)
+Shannon_Beef_Cows_fromCATINV_tall = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav")
+print (Shannon_Beef_Cows_fromCATINV_tall.keys())
+Shannon_Beef_Cows_fromCATINV_tall = Shannon_Beef_Cows_fromCATINV_tall["CATINV_annual_tall"]
+Shannon_Beef_Cows_fromCATINV_tall.head(2)
 
 # %%
 Shannon_Beef_Cows_fromCATINV_tall.head(2)
 
 # %%
-import pickle
-from datetime import datetime
-
 filename = reOrganized_dir + "state_USDA_ShannonCattle.sav"
 
 export_ = {"AgLand": AgLand, 
@@ -473,19 +589,19 @@ export_ = {"AgLand": AgLand,
            "feed_expense": feed_expense, 
            "FarmOperation": FarmOperation,
            "slaughter" : slaughter,
-           "beef_fromCATINV_csv" : beef_fromCATINV_csv,
-           "Shannon_beef_fromCATINV_deltas" : Shannon_beef_fromCATINV_deltas,
-           "Shannon_beef_fromCATINV_ratios" : Shannon_beef_fromCATINV_ratios,
+           "beef_fromCATINV_csv" : shannon_annual,
+           "Shannon_beef_fromCATINV_deltas" : inventory_annual_deltas,
+           "shannon_annual_inventory_deltas_tall": inventory_deltas_tall,
+           
+           "Shannon_beef_fromCATINV_ratios" : inventory_annual_ratios,
+           "shannon_annual_inventory_ratios_tall" : inventory_ratios_tall,
+           
            "Shannon_Beef_Cows_fromCATINV_tall" : Shannon_Beef_Cows_fromCATINV_tall,
            "source_code" : "00_state_clean_USDA_data_addFIPS",
            "Author": "HN",
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 pickle.dump(export_, open(filename, 'wb'))
-
-# %%
-
-# %%
 
 # %%
 

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -205,7 +205,7 @@ print(sorted(state_NPP_Ra_herb.year.unique()))
 # # Read inventory deltas
 
 # %%
-Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_deltas.sav")
+Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + "state_USDA_ShannonCattle.sav")
 Shannon_CATINV_deltas = Shannon_Beef_Cows_fromCATINV_deltas["shannon_annual_inventory_deltas_tall"]
 Shannon_CATINV_deltas = Shannon_CATINV_deltas[Shannon_CATINV_deltas.state_fip.isin(state_SoI_fip)]
 Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(np.float32)
