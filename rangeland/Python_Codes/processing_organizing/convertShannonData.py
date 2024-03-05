@@ -45,9 +45,13 @@ EX_sheet_names
 ii = 0
 sheet_name_ = EX_sheet_names[ii]
 
-curr_sheet = pd.read_excel(io=Shannon_data_dir + "CATINV.xls", sheet_name=sheet_name_, header=0, skiprows=0)
+curr_sheet = pd.read_excel(
+    io=Shannon_data_dir + "CATINV.xls", sheet_name=sheet_name_, header=0, skiprows=0
+)
 curr_sheet_columns = list(curr_sheet.columns)
-named_columns = curr_sheet_columns[0]  # [x for x in curr_sheet_columns if not("Unnamed" in x)]
+named_columns = curr_sheet_columns[
+    0
+]  # [x for x in curr_sheet_columns if not("Unnamed" in x)]
 named_columns
 
 # %%
@@ -62,10 +66,13 @@ curr_sheet_columns[:10]
 curr_sheet.columns = list(curr_sheet.iloc[1,].astype(str))
 curr_sheet = curr_sheet[2:].copy()
 curr_sheet.rename({"nan": "state"}, axis=1, inplace=True)
-curr_sheet.rename(columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True)
+curr_sheet.rename(
+    columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True
+)
 curr_sheet.reset_index(drop=True, inplace=True)
 curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] = (
-             curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000)
+    curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000
+)
 
 # Drop rows that are entirely NA
 curr_sheet.dropna(axis=0, how="all", inplace=True)
@@ -100,10 +107,13 @@ Beef_Cows_CATINV.to_csv(out_name, index=False)
 years = list(Beef_Cows_CATINV.columns[1:])
 num_years = len(years)
 
-CATINV_df_tall = pd.DataFrame(data=None,
-                              index=range(num_years * len(Beef_Cows_CATINV.state.unique())),
-                              columns=["state", "year", "inventory"],
-                              dtype=None, copy=False)
+CATINV_df_tall = pd.DataFrame(
+    data=None,
+    index=range(num_years * len(Beef_Cows_CATINV.state.unique())),
+    columns=["state", "year", "inventory"],
+    dtype=None,
+    copy=False,
+)
 
 idx_ = 0
 for a_state in Beef_Cows_CATINV.state.unique():
@@ -150,11 +160,11 @@ import rangeland_core as rc
 
 # %%
 param_dir = data_dir_base + "parameters/"
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
-county_id_name_fips = abb_dict ["county_fips"]
+county_id_name_fips = abb_dict["county_fips"]
 
 county_id_name_fips = county_id_name_fips[["state", "state_fips"]].copy()
 

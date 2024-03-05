@@ -45,13 +45,15 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 plots_dir = data_dir_base + "plots/"
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
-d = {"state": abb_dict["abb_2_full"].keys(),
-    "full_state": abb_dict["abb_2_full"].values()}
+d = {
+    "state": abb_dict["abb_2_full"].keys(),
+    "full_state": abb_dict["abb_2_full"].values(),
+}
 
 # creating a Dataframe object
 state_abbrFull_df = pd.DataFrame(d)
@@ -65,7 +67,9 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplac
 
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
-county_id_name_fips = rc.correct_Mins_county_6digitFIPS(df=county_id_name_fips, col_="county_fips")
+county_id_name_fips = rc.correct_Mins_county_6digitFIPS(
+    df=county_id_name_fips, col_="county_fips"
+)
 
 
 county_id_name_fips.reset_index(drop=True, inplace=True)
@@ -81,11 +85,13 @@ state_fips_df.reset_index(drop=True, inplace=True)
 state_fips_df.head(2)
 
 # %%
-annual_invent = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav")
+annual_invent = pd.read_pickle(
+    reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav"
+)
 annual_invent = annual_invent["CATINV_annual_tall"]
 annual_invent.head(2)
 
-chosen_states = ["CO", "UT", "NM",  "OK", "TX"]
+chosen_states = ["CO", "UT", "NM", "OK", "TX"]
 annual_invent_5states = annual_invent[annual_invent.state.isin(chosen_states)].copy()
 annual_invent_5states.reset_index(drop=True, inplace=True)
 annual_invent_5states.head(2)
@@ -101,7 +107,9 @@ state_RA.head(2)
 
 # %%
 state_NPP = pd.read_csv(Min_data_base + "statefips_annual_MODIS_NPP.csv")
-state_NPP.rename(columns={"NPP": "modis_npp", "statefips90m": "state_fip"}, inplace=True)
+state_NPP.rename(
+    columns={"NPP": "modis_npp", "statefips90m": "state_fip"}, inplace=True
+)
 
 state_NPP = rc.correct_3digitStateFips_Min(state_NPP, "state_fip")
 
@@ -118,18 +126,24 @@ state_NPP.head(2)
 # %%
 a = ["state_fip", "rangeland_acre", "state_area_acre"]
 state_NPP = pd.merge(state_NPP, state_RA[a], on=["state_fip"], how="left")
-state_NPP = rc.covert_unitNPP_2_total(NPP_df=state_NPP, npp_unit_col_="modis_npp",
-                                      acr_area_col_="rangeland_acre", npp_area_col_="state_rangeland_npp")
+state_NPP = rc.covert_unitNPP_2_total(
+    NPP_df=state_NPP,
+    npp_unit_col_="modis_npp",
+    acr_area_col_="rangeland_acre",
+    npp_area_col_="state_rangeland_npp",
+)
 
 ### Security check to not make mistake later:
 state_NPP.drop(columns=["modis_npp"], inplace=True)
 state_NPP.head(2)
 
 # %%
-print (annual_invent_5states.shape)
-annual_invent_5states = annual_invent_5states[annual_invent_5states.year.isin(list(state_NPP.year.unique()))]
+print(annual_invent_5states.shape)
+annual_invent_5states = annual_invent_5states[
+    annual_invent_5states.year.isin(list(state_NPP.year.unique()))
+]
 annual_invent_5states.reset_index(drop=True, inplace=True)
-print (annual_invent_5states.shape)
+print(annual_invent_5states.shape)
 
 # %%
 annual_invent_5states.head(2)
@@ -138,9 +152,9 @@ annual_invent_5states.head(2)
 state_NPP.head(2)
 
 # %%
-state_NPP_invent = pd.merge(state_NPP, annual_invent_5states, 
-                            on=["state_fip", "state", "year"], 
-                            how="left")
+state_NPP_invent = pd.merge(
+    state_NPP, annual_invent_5states, on=["state_fip", "state", "year"], how="left"
+)
 
 state_NPP_invent.sort_values(by=["state", "year"], inplace=True)
 
@@ -148,123 +162,128 @@ state_NPP_invent.head(2)
 
 # %%
 state_ = chosen_states[0]
-B = state_NPP_invent[state_NPP_invent.state==state_].copy()
+B = state_NPP_invent[state_NPP_invent.state == state_].copy()
 
 
 # %%
-fig, axs = plt.subplots(5, 1, figsize=(10, 2*len(chosen_states)), sharex=True,
-                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+fig, axs = plt.subplots(
+    5,
+    1,
+    figsize=(10, 2 * len(chosen_states)),
+    sharex=True,
+    gridspec_kw={"hspace": 0.15, "wspace": 0.05},
+)
 axs[0].grid(axis="y", which="both")
 axs[1].grid(axis="y", which="both")
 axs[2].grid(axis="y", which="both")
 axs[3].grid(axis="y", which="both")
 axs[4].grid(axis="y", which="both")
 
-ii=0
+ii = 0
 state_ = chosen_states[ii]
-B = state_NPP_invent[state_NPP_invent.state==state_].copy()
+B = state_NPP_invent[state_NPP_invent.state == state_].copy()
 color_ = "dodgerblue"
-axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_);
-axs[ii].set_ylabel('inventory', color=color_)
+axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_)
+axs[ii].set_ylabel("inventory", color=color_)
 
 ax0T = axs[ii].twinx()  # instantiate a second axes that shares the same x-axis
-color_ = 'tab:red'
-ax0T.set_ylabel('NPP', color=color_)  # we already handled the x-label with ax1
-ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP");
+color_ = "tab:red"
+ax0T.set_ylabel("NPP", color=color_)  # we already handled the x-label with ax1
+ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP")
 
 mu, std_ = B.state_rangeland_npp.mean(), statistics.stdev(B.state_rangeland_npp)
-ax0T.axhline(y = mu, color =color_, linestyle = '-.', linewidth=2)
-ax0T.axhspan(mu-std_, mu+std_, alpha=0.2, color="tab:red")
+ax0T.axhline(y=mu, color=color_, linestyle="-.", linewidth=2)
+ax0T.axhspan(mu - std_, mu + std_, alpha=0.2, color="tab:red")
 
-ax0T.tick_params(axis='y')
-axs[ii].legend(loc="lower right");
+ax0T.tick_params(axis="y")
+axs[ii].legend(loc="lower right")
 ####################################
 ii = 1
 state_ = chosen_states[ii]
-B = state_NPP_invent[state_NPP_invent.state==state_].copy()
+B = state_NPP_invent[state_NPP_invent.state == state_].copy()
 color_ = "dodgerblue"
-axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_);
-axs[ii].set_ylabel('inventory', color=color_)
+axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_)
+axs[ii].set_ylabel("inventory", color=color_)
 
 ax0T = axs[ii].twinx()  # instantiate a second axes that shares the same x-axis
-color_ = 'tab:red'
-ax0T.set_ylabel('NPP', color=color_)  # we already handled the x-label with ax1
-ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP");
+color_ = "tab:red"
+ax0T.set_ylabel("NPP", color=color_)  # we already handled the x-label with ax1
+ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP")
 
 mu, std_ = B.state_rangeland_npp.mean(), statistics.stdev(B.state_rangeland_npp)
-ax0T.axhline(y = mu, color =color_, linestyle = '-.', linewidth=2)
-ax0T.axhspan(mu-std_, mu+std_, alpha=0.2, color="tab:red")
+ax0T.axhline(y=mu, color=color_, linestyle="-.", linewidth=2)
+ax0T.axhspan(mu - std_, mu + std_, alpha=0.2, color="tab:red")
 
-ax0T.tick_params(axis='y')
-axs[ii].legend(loc="lower right");
+ax0T.tick_params(axis="y")
+axs[ii].legend(loc="lower right")
 ####################################
 ii = 2
 state_ = chosen_states[ii]
-B = state_NPP_invent[state_NPP_invent.state==state_].copy()
+B = state_NPP_invent[state_NPP_invent.state == state_].copy()
 color_ = "dodgerblue"
-axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_);
-axs[ii].set_ylabel('inventory', color=color_)
+axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_)
+axs[ii].set_ylabel("inventory", color=color_)
 
 ax0T = axs[ii].twinx()  # instantiate a second axes that shares the same x-axis
-color_ = 'tab:red'
-ax0T.set_ylabel('NPP', color=color_)  # we already handled the x-label with ax1
+color_ = "tab:red"
+ax0T.set_ylabel("NPP", color=color_)  # we already handled the x-label with ax1
 
 mu, std_ = B.state_rangeland_npp.mean(), statistics.stdev(B.state_rangeland_npp)
-ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP");
-ax0T.axhline(y = mu , color =color_, linestyle = '-.', linewidth=2)
+ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP")
+ax0T.axhline(y=mu, color=color_, linestyle="-.", linewidth=2)
 
-ax0T.axhspan(mu-std_, mu+std_, alpha=0.2, color="tab:red")
+ax0T.axhspan(mu - std_, mu + std_, alpha=0.2, color="tab:red")
 
-ax0T.tick_params(axis='y')
-axs[ii].legend(loc="lower right");
+ax0T.tick_params(axis="y")
+axs[ii].legend(loc="lower right")
 
 ####################################
 ii = 3
 state_ = chosen_states[ii]
-B = state_NPP_invent[state_NPP_invent.state==state_].copy()
+B = state_NPP_invent[state_NPP_invent.state == state_].copy()
 color_ = "dodgerblue"
-axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_);
-axs[ii].set_ylabel('inventory', color=color_)
+axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_)
+axs[ii].set_ylabel("inventory", color=color_)
 
 ax0T = axs[ii].twinx()  # instantiate a second axes that shares the same x-axis
-color_ = 'tab:red'
-ax0T.set_ylabel('NPP', color=color_)  # we already handled the x-label with ax1
+color_ = "tab:red"
+ax0T.set_ylabel("NPP", color=color_)  # we already handled the x-label with ax1
 
-ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP");
+ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP")
 mu = B.state_rangeland_npp.mean()
 std_ = statistics.stdev(B.state_rangeland_npp)
-ax0T.axhline(y = mu, color =color_, linestyle = '-.', linewidth=2)
-ax0T.axhspan(mu-std_, mu+std_, alpha=0.2, color="tab:red")
+ax0T.axhline(y=mu, color=color_, linestyle="-.", linewidth=2)
+ax0T.axhspan(mu - std_, mu + std_, alpha=0.2, color="tab:red")
 
-ax0T.tick_params(axis='y')
-axs[ii].legend(loc="lower right");
+ax0T.tick_params(axis="y")
+axs[ii].legend(loc="lower right")
 ####################################
 ii = 4
 state_ = chosen_states[ii]
-B = state_NPP_invent[state_NPP_invent.state==state_].copy()
+B = state_NPP_invent[state_NPP_invent.state == state_].copy()
 color_ = "dodgerblue"
-axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_);
-axs[ii].set_ylabel('inventory', color=color_)
+axs[ii].plot(B.year, B.inventory, c=color_, linewidth=3, label=state_)
+axs[ii].set_ylabel("inventory", color=color_)
 
 ax0T = axs[ii].twinx()  # instantiate a second axes that shares the same x-axis
-color_ = 'tab:red'
-ax0T.set_ylabel('NPP', color=color_)  # we already handled the x-label with ax1
-ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP");
-ax0T.tick_params(axis='y')
-axs[ii].legend(loc="lower right");
+color_ = "tab:red"
+ax0T.set_ylabel("NPP", color=color_)  # we already handled the x-label with ax1
+ax0T.plot(B.year, B.state_rangeland_npp, c=color_, linewidth=3, label="NPP")
+ax0T.tick_params(axis="y")
+axs[ii].legend(loc="lower right")
 mu = B.state_rangeland_npp.mean()
 std_ = statistics.stdev(B.state_rangeland_npp)
-ax0T.axhline(y = mu, color =color_, linestyle = '-.', linewidth=2)
-ax0T.axhspan(mu-std_, mu+std_, alpha=0.2, color="tab:red")
+ax0T.axhline(y=mu, color=color_, linestyle="-.", linewidth=2)
+ax0T.axhspan(mu - std_, mu + std_, alpha=0.2, color="tab:red")
 
 axs[ii].set_xticks(B.year, B.year, rotation=90)
 
 
 # axs[ii].xaxis.set_major_locator(mdates.YearLocator())
 # axs[ii].xaxis.set_major_formatter(DateFormatter("%b"))
-    
-# axs.plot(["2015", "2016", "2017"], 
-#          B[["2015", "2016", "2017"]].values[0], 
+
+# axs.plot(["2015", "2016", "2017"],
+#          B[["2015", "2016", "2017"]].values[0],
 #          color = 'b', marker='o', markerfacecolor='r', markersize=5);
 
 # odd_i = itertools.islice(B.columns[90:], 0, None, 3);
@@ -283,13 +302,13 @@ v = B.state_rangeland_npp
 vcentered = v - v.mean()
 vcentered_norm = np.linalg.norm(vcentered)
 
-print (f"{v.std()                          = }")
-print (f"{statistics.stdev(v)              = }")
-print (f"{vcentered_norm/np.sqrt(len(v)-1) = }")
+print(f"{v.std()                          = }")
+print(f"{statistics.stdev(v)              = }")
+print(f"{vcentered_norm/np.sqrt(len(v)-1) = }")
 
 print()
-print (f"{np.std(v)                        = }")
-print (f"{vcentered_norm/np.sqrt(len(v))   = }")
+print(f"{np.std(v)                        = }")
+print(f"{vcentered_norm/np.sqrt(len(v))   = }")
 
 # %%
 

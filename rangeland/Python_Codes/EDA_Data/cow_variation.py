@@ -46,8 +46,8 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 plots_dir = data_dir_base + "plots/"
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -72,7 +72,9 @@ county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplac
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 county_id_name_fips.rename(columns={"county": "county_fips"}, inplace=True)
 
-county_id_name_fips = rc.correct_Mins_county_6digitFIPS(df=county_id_name_fips, col_="county_fips")
+county_id_name_fips = rc.correct_Mins_county_6digitFIPS(
+    df=county_id_name_fips, col_="county_fips"
+)
 county_id_name_fips.reset_index(drop=True, inplace=True)
 county_id_name_fips.head(2)
 
@@ -188,21 +190,27 @@ county_RA_and_TA_fraction = pd.read_csv(
 )
 county_RA_and_TA_fraction.rename(columns={"fips_id": "county_fips"}, inplace=True)
 
-county_RA_and_TA_fraction = rc.correct_Mins_county_6digitFIPS(df=county_RA_and_TA_fraction, col_="county_fips")
+county_RA_and_TA_fraction = rc.correct_Mins_county_6digitFIPS(
+    df=county_RA_and_TA_fraction, col_="county_fips"
+)
 L = len(county_RA_and_TA_fraction.county_fips.unique())
 print("number of counties in county_RA_and_TA_fraction are {}.".format(L))
 print(county_RA_and_TA_fraction.shape)
 county_RA_and_TA_fraction.head(2)
 
 # %%
-county_annual_NPP_Ra = pd.merge(NPP, county_RA_and_TA_fraction, on=["county_fips"], how="left")
+county_annual_NPP_Ra = pd.merge(
+    NPP, county_RA_and_TA_fraction, on=["county_fips"], how="left"
+)
 county_annual_NPP_Ra.head(2)
 
 # %%
-county_annual_NPP_Ra = rc.covert_unitNPP_2_total(NPP_df=county_annual_NPP_Ra,
-                                                 npp_unit_col_="modis_npp",
-                                                 acr_area_col_="rangeland_acre",
-                                                 npp_area_col_="county_rangeland_npp")
+county_annual_NPP_Ra = rc.covert_unitNPP_2_total(
+    NPP_df=county_annual_NPP_Ra,
+    npp_unit_col_="modis_npp",
+    acr_area_col_="rangeland_acre",
+    npp_area_col_="county_rangeland_npp",
+)
 ### Security check to not make mistake later:
 county_annual_NPP_Ra.drop(columns=["modis_npp"], inplace=True)
 county_annual_NPP_Ra.head(2)

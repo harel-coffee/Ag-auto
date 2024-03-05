@@ -35,39 +35,57 @@ pop_2000_file = "z_2000_2009_co-est2009-alldata.csv"
 
 # %%
 # encoding can be unicode_escape too.
-pop_2000 = pd.read_csv(census_dir + pop_2000_file, encoding='latin-1')
-pop_2000_2010 = pd.read_csv(census_dir + pop_2000_2010_file, encoding='latin-1')
-pop_2010_2020 = pd.read_csv(census_dir + pop_2010_2020_file, encoding='latin-1')
+pop_2000 = pd.read_csv(census_dir + pop_2000_file, encoding="latin-1")
+pop_2000_2010 = pd.read_csv(census_dir + pop_2000_2010_file, encoding="latin-1")
+pop_2010_2020 = pd.read_csv(census_dir + pop_2010_2020_file, encoding="latin-1")
 
-pop_2000.drop(["SUMLEV", "REGION", "DIVISION" ], axis=1, inplace=True)
-pop_2000_2010.drop(["SUMLEV", "REGION", "DIVISION" ], axis=1, inplace=True)
+pop_2000.drop(["SUMLEV", "REGION", "DIVISION"], axis=1, inplace=True)
+pop_2000_2010.drop(["SUMLEV", "REGION", "DIVISION"], axis=1, inplace=True)
 pop_2010_2020.drop(["SUMLEV", "REGION", "DIVISION"], axis=1, inplace=True)
 
 
 pop_2000.rename(
-         columns={ "STATE": "state_fip", "COUNTY": "cnty_fip", "STNAME": "state", "CTYNAME": "county"},
-        inplace=True)
+    columns={
+        "STATE": "state_fip",
+        "COUNTY": "cnty_fip",
+        "STNAME": "state",
+        "CTYNAME": "county",
+    },
+    inplace=True,
+)
 
 pop_2000_2010.rename(
-         columns={ "STATE": "state_fip", "COUNTY": "cnty_fip", "STNAME": "state", "CTYNAME": "county"},
-        inplace=True)
+    columns={
+        "STATE": "state_fip",
+        "COUNTY": "cnty_fip",
+        "STNAME": "state",
+        "CTYNAME": "county",
+    },
+    inplace=True,
+)
 
 pop_2010_2020.rename(
-         columns={ "STATE": "state_fip", "COUNTY": "cnty_fip", "STNAME": "state", "CTYNAME": "county"},
-        inplace=True)
+    columns={
+        "STATE": "state_fip",
+        "COUNTY": "cnty_fip",
+        "STNAME": "state",
+        "CTYNAME": "county",
+    },
+    inplace=True,
+)
 
 pop_2000.head(2)
 
 # %%
-pop_2000.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
-pop_2000_2010.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
-pop_2010_2020.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
+pop_2000.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+pop_2000_2010.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+pop_2010_2020.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 pop_2000.head(2)
 
 # %%
-pop_2000.rename({'stname': 'state', 'ctyname':'county'}, axis=1, inplace=True)
-pop_2000_2010.rename({'stname': 'state', 'ctyname':'county'}, axis=1, inplace=True)
-pop_2010_2020.rename({'stname': 'state', 'ctyname':'county'}, axis=1, inplace=True)
+pop_2000.rename({"stname": "state", "ctyname": "county"}, axis=1, inplace=True)
+pop_2000_2010.rename({"stname": "state", "ctyname": "county"}, axis=1, inplace=True)
+pop_2010_2020.rename({"stname": "state", "ctyname": "county"}, axis=1, inplace=True)
 pop_2000_2010.head(2)
 
 # %%
@@ -121,8 +139,8 @@ pop_2010_2020.drop(["state_fip", "cnty_fip"], axis=1, inplace=True)
 pop_2000_2010.head(2)
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -156,7 +174,9 @@ A
 
 # %%
 L = len(pop_2000_2010) + len(pop_2010_2020)
-pop_wide = pd.DataFrame(columns=["county_fips", "year", "population"], index=range(L * 2))
+pop_wide = pd.DataFrame(
+    columns=["county_fips", "year", "population"], index=range(L * 2)
+)
 
 pop_wide.county_fips = "666"
 pop_wide.year = 666
@@ -174,18 +194,26 @@ for idx in pop_2000_2010.index:
     pop_wide.loc[wide_pointer, "county_fips"] = pop_2000_2010.loc[idx, "county_fips"]
     pop_wide.loc[wide_pointer, "population"] = pop_2000_2010.loc[idx, "popestimate2002"]
 
-    pop_wide.loc[wide_pointer + 1, "county_fips"] = pop_2000_2010.loc[idx, "county_fips"]
-    pop_wide.loc[wide_pointer + 1, "population"] = pop_2000_2010.loc[idx, "popestimate2007"]
+    pop_wide.loc[wide_pointer + 1, "county_fips"] = pop_2000_2010.loc[
+        idx, "county_fips"
+    ]
+    pop_wide.loc[wide_pointer + 1, "population"] = pop_2000_2010.loc[
+        idx, "popestimate2007"
+    ]
     wide_pointer += 2
 
 for idx in pop_2010_2020.index:
     pop_wide.loc[wide_pointer, "county_fips"] = pop_2010_2020.loc[idx, "county_fips"]
     pop_wide.loc[wide_pointer, "population"] = pop_2010_2020.loc[idx, "popestimate2012"]
 
-    pop_wide.loc[wide_pointer + 1, "county_fips"] = pop_2010_2020.loc[idx, "county_fips"]
-    pop_wide.loc[wide_pointer + 1, "population"] = pop_2010_2020.loc[idx, "popestimate2017"]
+    pop_wide.loc[wide_pointer + 1, "county_fips"] = pop_2010_2020.loc[
+        idx, "county_fips"
+    ]
+    pop_wide.loc[wide_pointer + 1, "population"] = pop_2010_2020.loc[
+        idx, "popestimate2017"
+    ]
     wide_pointer += 2
-    
+
 pop_wide.head(2)
 
 # %%
@@ -199,29 +227,33 @@ pop_wide.head(10)
 # population_1990_1999 = pd.read_csv(f'/Users/hn/Documents/01_research_data/RangeLand/Data/' + \
 #                                                        'census/CO-99-10.txt')
 
-pop_1990_1999 = pd.read_csv(census_dir + pop_1990_1999_file, 
-                                   header = 12, sep = "\t", on_bad_lines = 'skip',
-                                   encoding = 'unicode_escape')
+pop_1990_1999 = pd.read_csv(
+    census_dir + pop_1990_1999_file,
+    header=12,
+    sep="\t",
+    on_bad_lines="skip",
+    encoding="unicode_escape",
+)
 
-print ()
-print (f"{pop_1990_1999.shape=}")
-print ()
+print()
+print(f"{pop_1990_1999.shape=}")
+print()
 pop_1990_1999.head(5)
 
 # %%
 cols = list(pop_1990_1999.loc[0])[0].split(" ")
-cols = [x.lower() for x in cols if x!=""]
+cols = [x.lower() for x in cols if x != ""]
 cols
 # [x for x in list(population_1990_1999.loc[1])[0].split(" ") if x!=""]
 
 # %%
-pop_1990_1999_clean = pd.DataFrame(columns = cols, index=range(len(pop_1990_1999)))
+pop_1990_1999_clean = pd.DataFrame(columns=cols, index=range(len(pop_1990_1999)))
 
 for a_idx in pop_1990_1999.index:
-    if a_idx==0:
+    if a_idx == 0:
         pass
     else:
-        curr_row = [x for x in list(pop_1990_1999.loc[a_idx])[0].split(" ") if x!=""]
+        curr_row = [x for x in list(pop_1990_1999.loc[a_idx])[0].split(" ") if x != ""]
         pop_1990_1999_clean.loc[a_idx] = curr_row
 
 pop_1990_1999_clean.dropna(inplace=True)
@@ -237,19 +269,19 @@ pop_1990_1999.head(2)
 # %%
 Supriya_Min_FIPS = pd.read_csv(param_dir + "Supriya_Min_FIPS.csv")
 Supriya_Min_FIPS.sort_values("fips", inplace=True)
-Supriya_Min_FIPS.rename({'county_name': 'county_state'}, axis=1, inplace=True)
+Supriya_Min_FIPS.rename({"county_name": "county_state"}, axis=1, inplace=True)
 Supriya_Min_FIPS.shape
 
 # %%
-print (f"{len(Supriya_Min_FIPS.fips.unique())=}")
-print (f"{len(pop_1990_1999.fips.unique())=}")
+print(f"{len(Supriya_Min_FIPS.fips.unique())=}")
+print(f"{len(pop_1990_1999.fips.unique())=}")
 
 # %%
 # pop_1990_1999 = pd.merge(pop_1990_1999, Supriya_Min_FIPS, on=['fips'], how='left')
 pop_1990_1999["population"] = pop_1990_1999.iloc[:, 2:9].sum(axis=1)
 pop_1990_1999 = pop_1990_1999[["year", "fips", "population"]].copy()
 
-pop_1990_1999.rename({'fips': 'county_fips'}, axis=1, inplace=True)
+pop_1990_1999.rename({"fips": "county_fips"}, axis=1, inplace=True)
 
 pop_wide.sort_values(["county_fips", "year"], inplace=True)
 
@@ -259,12 +291,14 @@ pop_1990_1999.head(2)
 # %%
 for idx in pop_1990_1999.index:
     if len(pop_1990_1999.loc[idx, "county_fips"]) == 4:
-        pop_1990_1999.loc[idx, "county_fips"] = "0" + pop_1990_1999.loc[idx, "county_fips"]
+        pop_1990_1999.loc[idx, "county_fips"] = (
+            "0" + pop_1990_1999.loc[idx, "county_fips"]
+        )
 
 pop_1990_1999.head(2)
 
 # %%
-pop_1997 = pop_1990_1999[pop_1990_1999.year==1997].copy()
+pop_1997 = pop_1990_1999[pop_1990_1999.year == 1997].copy()
 pop_1997.reset_index(drop=True, inplace=True)
 
 pop_1997.head(5)
@@ -291,12 +325,14 @@ from datetime import datetime
 
 filename = reOrganized_dir + "human_population.sav"
 
-export_ = {"human_population": pop_wide, 
-           "source_code" : "clean_organize_population",
-           "Author": "HN",
-           "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+export_ = {
+    "human_population": pop_wide,
+    "source_code": "clean_organize_population",
+    "Author": "HN",
+    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+}
 
-pickle.dump(export_, open(filename, 'wb'))
+pickle.dump(export_, open(filename, "wb"))
 
 # %% [markdown]
 # # Reshape other population DFs

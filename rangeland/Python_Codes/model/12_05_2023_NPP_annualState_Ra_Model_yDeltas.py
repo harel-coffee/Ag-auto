@@ -65,15 +65,17 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 # # Read
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
 county_id_name_fips = pd.read_csv(Min_data_base + "county_id_name_fips.csv")
 county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 
-county_id_name_fips = county_id_name_fips[county_id_name_fips.state.isin(SoI_abb)].copy()
+county_id_name_fips = county_id_name_fips[
+    county_id_name_fips.state.isin(SoI_abb)
+].copy()
 
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 
@@ -105,7 +107,7 @@ len(state_SoI_fip)
 # herb = rc.correct_state_int_fips_to_str(df=herb, col_="state_fip")
 # herb.sort_values(by=["state_fip"], inplace=True)
 herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/state_herb_ratio.sav")
-print (herb.keys())
+print(herb.keys())
 herb = herb["state_herb_ratio"]
 herb = herb[herb.state_fip.isin(state_SoI_fip)]
 # herb.dropna(how="any", inplace=True)
@@ -169,7 +171,7 @@ prod_test["state_fip"] = prod_test.statefips90m.str.slice(0, 2)
 print(sorted(prod_test.state_fip.unique()))
 
 # %%
-county_id_name_fips[county_id_name_fips.state == "TN"] 
+county_id_name_fips[county_id_name_fips.state == "TN"]
 
 # %%
 
@@ -181,8 +183,12 @@ state_NPP_Ra = pd.merge(NPP, state_RA, on=["state_fip"], how="left")
 state_NPP_Ra.head(2)
 
 # %%
-state_NPP_Ra = rc.covert_unitNPP_2_total(NPP_df=state_NPP_Ra, npp_col_="modis_npp",
-                                         area_col_="rangeland_acre", new_col_="state_rangeland_npp")
+state_NPP_Ra = rc.covert_unitNPP_2_total(
+    NPP_df=state_NPP_Ra,
+    npp_col_="modis_npp",
+    area_col_="rangeland_acre",
+    new_col_="state_rangeland_npp",
+)
 
 ### Security check to not make mistake later:
 state_NPP_Ra.drop(columns=["modis_npp"], inplace=True)
@@ -205,10 +211,18 @@ print(sorted(state_NPP_Ra_herb.year.unique()))
 # # Read inventory deltas
 
 # %%
-Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + "state_USDA_ShannonCattle.sav")
-Shannon_CATINV_deltas = Shannon_Beef_Cows_fromCATINV_deltas["shannon_annual_inventory_deltas_tall"]
-Shannon_CATINV_deltas = Shannon_CATINV_deltas[Shannon_CATINV_deltas.state_fip.isin(state_SoI_fip)]
-Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(np.float32)
+Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(
+    reOrganized_dir + "state_USDA_ShannonCattle.sav"
+)
+Shannon_CATINV_deltas = Shannon_Beef_Cows_fromCATINV_deltas[
+    "shannon_annual_inventory_deltas_tall"
+]
+Shannon_CATINV_deltas = Shannon_CATINV_deltas[
+    Shannon_CATINV_deltas.state_fip.isin(state_SoI_fip)
+]
+Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(
+    np.float32
+)
 Shannon_CATINV_deltas.head(2)
 
 # %%
@@ -279,8 +293,9 @@ state_NPP_Ra_herb_InvenDelta["state_normal_npp"] = (
 state_NPP_Ra_herb_InvenDelta.head(2)
 
 # %%
-state_NPP_Ra_herb_InvenDelta = pd.merge(state_NPP_Ra_herb_InvenDelta, county_id_name_fips,
-                                        on=["state_fip"], how="left")
+state_NPP_Ra_herb_InvenDelta = pd.merge(
+    state_NPP_Ra_herb_InvenDelta, county_id_name_fips, on=["state_fip"], how="left"
+)
 state_NPP_Ra_herb_InvenDelta.head(2)
 
 # %%
@@ -328,8 +343,9 @@ ax1.grid(axis="y", which="both")
 ax2.grid(axis="y", which="both")
 
 var = "state_normal_npp"
-sns.histplot(data=state_NPP_Ra_herb_InvenDelta[var],
-             kde=True, bins=200, color="darkblue", ax=ax1)
+sns.histplot(
+    data=state_NPP_Ra_herb_InvenDelta[var], kde=True, bins=200, color="darkblue", ax=ax1
+)
 
 # ax1.title("Linear graph")
 ax1.title.set_text(var.replace("_", " ") + " density")
@@ -359,14 +375,20 @@ ax1.grid(axis="y", which="both")
 ax2.grid(axis="y", which="both")
 
 var = "state_normal_npp"
-sns.histplot(data=state_NPP_Ra_herb_InvenDelta[var],
-             kde=True, bins=200, color="darkblue", ax=ax1)
+sns.histplot(
+    data=state_NPP_Ra_herb_InvenDelta[var], kde=True, bins=200, color="darkblue", ax=ax1
+)
 
 # ax1.title("Linear graph")
 ax1.title.set_text(var.replace("_", " ") + " density")
 
-sns.histplot(data=1 / (state_NPP_Ra_herb_InvenDelta[var]),
-             kde=True, bins=200, color="darkblue", ax=ax2)
+sns.histplot(
+    data=1 / (state_NPP_Ra_herb_InvenDelta[var]),
+    kde=True,
+    bins=200,
+    color="darkblue",
+    ax=ax2,
+)
 ax2.title.set_text("1/(" + var.replace("_", " ") + ")" + " density")
 
 ax1.set_xlabel("")
@@ -401,8 +423,12 @@ yr_max = state_NPP_Ra_herb_InvenDelta.year.unique().max()
 print(yr_max)
 
 # %%
-train_df = state_NPP_Ra_herb_InvenDelta[state_NPP_Ra_herb_InvenDelta.year < yr_max].copy()
-test_df  = state_NPP_Ra_herb_InvenDelta[state_NPP_Ra_herb_InvenDelta.year == yr_max].copy()
+train_df = state_NPP_Ra_herb_InvenDelta[
+    state_NPP_Ra_herb_InvenDelta.year < yr_max
+].copy()
+test_df = state_NPP_Ra_herb_InvenDelta[
+    state_NPP_Ra_herb_InvenDelta.year == yr_max
+].copy()
 
 # %%
 test_df.year.unique()
@@ -463,7 +489,9 @@ print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
 state_NPP_Ra_herb_InvenDelta.head(2)
 
 # %%
-state_NPP_Ra_herb_InvenDelta["inverse_state_normal_npp"] = (1 / state_NPP_Ra_herb_InvenDelta["state_normal_npp"])
+state_NPP_Ra_herb_InvenDelta["inverse_state_normal_npp"] = (
+    1 / state_NPP_Ra_herb_InvenDelta["state_normal_npp"]
+)
 state_NPP_Ra_herb_InvenDelta.head(2)
 
 # %%
@@ -506,20 +534,22 @@ ax2.set_xlabel(var.replace("_", " "))
 fig.tight_layout()
 
 # %%
-state_NPP_Ra_herb_InvenDelta["log_rangeland_acre"] = np.log10(state_NPP_Ra_herb_InvenDelta["rangeland_acre"])
+state_NPP_Ra_herb_InvenDelta["log_rangeland_acre"] = np.log10(
+    state_NPP_Ra_herb_InvenDelta["rangeland_acre"]
+)
 state_NPP_Ra_herb_InvenDelta.head(2)
 
 # %%
 print(state_NPP_Ra_herb_InvenDelta.log_rangeland_acre.min().round(2))
 print(state_NPP_Ra_herb_InvenDelta.log_rangeland_acre.max().round(2))
-print ()
+print()
 print(state_NPP_Ra_herb_InvenDelta.inverse_state_normal_npp.min().round(2))
 print(state_NPP_Ra_herb_InvenDelta.inverse_state_normal_npp.max().round(2))
 
-print ()
+print()
 print(state_NPP_Ra_herb_InvenDelta.herb_avg.min().round(2))
 print(state_NPP_Ra_herb_InvenDelta.herb_avg.max().round(2))
-print ()
+print()
 print(state_NPP_Ra_herb_InvenDelta.inventory_delta.min().round(2))
 print(state_NPP_Ra_herb_InvenDelta.inventory_delta.max().round(2))
 
@@ -548,7 +578,9 @@ print(state_NPP_Ra_herb_InvenDelta.normal_inventory_delta.max())
 
 # %%
 RA_mean = state_NPP_Ra_herb_InvenDelta["rangeland_acre"].mean()
-state_NPP_Ra_herb_InvenDelta["normal_RA"] = (state_NPP_Ra_herb_InvenDelta["rangeland_acre"] - RA_mean) / RA_mean
+state_NPP_Ra_herb_InvenDelta["normal_RA"] = (
+    state_NPP_Ra_herb_InvenDelta["rangeland_acre"] - RA_mean
+) / RA_mean
 state_NPP_Ra_herb_InvenDelta.head(2)
 
 # %%

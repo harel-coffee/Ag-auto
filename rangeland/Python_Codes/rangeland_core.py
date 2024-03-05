@@ -108,25 +108,33 @@ def clean_census(df, col_, col_to_lower=True):
     """
     if col_to_lower == True:
         df.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+        col_ = col_.lower()
     if "state" in df.columns:
         df.state = df.state.str.title()
     if "county" in df.columns:
         df.county = df.county.str.title()
 
     df.reset_index(drop=True, inplace=True)
-    col_ = col_.lower()
-    # df = df[df[col_] != " (D)"]
-    # df = df[df[col_] != " (Z)"]
 
-    # df = df[~(df[col_].str.contains(pat="(D)", case=False))]
-    # df = df[~(df[col_].str.contains(pat="(Z)", case=False))]
+    """
+    It is possible that this column is all numbers. 
+    So, I put the following If there. 
+    I am not sure how many cases are possible!!!
+    So, maybe I should convert it to str first!
+    But, then we might have produced NaN and who knows how many different
+    patterns!!!
+    """
+    if df[col_].dtype == "O" or df[col_].dtype == "str":
+        # df = df[df[col_] != " (D)"]
+        # df = df[df[col_] != " (Z)"]
+        # df = df[~(df[col_].str.contains(pat="(D)", case=False))]
+        # df = df[~(df[col_].str.contains(pat="(Z)", case=False))]
 
-    df = df[~(df[col_].str.contains(pat="(D)", case=False, na=False))]
-    df = df[~(df[col_].str.contains(pat="(Z)", case=False, na=False))]
-
+        df = df[~(df[col_].str.contains(pat="(D)", case=False, na=False))]
+        df = df[~(df[col_].str.contains(pat="(Z)", case=False, na=False))]
     df.reset_index(drop=True, inplace=True)
 
-    # this is not good contision. maybe the first one is na whose
+    # this is not good condition. maybe the first one is na whose
     # type would be float.
 
     # if type(df[col_][0]) == str:

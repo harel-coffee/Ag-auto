@@ -95,8 +95,8 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -121,7 +121,7 @@ print(f"{len(county_fips.state.unique()) = }")
 county_fips.head(2)
 
 # %%
-del(county_fips)
+del county_fips
 
 # %% [markdown]
 # ## NPP exist only after 2001!
@@ -137,12 +137,32 @@ df_OuterJoined.reset_index(drop=True, inplace=True)
 df_OuterJoined.head(2)
 
 # %%
-df_OuterJoined.drop(labels=["normal", "alert", "danger", "emergency",
-                            "s1_normal", "s1_alert", "s1_danger", "s1_emergency",
-                            "s2_normal", "s2_alert", "s2_danger", "s2_emergency",
-                            "s3_normal", "s3_alert", "s3_danger", "s3_emergency",
-                            "s4_normal", "s4_alert", "s4_danger", "s4_emergency"],
-                    axis=1, inplace=True)
+df_OuterJoined.drop(
+    labels=[
+        "normal",
+        "alert",
+        "danger",
+        "emergency",
+        "s1_normal",
+        "s1_alert",
+        "s1_danger",
+        "s1_emergency",
+        "s2_normal",
+        "s2_alert",
+        "s2_danger",
+        "s2_emergency",
+        "s3_normal",
+        "s3_alert",
+        "s3_danger",
+        "s3_emergency",
+        "s4_normal",
+        "s4_alert",
+        "s4_danger",
+        "s4_emergency",
+    ],
+    axis=1,
+    inplace=True,
+)
 
 # %% [markdown]
 # ## Inventory
@@ -163,7 +183,9 @@ print(inventory_2017.shape)
 inventory_2017.head(3)
 
 # %%
-df_OuterJoined = df_OuterJoined[df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)]
+df_OuterJoined = df_OuterJoined[
+    df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)
+]
 
 # %% [markdown]
 # # WARNING.
@@ -199,11 +221,16 @@ inventory_2017.head(2)
 # %%
 npp_cols = ["county_total_npp", "unit_npp"]
 
-sw_cols = ["S1_countyMean_total_precip", "S2_countyMean_total_precip",   
-           "S3_countyMean_total_precip", "S4_countyMean_total_precip",
-           
-           "S1_countyMean_avg_Tavg", "S2_countyMean_avg_Tavg",
-           "S3_countyMean_avg_Tavg", "S4_countyMean_avg_Tavg"]
+sw_cols = [
+    "S1_countyMean_total_precip",
+    "S2_countyMean_total_precip",
+    "S3_countyMean_total_precip",
+    "S4_countyMean_total_precip",
+    "S1_countyMean_avg_Tavg",
+    "S2_countyMean_avg_Tavg",
+    "S3_countyMean_avg_Tavg",
+    "S4_countyMean_avg_Tavg",
+]
 
 # %%
 common_cols = ["county_fips", "year"]
@@ -252,7 +279,9 @@ NPP_SW_heat_avg.head(2)
 inventory_2017.head(2)
 
 # %%
-inv_2017_NPP_SW_heat_avg = pd.merge(inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left")
+inv_2017_NPP_SW_heat_avg = pd.merge(
+    inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left"
+)
 inv_2017_NPP_SW_heat_avg.head(2)
 
 # %% [markdown]
@@ -282,9 +311,15 @@ pop_cols = ["county_fips", "year", "population"]
 slaughter_cols = ["year", "county_fips", "slaughter"]
 
 
-control_cols = ["county_fips"] + ["year"] + ["rangeland_fraction", "rangeland_acre"]+ \
-               ["herb_avg", "herb_area_acr"] + ["irr_hay_area", "irr_hay_as_perc"] + \
-               ["population"] + ["feed_expense", "slaughter"]
+control_cols = (
+    ["county_fips"]
+    + ["year"]
+    + ["rangeland_fraction", "rangeland_acre"]
+    + ["herb_avg", "herb_area_acr"]
+    + ["irr_hay_area", "irr_hay_as_perc"]
+    + ["population"]
+    + ["feed_expense", "slaughter"]
+)
 
 # %%
 controls = df_OuterJoined[control_cols].copy()
@@ -313,43 +348,63 @@ controls.head(2)
 # %%
 variable_controls = ["population", "slaughter", "feed_expense"]
 
-constant_controls = ["herb_avg",    "herb_area_acr", "rangeland_fraction", \
-                     "rangeland_acre", "irr_hay_area", "irr_hay_as_perc"]
+constant_controls = [
+    "herb_avg",
+    "herb_area_acr",
+    "rangeland_fraction",
+    "rangeland_acre",
+    "irr_hay_area",
+    "irr_hay_as_perc",
+]
 
 constant_control_df = controls[["county_fips"] + constant_controls].drop_duplicates()
 constant_control_df.reset_index(drop=True, inplace=True)
 constant_control_df.head(2)
 
 # %%
-controls_avg = controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
+controls_avg = (
+    controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
+)
 controls_avg.reset_index(drop=False, inplace=True)
 controls_avg = controls_avg.round(3)
 controls_avg.head(2)
 
 # %%
-controls_avg = pd.merge(controls_avg, constant_control_df, on=["county_fips"], how="left")
+controls_avg = pd.merge(
+    controls_avg, constant_control_df, on=["county_fips"], how="left"
+)
 print(controls_avg.shape)
 controls_avg.head(2)
 
 # %% [markdown]
-# ### Join - Drop Na. then normalize to unit vector. 
+# ### Join - Drop Na. then normalize to unit vector.
 #
 # Otherwise, when we drop NAs in different cases differently, colums will not have norm 1.
 
 # %%
-all_df = pd.merge(inv_2017_NPP_SW_heat_avg, controls_avg, on=["county_fips"], how="outer")
+all_df = pd.merge(
+    inv_2017_NPP_SW_heat_avg, controls_avg, on=["county_fips"], how="outer"
+)
 print(all_df.shape)
 all_df.head(2)
 
 # %%
-normalize_cols = ["population", "slaughter", "feed_expense",
-                  "herb_avg",    "herb_area_acr",    "rangeland_fraction",
-                  "rangeland_acre", "irr_hay_area", "irr_hay_as_perc"]
+normalize_cols = [
+    "population",
+    "slaughter",
+    "feed_expense",
+    "herb_avg",
+    "herb_area_acr",
+    "rangeland_fraction",
+    "rangeland_acre",
+    "irr_hay_area",
+    "irr_hay_as_perc",
+]
 
-normalize_cols = all_indp_vars + normalize_cols 
+normalize_cols = all_indp_vars + normalize_cols
 
 # %%
-all_df = all_df[['year', 'county_fips', 'inventory'] + normalize_cols]
+all_df = all_df[["year", "county_fips", "inventory"] + normalize_cols]
 
 # %%
 all_df.dropna(how="any", inplace=True)
@@ -370,13 +425,15 @@ all_indp_vars
 
 # %%
 all_df_normal = all_df.copy()
-all_df_normal[normalize_cols] = (all_df_normal[normalize_cols] - all_df_normal[normalize_cols].mean())
+all_df_normal[normalize_cols] = (
+    all_df_normal[normalize_cols] - all_df_normal[normalize_cols].mean()
+)
 
 col_norms = all_df_normal[normalize_cols].apply(np.linalg.norm, axis=0)
 all_df_normal[normalize_cols] = all_df_normal[normalize_cols] / col_norms
 
-print ((np.linalg.norm(all_df_normal.county_total_npp)))
-print ((np.linalg.norm(all_df_normal.S1_countyMean_total_precip)))
+print((np.linalg.norm(all_df_normal.county_total_npp)))
+print((np.linalg.norm(all_df_normal.S1_countyMean_total_precip)))
 all_df_normal.head(2)
 
 # %%
@@ -391,19 +448,21 @@ X
 normalize_cols
 
 # %%
-print (round(VIFs[normalize_cols.index('county_total_npp')], 1))
-print (round(VIFs[normalize_cols.index('unit_npp')], 1))
-print (round(VIFs[normalize_cols.index('rangeland_acre')], 1))
+print(round(VIFs[normalize_cols.index("county_total_npp")], 1))
+print(round(VIFs[normalize_cols.index("unit_npp")], 1))
+print(round(VIFs[normalize_cols.index("rangeland_acre")], 1))
 
 # %%
-cc = ['county_total_npp',
-      # 'unit_npp',
-      'population',
-      'herb_avg',
-      # 'herb_area_acr',
-      # 'rangeland_fraction',
-      'rangeland_acre',
-      'irr_hay_area']
+cc = [
+    "county_total_npp",
+    # 'unit_npp',
+    "population",
+    "herb_avg",
+    # 'herb_area_acr',
+    # 'rangeland_fraction',
+    "rangeland_acre",
+    "irr_hay_area",
+]
 
 
 X = all_df_normal[cc].values
@@ -413,14 +472,15 @@ VIFs = np.diagonal(inv_Xt_X)
 [round(x, 1) for x in VIFs]
 
 # %%
-cc = [# 'county_total_npp',
-      'unit_npp',
-      'population',
-      'herb_avg',
-      # 'herb_area_acr',
-      # 'rangeland_fraction',
-      'rangeland_acre',
-      'irr_hay_area']
+cc = [  # 'county_total_npp',
+    "unit_npp",
+    "population",
+    "herb_avg",
+    # 'herb_area_acr',
+    # 'rangeland_fraction',
+    "rangeland_acre",
+    "irr_hay_area",
+]
 
 
 X = all_df_normal[cc].values

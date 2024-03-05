@@ -55,6 +55,7 @@
 
 # %%
 import shutup
+
 shutup.please()
 
 import pandas as pd
@@ -94,8 +95,8 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -135,19 +136,47 @@ df_OuterJoined.head(2)
 # %%
 df_OuterJoined["dangerEncy"] = df_OuterJoined["danger"] + df_OuterJoined["emergency"]
 
-df_OuterJoined["s1_dangerEncy"] = (df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"])
-df_OuterJoined["s2_dangerEncy"] = (df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"])
-df_OuterJoined["s3_dangerEncy"] = (df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"])
-df_OuterJoined["s4_dangerEncy"] = (df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"])
+df_OuterJoined["s1_dangerEncy"] = (
+    df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
+)
+df_OuterJoined["s2_dangerEncy"] = (
+    df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
+)
+df_OuterJoined["s3_dangerEncy"] = (
+    df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
+)
+df_OuterJoined["s4_dangerEncy"] = (
+    df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
+)
 df_OuterJoined.head(2)
 
 # %%
-df_OuterJoined.drop(labels=["normal", "alert", "danger", "emergency",
-                            "s1_normal", "s1_alert", "s1_danger", "s1_emergency",
-                            "s2_normal", "s2_alert", "s2_danger", "s2_emergency",
-                            "s3_normal", "s3_alert", "s3_danger", "s3_emergency",
-                            "s4_normal", "s4_alert", "s4_danger", "s4_emergency"],
-                    axis=1, inplace=True)
+df_OuterJoined.drop(
+    labels=[
+        "normal",
+        "alert",
+        "danger",
+        "emergency",
+        "s1_normal",
+        "s1_alert",
+        "s1_danger",
+        "s1_emergency",
+        "s2_normal",
+        "s2_alert",
+        "s2_danger",
+        "s2_emergency",
+        "s3_normal",
+        "s3_alert",
+        "s3_danger",
+        "s3_emergency",
+        "s4_normal",
+        "s4_alert",
+        "s4_danger",
+        "s4_emergency",
+    ],
+    axis=1,
+    inplace=True,
+)
 
 df_OuterJoined.head(2)
 
@@ -170,7 +199,9 @@ print(inventory_2017.shape)
 inventory_2017.head(3)
 
 # %%
-df_OuterJoined = df_OuterJoined[df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)]
+df_OuterJoined = df_OuterJoined[
+    df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)
+]
 
 # %% [markdown]
 # # WARNING.
@@ -294,7 +325,9 @@ print(inventory_2017.shape)
 inventory_2017.head(2)
 
 # %%
-inv_2017_NPP_SW_heat_avg = pd.merge(inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left")
+inv_2017_NPP_SW_heat_avg = pd.merge(
+    inventory_2017, NPP_SW_heat_avg, on=["county_fips"], how="left"
+)
 inv_2017_NPP_SW_heat_avg.head(2)
 
 # %% [markdown]
@@ -308,17 +341,17 @@ all_indp_vars = list(set(HS_var + sw_cols + npp_cols))  # AW_vars
 all_indp_vars
 
 # %%
-print (inv_2017_NPP_SW_heat_avg.unit_npp_std.min())
-print (inv_2017_NPP_SW_heat_avg.unit_npp_std.max())
-print ()
-print (inv_2017_NPP_SW_heat_avg.unit_npp.min())
-print (inv_2017_NPP_SW_heat_avg.unit_npp.max())
-print ()
-print (inv_2017_NPP_SW_heat_avg.county_total_npp_std.min())
-print (inv_2017_NPP_SW_heat_avg.county_total_npp_std.max())
-print ()
-print (inv_2017_NPP_SW_heat_avg.county_total_npp.min())
-print (inv_2017_NPP_SW_heat_avg.county_total_npp.max())
+print(inv_2017_NPP_SW_heat_avg.unit_npp_std.min())
+print(inv_2017_NPP_SW_heat_avg.unit_npp_std.max())
+print()
+print(inv_2017_NPP_SW_heat_avg.unit_npp.min())
+print(inv_2017_NPP_SW_heat_avg.unit_npp.max())
+print()
+print(inv_2017_NPP_SW_heat_avg.county_total_npp_std.min())
+print(inv_2017_NPP_SW_heat_avg.county_total_npp_std.max())
+print()
+print(inv_2017_NPP_SW_heat_avg.county_total_npp.min())
+print(inv_2017_NPP_SW_heat_avg.county_total_npp.max())
 
 # %%
 inv_2017_NPP_SW_heat_avg_normal = inv_2017_NPP_SW_heat_avg.copy()
@@ -329,17 +362,17 @@ inv_2017_NPP_SW_heat_avg_normal[all_indp_vars] = (
 inv_2017_NPP_SW_heat_avg_normal.head(2)
 
 # %%
-print (inv_2017_NPP_SW_heat_avg_normal.unit_npp_std.min())
-print (inv_2017_NPP_SW_heat_avg_normal.unit_npp_std.max())
-print ()
-print (inv_2017_NPP_SW_heat_avg_normal.unit_npp.min())
-print (inv_2017_NPP_SW_heat_avg_normal.unit_npp.max())
-print ()
-print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp_std.min())
-print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp_std.max())
-print ()
-print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp.min())
-print (inv_2017_NPP_SW_heat_avg_normal.county_total_npp.max())
+print(inv_2017_NPP_SW_heat_avg_normal.unit_npp_std.min())
+print(inv_2017_NPP_SW_heat_avg_normal.unit_npp_std.max())
+print()
+print(inv_2017_NPP_SW_heat_avg_normal.unit_npp.min())
+print(inv_2017_NPP_SW_heat_avg_normal.unit_npp.max())
+print()
+print(inv_2017_NPP_SW_heat_avg_normal.county_total_npp_std.min())
+print(inv_2017_NPP_SW_heat_avg_normal.county_total_npp_std.max())
+print()
+print(inv_2017_NPP_SW_heat_avg_normal.county_total_npp.min())
+print(inv_2017_NPP_SW_heat_avg_normal.county_total_npp.max())
 
 # %% [markdown]
 # # Model
@@ -458,13 +491,15 @@ pop_cols = ["county_fips", "year", "population"]
 slaughter_cols = ["year", "county_fips", "slaughter"]
 
 
-control_cols = (["county_fips"] + 
-                ["year"] + 
-                ["rangeland_fraction", "rangeland_acre"] + 
-                ["herb_avg", "herb_area_acr"]    + 
-                ["irr_hay_area", "irr_hay_as_perc"] + 
-                ["population"] + 
-                ["feed_expense", "slaughter"])
+control_cols = (
+    ["county_fips"]
+    + ["year"]
+    + ["rangeland_fraction", "rangeland_acre"]
+    + ["herb_avg", "herb_area_acr"]
+    + ["irr_hay_area", "irr_hay_as_perc"]
+    + ["population"]
+    + ["feed_expense", "slaughter"]
+)
 
 # %%
 # irr_hay = df_OuterJoined[irr_hay_cols].copy()
@@ -527,22 +562,31 @@ controls.head(2)
 # %%
 variable_controls = ["population", "slaughter", "feed_expense"]
 
-constant_controls = ["herb_avg", "herb_area_acr",
-                     "rangeland_fraction", "rangeland_acre",
-                     "irr_hay_area", "irr_hay_as_perc"]
+constant_controls = [
+    "herb_avg",
+    "herb_area_acr",
+    "rangeland_fraction",
+    "rangeland_acre",
+    "irr_hay_area",
+    "irr_hay_as_perc",
+]
 
 constant_control_df = controls[["county_fips"] + constant_controls].drop_duplicates()
 constant_control_df.reset_index(drop=True, inplace=True)
 constant_control_df.head(2)
 
 # %%
-controls_avg = controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
+controls_avg = (
+    controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
+)
 controls_avg.reset_index(drop=False, inplace=True)
 controls_avg = controls_avg.round(3)
 controls_avg.head(2)
 
 # %%
-controls_avg = pd.merge(controls_avg, constant_control_df, on=["county_fips"], how="left")
+controls_avg = pd.merge(
+    controls_avg, constant_control_df, on=["county_fips"], how="left"
+)
 print(controls_avg.shape)
 controls_avg.head(2)
 
@@ -551,19 +595,27 @@ controls_avg["irr_hay_as_perc_categ"] = controls_avg["irr_hay_as_perc"]
 
 controls_avg.loc[(controls_avg.irr_hay_as_perc <= 6), "irr_hay_as_perc_categ"] = 0
 
-controls_avg.loc[(controls_avg.irr_hay_as_perc > 6) & (controls_avg.irr_hay_as_perc <= 96),\
-                 "irr_hay_as_perc_categ",] = 1
+controls_avg.loc[
+    (controls_avg.irr_hay_as_perc > 6) & (controls_avg.irr_hay_as_perc <= 96),
+    "irr_hay_as_perc_categ",
+] = 1
 
 controls_avg.loc[(controls_avg.irr_hay_as_perc > 96), "irr_hay_as_perc_categ"] = 2
 
 controls_avg.head(2)
 
 # %%
-normalize_cols = ["population", "slaughter",
-                  "feed_expense", "herb_avg",
-                  "herb_area_acr", "rangeland_fraction",
-                  "rangeland_acre", "irr_hay_area",
-                  "irr_hay_as_perc"]
+normalize_cols = [
+    "population",
+    "slaughter",
+    "feed_expense",
+    "herb_avg",
+    "herb_area_acr",
+    "rangeland_fraction",
+    "rangeland_acre",
+    "irr_hay_area",
+    "irr_hay_as_perc",
+]
 
 controls_avg_normal = controls_avg.copy()
 
@@ -976,7 +1028,12 @@ del (indp_vars, X, Y, model_, model_result, curr_all)
 # %%
 
 # %%
-indp_vars = ["county_total_npp"] + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
+indp_vars = ["county_total_npp"] + [
+    "rangeland_acre",
+    "herb_area_acr",
+    "irr_hay_area",
+    "population",
+]
 y_var = "inventory"
 
 #################################################################
@@ -1081,7 +1138,12 @@ model_result.summary()
 all_df.columns
 
 # %%
-indp_vars = ["county_total_npp"] + ["rangeland_acre", "herb_avg", "irr_hay_area", "population"]
+indp_vars = ["county_total_npp"] + [
+    "rangeland_acre",
+    "herb_avg",
+    "irr_hay_area",
+    "population",
+]
 y_var = "inventory"
 #################################################################
 curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
@@ -1115,7 +1177,13 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["unit_npp"] + ["rangeland_acre", "herb_avg", "irr_hay_area", "population", "dangerEncy"]
+indp_vars = ["unit_npp"] + [
+    "rangeland_acre",
+    "herb_avg",
+    "irr_hay_area",
+    "population",
+    "dangerEncy",
+]
 y_var = "inventory"
 #################################################################
 curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()
@@ -1149,7 +1217,12 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["unit_npp"] + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
+indp_vars = ["unit_npp"] + [
+    "rangeland_acre",
+    "herb_area_acr",
+    "irr_hay_area",
+    "population",
+]
 y_var = "inventory"
 
 #################################################################

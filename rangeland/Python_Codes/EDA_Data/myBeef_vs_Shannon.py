@@ -1,3 +1,4 @@
+
 # ---
 # jupyter:
 #   jupytext:
@@ -181,7 +182,7 @@ Q5_calves.rename(columns={"value": "cattle_inc_calves_invt"}, inplace=True)
 Q5_calves.head(2)
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
 SoI = abb_dict['SoI']
 SoI_abb = []
 state_25_abb = [abb_dict["full_2_abb"][x] for x in SoI]

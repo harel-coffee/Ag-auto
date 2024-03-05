@@ -65,8 +65,8 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 # # Read
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -75,7 +75,9 @@ SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 county_id_name_fips = pd.read_csv(Min_data_base + "county_id_name_fips.csv")
 county_id_name_fips.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 
-county_id_name_fips = county_id_name_fips[county_id_name_fips.state.isin(SoI_abb)].copy()
+county_id_name_fips = county_id_name_fips[
+    county_id_name_fips.state.isin(SoI_abb)
+].copy()
 
 county_id_name_fips.sort_values(by=["state", "county"], inplace=True)
 
@@ -89,7 +91,9 @@ county_id_name_fips.head(2)
 # %%
 county_id_name_fips["state_fip"] = county_id_name_fips.county_fips.str.slice(0, 2)
 
-county_id_name_fips = county_id_name_fips.drop(columns=["county_name", "county_fips", "fips"])
+county_id_name_fips = county_id_name_fips.drop(
+    columns=["county_name", "county_fips", "fips"]
+)
 county_id_name_fips.drop_duplicates(inplace=True)
 county_id_name_fips.reset_index(drop=True, inplace=True)
 
@@ -104,7 +108,7 @@ len(state_SoI_fip)
 # herb = rc.correct_state_int_fips_to_str(df=herb, col_="state_fip")
 # herb.sort_values(by=["state_fip"], inplace=True)
 herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/state_herb_ratio.sav")
-print (herb.keys())
+print(herb.keys())
 herb = herb["state_herb_ratio"]
 herb = herb[herb.state_fip.isin(state_SoI_fip)]
 # herb.dropna(how="any", inplace=True)
@@ -177,8 +181,12 @@ state_RA.head(2)
 # %%
 state_NPP_Ra = pd.merge(NPP, state_RA, on=["state_fip"], how="left")
 
-state_NPP_Ra = rc.covert_unitNPP_2_total(NPP_df=state_NPP_Ra, npp_col_="modis_npp",
-                                         area_col_="rangeland_acre", new_col_="state_rangeland_npp")
+state_NPP_Ra = rc.covert_unitNPP_2_total(
+    NPP_df=state_NPP_Ra,
+    npp_col_="modis_npp",
+    area_col_="rangeland_acre",
+    new_col_="state_rangeland_npp",
+)
 
 ### Security check to not make mistake later:
 state_NPP_Ra.drop(columns=["modis_npp"], inplace=True)
@@ -193,8 +201,10 @@ state_NPP_Ra.head(2)
 npp_states = state_NPP_Ra.state_fip.unique()
 npp_years = state_NPP_Ra.year.unique()
 
-npp_delta_df = pd.DataFrame(index = np.arange(len(npp_states)*(len(npp_years)-1)),
-                           columns = ["state_fip", "year", "npp_delta"])
+npp_delta_df = pd.DataFrame(
+    index=np.arange(len(npp_states) * (len(npp_years) - 1)),
+    columns=["state_fip", "year", "npp_delta"],
+)
 
 npp_delta_df.year = npp_delta_df.year.astype(str)
 npp_delta_df.state_fip = npp_delta_df.state_fip.astype(str)
@@ -204,19 +214,26 @@ idx_ = 0
 for a_state in npp_states:
     curr_df = state_NPP_Ra[state_NPP_Ra.state_fip == a_state].copy()
     curr_df.sort_values(by=["year"], inplace=True)
-    
-    npp_deltas = curr_df["state_rangeland_npp"][1:].values - curr_df["state_rangeland_npp"][0:-1] .values
-    yr_deltas  = curr_df.year.astype(str).values[1:] + "-" + curr_df.year.astype(str).values[0:-1] 
-    
-    npp_delta_df.loc[idx_:idx_+len(npp_deltas)-1, "npp_delta"] = npp_deltas
-    npp_delta_df.loc[idx_:idx_+len(npp_deltas)-1, "year"] = yr_deltas
-    npp_delta_df.loc[idx_:idx_+len(npp_deltas)-1, "state_fip"] = a_state
+
+    npp_deltas = (
+        curr_df["state_rangeland_npp"][1:].values
+        - curr_df["state_rangeland_npp"][0:-1].values
+    )
+    yr_deltas = (
+        curr_df.year.astype(str).values[1:]
+        + "-"
+        + curr_df.year.astype(str).values[0:-1]
+    )
+
+    npp_delta_df.loc[idx_ : idx_ + len(npp_deltas) - 1, "npp_delta"] = npp_deltas
+    npp_delta_df.loc[idx_ : idx_ + len(npp_deltas) - 1, "year"] = yr_deltas
+    npp_delta_df.loc[idx_ : idx_ + len(npp_deltas) - 1, "state_fip"] = a_state
     idx_ += len(npp_deltas)
-    
+
 npp_delta_df.head(2)
 
 # %%
-del(NPP, state_NPP_Ra)
+del (NPP, state_NPP_Ra)
 
 # %%
 state_NPPdelta_Ra = pd.merge(npp_delta_df, state_RA, on=["state_fip"], how="left")
@@ -238,10 +255,18 @@ print(sorted(state_NPPdelta_Ra_herb.year.unique()))
 # # Read inventory deltas
 
 # %%
-Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(reOrganized_dir + "state_USDA_ShannonCattle.sav")
-Shannon_CATINV_deltas = Shannon_Beef_Cows_fromCATINV_deltas["shannon_annual_inventory_deltas_tall"]
-Shannon_CATINV_deltas = Shannon_CATINV_deltas[Shannon_CATINV_deltas.state_fip.isin(state_SoI_fip)]
-Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(np.float32)
+Shannon_Beef_Cows_fromCATINV_deltas = pd.read_pickle(
+    reOrganized_dir + "state_USDA_ShannonCattle.sav"
+)
+Shannon_CATINV_deltas = Shannon_Beef_Cows_fromCATINV_deltas[
+    "shannon_annual_inventory_deltas_tall"
+]
+Shannon_CATINV_deltas = Shannon_CATINV_deltas[
+    Shannon_CATINV_deltas.state_fip.isin(state_SoI_fip)
+]
+Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(
+    np.float32
+)
 Shannon_CATINV_deltas.head(2)
 
 # %%
@@ -271,21 +296,32 @@ Shannon_CATINV_deltas.tail(3)
 # %%
 ccc_ = ["state_fip", "year", "rangeland_acre", "npp_delta", "herb_avg"]
 
-state_NPPdelta_Ra_herb_InvenDelta = pd.merge(state_NPPdelta_Ra_herb[ccc_], Shannon_CATINV_deltas,
-                                             on=["state_fip", "year"], how="left")
+state_NPPdelta_Ra_herb_InvenDelta = pd.merge(
+    state_NPPdelta_Ra_herb[ccc_],
+    Shannon_CATINV_deltas,
+    on=["state_fip", "year"],
+    how="left",
+)
 state_NPPdelta_Ra_herb_InvenDelta.head(2)
 
 # %%
 
 # %%
-state_NPPdelta_Ra_herb_InvenDelta = pd.merge(state_NPPdelta_Ra_herb_InvenDelta, county_id_name_fips,
-                                             on=["state_fip"], how="left")
+state_NPPdelta_Ra_herb_InvenDelta = pd.merge(
+    state_NPPdelta_Ra_herb_InvenDelta, county_id_name_fips, on=["state_fip"], how="left"
+)
 state_NPPdelta_Ra_herb_InvenDelta.head(2)
 
 # %%
-new_order = ["state", "state_fip",
-             "year", "npp_delta",
-             "rangeland_acre", "herb_avg", "inventory_delta"]
+new_order = [
+    "state",
+    "state_fip",
+    "year",
+    "npp_delta",
+    "rangeland_acre",
+    "herb_avg",
+    "inventory_delta",
+]
 
 state_NPPdelta_Ra_herb_InvenDelta = state_NPPdelta_Ra_herb_InvenDelta[new_order]
 state_NPPdelta_Ra_herb_InvenDelta.head(2)
@@ -318,8 +354,13 @@ fig, ax1 = plt.subplots(1, 1, figsize=(8, 2.5), sharey=False, sharex=False)
 ax1.grid(axis="y", which="both")
 
 var = "npp_delta"
-sns.histplot(data=state_NPPdelta_Ra_herb_InvenDelta[var],
-             kde=True, bins=200, color="darkblue", ax=ax1)
+sns.histplot(
+    data=state_NPPdelta_Ra_herb_InvenDelta[var],
+    kde=True,
+    bins=200,
+    color="darkblue",
+    ax=ax1,
+)
 
 ax1.title.set_text(var.replace("_", " ") + " density")
 ax1.set_xlabel(var.replace("_", " "))
@@ -333,11 +374,16 @@ fig, axes = plt.subplots(1, 1, figsize=(10, 2), sharey=False, sharex=False)
 axes.grid(axis="y", which="both")
 
 var = "inventory_delta"
-sns.histplot(data=state_NPPdelta_Ra_herb_InvenDelta[var],
-             kde=True, bins=200, color="darkblue", ax=axes)
+sns.histplot(
+    data=state_NPPdelta_Ra_herb_InvenDelta[var],
+    kde=True,
+    bins=200,
+    color="darkblue",
+    ax=axes,
+)
 axes.title.set_text(var.replace("_", " ") + " density")
 
-axes.set_xlabel(var.replace("_", " "));
+axes.set_xlabel(var.replace("_", " "))
 
 # %% [markdown]
 # ## Model
@@ -351,8 +397,12 @@ yr_max = state_NPPdelta_Ra_herb_InvenDelta.year.unique().max()
 print(yr_max)
 
 # %%
-train_df = state_NPPdelta_Ra_herb_InvenDelta[state_NPPdelta_Ra_herb_InvenDelta.year < yr_max].copy()
-test_df  = state_NPPdelta_Ra_herb_InvenDelta[state_NPPdelta_Ra_herb_InvenDelta.year == yr_max].copy()
+train_df = state_NPPdelta_Ra_herb_InvenDelta[
+    state_NPPdelta_Ra_herb_InvenDelta.year < yr_max
+].copy()
+test_df = state_NPPdelta_Ra_herb_InvenDelta[
+    state_NPPdelta_Ra_herb_InvenDelta.year == yr_max
+].copy()
 
 # %%
 test_df.year.unique()

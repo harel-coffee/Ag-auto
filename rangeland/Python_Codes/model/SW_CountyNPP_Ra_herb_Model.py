@@ -71,8 +71,8 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 # Bhupi.head(2)
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %% [markdown]
@@ -299,8 +299,11 @@ print(len(county_annual_NPP_Ra.county_fips.unique()))
 print(len(county_annual_SW_Ra.county_fips.unique()))
 
 # %%
-cattle_inventory_cnty_missing_from_NPP = [x for x in cattle_inventory.county_fips.unique()
-                                          if not (x in county_annual_NPP_Ra.county_fips.unique())]
+cattle_inventory_cnty_missing_from_NPP = [
+    x
+    for x in cattle_inventory.county_fips.unique()
+    if not (x in county_annual_NPP_Ra.county_fips.unique())
+]
 len(cattle_inventory_cnty_missing_from_NPP)
 
 # %%
@@ -545,9 +548,13 @@ counties_w_missingYears
 # %%
 
 # %%
-NPP_Ra_cattleInv_2017 = county_annual_NPP_Ra_cattleInv[county_annual_NPP_Ra_cattleInv.year == 2017].copy()
+NPP_Ra_cattleInv_2017 = county_annual_NPP_Ra_cattleInv[
+    county_annual_NPP_Ra_cattleInv.year == 2017
+].copy()
 
-NPP_A_2017 = NPP_Ra_cattleInv_2017[["county_rangeland_npp", "rangeland_acre", "herb_avg"]].values
+NPP_A_2017 = NPP_Ra_cattleInv_2017[
+    ["county_rangeland_npp", "rangeland_acre", "herb_avg"]
+].values
 NPP_A_2017 = np.hstack([NPP_A_2017, np.ones(len(NPP_A_2017)).reshape(-1, 1)])
 print(NPP_A_2017.shape)
 
@@ -555,7 +562,9 @@ y_2017 = NPP_Ra_cattleInv_2017[[inv_col_]].values.reshape(-1)
 print(f"{y_2017.shape = }")
 
 # %%
-NPP_sol_2017, NPP_RSS_2017, NPP_rank_2017, NPP_singular_vals_2017 = np.linalg.lstsq(NPP_A_2017, y_2017)
+NPP_sol_2017, NPP_RSS_2017, NPP_rank_2017, NPP_singular_vals_2017 = np.linalg.lstsq(
+    NPP_A_2017, y_2017
+)
 
 # %%
 county_annual_NPP_Ra_cattleInv[county_annual_NPP_Ra_cattleInv.year == 2017].head(2)
@@ -575,7 +584,9 @@ NPP_coef_2017, Ra_coef_2017, herb_coef_2017, intercept_2017 = (
 # ### Apply ```NPP``` 2017 model to 2012 data
 
 # %%
-NPP_Ra_cattleInv_2012 = county_annual_NPP_Ra_cattleInv[county_annual_NPP_Ra_cattleInv.year == 2012].copy()
+NPP_Ra_cattleInv_2012 = county_annual_NPP_Ra_cattleInv[
+    county_annual_NPP_Ra_cattleInv.year == 2012
+].copy()
 y_2012 = NPP_Ra_cattleInv_2012[[inv_col_]].values.reshape(-1)
 NPP_Ra_cattleInv_2012.head(2)
 
@@ -798,7 +809,13 @@ cnty_ann_SW_NPP_Ra.head(2)
 # %%
 fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False, sharex=False)
 axes.grid(axis="y", which="both")
-sns.histplot(data=cnty_ann_SW_NPP_Ra.rangeland_acre, kde=True, bins=200, color="darkblue", ax=axes)
+sns.histplot(
+    data=cnty_ann_SW_NPP_Ra.rangeland_acre,
+    kde=True,
+    bins=200,
+    color="darkblue",
+    ax=axes,
+)
 
 # %%
 fig, axes = plt.subplots(2, 1, figsize=(10, 7), sharey=False, sharex=False)
@@ -806,7 +823,13 @@ fig, axes = plt.subplots(2, 1, figsize=(10, 7), sharey=False, sharex=False)
 ax1.grid(axis="y", which="both")
 ax2.grid(axis="y", which="both")
 
-sns.histplot(data=cnty_ann_SW_NPP_Ra.county_rangeland_npp, kde=True, bins=200, color="darkblue", ax=ax1)
+sns.histplot(
+    data=cnty_ann_SW_NPP_Ra.county_rangeland_npp,
+    kde=True,
+    bins=200,
+    color="darkblue",
+    ax=ax1,
+)
 
 A = cnty_ann_SW_NPP_Ra[cnty_ann_SW_NPP_Ra.county_rangeland_npp < 200000]
 sns.histplot(data=A.county_rangeland_npp, kde=True, bins=200, color="darkblue", ax=ax2)

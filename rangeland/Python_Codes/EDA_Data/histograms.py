@@ -33,6 +33,7 @@ sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 from datetime import datetime, date
+
 current_time = datetime.now().strftime("%H:%M:%S")
 print("Today's date:", date.today())
 print("Current Time =", current_time)
@@ -50,8 +51,8 @@ plots_dir = data_dir_base + "plots/histograms/"
 os.makedirs(plots_dir, exist_ok=True)
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -66,23 +67,58 @@ df_OuterJoined.head(2)
 df_OuterJoined.reset_index(drop=True, inplace=True)
 
 # %%
-df_OuterJoined['s1_dangerEncy'] = df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
-df_OuterJoined['s2_dangerEncy'] = df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
-df_OuterJoined['s3_dangerEncy'] = df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
-df_OuterJoined['s4_dangerEncy'] = df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
+df_OuterJoined["s1_dangerEncy"] = (
+    df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
+)
+df_OuterJoined["s2_dangerEncy"] = (
+    df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
+)
+df_OuterJoined["s3_dangerEncy"] = (
+    df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
+)
+df_OuterJoined["s4_dangerEncy"] = (
+    df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
+)
 
 
 # %%
-df_OuterJoined.drop(labels=['EW', 'Pallavi',
-                            'normal', 'alert', 'danger', 'emergency',
-                            's1_normal', 's1_alert', 's1_danger', 's1_emergency',
-                            's2_normal', 's2_alert', 's2_danger', 's2_emergency',
-                            's3_normal', 's3_alert', 's3_danger', 's3_emergency',
-                            's4_normal', 's4_alert', 's4_danger', 's4_emergency',
-                            's1_avhrr_ndvi', 's2_avhrr_ndvi', 's3_avhrr_ndvi', 's4_avhrr_ndvi',
-                            's1_gimms_ndvi', 's2_gimms_ndvi', 's3_gimms_ndvi', 's4_gimms_ndvi',
-                            'state'],
-                    axis=1, inplace=True)
+df_OuterJoined.drop(
+    labels=[
+        "EW",
+        "Pallavi",
+        "normal",
+        "alert",
+        "danger",
+        "emergency",
+        "s1_normal",
+        "s1_alert",
+        "s1_danger",
+        "s1_emergency",
+        "s2_normal",
+        "s2_alert",
+        "s2_danger",
+        "s2_emergency",
+        "s3_normal",
+        "s3_alert",
+        "s3_danger",
+        "s3_emergency",
+        "s4_normal",
+        "s4_alert",
+        "s4_danger",
+        "s4_emergency",
+        "s1_avhrr_ndvi",
+        "s2_avhrr_ndvi",
+        "s3_avhrr_ndvi",
+        "s4_avhrr_ndvi",
+        "s1_gimms_ndvi",
+        "s2_gimms_ndvi",
+        "s3_gimms_ndvi",
+        "s4_gimms_ndvi",
+        "state",
+    ],
+    axis=1,
+    inplace=True,
+)
 
 # %%
 sorted(df_OuterJoined.columns)
@@ -118,10 +154,10 @@ plt.rcParams.update(params)
 # %%
 fig, axes = plt.subplots(1, 1, figsize=(12, 5), sharey=False)
 axes.grid(axis="y", which="both")
-axes.set_axisbelow(True) # sends the grids underneath the plot
+axes.set_axisbelow(True)  # sends the grids underneath the plot
 
-plt.hist(df_OuterJoined['rangeland_fraction']*100, bins=100);
-plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+plt.hist(df_OuterJoined["rangeland_fraction"] * 100, bins=100)
+plt.xticks(np.arange(0, 102, 2), rotation="vertical")
 
 axes.title.set_text("rangeland fraction")
 axes.set_xlabel("rangeland fraction")
@@ -136,10 +172,10 @@ plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 # %%
 fig, axes = plt.subplots(1, 1, figsize=(12, 5), sharey=False)
 axes.grid(axis="y", which="both")
-axes.set_axisbelow(True) # sends the grids underneath the plot
+axes.set_axisbelow(True)  # sends the grids underneath the plot
 
-plt.hist(df_OuterJoined['herb_avg'], bins=100);
-plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+plt.hist(df_OuterJoined["herb_avg"], bins=100)
+plt.xticks(np.arange(0, 102, 2), rotation="vertical")
 
 axes.title.set_text("herb average (taken over rangeland pixels(?)")
 axes.set_xlabel("herb average")
@@ -154,10 +190,10 @@ plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 # %%
 fig, axes = plt.subplots(1, 1, figsize=(12, 5), sharey=False)
 axes.grid(axis="y", which="both")
-axes.set_axisbelow(True) # sends the grids underneath the plot
+axes.set_axisbelow(True)  # sends the grids underneath the plot
 
-plt.hist(df_OuterJoined['irr_hay_as_perc'], bins=100);
-plt.xticks(np.arange(0, 102, 2), rotation ='vertical');
+plt.hist(df_OuterJoined["irr_hay_as_perc"], bins=100)
+plt.xticks(np.arange(0, 102, 2), rotation="vertical")
 
 axes.title.set_text("irrigated hay as %")
 axes.set_xlabel("irr hay as perc")
@@ -172,11 +208,11 @@ fig, axes = plt.subplots(3, 1, figsize=(12, 10), sharey=False)
 axes[0].grid(axis="y", which="both")
 axes[1].grid(axis="y", which="both")
 axes[2].grid(axis="y", which="both")
-axes[0].set_axisbelow(True) # sends the grids underneath the plot
-axes[1].set_axisbelow(True) 
+axes[0].set_axisbelow(True)  # sends the grids underneath the plot
+axes[1].set_axisbelow(True)
 axes[2].set_axisbelow(True)
 
-axes[0].hist(df_OuterJoined['irr_hay_as_perc'], bins=100);
+axes[0].hist(df_OuterJoined["irr_hay_as_perc"], bins=100)
 # axes[0].set(xticks=np.arange(0, 102, 2));
 x_ticks = np.arange(0, 102, 2)
 axes[0].set_xticks(x_ticks)
@@ -185,14 +221,14 @@ axes[0].set_xticklabels(x_ticks, rotation="vertical")
 axes[0].set_xlabel("irr hay as perc")
 axes[0].set_ylabel("count")
 ###################################
-axes[1].hist(df_OuterJoined['rangeland_fraction']*100, bins=100);
+axes[1].hist(df_OuterJoined["rangeland_fraction"] * 100, bins=100)
 axes[1].set_xticks(x_ticks)
 axes[1].set_xticklabels(x_ticks, rotation="vertical")
 
 axes[1].set_xlabel("rangeland fraction")
 axes[1].set_ylabel("count")
 ###################################
-axes[2].hist(df_OuterJoined['herb_avg'], bins=100);
+axes[2].hist(df_OuterJoined["herb_avg"], bins=100)
 axes[2].set_xticks(x_ticks)
 axes[2].set_xticklabels(x_ticks, rotation="vertical")
 

@@ -62,8 +62,8 @@ Bhupi.head(2)
 # %%
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -207,7 +207,9 @@ county_RA_and_TA_fraction.head(5)
 
 # %%
 county_RA_and_TA_fraction.rename(columns={"fips_id": "county_fips"}, inplace=True)
-county_RA_and_TA_fraction = rc.correct_Mins_FIPS(df=county_RA_and_TA_fraction, col_="county_fips")
+county_RA_and_TA_fraction = rc.correct_Mins_FIPS(
+    df=county_RA_and_TA_fraction, col_="county_fips"
+)
 county_RA_and_TA_fraction.head(2)
 
 # %%
@@ -217,7 +219,9 @@ county_annual_NPP_Ra = pd.merge(
 county_annual_NPP_Ra.head(2)
 
 # %%
-county_annual_SW_Ra = pd.merge(seasonal_weather, county_RA_and_TA_fraction, on=["county_fips"], how="left")
+county_annual_SW_Ra = pd.merge(
+    seasonal_weather, county_RA_and_TA_fraction, on=["county_fips"], how="left"
+)
 county_annual_SW_Ra.head(2)
 
 # %%
@@ -397,7 +401,9 @@ county_annual_SW_Ra_cattleInv.head(2)
 # ## Least Squares based on 2017 ```NPP```
 
 # %%
-NPP_Ra_cattleInv_2017 = county_annual_NPP_Ra_cattleInv[county_annual_NPP_Ra_cattleInv.year == 2017].copy()
+NPP_Ra_cattleInv_2017 = county_annual_NPP_Ra_cattleInv[
+    county_annual_NPP_Ra_cattleInv.year == 2017
+].copy()
 
 # %%
 NPP_A_2017 = NPP_Ra_cattleInv_2017[["modis_npp", "rangeland_acre"]].values
@@ -411,7 +417,9 @@ print(NPP_A_2017.shape)
 NPP_A_2017
 
 # %%
-NPP_sol_2017, NPP_RSS_2017, NPP_rank_2017, NPP_singular_vals_2017 = np.linalg.lstsq(NPP_A_2017, y_2017)
+NPP_sol_2017, NPP_RSS_2017, NPP_rank_2017, NPP_singular_vals_2017 = np.linalg.lstsq(
+    NPP_A_2017, y_2017
+)
 
 # %%
 county_annual_NPP_Ra_cattleInv[county_annual_NPP_Ra_cattleInv.year == 2017].head(2)

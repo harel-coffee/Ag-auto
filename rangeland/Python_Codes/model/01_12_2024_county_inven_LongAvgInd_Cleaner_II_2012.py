@@ -95,8 +95,8 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -154,12 +154,32 @@ df_OuterJoined["s4_dangerEncy"] = (
 df_OuterJoined.head(2)
 
 # %%
-df_OuterJoined.drop(labels=["normal", "alert", "danger", "emergency",
-                            "s1_normal", "s1_alert", "s1_danger", "s1_emergency",
-                            "s2_normal", "s2_alert", "s2_danger", "s2_emergency",
-                            "s3_normal", "s3_alert", "s3_danger", "s3_emergency",
-                            "s4_normal", "s4_alert", "s4_danger", "s4_emergency"],
-                    axis=1, inplace=True)
+df_OuterJoined.drop(
+    labels=[
+        "normal",
+        "alert",
+        "danger",
+        "emergency",
+        "s1_normal",
+        "s1_alert",
+        "s1_danger",
+        "s1_emergency",
+        "s2_normal",
+        "s2_alert",
+        "s2_danger",
+        "s2_emergency",
+        "s3_normal",
+        "s3_alert",
+        "s3_danger",
+        "s3_emergency",
+        "s4_normal",
+        "s4_alert",
+        "s4_danger",
+        "s4_emergency",
+    ],
+    axis=1,
+    inplace=True,
+)
 
 # %% [markdown]
 # ## Inventory
@@ -180,7 +200,9 @@ print(inventory_2017.shape)
 inventory_2017.head(3)
 
 # %%
-df_OuterJoined = df_OuterJoined[df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)]
+df_OuterJoined = df_OuterJoined[
+    df_OuterJoined.county_fips.isin(inv_2017_Pallavi_cnty_list)
+]
 
 # %% [markdown]
 # # WARNING.
@@ -815,7 +837,12 @@ del (indp_vars, X, Y, model_, model_result, curr_all)
 # %%
 
 # %%
-indp_vars = ["county_total_npp"] + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population",]
+indp_vars = ["county_total_npp"] + [
+    "rangeland_acre",
+    "herb_area_acr",
+    "irr_hay_area",
+    "population",
+]
 y_var = "inventory"
 
 #################################################################
@@ -937,7 +964,13 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["unit_npp"] + ["rangeland_acre", "herb_avg", "irr_hay_area", "population","dangerEncy"]
+indp_vars = ["unit_npp"] + [
+    "rangeland_acre",
+    "herb_avg",
+    "irr_hay_area",
+    "population",
+    "dangerEncy",
+]
 y_var = "inventory"
 #################################################################
 curr_all = all_df[indp_vars + [y_var] + ["county_fips"]].copy()

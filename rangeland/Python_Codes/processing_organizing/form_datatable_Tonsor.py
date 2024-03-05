@@ -104,7 +104,7 @@ cattle_inventory = USDA_data["cattle_inventory"]
 # FarmOperation = USDA_data["FarmOperation"] # not needed. create by NASS guy.
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
 SoI = abb_dict['SoI']
 SoI_abb = []
 for x in SoI:
@@ -569,7 +569,7 @@ Beef_Cows_fromCATINV = pd.read_csv(reOrganized_dir + "Shannon_Beef_Cows_fromCATI
 Beef_Cows_fromCATINV.head(2)
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
 state_25_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%

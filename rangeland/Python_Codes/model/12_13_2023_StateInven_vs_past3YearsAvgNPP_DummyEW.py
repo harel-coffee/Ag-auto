@@ -55,14 +55,14 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 # for bold print
 start_b = "\033[1m"
 end_b = "\033[0;0m"
-print ("This is " + start_b + "a_bold_text" + end_b + "!")
+print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %% [markdown]
 # # Read
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -86,17 +86,17 @@ len(state_SoI_fip)
 # herb = rc.correct_state_int_fips_to_str(df=herb, col_="state_fip")
 # herb.sort_values(by=["state_fip"], inplace=True)
 herb = pd.read_pickle(data_dir_base + "Supriya/Nov30_HerbRatio/state_herb_ratio.sav")
-print (herb.keys())
+print(herb.keys())
 herb = herb["state_herb_ratio"]
 herb = herb[herb.state_fip.isin(state_SoI_fip)]
 # herb.dropna(how="any", inplace=True)
 herb.head(3)
 
 # %%
-herb[herb.state_fip=="34"]
+herb[herb.state_fip == "34"]
 
 # %%
-herb[herb.state_fip=="46"]
+herb[herb.state_fip == "46"]
 
 # %%
 herb.dropna(how="any", inplace=True)
@@ -134,8 +134,12 @@ state_NPP_Ra = pd.merge(NPP, state_RA, on=["state_fip"], how="left")
 state_NPP_Ra.head(2)
 
 # %%
-state_NPP_Ra = rc.covert_unitNPP_2_total(NPP_df=state_NPP_Ra, npp_unit_col_="modis_npp",
-                                         acr_area_col_="rangeland_acre", npp_area_col_="state_rangeland_npp")
+state_NPP_Ra = rc.covert_unitNPP_2_total(
+    NPP_df=state_NPP_Ra,
+    npp_unit_col_="modis_npp",
+    acr_area_col_="rangeland_acre",
+    npp_area_col_="state_rangeland_npp",
+)
 
 ### Security check to not make mistake later:
 state_NPP_Ra.drop(columns=["modis_npp"], inplace=True)
@@ -168,11 +172,11 @@ invent_tall["NPP_avg_past_3yrs"] = [0] + NPP_3yr_avg
 invent_tall.head(5)
 
 # %%
-print (state_NPP_Ra.state_rangeland_npp[:3].values)
-print (state_NPP_Ra.state_rangeland_npp[:3].mean())
+print(state_NPP_Ra.state_rangeland_npp[:3].values)
+print(state_NPP_Ra.state_rangeland_npp[:3].mean())
 
 # %%
-invent_tall = invent_tall[invent_tall.year>=2004]
+invent_tall = invent_tall[invent_tall.year >= 2004]
 invent_tall.reset_index(drop=True, inplace=True)
 invent_tall.head(3)
 
@@ -186,24 +190,35 @@ invent_tall.head(3)
 state_RA.head(2)
 
 # %%
-invent_tall = pd.merge(invent_tall, state_RA[["state_fip", "rangeland_acre"]], 
-                       on=["state_fip"], how="left")
+invent_tall = pd.merge(
+    invent_tall, state_RA[["state_fip", "rangeland_acre"]], on=["state_fip"], how="left"
+)
 
-invent_tall = pd.merge(invent_tall, herb[["state_fip", "herb_avg"]], 
-                       on=["state_fip"], how="left")
+invent_tall = pd.merge(
+    invent_tall, herb[["state_fip", "herb_avg"]], on=["state_fip"], how="left"
+)
 
-invent_tall = pd.merge(invent_tall, county_fips[["state_fip", "EW"]], 
-                       on=["state_fip"], how="left")
+invent_tall = pd.merge(
+    invent_tall, county_fips[["state_fip", "EW"]], on=["state_fip"], how="left"
+)
 invent_tall.head(2)
 
 # %%
-invent_tall["EW_binary"] = invent_tall["EW"].map({"E":0, "W" : 1})
+invent_tall["EW_binary"] = invent_tall["EW"].map({"E": 0, "W": 1})
 invent_tall.head(2)
 
 # %%
 # Re-order the columns.
-new_order = ["state_fip", "year", "NPP_avg_past_3yrs", 
-             "rangeland_acre", "herb_avg", "EW", "EW_binary", "inventory"]
+new_order = [
+    "state_fip",
+    "year",
+    "NPP_avg_past_3yrs",
+    "rangeland_acre",
+    "herb_avg",
+    "EW",
+    "EW_binary",
+    "inventory",
+]
 invent_tall = invent_tall[new_order]
 invent_tall.head(2)
 
@@ -224,7 +239,7 @@ print(yr_max)
 
 # %%
 train_df = invent_tall[invent_tall.year < yr_max].copy()
-test_df  = invent_tall[invent_tall.year == yr_max].copy()
+test_df = invent_tall[invent_tall.year == yr_max].copy()
 
 # %%
 train_A = train_df[indp_vars].values
@@ -233,8 +248,8 @@ print(train_A.shape)
 train_y = train_df[y_var].values.reshape(-1).astype("float")
 
 NPP_sol, NPP_RSS, _, _ = np.linalg.lstsq(train_A, train_y)
-print (f"{NPP_sol = }")
-print (f"{NPP_RSS = }")
+print(f"{NPP_sol = }")
+print(f"{NPP_RSS = }")
 
 ######
 ######   Test
@@ -249,8 +264,8 @@ NPP_test_res = y_test - yhat_test
 NPP_RSS_test = np.dot(NPP_test_res, NPP_test_res)
 NPP_MSE_test = NPP_RSS_test / len(y_test)
 NPP_RSE_test = np.sqrt(NPP_MSE_test)
-print ("========================================================================")
-print (start_b + "Test residuals for 3-years-Avg-NPP:\n" + end_b)
+print("========================================================================")
+print(start_b + "Test residuals for 3-years-Avg-NPP:\n" + end_b)
 print("    RSS_test = {0:.0f}.".format(NPP_RSS_test))
 print("    MSE_test = {0:.0f}.".format(NPP_MSE_test))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
@@ -260,7 +275,7 @@ X = train_df[indp_vars]
 X = sm.add_constant(X)
 Y = train_df[y_var].astype(float)
 ks = sm.OLS(Y, X)
-ks_result =ks.fit()
+ks_result = ks.fit()
 ks_result.summary()
 
 # %%
@@ -270,7 +285,7 @@ NPP_RSS_train = np.dot(NPP_train_res, NPP_train_res)
 NPP_MSE_train = NPP_RSS_train / len(train_df[y_var])
 NPP_RSE_train = np.sqrt(NPP_MSE_train)
 
-print (start_b + "train residuals for 3-years-Avg-NPP:\n" + end_b)
+print(start_b + "train residuals for 3-years-Avg-NPP:\n" + end_b)
 print("    RSS_train = {0:.0f}.".format(NPP_RSS_train))
 print("    MSE_train = {0:.0f}.".format(NPP_MSE_train))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_train))
@@ -287,7 +302,7 @@ NPP_RSS_test = np.dot(NPP_test_res, NPP_test_res)
 NPP_MSE_test = NPP_RSS_test / len(y_test)
 NPP_RSE_test = np.sqrt(NPP_MSE_test)
 
-print (start_b + "Test residuals for 3-years-Avg-NPP:\n" + end_b)
+print(start_b + "Test residuals for 3-years-Avg-NPP:\n" + end_b)
 print("    RSS_test = {0:.0f}.".format(NPP_RSS_test))
 print("    MSE_test = {0:.0f}.".format(NPP_MSE_test))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
@@ -310,7 +325,7 @@ X = train_df[indp_vars]
 X = sm.add_constant(X)
 Y = train_df[y_var].astype(float)
 ks = sm.OLS(Y, X)
-ks_result =ks.fit()
+ks_result = ks.fit()
 ks_result.summary()
 
 # %%
@@ -325,7 +340,7 @@ NPP_RSS_test = np.dot(NPP_test_res, NPP_test_res)
 NPP_MSE_test = NPP_RSS_test / len(y_test)
 NPP_RSE_test = np.sqrt(NPP_MSE_test)
 
-print (start_b + "Test residuals for 3-years-Avg-NPP, RA, and herb:\n" + end_b)
+print(start_b + "Test residuals for 3-years-Avg-NPP, RA, and herb:\n" + end_b)
 print("    RSS_test = {0:.0f}.".format(NPP_RSS_test))
 print("    MSE_test = {0:.0f}.".format(NPP_MSE_test))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
@@ -334,8 +349,8 @@ print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
 # # Standardize so scales are the same.
 
 # %%
-print (f"{indp_vars = }")
-print ()
+print(f"{indp_vars = }")
+print()
 train_df.head(2)
 
 # %%
@@ -354,7 +369,7 @@ X = train_df[std_cols]
 X = sm.add_constant(X)
 Y = train_df[y_var].astype(float)
 ks = sm.OLS(Y, X)
-ks_result =ks.fit()
+ks_result = ks.fit()
 ks_result.summary()
 
 # %%
@@ -364,7 +379,9 @@ NPP_RSS_train = np.dot(NPP_train_res, NPP_train_res)
 NPP_MSE_train = NPP_RSS_train / len(train_df[y_var])
 NPP_RSE_train = np.sqrt(NPP_MSE_train)
 
-print (start_b + "Standardized: train residuals for 3-years-Avg-NPP, RA, herb:\n" + end_b)
+print(
+    start_b + "Standardized: train residuals for 3-years-Avg-NPP, RA, herb:\n" + end_b
+)
 print("    RSS_train = {0:.0f}.".format(NPP_RSS_train))
 print("    MSE_train = {0:.0f}.".format(NPP_MSE_train))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_train))
@@ -375,9 +392,9 @@ print("    RSE =  {0:.0f}.".format(NPP_RSE_train))
 # %%
 train_y_std = preprocessing.scale(train_y)
 NPP_sol, NPP_RSS, _, _ = np.linalg.lstsq(train_A, train_y_std)
-print (NPP_sol)
-print (NPP_RSS)
-print ("==============================================")
+print(NPP_sol)
+print(NPP_RSS)
+print("==============================================")
 
 yhat_train_std = train_A @ NPP_sol
 
@@ -390,8 +407,11 @@ NPP_RSS_train = np.dot(NPP_train_res, NPP_train_res)
 NPP_MSE_train = NPP_RSS_train / len(train_y)
 NPP_RSE_train = np.sqrt(NPP_MSE_train)
 
-print (start_b + "standardized X and Y: train residuals for 3-years-Avg-NPP, RA, Herb, and dummy east-west:\n" + \
-       end_b)
+print(
+    start_b
+    + "standardized X and Y: train residuals for 3-years-Avg-NPP, RA, Herb, and dummy east-west:\n"
+    + end_b
+)
 print("    RSS_test = {0:.0f}.".format(NPP_RSS_train))
 print("    MSE_test = {0:.0f}.".format(NPP_MSE_train))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_train))
@@ -404,7 +424,7 @@ print("    RSE =  {0:.0f}.".format(NPP_RSE_train))
 # %%
 # mu = train_df["NPP_avg_past_3yrs"].mean()
 # np_std = np.std(train_df["NPP_avg_past_3yrs"])
-#### the preprocessing.scale uses np.std. 
+#### the preprocessing.scale uses np.std.
 #### I do not know why statistics.stdev(.) is different!!!!
 # (train_df["NPP_avg_past_3yrs"] - mu) / np_std
 # statistics.stdev(train_df["NPP_avg_past_3yrs"])
@@ -416,14 +436,14 @@ v = train_df["NPP_avg_past_3yrs"]
 vcentered = v - v.mean()
 vcentered_norm = np.linalg.norm(vcentered)
 
-print (f"{v.std()                          = }")
-print (f"{statistics.stdev(v)              = }")
-print (f"{vcentered_norm/np.sqrt(len(v)-1) = }")
+print(f"{v.std()                          = }")
+print(f"{statistics.stdev(v)              = }")
+print(f"{vcentered_norm/np.sqrt(len(v)-1) = }")
 
 print()
-print (f"{v.std(ddof=0)                    = }")
-print (f"{np.std(v)                        = }")
-print (f"{vcentered_norm/np.sqrt(len(v))   = }")
+print(f"{v.std(ddof=0)                    = }")
+print(f"{np.std(v)                        = }")
+print(f"{vcentered_norm/np.sqrt(len(v))   = }")
 
 # %% [markdown]
 # ## Model inventory vs. 3 yrs NPP and EW Dummy.
@@ -443,7 +463,7 @@ X = train_df[indp_vars]
 X = sm.add_constant(X)
 Y = train_df[y_var].astype(float)
 ks = sm.OLS(Y, X)
-ks_result =ks.fit()
+ks_result = ks.fit()
 ks_result.summary()
 
 # %%
@@ -458,7 +478,7 @@ NPP_RSS_test = np.dot(NPP_test_res, NPP_test_res)
 NPP_MSE_test = NPP_RSS_test / len(y_test)
 NPP_RSE_test = np.sqrt(NPP_MSE_test)
 
-print (start_b + "Test residuals for 3-years-NPP-Avg and EW_binary:\n" + end_b)
+print(start_b + "Test residuals for 3-years-NPP-Avg and EW_binary:\n" + end_b)
 print("    RSS_test = {0:.0f}.".format(NPP_RSS_test))
 print("    MSE_test = {0:.0f}.".format(NPP_MSE_test))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
@@ -470,8 +490,8 @@ print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
 invent_tall.head(2)
 
 # %%
-print (invent_tall.NPP_avg_past_3yrs.min())
-print (invent_tall.NPP_avg_past_3yrs.max())
+print(invent_tall.NPP_avg_past_3yrs.min())
+print(invent_tall.NPP_avg_past_3yrs.max())
 
 # %%
 indp_vars = col_3NPP + ["rangeland_acre", "herb_avg", "EW_binary"]
@@ -482,7 +502,7 @@ X = train_df[indp_vars]
 X = sm.add_constant(X)
 Y = train_df[y_var].astype(float)
 ks = sm.OLS(Y, X)
-ks_result =ks.fit()
+ks_result = ks.fit()
 ks_result.summary()
 
 # %%
@@ -497,7 +517,11 @@ NPP_RSS_test = np.dot(NPP_test_res, NPP_test_res)
 NPP_MSE_test = NPP_RSS_test / len(y_test)
 NPP_RSE_test = np.sqrt(NPP_MSE_test)
 
-print (start_b + "Test residuals for 3-years-NPP-Avg., RA, herb ratio, and dummy east-west:\n" + end_b)
+print(
+    start_b
+    + "Test residuals for 3-years-NPP-Avg., RA, herb ratio, and dummy east-west:\n"
+    + end_b
+)
 print("    RSS_test = {0:.0f}.".format(NPP_RSS_test))
 print("    MSE_test = {0:.0f}.".format(NPP_MSE_test))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_test))
@@ -518,23 +542,29 @@ text_size, text_color = "large", "r"
 
 data_ = invent_tall.rangeland_acre
 sns.histplot(data=np.sqrt(data_), kde=True, bins=200, color="darkblue", ax=axes[0])
-axes[0].text(x=np.sqrt(data_).min() + 2, y=20, s="2nd root", fontsize=text_size, color=text_color)
+axes[0].text(
+    x=np.sqrt(data_).min() + 2, y=20, s="2nd root", fontsize=text_size, color=text_color
+)
 
 ###########################################
 sns.histplot(data=np.log10(data_), kde=True, bins=200, color="darkblue", ax=axes[1])
-axes[1].text(x=np.log10(data_).min(), y=2, s="log10", fontsize=text_size, color=text_color)
+axes[1].text(
+    x=np.log10(data_).min(), y=2, s="log10", fontsize=text_size, color=text_color
+)
 
 ###########################################
 # sns.histplot(data = 1/data_, kde = True, bins=200, color = 'darkblue', ax=axes[2]);
 # axes[2].text(x = (1/data_).min(), y=200, s='inverse', fontsize=text_size, color=text_color)
 
 sns.histplot(data=data_, kde=True, bins=200, color="darkblue", ax=axes[2])
-axes[2].text(x=data_.min() + 3000000, y=80, s="original", fontsize=text_size, color=text_color)
+axes[2].text(
+    x=data_.min() + 3000000, y=80, s="original", fontsize=text_size, color=text_color
+)
 
 
-axes[0].set_xlabel("");
-axes[1].set_xlabel("");
-axes[2].set_xlabel("transformed rangeland acr");
+axes[0].set_xlabel("")
+axes[1].set_xlabel("")
+axes[2].set_xlabel("transformed rangeland acr")
 
 # %%
 fig, axes = plt.subplots(3, 1, figsize=(10, 6), sharey=False, sharex=False)
@@ -546,23 +576,29 @@ text_size, text_color = "large", "r"
 
 data_ = invent_tall.NPP_avg_past_3yrs
 sns.histplot(data=np.sqrt(data_), kde=True, bins=200, color="darkblue", ax=axes[0])
-axes[0].text(x=np.sqrt(data_).min() + 2, y=8, s="2nd root", fontsize=text_size, color=text_color)
+axes[0].text(
+    x=np.sqrt(data_).min() + 2, y=8, s="2nd root", fontsize=text_size, color=text_color
+)
 
 ###########################################
 sns.histplot(data=np.log10(data_), kde=True, bins=200, color="darkblue", ax=axes[1])
-axes[1].text(x=np.log10(data_).min(), y=8, s="log10", fontsize=text_size, color=text_color)
+axes[1].text(
+    x=np.log10(data_).min(), y=8, s="log10", fontsize=text_size, color=text_color
+)
 
 ###########################################
 # sns.histplot(data = 1/data_, kde = True, bins=200, color = 'darkblue', ax=axes[2]);
 # axes[2].text(x = (1/data_).min(), y=200, s='inverse', fontsize=text_size, color=text_color)
 
 sns.histplot(data=data_, kde=True, bins=200, color="darkblue", ax=axes[2])
-axes[2].text(x=data_.min() + 3000000, y=8, s="original", fontsize=text_size, color=text_color)
+axes[2].text(
+    x=data_.min() + 3000000, y=8, s="original", fontsize=text_size, color=text_color
+)
 
 
-axes[0].set_xlabel("");
-axes[1].set_xlabel("");
-axes[2].set_xlabel("transformed NPP_avg_past_3yrs");
+axes[0].set_xlabel("")
+axes[1].set_xlabel("")
+axes[2].set_xlabel("transformed NPP_avg_past_3yrs")
 
 # %% [markdown]
 # ### Avg. of current year and past 3 years (4 years total):
@@ -584,45 +620,59 @@ invent_tall_copy["NPP_avg_past_4yrs"] = NPP_4yr_avg
 invent_tall_copy.head(5)
 
 # %%
-print (state_NPP_Ra.state_rangeland_npp[:4].values)
-print (state_NPP_Ra.state_rangeland_npp[:4].mean())
+print(state_NPP_Ra.state_rangeland_npp[:4].values)
+print(state_NPP_Ra.state_rangeland_npp[:4].mean())
 
 # %%
-invent_tall_copy = invent_tall_copy[invent_tall_copy.year>=2004]
+invent_tall_copy = invent_tall_copy[invent_tall_copy.year >= 2004]
 invent_tall_copy.reset_index(drop=True, inplace=True)
 invent_tall_copy.head(3)
 
 # %%
-invent_tall_copy = pd.merge(invent_tall_copy, state_RA[["state_fip", "rangeland_acre"]], 
-                            on=["state_fip"], how="left")
+invent_tall_copy = pd.merge(
+    invent_tall_copy,
+    state_RA[["state_fip", "rangeland_acre"]],
+    on=["state_fip"],
+    how="left",
+)
 
-invent_tall_copy = pd.merge(invent_tall_copy, herb[["state_fip", "herb_avg"]], 
-                            on=["state_fip"], how="left")
+invent_tall_copy = pd.merge(
+    invent_tall_copy, herb[["state_fip", "herb_avg"]], on=["state_fip"], how="left"
+)
 
-invent_tall_copy = pd.merge(invent_tall_copy, county_fips[["state_fip", "EW"]], 
-                             on=["state_fip"], how="left")
+invent_tall_copy = pd.merge(
+    invent_tall_copy, county_fips[["state_fip", "EW"]], on=["state_fip"], how="left"
+)
 
 invent_tall_copy.head(2)
 
 # %%
-invent_tall_copy["EW_binary"] = invent_tall_copy["EW"].map({"E":0, "W" : 1})
+invent_tall_copy["EW_binary"] = invent_tall_copy["EW"].map({"E": 0, "W": 1})
 invent_tall_copy.head(2)
 
 # %%
 # Re-order the columns.
-new_order = ["state_fip", "year", "NPP_avg_past_4yrs", 
-             "rangeland_acre", "herb_avg", "EW", "EW_binary", "inventory"]
+new_order = [
+    "state_fip",
+    "year",
+    "NPP_avg_past_4yrs",
+    "rangeland_acre",
+    "herb_avg",
+    "EW",
+    "EW_binary",
+    "inventory",
+]
 invent_tall_copy = invent_tall_copy[new_order]
 invent_tall_copy.head(2)
 
 # %%
 indp_vars = col_3NPP + ["rangeland_acre", "herb_avg", "EW_binary"]
-print (f"{yr_max = }")
+print(f"{yr_max = }")
 indp_vars
 
 # %%
 train_df = invent_tall_copy[invent_tall_copy.year < yr_max].copy()
-test_df  = invent_tall_copy[invent_tall_copy.year == yr_max].copy()
+test_df = invent_tall_copy[invent_tall_copy.year == yr_max].copy()
 
 # %%
 train_A = train_df[indp_vars].values
@@ -634,7 +684,7 @@ train_df.head(3)
 
 # %%
 NPP_sol, NPP_RSS, _, _ = np.linalg.lstsq(train_A, train_y)
-print (indp_vars)
+print(indp_vars)
 NPP_sol
 
 # %%
@@ -650,7 +700,11 @@ NPP_MSE_test = NPP_RSS_test / len(y_test)
 NPP_RSE_test = np.sqrt(NPP_MSE_test)
 
 
-print (start_b + "Test residuals for 4-years-NPP-Avg., RA, herb ratio, and dummy EW:\n" + end_b)
+print(
+    start_b
+    + "Test residuals for 4-years-NPP-Avg., RA, herb ratio, and dummy EW:\n"
+    + end_b
+)
 print("    RSS_test = {0:.0f}.".format(NPP_RSS_test))
 print("    MSE_test = {0:.0f}.".format(NPP_MSE_test))
 print("    RSE =  {0:.0f}.".format(NPP_RSE_test))

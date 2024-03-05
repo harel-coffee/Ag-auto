@@ -83,8 +83,8 @@ print("This is " + start_b + "a_bold_text" + end_b + "!")
 # # Read the data
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %% [markdown]
@@ -214,7 +214,7 @@ RA.reset_index(drop=True, inplace=True)
 RA.head(2)
 
 # %%
-RA = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
+RA = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 RA = RA["filtered_counties"]
 
 print(f"{len(RA.county_fips.unique()) = }")

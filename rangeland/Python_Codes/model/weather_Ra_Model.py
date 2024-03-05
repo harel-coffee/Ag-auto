@@ -62,7 +62,7 @@ Bhupi.head(2)
 # %%
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = []
 for x in SoI:

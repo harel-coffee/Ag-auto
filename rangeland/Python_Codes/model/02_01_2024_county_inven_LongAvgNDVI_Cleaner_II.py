@@ -95,8 +95,8 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
@@ -127,10 +127,18 @@ df_OuterJoined.head(2)
 
 # %%
 df_OuterJoined["dangerEncy"] = df_OuterJoined["danger"] + df_OuterJoined["emergency"]
-df_OuterJoined["s1_dangerEncy"] = df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
-df_OuterJoined["s2_dangerEncy"] = df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
-df_OuterJoined["s3_dangerEncy"] = df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
-df_OuterJoined["s4_dangerEncy"] = df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
+df_OuterJoined["s1_dangerEncy"] = (
+    df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
+)
+df_OuterJoined["s2_dangerEncy"] = (
+    df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
+)
+df_OuterJoined["s3_dangerEncy"] = (
+    df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
+)
+df_OuterJoined["s4_dangerEncy"] = (
+    df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
+)
 
 df_OuterJoined.head(2)
 
@@ -142,13 +150,33 @@ gimms_cols = [x for x in (df_OuterJoined.columns) if "gimms" in x]
 avhrr_cols = [x for x in (df_OuterJoined.columns) if "avhrr" in x]
 
 # %%
-LL = gimms_cols + avhrr_cols + \
-     ["normal", "alert", "danger", "emergency",
-      "s1_normal", "s1_alert", "s1_danger", "s1_emergency",
-      "s2_normal", "s2_alert", "s2_danger", "s2_emergency",
-      "s3_normal", "s3_alert", "s3_danger", "s3_emergency",
-      "s4_normal", "s4_alert", "s4_danger", "s4_emergency"]
-df_OuterJoined.drop(labels = LL, axis=1, inplace=True)
+LL = (
+    gimms_cols
+    + avhrr_cols
+    + [
+        "normal",
+        "alert",
+        "danger",
+        "emergency",
+        "s1_normal",
+        "s1_alert",
+        "s1_danger",
+        "s1_emergency",
+        "s2_normal",
+        "s2_alert",
+        "s2_danger",
+        "s2_emergency",
+        "s3_normal",
+        "s3_alert",
+        "s3_danger",
+        "s3_emergency",
+        "s4_normal",
+        "s4_alert",
+        "s4_danger",
+        "s4_emergency",
+    ]
+)
+df_OuterJoined.drop(labels=LL, axis=1, inplace=True)
 
 # %%
 (df_OuterJoined.columns)
@@ -175,7 +203,9 @@ inventory_snap.head(3)
 #
 #   Filter only the counties in the snapshot.
 #
-df_OuterJoined = df_OuterJoined[df_OuterJoined.county_fips.isin(SnapInv_Pallavi_cnty_list)]
+df_OuterJoined = df_OuterJoined[
+    df_OuterJoined.county_fips.isin(SnapInv_Pallavi_cnty_list)
+]
 
 # %% [markdown]
 # # WARNING.
@@ -277,7 +307,9 @@ print(inventory_snap.shape)
 inventory_snap.head(2)
 
 # %%
-inv_snap_ndvi_SW_heat_avg = pd.merge(inventory_snap, ndvi_SW_heat_avg, on=["county_fips"], how="left")
+inv_snap_ndvi_SW_heat_avg = pd.merge(
+    inventory_snap, ndvi_SW_heat_avg, on=["county_fips"], how="left"
+)
 inv_snap_ndvi_SW_heat_avg.head(2)
 
 # %%
@@ -415,22 +447,31 @@ controls.head(2)
 # %%
 variable_controls = ["population", "slaughter", "feed_expense"]
 
-constant_controls = ["herb_avg", "herb_area_acr",
-                     "rangeland_fraction", "rangeland_acre",
-                     "irr_hay_area", "irr_hay_as_perc"]
+constant_controls = [
+    "herb_avg",
+    "herb_area_acr",
+    "rangeland_fraction",
+    "rangeland_acre",
+    "irr_hay_area",
+    "irr_hay_as_perc",
+]
 
 constant_control_df = controls[["county_fips"] + constant_controls].drop_duplicates()
 constant_control_df.reset_index(drop=True, inplace=True)
 constant_control_df.head(2)
 
 # %%
-controls_avg = controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
+controls_avg = (
+    controls[["county_fips"] + variable_controls].groupby("county_fips").mean()
+)
 controls_avg.reset_index(drop=False, inplace=True)
 controls_avg = controls_avg.round(3)
 controls_avg.head(2)
 
 # %%
-controls_avg = pd.merge(controls_avg, constant_control_df, on=["county_fips"], how="left")
+controls_avg = pd.merge(
+    controls_avg, constant_control_df, on=["county_fips"], how="left"
+)
 print(controls_avg.shape)
 controls_avg.head(2)
 
@@ -515,7 +556,12 @@ controls_avg_normal.head(2)
 
 # %%
 print(inv_snap_ndvi_SW_heat_avg_normal.shape)
-all_df = pd.merge(inv_snap_ndvi_SW_heat_avg_normal, controls_avg_normal, on=["county_fips"], how="outer")
+all_df = pd.merge(
+    inv_snap_ndvi_SW_heat_avg_normal,
+    controls_avg_normal,
+    on=["county_fips"],
+    how="outer",
+)
 print(all_df.shape)
 all_df.head(2)
 
@@ -678,7 +724,12 @@ model_result.summary()
 del (indp_vars, X, Y, model_, model_result, curr_all)
 
 # %%
-indp_vars = mean_ndvi_cols + ["rangeland_acre", "herb_area_acr", "irr_hay_area", "population"]
+indp_vars = mean_ndvi_cols + [
+    "rangeland_acre",
+    "herb_area_acr",
+    "irr_hay_area",
+    "population",
+]
 y_var = "inventory"
 
 #################################################################
@@ -696,7 +747,12 @@ model_result = model_.fit()
 model_result.summary()
 
 # %%
-indp_vars = mean_ndvi_cols + ["rangeland_acre", "herb_avg", "irr_hay_area", "population"]
+indp_vars = mean_ndvi_cols + [
+    "rangeland_acre",
+    "herb_avg",
+    "irr_hay_area",
+    "population",
+]
 y_var = "inventory"
 
 #################################################################

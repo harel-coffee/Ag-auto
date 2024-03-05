@@ -67,8 +67,8 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "state_abbreviations.sav")
-SoI = abb_dict['SoI']
+abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %% [markdown]
@@ -215,7 +215,7 @@ print("There are {} incomlete counties out of {} for census years!!!".format(lic
 # RA.head(2)
 
 # %%
-RA = pd.read_pickle(param_dir + "filtered_counties_RAsizePallavi.sav")
+RA = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 RA = RA["filtered_counties_29States"]
 print(f"{len(RA.county_fips.unique()) = }")
 print(f"{len(RA.state.unique()) = }")
@@ -868,8 +868,8 @@ herb = herb[["county_fips", "herb_avg"]]
 herb.head(2)
 
 # %%
-print (len(irr_hay.county_fips))
-print (len(irr_hay.county_fips.unique()))
+print(len(irr_hay.county_fips))
+print(len(irr_hay.county_fips.unique()))
 irr_hay.head(2)
 
 # %%
