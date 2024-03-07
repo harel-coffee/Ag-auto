@@ -82,12 +82,12 @@ sorted(USDA_data.keys())
 AgLand = USDA_data['AgLand']
 FarmOperation = USDA_data['FarmOperation']
 
-beef_price_at_1982 = USDA_data['beef_price']
+beef_price_at_1982 = USDA_data['beef_price_at_1982']
 beef_price_deltas_ratios = USDA_data["beef_price_deltas_ratios"]
 
 feed_expense = USDA_data['feed_expense']
 
-hay_price_Q1_at_1982 = USDA_data['hay_price_Q1']
+hay_price_Q1_at_1982 = USDA_data['HayPrice_Q1_at_1982']
 hay_price_deltas_ratios = USDA_data["hay_price_deltas_ratios"]
 
 shannon_invt = USDA_data['shannon_invt']
@@ -894,12 +894,45 @@ export_ = {
     "beef_price_at_1982" : beef_price_at_1982,
     "hay_price_deltas_ratios": hay_price_deltas_ratios,
     "beef_price_deltas_ratios" : beef_price_deltas_ratios,
-
     
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
 
 pickle.dump(export_, open(filename, "wb"))
+
+# %%
+ind_deltas_df.head(2)
+
+# %%
+ind_deltas_df.columns
+
+# %%
+A = ind_deltas_df.copy()
+A.dropna(subset=["hay_price_at_1982"], inplace=True)
+A.head(2)
+
+# %%
+hay_price_deltas_ratios.head(2)
+
+# %%
+C = pd.merge(hay_price_deltas_ratios[['year', "state_fips", "hay_price_detas_at_1982"]], 
+             A[['year', "state_fips", "hay_price_at_1982"]], 
+             on=['year', "state_fips"] , how="left")
+C.sort_values(by=["state_fips", "year"], inplace=True)
+C.reset_index(drop=True, inplace=True)
+C.head(2)
+
+# %%
+C["redundancy"] = C["hay_price_detas_at_1982"] - C["hay_price_at_1982"]
+
+# %%
+C[C.redundancy != 0]
+
+# %%
+A = ind_deltas_df[["year", "state_fips", "hay_price_at_1982"]].copy()
+A.dropna()
+
+# %%
 
 # %%

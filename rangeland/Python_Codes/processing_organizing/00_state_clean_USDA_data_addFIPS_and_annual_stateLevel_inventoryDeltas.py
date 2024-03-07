@@ -210,6 +210,9 @@ print (HayPrice_Q1.shape)
 HayPrice_Q1.head(2)
 
 # %%
+sorted(HayPrice_Q1[HayPrice_Q1["State ANSI"] == 1].Year.unique())
+
+# %%
 print (HayPrice_Q1.State.unique()[:4])
 print (HayPrice_Q1.Period.unique())
 
@@ -466,7 +469,22 @@ print(beef_price.ag_district.unique())
 HayPrice_Q1.head(2)
 
 # %%
-HayPrice_Q1 = HayPrice_Q1[HayPrice_Q1.period != "MARKETING YEAR"]
+print (sorted(HayPrice_Q1[HayPrice_Q1["state_ansi"] == 1].year.unique()))
+
+# %% [markdown]
+# # <span style='color:red'>STOP</span>
+#
+#
+# Fucking ```HayPrice_Q1``` is messed up. 
+# For some years, marketing year is the only thing we have. So, we cannot take median in a given year.
+#
+
+# %%
+# HayPrice_Q1 = HayPrice_Q1[HayPrice_Q1.period != "MARKETING YEAR"]
+HayPrice_Q1 = HayPrice_Q1[HayPrice_Q1.period == "MARKETING YEAR"].copy()
+# sorted(HayPrice_Q1[HayPrice_Q1["state_ansi"] == 1].year.unique())
+
+# %%
 print (beef_price.shape)
 beef_price = beef_price[beef_price.period != "MARKETING YEAR"]
 print (beef_price.shape)
@@ -601,6 +619,9 @@ for idx in HayPrice_Q1.index:
 HayPrice_Q1[["state", "state_ansi"]].head(5)
 
 HayPrice_Q1.head(2)
+
+# %%
+sorted(HayPrice_Q1[HayPrice_Q1["state_ansi"] == "01"].year.unique())
 
 # %% [markdown]
 # # beef price is national scale
@@ -843,6 +864,12 @@ HayPrice_Q1_at_1982.head(2)
 # %%
 beef_price_at_1982.head(2)
 
+# %% [markdown]
+# # <span style='color:red'>STOP</span>
+#
+#
+# This is wrong way of doing it. If there is a missing year(s), then the ```diff_year``` would be wrong the way we are doing it
+
 # %%
 delta_cols = ["year", "state_fips", "hay_price_at_1982"]
 non_delta_cols = [x for x in HayPrice_Q1_at_1982.columns if not(x in delta_cols)]
@@ -967,6 +994,10 @@ inventory_ratios_tall = inventory_ratios_tall[["year", "state_fips", "inventory_
 inventory_deltas_ratio_tall = pd.merge(inventory_deltas_tall, 
                                        inventory_ratios_tall, on=["state_fips", "year"], how="left")
 
+beef_hay_price_at_1982 = pd.merge(HayPrice_Q1_at_1982[["year", "state_fips", "hay_price_at_1982"]], 
+                                  beef_price_at_1982[["year", "beef_price_at_1982"]], 
+                                  on=["year"], how="outer")
+
 # %%
 filename = reOrganized_dir + "state_USDA_ShannonCattle.sav"
 
@@ -983,8 +1014,10 @@ export_ = {"AgLand": AgLand,
            "shannon_invt_tall": shannon_Beef_Cows_fromCATINV_tall,
            "shannon_invt_deltas_ratios_tall": inventory_deltas_ratio_tall,
 
-           "hay_price_Q1" : HayPrice_Q1_at_1982,
-           "beef_price" : beef_price_at_1982,
+           "HayPrice_Q1_at_1982" : HayPrice_Q1_at_1982,
+           "beef_price_at_1982" : beef_price_at_1982,
+           
+           "beef_hay_price_at_1982" : beef_hay_price_at_1982,
            
            "beef_price_deltas_ratios" : beef_price_deltas_ratios,
            "hay_price_deltas_ratios" : hay_price_deltas_ratios,
@@ -997,10 +1030,28 @@ export_ = {"AgLand": AgLand,
 pickle.dump(export_, open(filename, "wb"))
 
 # %%
-shannon_annual.head(2)
+HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.year == 2017) & (HayPrice_Q1_at_1982.state_fips == "01")]
 
 # %%
-feed_expense.head(2)
+HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.year == 2016) & (HayPrice_Q1_at_1982.state_fips == "01")]
+
+# %%
+hay_price_deltas[(hay_price_deltas.year.isin([1996, 1997, 1998])) & (hay_price_deltas.state_fips == "01")]
+
+# %%
+HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.state_fips == "01") & 
+                    (HayPrice_Q1_at_1982.year.isin([1996, 1997, 1998]))]
+
+# %%
+36.833856 - 38.377193
+
+# %%
+HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.state_fips == "01") & 
+                    (HayPrice_Q1_at_1982.year.isin([1955, 1956, 1957, 1958, 1959]))]
+
+# %%
+
+# %%
 
 # %%
 
