@@ -67,29 +67,20 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
-# %% [markdown]
-# ## County Fips
-
-# %%
-county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
-county_fips = county_fips["county_fips"]
+county_fips = abb_dict["county_fips"]
 
 print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
 county_fips.reset_index(drop=True, inplace=True)
-county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
+county_fips = county_fips[["county_fips", "county_name", "state", "EW_meridian"]]
 print(f"{len(county_fips.state.unique()) = }")
 
 county_fips.head(2)
-
-# %%
-# cnty_interest_list = list(county_fips.county_fips.unique())
-# len(cnty_interest_list)
 
 # %% [markdown]
 # ## Inventory
@@ -372,6 +363,8 @@ seasonal_precip_vars = [
     "S4_countyMean_total_precip",
 ]
 
+seasonal_precip_vars = [x.lower() for x in seasonal_precip_vars]
+
 seasonal_temp_vars = [
     "S1_countyMean_avg_Tavg",
     "S2_countyMean_avg_Tavg",
@@ -379,9 +372,15 @@ seasonal_temp_vars = [
     "S4_countyMean_avg_Tavg",
 ]
 
+seasonal_temp_vars = [x.lower() for x in seasonal_temp_vars]
 SW_vars = seasonal_precip_vars + seasonal_temp_vars
+SW_vars = [x.lower() for x in SW_vars]
+
 for a_col in SW_vars:
     SW[a_col] = SW[a_col].astype(float)
+
+# %%
+SW.head(2)
 
 # %%
 SW["yr_countyMean_total_precip"] = SW[seasonal_precip_vars].sum(axis=1)
@@ -546,7 +545,7 @@ print(NPP_SW_heat.shape)
 # %%
 NPP_SW_heat = NPP_SW_heat[NPP_SW_heat.year >= 2001]
 NPP_SW_heat = NPP_SW_heat[NPP_SW_heat.year <= 2017]
-NPP_SW_heat.drop(labels=["county_name", "state", "EW"], axis=1, inplace=True)
+NPP_SW_heat.drop(labels=["county_name", "state", "EW_meridian"], axis=1, inplace=True)
 NPP_SW_heat.head(2)
 
 # %%
@@ -558,9 +557,7 @@ NPP_SW_heat_avg.drop(labels=["year"], axis=1, inplace=True)
 NPP_SW_heat_avg.head(3)
 
 # %%
-NPP_SW_heat.loc[
-    NPP_SW_heat.county_fips == "04005", "S4_countyMean_total_precip"
-].mean().round(3)
+NPP_SW_heat.loc[NPP_SW_heat.county_fips == "04005", "s4_countymean_total_precip"].mean().round(3)
 
 # %%
 print(len(NPP_SW_heat_avg.index))
@@ -591,7 +588,7 @@ print(inventory_2017.shape)
 # Merge them so that counties are in the same order. My sick mind!
 
 # %%
-inventory_2017 = inventory_2017[["county_fips", "inventory", "EW"]]
+inventory_2017 = inventory_2017[["county_fips", "inventory", "EW_meridian"]]
 
 # %%
 inv_2017_NPP_SW_heat_avg = pd.merge(
@@ -608,7 +605,7 @@ inv_2017_NPP_SW_heat_avg.columns
 # %%
 HS_var = ["dangerEncy"]
 npp_var = ["county_total_npp"]
-AW_vars = ["yr_countyMean_total_precip", "annual_avg_Tavg"]
+AW_vars = ["yr_countyMean_total_precip", "annual_avg_tavg"]
 
 SW_vars = [
     "S1_countyMean_total_precip",
@@ -621,6 +618,7 @@ SW_vars = [
     "S4_countyMean_avg_Tavg",
 ]
 
+SW_vars = [x.lower() for x in SW_vars]
 all_indp_vars = list(set(HS_var + AW_vars + SW_vars + npp_var))
 all_indp_vars = sorted(all_indp_vars)
 all_indp_vars
@@ -637,7 +635,7 @@ inv_2017_NPP_SW_heat_avg_normal.head(2)
 inv_2017_NPP_SW_heat_avg.head(2)
 
 # %%
-nonControlvars = ["county_fips", "inventory", "EW"]
+nonControlvars = ["county_fips", "inventory", "EW_meridian"]
 inv_2017_NPP_SW_heat_avg_normal[nonControlvars] = inv_2017_NPP_SW_heat_avg[
     nonControlvars
 ]
@@ -1031,20 +1029,6 @@ print(f"{len(A)=}, {len(B)=}")
 
 # %%
 controls_avg_normal.head(2)
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
 
 # %%
 # print (controls_normal.shape)

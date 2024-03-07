@@ -132,6 +132,9 @@ def clean_census(df, col_, col_to_lower=True):
 
         df = df[~(df[col_].str.contains(pat="(D)", case=False, na=False))]
         df = df[~(df[col_].str.contains(pat="(Z)", case=False, na=False))]
+        df = df[~(df[col_].str.contains(pat="(S)", case=False, na=False))]
+        df = df[~(df[col_].str.contains(pat="(NA)", case=False, na=False))]
+
     df.reset_index(drop=True, inplace=True)
 
     # this is not good condition. maybe the first one is na whose

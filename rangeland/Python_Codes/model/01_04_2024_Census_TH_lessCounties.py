@@ -81,20 +81,16 @@ print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %% [markdown]
 # # Read the data
-
-# %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
-SoI = abb_dict["SoI"]
-SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
-
-# %% [markdown]
+#
 # #### County FIPS
 
 # %%
-county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
+county_fips = abb_dict['county_fips']
 
-county_fips = county_fips["county_fips"]
-
+# %%
 print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
@@ -215,7 +211,7 @@ RA.head(2)
 
 # %%
 RA = pd.read_pickle(reOrganized_dir + "county_fips.sav")
-RA = RA["filtered_counties"]
+RA = RA["filtered_counties_29States"]
 
 print(f"{len(RA.county_fips.unique()) = }")
 RA.head(2)
@@ -392,6 +388,7 @@ SW_vars = [
     "S4_countyMean_avg_Tavg",
 ]
 
+SW_vars = [x.lower() for x in SW_vars]
 for a_col in SW_vars:
     seasonal_weather[a_col] = seasonal_weather[a_col].astype(float)
 
@@ -691,9 +688,5 @@ ks_result.conf_int()[1] - ks_result.conf_int()[0]
 # ## Include lag ```NPP``` in the model
 #
 # Do we have annual county-level NPP?
-
-# %%
-
-# %%
 
 # %%

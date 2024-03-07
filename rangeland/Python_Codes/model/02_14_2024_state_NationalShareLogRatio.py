@@ -56,14 +56,14 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
 
 # %%
-filename = reOrganized_dir + "state_data_OuterJoined.sav"
+filename = reOrganized_dir + "state_data_and_normalData_OuterJoined.sav"
 state_data = pd.read_pickle(filename)
 state_data.keys()
 
@@ -125,9 +125,10 @@ state_data = pd.merge(state_data, total_inv, on=["year"], how="left")
 state_data.head(2)
 
 # %%
-state_data["inventory_share"] = (
-    state_data["inventory"] / state_data["total_inventory"]
-) * 100
+state_data.dropna(subset=["inventory"], axis=0, inplace=True)
+
+# %%
+state_data["inventory_share"] = (state_data["inventory"] / state_data["total_inventory"]) * 100
 state_data.head(2)
 
 # %%
@@ -540,14 +541,14 @@ cc = [
     "state_total_npp",
     "annual_statemean_total_precip",
     "annual_avg_tavg",
-    "s1_sum_modis_ndvi",
-    "s2_sum_modis_ndvi",
-    "s3_sum_modis_ndvi",
-    "s4_sum_modis_ndvi",
-    "s1_mean_modis_ndvi",
-    "s2_mean_modis_ndvi",
-    "s3_mean_modis_ndvi",
-    "s4_mean_modis_ndvi",
+#     "s1_sum_modis_ndvi",
+#     "s2_sum_modis_ndvi",
+#     "s3_sum_modis_ndvi",
+#     "s4_sum_modis_ndvi",
+#     "s1_mean_modis_ndvi",
+#     "s2_mean_modis_ndvi",
+#     "s3_mean_modis_ndvi",
+#     "s4_mean_modis_ndvi",
     "s1_max_modis_ndvi",
     "s2_max_modis_ndvi",
     "s3_max_modis_ndvi",
@@ -584,7 +585,8 @@ non_delta_cols = [
     "year",
     "state_fips",
     "inventory",
-    "sale_4_slaughter_head",
+#    "sale_4_slaughter_head",
+    "slaughter",
     "population",
     "feed_expense",
     "number_of_farm_operation",
@@ -619,8 +621,9 @@ del nonDelta_df
 delta_data.head(3)
 
 # %%
-## Check the Census data which is every 5 years.
-delta_data[["sale_4_slaughter_head", "population"]].head(3)
+## Check the Census data which is every 5 years. 
+# slaughter is sale_4_slaughter
+delta_data[["slaughter", "population"]].head(3)
 
 # %%
 delta_data.columns
@@ -639,14 +642,14 @@ normalize_cols = [
     "maxNDVI_DoY_stateStd",
     "maxNDVI_DoY_stateMin",
     "maxNDVI_DoY_stateMax",
-    "s1_sum_modis_ndvi",
-    "s2_sum_modis_ndvi",
-    "s3_sum_modis_ndvi",
-    "s4_sum_modis_ndvi",
-    "s1_mean_modis_ndvi",
-    "s2_mean_modis_ndvi",
-    "s3_mean_modis_ndvi",
-    "s4_mean_modis_ndvi",
+#     "s1_sum_modis_ndvi",
+#     "s2_sum_modis_ndvi",
+#     "s3_sum_modis_ndvi",
+#     "s4_sum_modis_ndvi",
+#     "s1_mean_modis_ndvi",
+#     "s2_mean_modis_ndvi",
+#     "s3_mean_modis_ndvi",
+#     "s4_mean_modis_ndvi",
     "s1_max_modis_ndvi",
     "s2_max_modis_ndvi",
     "s3_max_modis_ndvi",
@@ -659,7 +662,7 @@ normalize_cols = [
     "s2_statemean_total_precip",
     "s3_statemean_total_precip",
     "s4_statemean_total_precip",
-    "sale_4_slaughter_head",
+    "slaughter",
     "population",
     "feed_expense",
     "number_of_farm_operation",

@@ -82,18 +82,19 @@ sorted(USDA_data.keys())
 AgLand = USDA_data['AgLand']
 FarmOperation = USDA_data['FarmOperation']
 
-hay_price_Q1_at_1982 = USDA_data['hay_price_Q1_at_1982']
-beef_price_at_1982 = USDA_data['beef_price_at_1982']
+beef_price_at_1982 = USDA_data['beef_price']
+beef_price_deltas_ratios = USDA_data["beef_price_deltas_ratios"]
 
 feed_expense = USDA_data['feed_expense']
 
+hay_price_Q1_at_1982 = USDA_data['hay_price_Q1']
+hay_price_deltas_ratios = USDA_data["hay_price_deltas_ratios"]
+
 shannon_invt = USDA_data['shannon_invt']
-shannon_invt_deltas = USDA_data['shannon_invt_deltas']
-shannon_invt_ratios = USDA_data['shannon_invt_ratios']
+shannon_invt = shannon_invt[shannon_invt.state != "US"]
 
 shannon_invt_tall = USDA_data['shannon_invt_tall']
-shannon_invt_deltas_tall = USDA_data['shannon_invt_deltas_tall']
-shannon_invt_ratios_tall = USDA_data['shannon_invt_ratios_tall']
+shannon_invt_deltas_ratios_tall = USDA_data['shannon_invt_deltas_ratios_tall']
 
 slaughter = USDA_data['slaughter']
 wetLand_area = USDA_data['wetLand_area']
@@ -105,23 +106,12 @@ FarmOperation.head(2)
 slaughter.rename(columns={"sale_4_slaughter_head": "slaughter"}, inplace=True)
 
 # %%
-shannon_invt.head(2)
-
-# %%
 shannon_invt_tall.head(2)
 
 # %%
 shannon_invt_tall = shannon_invt_tall[shannon_invt_tall.state != "US"]
-shannon_invt = shannon_invt[shannon_invt.state != "US"]
-
 shannon_invt_tall.reset_index(drop=True, inplace=True)
 shannon_invt.reset_index(drop=True, inplace=True)
-
-# %%
-AgLand.head(2)
-
-# %%
-wetLand_area.head(2)
 
 # %%
 FarmOperation.head(2)
@@ -172,7 +162,6 @@ County_NDVIDOY_Herb.head(2)
 County_NDVIDOY_Herb["state_fips"] = County_NDVIDOY_Herb.county_fips.str.slice(start=0, stop=2)
 County_NDVIDOY_Herb.head(2)
 WA_County_NDVIDOY_Herb = County_NDVIDOY_Herb[County_NDVIDOY_Herb.state_fips == "53"]
-sorted(WA_County_NDVIDOY_Herb.maxNDVI_DoY_countyMean.unique())
 
 # %%
 County_NDVIDOY_Herb.head(5)
@@ -319,61 +308,6 @@ SW = SW.round(3)
 
 SW.head(2)
 
-# %%
-### We already have done this before and have the data in
-### SW.
-
-# state_grid_mean_idx = pd.read_csv(Min_data_base + "statefips_gridmet_mean_indices.csv")
-# state_grid_mean_idx.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
-
-# state_grid_mean_idx.rename(columns={"statefips": "state_fips"}, inplace=True)
-
-# state_grid_mean_idx["state_fips"] = state_grid_mean_idx["state_fips"].astype(str)
-# state_grid_mean_idx["state_fips"] = state_grid_mean_idx["state_fips"].str.slice(start=1, stop=3)
-
-# state_grid_mean_idx = state_grid_mean_idx[["year", "month", "state_fips",
-#                                            "normal", "alert", "danger", "emergency"]]
-
-
-# for a_col in ["normal", "alert", "danger", "emergency"]:
-#     state_grid_mean_idx[a_col] = state_grid_mean_idx[a_col].astype(float)
-
-# state_grid_mean_idx.reset_index(drop=True, inplace=True)
-# state_grid_mean_idx.head(2)
-
-# state_grid_mean_idx["season"] = "s5"
-# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([1, 2, 3]), 's1',
-#                                          state_grid_mean_idx.season)
-
-# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([4, 5, 6, 7]), 's2',
-#                                          state_grid_mean_idx.season)
-
-# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([8, 9]), 's3',
-#                                          state_grid_mean_idx.season)
-
-# state_grid_mean_idx['season'] = np.where(state_grid_mean_idx['month'].isin([10, 11, 12]), 's4',
-#                                          state_grid_mean_idx.season)
-
-# state_grid_mean_idx.head(2)
-
-# state_grid_mean_idx = state_grid_mean_idx[["year",  "state_fips", "season", "danger", "emergency"]]
-# state_grid_mean_idx = state_grid_mean_idx.groupby(["year", "state_fips", "season"]).sum().reset_index()
-# state_grid_mean_idx.head(2)
-
-
-# state_grid_mean_idx["dangerEncy"] = state_grid_mean_idx["danger"] + state_grid_mean_idx["emergency"]
-
-
-# state_grid_mean_idx = state_grid_mean_idx.pivot(index=['year', 'state_fips'],
-#                                                 columns='season', values='dangerEncy')
-# state_grid_mean_idx.reset_index(drop=False, inplace=True)
-# state_grid_mean_idx.head(2)
-
-# state_grid_mean_idx.rename(columns={"s1": "s1_dangerEncy", "s2": "s2_dangerEncy",
-#                                     "s3": "s3_dangerEncy", "s4": "s4_dangerEncy"},
-#                            inplace=True)
-# state_grid_mean_idx.head(2)
-
 # %% [markdown]
 # # Others (Controls)
 #
@@ -471,9 +405,6 @@ RA_state["rangeland_fraction"] = (RA_state["rangeland_acre"] / RA_state["state_a
 RA_state.head(2)
 
 # %%
-AgLand.head(2)
-
-# %%
 FarmOperation.head(2)
 
 # %%
@@ -498,20 +429,8 @@ human_population.head(2)
 slaughter.head(2)
 
 # %%
-wetLand_area.head(2)
-
-# %%
-# %who
-
-# %%
 shannon_invt_tall = shannon_invt_tall[["year", "inventory", "state_fips"]]
 shannon_invt_tall.head(2)
-
-# %%
-shannon_invt_deltas.head(2)
-
-# %%
-shannon_invt.head(2)
 
 # %%
 seasonal_ndvi.head(2)
@@ -560,15 +479,14 @@ export_ = {
     "wetLand_area": wetLand_area,
     
     "shannon_invt": shannon_invt,
-    "shannon_invt_deltas": shannon_invt_deltas,
-    "shannon_invt_ratios": shannon_invt_ratios,
 
     "shannon_invt_tall": shannon_invt_tall,
-    "shannon_invt_deltas_tall": shannon_invt_deltas_tall,
-    "shannon_invt_ratios_tall": shannon_invt_ratios_tall,
+    "shannon_invt_deltas_ratios_tall": shannon_invt_deltas_ratios_tall,
     
     "hay_price_Q1_at_1982" : hay_price_Q1_at_1982,
     "beef_price_at_1982" : beef_price_at_1982,
+    "hay_price_deltas_ratios": hay_price_deltas_ratios,
+    "beef_price_deltas_ratios" : beef_price_deltas_ratios,
 
     "seasonal_ndvi": seasonal_ndvi,
     "source_code": "state_vars_oneFile_outerjoin",
@@ -582,9 +500,6 @@ pickle.dump(export_, open(filename, "wb"))
 # ## Do the outer join and normalize and save in another file
 #
 # #### First do variables that change over time then constant variables such as rangeland area.
-
-# %%
-AgLand.head(2)
 
 # %% [markdown]
 # ### Time-invariant Variables
@@ -620,9 +535,6 @@ FarmOperation = FarmOperation[["state_fips", "year", "number_of_farm_operation"]
 FarmOperation.head(2)
 
 # %%
-FarmOperation.head(2)
-
-# %%
 Min_state_NPP.head(2)
 
 # %%
@@ -642,11 +554,14 @@ slaughter.head(2)
 shannon_invt_tall.head(2)
 
 # %%
-shannon_invt.head(2)
-
-# %%
 wetLand_area = wetLand_area[["state_fips", "year", "crp_wetland_acr"]]
 wetLand_area.head(2)
+
+# %%
+AgLand.head(2)
+
+# %%
+# AgLand[AgLand.state_fips == "01"]
 
 # %%
 annual_outer = pd.merge(shannon_invt_tall, state_yr_npp, on=["state_fips", "year"], how="outer")
@@ -655,6 +570,7 @@ annual_outer = pd.merge(annual_outer, human_population, on=["state_fips", "year"
 annual_outer = pd.merge(annual_outer, feed_expense, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, FarmOperation, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, wetLand_area, on=["state_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, AgLand, on=["state_fips", "year"], how="outer")
 annual_outer.head(2)
 
 # %%
@@ -671,6 +587,9 @@ annual_outer = pd.merge(annual_outer, hay_price_Q1_at_1982[["state_fips", "year"
 # %%
 annual_outer = pd.merge(annual_outer, beef_price_at_1982[["year", "beef_price_at_1982"]], 
                         on=["year"], how="outer")
+
+# %%
+annual_outer.head(2)
 
 # %% [markdown]
 # ### Seasonal variables
@@ -716,6 +635,7 @@ all_df = pd.merge(all_df, state_fips_, on=["state_fips"], how="left")
 all_df[all_df.state_fips == "01"].maxNDVI_DoY_stateMean.unique()
 
 # %%
+all_df.head(2)
 
 # %%
 
@@ -749,7 +669,7 @@ list(all_df.columns)
 # ]
 
 non_normal_cols = [
-    'year',
+   'year',
     'inventory',
     'state_fips',
     'max_ndvi_month_avhrr',
@@ -775,40 +695,33 @@ non_normal_cols = [
 numeric_cols = [x for x in sorted(all_df.columns) if not (x in non_normal_cols)]
 
 # %%
-numeric_cols
-
-# %%
 all_df_normalized = all_df.copy()
 
-all_df_normalized[numeric_cols] = (
-    all_df_normalized[numeric_cols] - all_df_normalized[numeric_cols].mean()
-) / all_df_normalized[numeric_cols].std(ddof=1)
+all_df_normalized[numeric_cols] = (all_df_normalized[numeric_cols] - all_df_normalized[numeric_cols].mean()) / \
+                                          all_df_normalized[numeric_cols].std(ddof=1)
 all_df_normalized[all_df_normalized.year == 2002].head(2)
 
 # %%
 all_df[all_df.year == 2002].head(2)
 
 # %%
-filename = reOrganized_dir + "state_data_and_normalData_OuterJoined.sav"
+# filename = reOrganized_dir + "state_data_and_normalData_OuterJoined.sav"
 
-export_ = {
-    "all_df": all_df,
-    "all_df_normalized": all_df_normalized,
-    "source_code": "state_vars_oneFile_outerjoin",
-    "NOTE": "state NPPs come from HN's computation, not statefips_annual_MODIS_NPP.csv",
-    "normal_cols": numeric_cols,
-    "non_normal_cols": non_normal_cols,
-    "Author": "HN",
-    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-}
+# export_ = {
+#     "all_df": all_df,
+#     "all_df_normalized": all_df_normalized,
+#     "source_code": "state_vars_oneFile_outerjoin",
+#     "NOTE": "state NPPs come from HN's computation, not statefips_annual_MODIS_NPP.csv",
+#     "normal_cols": numeric_cols,
+#     "non_normal_cols": non_normal_cols,
+#     "Author": "HN",
+#     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+# }
 
-pickle.dump(export_, open(filename, "wb"))
+# pickle.dump(export_, open(filename, "wb"))
 
 # %%
 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-# %%
-numeric_cols
 
 # %% [markdown]
 # # Compute differences/deltas and then normalize
@@ -820,8 +733,8 @@ all_df['max_ndvi_currYrseason_avhrr'].unique()
 
 # %%
 delta_cols = [
-    "year", # need for merge stuff
-    "state_fips",# need for merge stuff
+    "year",
+    "state_fips",
     'inventory',
     'state_unit_npp',
     'state_total_npp',
@@ -830,6 +743,7 @@ delta_cols = [
     'feed_expense',
     'number_of_farm_operation',
     'crp_wetland_acr',
+    'agland',
     'hay_price_at_1982',
     'beef_price_at_1982',
     's1_statemean_total_precip',
@@ -852,10 +766,6 @@ delta_cols = [
     'annual_avg_tavg',
     'annual_statemean_total_danger',
     'annual_statemean_total_emergency',
-    'maxNDVI_DoY_stateMean',
-    'maxNDVI_DoY_stateMedian',
-    'maxNDVI_DoY_stateMin',
-    'maxNDVI_DoY_stateMax',
     'max_ndvi_in_year_avhrr',
     'max_ndvi_in_year_gimms',
     'max_ndvi_in_year_modis',
@@ -871,7 +781,7 @@ delta_cols = [
     's2_max_modis_ndvi',
     's3_max_modis_ndvi',
     's4_max_modis_ndvi',
-]
+    ]
 
 # %%
 non_delta_cols = ["year", "state_fips"] + [x for x in all_df.columns if not (x in delta_cols)]
@@ -913,6 +823,15 @@ nonDelta_df = nonDelta_df[non_delta_cols]
 nonDelta_df.head(3)
 
 # %%
+print (ind_deltas_df.shape)
+print (nonDelta_df.shape)
+
+# %%
+nonDelta_df.head(2)
+
+# %%
+
+# %%
 delta_data = pd.merge(ind_deltas_df, nonDelta_df, on=["year", "state_fips"], how="left")
 delta_data.head(3)
 
@@ -942,17 +861,41 @@ delta_data_normal[delta_data_normal.year == 2002].head(2)
 delta_data[delta_data.year == 2002].head(2)
 
 # %%
+all_df.shape
 
 # %%
-filename = reOrganized_dir + "state_delta_and_normalDelta_OuterJoined.sav"
+all_df_normalized.shape
+
+# %%
+delta_data.shape
+
+# %%
+delta_data_normal.shape
+
+# %%
+filename = reOrganized_dir + "state_data_and_deltas_and_normalDelta_OuterJoined.sav"
 
 export_ = {
-    "delta_data": delta_data,
-    "delta_data_normal": delta_data_normal,
+    "all_df_outerjoined": all_df,
+    "all_df_outerjoined_normalized": all_df_normalized,
+    
+    "delta_data_outerjoined": delta_data,
+    "delta_data_normal_outerjoined": delta_data_normal,
+    
     "delta_cols": delta_cols,
     "normalized_columns": numeric_cols,
     "non_normalized_columns": non_normal_cols,
+    
     "source_code": "state_vars_oneFile_outerjoin",
+    "shannon_invt_tall": shannon_invt_tall,
+    "shannon_invt_deltas_ratios_tall": shannon_invt_deltas_ratios_tall,
+    
+    "hay_price_Q1_at_1982" : hay_price_Q1_at_1982,
+    "beef_price_at_1982" : beef_price_at_1982,
+    "hay_price_deltas_ratios": hay_price_deltas_ratios,
+    "beef_price_deltas_ratios" : beef_price_deltas_ratios,
+
+    
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }

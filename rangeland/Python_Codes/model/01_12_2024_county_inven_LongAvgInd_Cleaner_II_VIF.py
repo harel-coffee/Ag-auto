@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -95,30 +95,24 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
-
-# %%
-df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_OuterJoined.sav")
-df_OuterJoined = df_OuterJoined["all_df"]
-df_OuterJoined.head(2)
-
-# %% [markdown]
-# ## County Fips
-
-# %%
-county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
-county_fips = county_fips["county_fips"]
+county_fips = abb_dict["county_fips"]
 
 print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
 county_fips.reset_index(drop=True, inplace=True)
-county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
+county_fips = county_fips[["county_fips", "county_name", "state", "EW_meridian"]]
 print(f"{len(county_fips.state.unique()) = }")
 
 county_fips.head(2)
+
+# %%
+df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_and_normalData_OuterJoined.sav")
+df_OuterJoined = df_OuterJoined["all_df"]
+df_OuterJoined.head(2)
 
 # %%
 del county_fips
@@ -231,6 +225,8 @@ sw_cols = [
     "S3_countyMean_avg_Tavg",
     "S4_countyMean_avg_Tavg",
 ]
+
+sw_cols = [x.lower() for x in sw_cols]
 
 # %%
 common_cols = ["county_fips", "year"]
@@ -433,7 +429,7 @@ col_norms = all_df_normal[normalize_cols].apply(np.linalg.norm, axis=0)
 all_df_normal[normalize_cols] = all_df_normal[normalize_cols] / col_norms
 
 print((np.linalg.norm(all_df_normal.county_total_npp)))
-print((np.linalg.norm(all_df_normal.S1_countyMean_total_precip)))
+print((np.linalg.norm(all_df_normal.s1_countymean_total_precip)))
 all_df_normal.head(2)
 
 # %%
@@ -441,16 +437,7 @@ X = all_df_normal[normalize_cols].values
 X
 
 # %%
-
-# %%
-
-# %%
 normalize_cols
-
-# %%
-print(round(VIFs[normalize_cols.index("county_total_npp")], 1))
-print(round(VIFs[normalize_cols.index("unit_npp")], 1))
-print(round(VIFs[normalize_cols.index("rangeland_acre")], 1))
 
 # %%
 cc = [
@@ -488,7 +475,5 @@ XT_X = np.dot(np.transpose(X), X)
 inv_Xt_X = np.linalg.inv(XT_X)
 VIFs = np.diagonal(inv_Xt_X)
 [round(x, 1) for x in VIFs]
-
-# %%
 
 # %%

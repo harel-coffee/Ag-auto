@@ -816,9 +816,7 @@ delta_cols = [
 ]
 
 # %%
-non_delta_cols = ["year", "county_fips"] + [
-    x for x in all_df.columns if not (x in delta_cols)
-]
+non_delta_cols = ["year", "county_fips"] + [x for x in all_df.columns if not (x in delta_cols)]
 print(len(non_delta_cols))
 non_delta_cols
 
@@ -848,9 +846,7 @@ nonDelta_df = nonDelta_df[non_delta_cols]
 nonDelta_df.head(3)
 
 # %%
-delta_data = pd.merge(
-    ind_deltas_df, nonDelta_df, on=["year", "county_fips"], how="left"
-)
+delta_data = pd.merge(ind_deltas_df, nonDelta_df, on=["year", "county_fips"], how="left")
 delta_data.head(3)
 
 # %%

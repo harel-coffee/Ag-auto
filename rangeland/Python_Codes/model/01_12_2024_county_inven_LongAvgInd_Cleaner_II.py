@@ -95,30 +95,26 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
+county_fips = abb_dict["county_fips"]
+county_fips.head(2)
 
 # %%
-df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_OuterJoined.sav")
-df_OuterJoined = df_OuterJoined["all_df"]
-df_OuterJoined.head(2)
-
-# %% [markdown]
-# ## County Fips
-
-# %%
-county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
-county_fips = county_fips["county_fips"]
-
 print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
 county_fips.reset_index(drop=True, inplace=True)
-county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
+county_fips = county_fips[["county_fips", "county_name", "state", "EW_meridian"]]
 print(f"{len(county_fips.state.unique()) = }")
 
 county_fips.head(2)
+
+# %%
+df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_and_normalData_OuterJoined.sav")
+df_OuterJoined = df_OuterJoined["all_df"]
+df_OuterJoined.head(2)
 
 # %% [markdown]
 # ## NPP exist only after 2001!
@@ -1260,15 +1256,3 @@ Y = np.log(curr_all[y_var].astype(float))
 model_ = sm.OLS(Y, X)
 model_result = model_.fit()
 model_result.summary()
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%

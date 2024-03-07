@@ -70,22 +70,24 @@ os.makedirs(reOrganized_dir, exist_ok=True)
 # ### Read beef and hay prices
 
 # %%
-filename = reOrganized_dir + "beef_hay_cost_fromMikeLinkandFile.sav"
-beef_hay_cost = pd.read_pickle(filename)
-beef_hay_cost.keys()
+# filename = reOrganized_dir + "beef_hay_cost_fromMikeLinkandFile.sav"
+# beef_hay_cost = pd.read_pickle(filename)
+# beef_hay_cost.keys()
+
+# beef_hay_cost_deltas = beef_hay_cost["beef_hay_costDeltas_MikeLinkandFile"]
+# beef_hay_cost = beef_hay_cost["beef_hay_cost_MikeLinkandFile"]
 
 # %%
-beef_hay_cost_deltas = beef_hay_cost["beef_hay_costDeltas_MikeLinkandFile"]
-beef_hay_cost = beef_hay_cost["beef_hay_cost_MikeLinkandFile"]
 
 # %%
-beef_hay_cost_deltas.head(2)
+state_USDA_ShannonCattle = pd.read_pickle(reOrganized_dir + "state_USDA_ShannonCattle.sav")
+state_USDA_ShannonCattle.keys()
 
 # %% [markdown]
 # ## Read inventory deltas
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
@@ -94,16 +96,14 @@ abb_dict.keys()
 
 # %%
 f_ = "state_USDA_ShannonCattle.sav"
-Shannon_Beef_Cows_fromCATINV_deltaRatios = pd.read_pickle(reOrganized_dir + f_)
-list(Shannon_Beef_Cows_fromCATINV_deltaRatios.keys())
+state_USDA_ShannonCattle = pd.read_pickle(reOrganized_dir + f_)
+list(state_USDA_ShannonCattle.keys())
 
 # %%
-Shannon_CATINV_deltas = Shannon_Beef_Cows_fromCATINV_deltaRatios[
-    "shannon_annual_inventory_deltas_tall"
-]
-Shannon_CATINV_ratios = Shannon_Beef_Cows_fromCATINV_deltaRatios[
-    "shannon_annual_inventory_ratios_tall"
-]
+
+# %%
+Shannon_CATINV_deltas = state_USDA_ShannonCattle["shannon_invt_deltas_tall"]
+Shannon_CATINV_ratios = state_USDA_ShannonCattle["shannon_invt_ratios_tall"]
 print(f"{Shannon_CATINV_deltas.shape = }")
 print(f"{Shannon_CATINV_ratios.shape = }")
 
@@ -114,12 +114,8 @@ Shannon_CATINV_ratios = Shannon_CATINV_ratios[Shannon_CATINV_ratios.state.isin(S
 Shannon_CATINV_deltas.reset_index(drop=True, inplace=True)
 Shannon_CATINV_ratios.reset_index(drop=True, inplace=True)
 
-Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(
-    np.float32
-)
-Shannon_CATINV_ratios.inventory_ratio = Shannon_CATINV_ratios.inventory_ratio.astype(
-    np.float32
-)
+Shannon_CATINV_deltas.inventory_delta = Shannon_CATINV_deltas.inventory_delta.astype(np.float32)
+Shannon_CATINV_ratios.inventory_ratio = Shannon_CATINV_ratios.inventory_ratio.astype(np.float32)
 
 print(f"{Shannon_CATINV_deltas.shape = }")
 print(f"{Shannon_CATINV_ratios.shape = }")

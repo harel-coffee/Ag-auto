@@ -69,7 +69,7 @@ end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
@@ -77,8 +77,9 @@ SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 snap_shot_year = 2017
 
 # %%
-df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_OuterJoined.sav")
-df_OuterJoined = df_OuterJoined["all_df"]
+df_OuterJoined_all = pd.read_pickle(reOrganized_dir + "county_data_and_normalData_OuterJoined.sav")
+df_OuterJoined = df_OuterJoined_all["all_df"]
+df_OuterJoined = df_OuterJoined[df_OuterJoined.Pallavi == "Y"]
 df_OuterJoined.head(2)
 
 # %% [markdown]
@@ -91,13 +92,17 @@ df_OuterJoined.head(2)
 # So let us use subset of cattle inventory from census
 
 # %%
-df_OuterJoined = df_OuterJoined[df_OuterJoined.Pallavi == "Y"]
+# what happened here? Why Pallavi disappeard?
+# df_OuterJoined = df_OuterJoined[df_OuterJoined.Pallavi == "Y"] 
 df_OuterJoined = df_OuterJoined[df_OuterJoined.year >= 2001]
 df_OuterJoined = df_OuterJoined[df_OuterJoined.year <= 2017]
 
 df_OuterJoined.reset_index(drop=True, inplace=True)
 
 df_OuterJoined.head(2)
+
+# %%
+list(df_OuterJoined.columns)
 
 # %%
 df_OuterJoined["dangerEncy"] = df_OuterJoined["danger"] + df_OuterJoined["emergency"]
@@ -122,6 +127,9 @@ df_OuterJoined.head(2)
 # %%
 gimms_cols = [x for x in (df_OuterJoined.columns) if "gimms" in x]
 avhrr_cols = [x for x in (df_OuterJoined.columns) if "avhrr" in x]
+
+# %%
+list(df_OuterJoined.columns)
 
 # %%
 LL = (
@@ -285,6 +293,15 @@ inv_snap_ndvi_SW_heat.head(2)
 # ### Normalize
 
 # %%
+all_df_normalized_ = df_OuterJoined_all["all_df_normalized"]
+all_df_normalized_ = all_df_normalized_[all_df_normalized_["Pallavi"]=="Y"].copy()
+
+all_df_normalized_ = all_df_normalized_[(all_df_normalized_.year>= 2001) & (all_df_normalized_.year<= 2017)].copy()
+all_df_normalized_.shape
+
+# %%
+
+# %%
 HS_var = ["dangerEncy"]
 # AW_vars = ['yr_countyMean_total_precip', 'annual_avg_Tavg']
 
@@ -313,6 +330,9 @@ sorted(inv_snap_ndvi_SW_heat_normal.columns)
 
 # %%
 mean_ndvi_cols
+
+# %%
+inv_snap_ndvi_SW_heat_normal.dropna(subset=["max_ndvi_in_year_modis"], axis=0, inplace=True)
 
 # %%
 indp_vars = mean_ndvi_cols
@@ -479,6 +499,27 @@ all_df = pd.merge(
 )
 print(all_df.shape)
 all_df.head(2)
+
+# %%
+len(all_df.columns)
+
+# %%
+all_df_normalized_.columns
+
+# %%
+aaa = [x for x in list(all_df.columns) if x in list(all_df_normalized_.columns)]
+bbb = [x for x in list(all_df.columns) if not (x in aaa)]
+len(aaa)
+
+# %%
+all_df_normalized_[aaa].shape
+
+# %%
+all_df.shape
+
+# %%
+print (len(all_df_normalized_["county_fips"].unique()))
+print (len(all_df["county_fips"].unique()))
 
 # %%
 indp_vars = mean_ndvi_cols + ["rangeland_acre"]

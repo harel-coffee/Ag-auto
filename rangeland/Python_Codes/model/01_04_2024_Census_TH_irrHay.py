@@ -86,20 +86,17 @@ print("This is " + start_b + "a_bold_text" + end_b + "!")
 
 # %% [markdown]
 # # Read the data
-
-# %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
-SoI = abb_dict["SoI"]
-SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
-
-# %% [markdown]
+#
 # #### County FIPS
 
 # %%
-county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+county_state_meta = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 
-county_fips = county_fips["county_fips"]
+county_fips = county_state_meta["county_fips"]
+SoI = county_state_meta["SoI"]
+SoI_abb = [county_state_meta["full_2_abb"][x] for x in SoI]
 
+# %%
 print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
@@ -116,6 +113,8 @@ cnty_interest_list = list(county_fips.county_fips.unique())
 
 # %%
 USDA_data = pd.read_pickle(reOrganized_dir + "USDA_data.sav")
+print (USDA_data.keys())
+print()
 inventory = USDA_data["cattle_inventory"]
 
 # pick only the counties we want
@@ -213,7 +212,8 @@ RA.head(2)
 
 # %%
 RA = pd.read_pickle(reOrganized_dir + "county_fips.sav")
-RA = RA["filtered_counties"]
+RA.keys()
+RA = RA["filtered_counties_29States"]
 
 print(f"{len(RA.county_fips.unique()) = }")
 RA.head(2)
@@ -390,6 +390,8 @@ SW_vars = [
     "S4_countyMean_avg_Tavg",
 ]
 
+SW_vars = [x.lower() for x in SW_vars]
+
 for a_col in SW_vars:
     seasonal_weather[a_col] = seasonal_weather[a_col].astype(float)
 
@@ -460,8 +462,8 @@ all_df.dropna(how="any").shape
 
 # %%
 fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
-plt.hist(all_df.irr_hay_as_perc, bins=100)
-plt.xticks(np.arange(0, 100, 2), rotation="vertical")
+plt.hist(all_df.irr_hay_as_perc, bins=100);
+plt.xticks(np.arange(0, 100, 2), rotation="vertical");
 
 # fig_name = plots_dir + "all_df_irr_hay_as_perc2.pdf"
 # plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
@@ -473,10 +475,8 @@ plt.xticks(np.arange(0, 100, 2), rotation="vertical")
 # %%
 thresh = 10
 fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False)
-plt.hist(
-    all_df.loc[all_df["irr_hay_as_perc"] <= thresh, "irr_hay_as_perc"], bins=thresh * 3
-)
-plt.xticks(np.arange(0, thresh + 1, 1))
+plt.hist(all_df.loc[all_df["irr_hay_as_perc"] <= thresh, "irr_hay_as_perc"], bins=thresh * 3);
+plt.xticks(np.arange(0, thresh + 1, 1));
 # rotation ='vertical'
 
 # %%
@@ -856,13 +856,5 @@ print("max slaughter sale is [{}]".format(slaughter_all.slaughter.max()))
 slaughter_all.head(2)
 
 slaughter_all.year.unique()
-
-# %%
-
-# %%
-
-# %%
-
-# %%
 
 # %%

@@ -214,26 +214,46 @@ print (HayPrice_Q1.State.unique()[:4])
 print (HayPrice_Q1.Period.unique())
 
 # %%
-HayPrice_Q1 = HayPrice_Q1[HayPrice_Q1.Period == "MARKETING YEAR"].copy()
-HayPrice_Q1.reset_index(drop=True, inplace=True)
-print (HayPrice_Q1.shape)
-
-# %%
+HayPrice_Q1.head(3)
 
 # %% [markdown]
 # ### beef price
 # beef price is on national scale and it has monthly data in it.
 # Pick up ```MARKETING YEAR``` for now.
+#
+# **<span style='color:red'>WARNING</span>:** Market Price does NOT exist pre-2003!
+# FUUUUCKKKKKK
 
 # %%
 beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
+beef_price = beef_price[beef_price.Year <= 2024].copy()
+beef_price.reset_index(drop=True, inplace=True)
 print (beef_price.shape)
 beef_price.head(2)
 
 # %%
-beef_price = beef_price[beef_price.Period == "MARKETING YEAR"].copy()
-beef_price.reset_index(drop=True, inplace=True)
-print (beef_price.shape)
+# import statistics
+# v = np.array([177, 184 , 186 , 184 , 142 , 144 , 158 , 141 , 139 , 144 , 142 , 142])
+# print (len(v))
+# print (statistics.median(v))
+# print (np.array(v).mean().round(3))
+
+# v = [144,154,148,145,121,125,141,115,112,125,123, 116]
+# print (len(v))
+# print (statistics.median(v))
+# print (np.array(v).mean().round(3))
+
+# v = [176,175,186,176,162,160,184,184, 167]
+# print (len(v))
+# print (statistics.median(v))
+# print (np.array(v).mean().round(3))
+
+# beef_price = beef_price[beef_price.Period == "MARKETING YEAR"].copy()
+# beef_price.reset_index(drop=True, inplace=True)
+# print (beef_price.shape)
+
+# %%
+beef_price.head(2)
 
 # %%
 feed_expense.head(2)
@@ -431,7 +451,25 @@ print(slaughter.ag_district.unique())
 print(HayPrice_Q1.ag_district.unique())
 print(beef_price.ag_district.unique())
 
+# %% [markdown]
+# # Beef and Hay Price are trouble Makers
+#
+#   - Drop the period == "MARKETING YEAR"
+#   - Group by year and take median
+
 # %%
+# HayPrice_Q1 = HayPrice_Q1[HayPrice_Q1.Period == "MARKETING YEAR"].copy()
+# HayPrice_Q1.reset_index(drop=True, inplace=True)
+# print (HayPrice_Q1.shape)
+
+# %%
+HayPrice_Q1.head(2)
+
+# %%
+HayPrice_Q1 = HayPrice_Q1[HayPrice_Q1.period != "MARKETING YEAR"]
+print (beef_price.shape)
+beef_price = beef_price[beef_price.period != "MARKETING YEAR"]
+print (beef_price.shape)
 
 # %%
 bad_cols = [
@@ -442,7 +480,7 @@ bad_cols = [
     "ag_district",
     "ag_district_code",
     "region",
-    "period",
+    # "period",
     "county",
     "county_ansi",
     "week_ending",
@@ -556,7 +594,6 @@ HayPrice_Q1["state_ansi"] = HayPrice_Q1["state_ansi"].astype("int32")
 HayPrice_Q1["state_ansi"] = HayPrice_Q1["state_ansi"].astype("str")
 HayPrice_Q1.state = HayPrice_Q1.state.str.title()
 
-
 for idx in HayPrice_Q1.index:
     if len(HayPrice_Q1.loc[idx, "state_ansi"]) == 1:
         HayPrice_Q1.loc[idx, "state_ansi"] = "0" + HayPrice_Q1.loc[idx, "state_ansi"]
@@ -624,8 +661,6 @@ wetLand_area.head(2)
 wetLand_area.CRP_wetLand_acr.dtype
 
 # %%
-
-# %%
 print(AgLand.shape)
 AgLand = rc.clean_census(df=AgLand, col_="AgLand")
 print(AgLand.shape)
@@ -651,9 +686,15 @@ FarmOperation = rc.clean_census(df=FarmOperation, col_="number_of_farm_operation
 print(FarmOperation.shape)
 
 # %%
+beef_price.head(2)
+
+# %%
 print(beef_price.shape)
 beef_price = rc.clean_census(df=beef_price, col_="beef_price")
 print(beef_price.shape)
+
+# %%
+beef_price.head(2)
 
 # %%
 HayPrice_Q1.head(2)
@@ -662,6 +703,34 @@ HayPrice_Q1.head(2)
 print(HayPrice_Q1.shape)
 HayPrice_Q1 = rc.clean_census(df=HayPrice_Q1, col_="hay_price")
 print(HayPrice_Q1.shape)
+
+# %% [markdown]
+# # Beed and Hay price
+#
+# Take median for each year
+
+# %%
+HayPrice_Q1.head(2)
+
+# %%
+beef_price.head(2)
+
+# %%
+print (f"{beef_price.shape = }")
+annual_beef_price = beef_price.groupby(["year", "state"])["beef_price"].median().reset_index().round(2)
+annual_beef_price["data_item"] = beef_price["data_item"].unique()[0]
+beef_price = annual_beef_price.copy()
+del(annual_beef_price)
+
+# %%
+A = HayPrice_Q1.groupby(["year", "state_fips"])["hay_price"].mean().reset_index().round(2)
+A["data_item"] = HayPrice_Q1["data_item"].unique()[0]
+A["commodity"] = HayPrice_Q1["commodity"].unique()[0]
+HayPrice_Q1 = A.copy()
+del(A)
+
+# %%
+HayPrice_Q1.shape
 
 # %% [markdown]
 # ### Beef inventory
@@ -751,7 +820,152 @@ HayPrice_Q1_at_1982["hay_price_at_1982"] = 100 * (HayPrice_Q1_at_1982["hay_price
 beef_price_at_1982["beef_price_at_1982"] = 100 * (beef_price_at_1982["beef_price"] / 
                                                              beef_price_at_1982["annual_mean_ppiaco"])
 
+# %% [markdown]
+# ## Compute price deltas and ratios as well!
+#
+# ### Everything will be computed at 1982
+#
+# **deltas**
+
 # %%
+HayPrice_Q1_at_1982.dropna(subset=["annual_mean_ppiaco"], axis=0, inplace=True)
+beef_price_at_1982.dropna(subset=["annual_mean_ppiaco"], axis=0, inplace=True)
+
+HayPrice_Q1_at_1982.sort_values(by=["state_fips", "year"], inplace=True)
+beef_price_at_1982.sort_values(by=["state", "year"], inplace=True)
+
+HayPrice_Q1_at_1982.reset_index(drop=True, inplace=True)
+beef_price_at_1982.reset_index(drop=True, inplace=True)
+
+# %%
+HayPrice_Q1_at_1982.head(2)
+
+# %%
+beef_price_at_1982.head(2)
+
+# %%
+delta_cols = ["year", "state_fips", "hay_price_at_1982"]
+non_delta_cols = [x for x in HayPrice_Q1_at_1982.columns if not(x in delta_cols)]
+
+hay_price_deltas = pd.DataFrame(columns=delta_cols)
+
+for a_state in HayPrice_Q1_at_1982.state_fips.unique():
+    curr_df = HayPrice_Q1_at_1982[HayPrice_Q1_at_1982.state_fips == a_state].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+
+    curr_diff = curr_df[delta_cols[2:]].values[1:] - curr_df[delta_cols[2:]].values[:-1]
+    curr_diff = pd.DataFrame(curr_diff, columns=delta_cols[2:])
+    curr_diff["year"] = curr_df.year[1:].values
+    
+    v = curr_diff["year"].values
+    w = v-1
+    
+    curr_diff["diff_year"] = [x + "_" + y for (x, y) in zip(v.astype(str), w.astype(str))]
+    curr_diff["state_fips"] = a_state
+    
+    hay_price_deltas = pd.concat([hay_price_deltas, curr_diff])
+    del curr_diff
+
+hay_price_deltas.rename(columns={"hay_price_at_1982": "hay_price_detas_at_1982"}, inplace=True)
+hay_price_deltas.head(2)
+
+# %%
+ratio_cols = ["year", "state_fips", "hay_price_at_1982"]
+non_ratio_cols = [x for x in HayPrice_Q1_at_1982.columns if not(x in ratio_cols)]
+
+hay_price_ratios = pd.DataFrame(columns=ratio_cols)
+
+for a_state in HayPrice_Q1_at_1982.state_fips.unique():
+    curr_df = HayPrice_Q1_at_1982[HayPrice_Q1_at_1982.state_fips == a_state].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+
+    curr_ratio = curr_df[ratio_cols[2:]].values[1:] / curr_df[ratio_cols[2:]].values[:-1]
+    curr_ratio = pd.DataFrame(curr_ratio, columns=ratio_cols[2:])
+    curr_ratio["year"] = curr_df.year[1:].values
+    
+    v = curr_ratio["year"].values
+    w = v-1
+    
+    curr_ratio["ratio_year"] = [x + "_" + y for (x, y) in zip(v.astype(str), w.astype(str))]
+    curr_ratio["state_fips"] = a_state
+    
+    hay_price_ratios = pd.concat([hay_price_ratios, curr_ratio])
+    del curr_ratio
+
+hay_price_ratios.rename(columns={"hay_price_at_1982": "hay_price_ratios_at_1982"}, inplace=True)
+hay_price_ratios.head(2)
+
+# %%
+HayPrice_Q1_at_1982.head(2)
+
+# %%
+delta_cols = ["year", "state", "beef_price_at_1982"]
+non_delta_cols = [x for x in beef_price_at_1982.columns if not(x in delta_cols)]
+
+beef_price_deltas = pd.DataFrame(columns=delta_cols)
+
+for a_state in beef_price_at_1982.state.unique():
+    curr_df = beef_price_at_1982[beef_price_at_1982.state == a_state].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+
+    curr_diff = curr_df[delta_cols[2:]].values[1:] - curr_df[delta_cols[2:]].values[:-1]
+    curr_diff = pd.DataFrame(curr_diff, columns=delta_cols[2:])
+    curr_diff["year"] = curr_df.year[1:].values
+    
+    v = curr_diff["year"].values
+    w = v-1
+    
+    curr_diff["diff_year"] = [x + "_" + y for (x, y) in zip(v.astype(str), w.astype(str))]
+    curr_diff["state"] = a_state
+    
+    beef_price_deltas = pd.concat([beef_price_deltas, curr_diff])
+    del curr_diff
+
+beef_price_deltas.rename(columns={"beef_price_at_1982": "beef_price_detas_at_1982"}, inplace=True)
+beef_price_deltas.head(2)
+
+# %%
+ratio_cols = ["year", "state", "beef_price_at_1982"]
+non_ratio_cols = [x for x in beef_price_at_1982.columns if not(x in ratio_cols)]
+
+beef_price_ratios = pd.DataFrame(columns=ratio_cols)
+
+for a_state in beef_price_at_1982.state.unique():
+    curr_df = beef_price_at_1982[beef_price_at_1982.state == a_state].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+
+    curr_ratio = curr_df[ratio_cols[2:]].values[1:] - curr_df[ratio_cols[2:]].values[:-1]
+    curr_ratio = pd.DataFrame(curr_ratio, columns=ratio_cols[2:])
+    curr_ratio["year"] = curr_df.year[1:].values
+    
+    v = curr_ratio["year"].values
+    w = v-1
+    
+    curr_ratio["ratio_year"] = [x + "_" + y for (x, y) in zip(v.astype(str), w.astype(str))]
+    curr_ratio["state"] = a_state
+    
+    beef_price_ratios = pd.concat([beef_price_ratios, curr_ratio])
+    del curr_ratio
+
+beef_price_ratios.rename(columns={"beef_price_at_1982": "beef_price_ratios_at_1982"}, inplace=True)
+beef_price_ratios.head(2)
+
+# %%
+beef_price_deltas_ratios = pd.merge(beef_price_ratios, beef_price_deltas, on = ["year", "state"], how="left")
+beef_price_deltas_ratios.head(2)
+
+# %%
+hay_price_deltas_ratios = pd.merge(hay_price_ratios, hay_price_deltas, on = ["year", "state_fips"], how="left")
+hay_price_deltas_ratios.head(2)
+
+# %%
+beef_price_deltas_ratios.head(2)
+
+# %%
+inventory_deltas_tall = inventory_deltas_tall[["year", "state_fips", "inventory_delta"]]
+inventory_ratios_tall = inventory_ratios_tall[["year", "state_fips", "inventory_ratio"]]
+inventory_deltas_ratio_tall = pd.merge(inventory_deltas_tall, 
+                                       inventory_ratios_tall, on=["state_fips", "year"], how="left")
 
 # %%
 filename = reOrganized_dir + "state_USDA_ShannonCattle.sav"
@@ -763,20 +977,18 @@ export_ = {"AgLand": AgLand,
            "slaughter": slaughter,
 
            "shannon_invt": shannon_annual,
-           "shannon_invt_deltas": inventory_annual_deltas,
-           "shannon_invt_ratios": inventory_annual_ratios,
+#            "shannon_invt_deltas": inventory_annual_deltas,
+#            "shannon_invt_ratios": inventory_annual_ratios,
 
            "shannon_invt_tall": shannon_Beef_Cows_fromCATINV_tall,
-           "shannon_invt_deltas_tall": inventory_deltas_tall,
-           "shannon_invt_ratios_tall": inventory_ratios_tall,
+           "shannon_invt_deltas_ratios_tall": inventory_deltas_ratio_tall,
+
+           "hay_price_Q1" : HayPrice_Q1_at_1982,
+           "beef_price" : beef_price_at_1982,
            
-           "national_beef_price" : beef_price,
-           "HayPrice_Q1" : HayPrice_Q1,
-           
-           "hay_price_Q1_at_1982" : HayPrice_Q1_at_1982,
-           "beef_price_at_1982" : beef_price_at_1982,
-           
-           
+           "beef_price_deltas_ratios" : beef_price_deltas_ratios,
+           "hay_price_deltas_ratios" : hay_price_deltas_ratios,
+                      
            "source_code": "00_state_clean_USDA_data_addFIPS_and_annual_stateLevel_inventoryDeltas",
            "Author": "HN",
            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -789,10 +1001,6 @@ shannon_annual.head(2)
 
 # %%
 feed_expense.head(2)
-
-# %%
-
-# %%
 
 # %%
 
