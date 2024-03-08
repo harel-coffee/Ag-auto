@@ -210,7 +210,12 @@ print (FarmOperation_count["Data Item"].unique())
 FarmOperation_count[(FarmOperation_count.Year == 1997) & (FarmOperation_count["State ANSI"] == 1)]
 
 # %%
+# FarmOperation in terms of Acre.
+# The other farmOperation is in terms of numbers of operations! 
 FarmOperation = AgLand[AgLand.Commodity == "FARM OPERATIONS"].copy()
+
+# %%
+FarmOperation_count["Data Item"].unique()
 
 # %%
 AgLand[(AgLand.Year == 1997) & (AgLand["State ANSI"] == 1)]
@@ -234,6 +239,17 @@ print (HayPrice_Q1.shape)
 HayPrice_Q1.head(2)
 
 # %%
+print (HayPrice_Q1.Period.unique())
+HayMY = HayPrice_Q1[HayPrice_Q1.Period == "MARKETING YEAR"].copy()
+HayNotMY = HayPrice_Q1[HayPrice_Q1.Period != "MARKETING YEAR"].copy()
+
+# %%
+len(sorted(HayMY.Year.unique()))
+
+# %%
+len(sorted(HayNotMY.Year.unique()))
+
+# %%
 sorted(HayPrice_Q1[HayPrice_Q1["State ANSI"] == 1].Year.unique())
 
 # %%
@@ -253,10 +269,21 @@ HayPrice_Q1.head(3)
 
 # %%
 beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
-beef_price = beef_price[beef_price.Year <= 2024].copy()
+beef_price = beef_price[beef_price.Year < 2024].copy()
 beef_price.reset_index(drop=True, inplace=True)
+
 print (beef_price.shape)
 beef_price.head(2)
+
+# %%
+chicken_price = pd.read_csv(Mike_dir + "chicken_broiler_price.csv")
+chicken_price = chicken_price[chicken_price.Year < 2024].copy()
+chicken_price.reset_index(drop=True, inplace=True)
+
+print (chicken_price.shape)
+chicken_price.head(2)
+
+# %%
 
 # %%
 # import statistics
@@ -298,6 +325,7 @@ slaughter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 beef_price.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 HayPrice_Q1.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 
+chicken_price.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
 sorted(list(feed_expense.columns))
 
 # %%
@@ -307,6 +335,7 @@ print(f"{FarmOperation.shape = }")
 print(f"{feed_expense.shape = }")
 print(f"{slaughter.shape = }")
 print(f"{HayPrice_Q1.shape = }")
+print(f"{chicken_price.shape = }")
 
 # %%
 print((feed_expense.columns == AgLand.columns).all())
@@ -316,6 +345,7 @@ print((feed_expense.columns == slaughter.columns).all())
 
 print((feed_expense.columns == beef_price.columns).all())
 print((feed_expense.columns == HayPrice_Q1.columns).all())
+print((feed_expense.columns == chicken_price.columns).all())
 
 # %%
 print(AgLand.zip_code.unique())
@@ -334,6 +364,7 @@ print(slaughter.week_ending.unique())
 print()
 print(beef_price.week_ending.unique())
 print(HayPrice_Q1.week_ending.unique())
+print(chicken_price.week_ending.unique())
 
 # %%
 print(AgLand.watershed.unique())
@@ -353,6 +384,7 @@ print(slaughter.domain_category.unique())
 print()
 print(beef_price.domain_category.unique())
 print(HayPrice_Q1.domain_category.unique())
+print(chicken_price.domain_category.unique())
 
 # %%
 FarmOperation.state_ansi.unique()
@@ -376,6 +408,7 @@ print(slaughter.watershed_code.unique())
 print()
 print(beef_price.watershed_code.unique())
 print(HayPrice_Q1.watershed_code.unique())
+print(chicken_price.watershed_code.unique())
 
 # %%
 
@@ -387,6 +420,7 @@ print(FarmOperation.watershed.unique())
 print(slaughter.watershed.unique())
 print(beef_price.watershed.unique())
 print(HayPrice_Q1.watershed.unique())
+print(chicken_price.watershed.unique())
 
 # %%
 print(AgLand.region.unique())
@@ -396,6 +430,7 @@ print(FarmOperation.region.unique())
 print(slaughter.region.unique())
 print(beef_price.region.unique())
 print(HayPrice_Q1.region.unique())
+print(chicken_price.region.unique())
 
 # %%
 print(AgLand.program.unique())
@@ -405,6 +440,7 @@ print(FarmOperation.program.unique())
 print(slaughter.program.unique())
 print(HayPrice_Q1.program.unique())
 print(beef_price.program.unique())
+print(chicken_price.program.unique())
 
 # %%
 print(AgLand.period.unique())
@@ -424,6 +460,7 @@ print(slaughter.geo_level.unique())
 
 print(HayPrice_Q1.geo_level.unique())
 print(beef_price.geo_level.unique())
+print(chicken_price.geo_level.unique())
 
 # %%
 print(AgLand.data_item.unique())
@@ -434,8 +471,7 @@ print(slaughter.data_item.unique())
 print ()
 print(HayPrice_Q1.data_item.unique())
 print(beef_price.data_item.unique())
-
-# %%
+print(chicken_price.data_item.unique())
 
 # %%
 AgLand.columns
@@ -449,6 +485,7 @@ print(slaughter.county.unique())
 
 print(HayPrice_Q1.county.unique())
 print(beef_price.county.unique())
+print(chicken_price.county.unique())
 
 # %%
 print(AgLand.county_ansi.unique())
@@ -459,6 +496,7 @@ print(slaughter.county_ansi.unique())
 
 print(HayPrice_Q1.county_ansi.unique())
 print(beef_price.county_ansi.unique())
+print(chicken_price.county_ansi.unique())
 
 # %%
 print(AgLand.ag_district_code.unique())
@@ -477,6 +515,7 @@ print(FarmOperation.ag_district.unique())
 print(slaughter.ag_district.unique())
 print(HayPrice_Q1.ag_district.unique())
 print(beef_price.ag_district.unique())
+print(chicken_price.ag_district.unique())
 
 # %% [markdown]
 # # Beef and Hay Price are trouble Makers
@@ -512,6 +551,19 @@ HayPrice_Q1 = HayPrice_Q1[HayPrice_Q1.period == "MARKETING YEAR"].copy()
 print (beef_price.shape)
 beef_price = beef_price[beef_price.period != "MARKETING YEAR"]
 print (beef_price.shape)
+
+# %%
+chicken_price.period.unique()
+
+# %%
+print (chicken_price.shape)
+chicken_price = chicken_price[chicken_price.period != "MARKETING YEAR"]
+print (chicken_price.shape)
+
+# %%
+print(chicken_price.ag_district.unique())
+
+# %%
 
 # %%
 bad_cols = [
@@ -578,6 +630,7 @@ slaughter.drop(bad_cols, axis="columns", inplace=True)
 
 HayPrice_Q1.drop(bad_cols, axis="columns", inplace=True)
 beef_price.drop(bad_cols, axis="columns", inplace=True)
+chicken_price.drop(bad_cols, axis="columns", inplace=True)
 
 # %%
 AgLand.head(2)
@@ -600,7 +653,6 @@ AgLand[["state", "state_ansi"]].head(5)
 wetLand_area["state_ansi"] = wetLand_area["state_ansi"].astype("int32")
 wetLand_area["state_ansi"] = wetLand_area["state_ansi"].astype("str")
 wetLand_area.state = wetLand_area.state.str.title()
-
 
 for idx in wetLand_area.index:
     if len(wetLand_area.loc[idx, "state_ansi"]) == 1:
@@ -656,6 +708,10 @@ print (beef_price.state.unique())
 beef_price.head(2)
 
 # %%
+print (chicken_price.state.unique())
+chicken_price.head(2)
+
+# %%
 slaughter.head(2)
 
 # %%
@@ -687,6 +743,9 @@ FarmOperation.rename(columns={"state_ansi": "state_fips",
 
 beef_price.rename(columns={"state_ansi": "state_fips",
                            "value": "beef_price", "cv_(%)": "beef_price_cv_(%)"}, inplace=True)
+
+chicken_price.rename(columns={"state_ansi": "state_fips",
+                           "value": "chicken_price", "cv_(%)": "chicken_price_cv_(%)"}, inplace=True)
 
 HayPrice_Q1.rename(columns={"state_ansi": "state_fips",
                             "value": "hay_price", "cv_(%)": "hay_price_cv_(%)"}, inplace=True)
@@ -731,15 +790,21 @@ FarmOperation = rc.clean_census(df=FarmOperation, col_="acres_of_farm_operation"
 print(FarmOperation.shape)
 
 # %%
-beef_price.head(2)
-
-# %%
 print(beef_price.shape)
 beef_price = rc.clean_census(df=beef_price, col_="beef_price")
 print(beef_price.shape)
 
-# %%
 beef_price.head(2)
+
+# %%
+print(chicken_price.shape)
+chicken_price = rc.clean_census(df=chicken_price, col_="chicken_price")
+print(chicken_price.shape)
+chicken_price.head(2)
+
+# %%
+print (len(chicken_price.year.unique()))
+print(len(beef_price.year.unique()))
 
 # %%
 HayPrice_Q1.head(2)
@@ -761,11 +826,21 @@ HayPrice_Q1.head(2)
 beef_price.head(2)
 
 # %%
+chicken_price.head(2)
+
+# %%
 print (f"{beef_price.shape = }")
-annual_beef_price = beef_price.groupby(["year", "state"])["beef_price"].median().reset_index().round(2)
+annual_beef_price = beef_price.groupby(["year", "state"])["beef_price"].mean().reset_index().round(2)
 annual_beef_price["data_item"] = beef_price["data_item"].unique()[0]
 beef_price = annual_beef_price.copy()
 del(annual_beef_price)
+
+# %%
+print (f"{chicken_price.shape = }")
+annual_chicken_price = chicken_price.groupby(["year", "state"])["chicken_price"].mean().reset_index().round(2)
+annual_chicken_price["data_item"] = chicken_price["data_item"].unique()[0]
+chicken_price = annual_chicken_price.copy()
+del(annual_chicken_price)
 
 # %%
 A = HayPrice_Q1.groupby(["year", "state_fips"])["hay_price"].mean().reset_index().round(2)
@@ -844,16 +919,20 @@ PPIACO['year'] = pd.to_datetime(PPIACO['date']).dt.year
 PPIACO.head(3)
 
 # %%
+
+# %%
 annual_PPIACO = PPIACO.groupby(["year"])["ppiaco"].mean().reset_index().round(2)
 annual_PPIACO.rename(columns={"ppiaco": "annual_mean_ppiaco"}, inplace=True)
 annual_PPIACO.head(2)
 
 # %%
-beef_price_at_1982  = beef_price.copy()
 HayPrice_Q1_at_1982 = HayPrice_Q1.copy()
+beef_price_at_1982  = beef_price.copy()
+chicken_price_at_1982  = chicken_price.copy()
 
 # %%
 beef_price_at_1982 =  pd.merge(beef_price_at_1982, annual_PPIACO, on=["year"], how="left")
+chicken_price_at_1982 =  pd.merge(chicken_price_at_1982, annual_PPIACO, on=["year"], how="left")
 HayPrice_Q1_at_1982 = pd.merge(HayPrice_Q1_at_1982, annual_PPIACO, on=["year"], how="left")
 
 HayPrice_Q1_at_1982.head(2)
@@ -865,9 +944,18 @@ HayPrice_Q1_at_1982["hay_price_at_1982"] = 100 * (HayPrice_Q1_at_1982["hay_price
 beef_price_at_1982["beef_price_at_1982"] = 100 * (beef_price_at_1982["beef_price"] / 
                                                              beef_price_at_1982["annual_mean_ppiaco"])
 
+chicken_price_at_1982["chicken_price_at_1982"] = 100 * (chicken_price_at_1982["chicken_price"] / 
+                                                             chicken_price_at_1982["annual_mean_ppiaco"])
+
 # %%
 HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.state_fips == "01") & 
                     (HayPrice_Q1_at_1982.year.isin([1955, 1956, 1957, 1958, 1959]))]
+
+# %%
+beef_price_at_1982.head(2)
+
+# %%
+chicken_price_at_1982.head(2)
 
 # %% [markdown]
 # ## Compute price deltas and ratios as well!
@@ -886,11 +974,18 @@ beef_price_at_1982.sort_values(by=["state", "year"], inplace=True)
 HayPrice_Q1_at_1982.reset_index(drop=True, inplace=True)
 beef_price_at_1982.reset_index(drop=True, inplace=True)
 
+chicken_price_at_1982.dropna(subset=["annual_mean_ppiaco"], axis=0, inplace=True)
+chicken_price_at_1982.sort_values(by=["state", "year"], inplace=True)
+chicken_price_at_1982.reset_index(drop=True, inplace=True)
+
 # %%
 HayPrice_Q1_at_1982.head(2)
 
 # %%
 beef_price_at_1982.head(2)
+
+# %%
+chicken_price_at_1982.head(2)
 
 # %% [markdown]
 # # <span style='color:red'>STOP</span>
@@ -1006,8 +1101,64 @@ beef_price_ratios.rename(columns={"beef_price_at_1982": "beef_price_ratios_at_19
 beef_price_ratios.head(2)
 
 # %%
+delta_cols = ["year", "state", "chicken_price_at_1982"]
+non_delta_cols = [x for x in chicken_price_at_1982.columns if not(x in delta_cols)]
+
+chicken_price_deltas = pd.DataFrame(columns=delta_cols)
+
+for a_state in chicken_price_at_1982.state.unique():
+    curr_df = chicken_price_at_1982[chicken_price_at_1982.state == a_state].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+
+    curr_diff = curr_df[delta_cols[2:]].values[1:] - curr_df[delta_cols[2:]].values[:-1]
+    curr_diff = pd.DataFrame(curr_diff, columns=delta_cols[2:])
+    curr_diff["year"] = curr_df.year[1:].values
+    
+    v = curr_diff["year"].values
+    w = v-1
+    
+    curr_diff["diff_year"] = [x + "_" + y for (x, y) in zip(v.astype(str), w.astype(str))]
+    curr_diff["state"] = a_state
+    
+    chicken_price_deltas = pd.concat([chicken_price_deltas, curr_diff])
+    del curr_diff
+
+chicken_price_deltas.rename(columns={"chicken_price_at_1982": "chicken_price_detas_at_1982"}, inplace=True)
+chicken_price_deltas.head(2)
+
+# %%
+ratio_cols = ["year", "state", "chicken_price_at_1982"]
+non_ratio_cols = [x for x in chicken_price_at_1982.columns if not(x in ratio_cols)]
+
+chicken_price_ratios = pd.DataFrame(columns=ratio_cols)
+
+for a_state in chicken_price_at_1982.state.unique():
+    curr_df = chicken_price_at_1982[chicken_price_at_1982.state == a_state].copy()
+    curr_df.sort_values(by=["year"], inplace=True)
+
+    curr_ratio = curr_df[ratio_cols[2:]].values[1:] - curr_df[ratio_cols[2:]].values[:-1]
+    curr_ratio = pd.DataFrame(curr_ratio, columns=ratio_cols[2:])
+    curr_ratio["year"] = curr_df.year[1:].values
+    
+    v = curr_ratio["year"].values
+    w = v-1
+    
+    curr_ratio["ratio_year"] = [x + "_" + y for (x, y) in zip(v.astype(str), w.astype(str))]
+    curr_ratio["state"] = a_state
+    
+    chicken_price_ratios = pd.concat([chicken_price_ratios, curr_ratio])
+    del curr_ratio
+
+chicken_price_ratios.rename(columns={"chicken_price_at_1982": "chicken_price_ratios_at_1982"}, inplace=True)
+chicken_price_ratios.head(2)
+
+# %%
 beef_price_deltas_ratios = pd.merge(beef_price_ratios, beef_price_deltas, on = ["year", "state"], how="left")
 beef_price_deltas_ratios.head(2)
+
+# %%
+chicken_price_deltas_ratios = pd.merge(chicken_price_ratios, chicken_price_deltas, on = ["year", "state"], how="left")
+chicken_price_deltas_ratios.head(2)
 
 # %%
 hay_price_deltas_ratios = pd.merge(hay_price_ratios, hay_price_deltas, on = ["year", "state_fips"], how="left")
@@ -1022,9 +1173,15 @@ inventory_ratios_tall = inventory_ratios_tall[["year", "state_fips", "inventory_
 inventory_deltas_ratio_tall = pd.merge(inventory_deltas_tall, 
                                        inventory_ratios_tall, on=["state_fips", "year"], how="left")
 
-beef_hay_price_at_1982 = pd.merge(HayPrice_Q1_at_1982[["year", "state_fips", "hay_price_at_1982"]], 
-                                  beef_price_at_1982[["year", "beef_price_at_1982"]], 
-                                  on=["year"], how="outer")
+beef_chicken_hay_price_at_1982 = pd.merge(HayPrice_Q1_at_1982[["year", "state_fips", "hay_price_at_1982"]], 
+                                          beef_price_at_1982[["year", "beef_price_at_1982"]], 
+                                          on=["year"], how="outer")
+beef_chicken_hay_price_at_1982.head(2)
+
+# %%
+beef_chicken_hay_price_at_1982 = pd.merge(beef_chicken_hay_price_at_1982, 
+                                          chicken_price_at_1982[["year", "chicken_price_at_1982"]], 
+                                          on=["year"], how="outer")
 
 # %%
 filename = reOrganized_dir + "state_USDA_ShannonCattle.sav"
@@ -1044,11 +1201,14 @@ export_ = {"AgLand": AgLand,
 
            "HayPrice_Q1_at_1982" : HayPrice_Q1_at_1982,
            "beef_price_at_1982" : beef_price_at_1982,
+           "chicken_price_at_1982" : chicken_price_at_1982,
+
            
-           "beef_hay_price_at_1982" : beef_hay_price_at_1982,
+           "beef_chicken_hay_price_at_1982" : beef_chicken_hay_price_at_1982,
            
-           "beef_price_deltas_ratios" : beef_price_deltas_ratios,
            "hay_price_deltas_ratios" : hay_price_deltas_ratios,
+           "beef_price_deltas_ratios" : beef_price_deltas_ratios,           
+           "chicken_price_deltas_ratios" : chicken_price_deltas_ratios,           
                       
            "source_code": "00_state_clean_USDA_data_addFIPS_and_annual_stateLevel_inventoryDeltas",
            "Author": "HN",
@@ -1090,12 +1250,22 @@ hay_price_deltas_ratios[(hay_price_deltas_ratios.state_fips == "01") & (hay_pric
 FarmOperation
 
 # %%
+beef_chicken_hay_price_at_1982.head(2)
 
 # %%
+beef_price_at_1982.head(2)
 
 # %%
+HayPrice_Q1_at_1982.head(2)
 
 # %%
+chicken_price_at_1982.head(2)
+
+# %%
+beef_price_at_1982.head(2)
+
+# %%
+chicken_price_at_1982
 
 # %%
 

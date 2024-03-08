@@ -93,6 +93,11 @@ SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 list(abb_dict.keys())
 
 # %%
+state_fips = abb_dict["state_fips"]
+state_fips = state_fips[state_fips.state.isin(SoI_abb)].copy()
+state_fips.reset_index(drop=True, inplace=True)
+print (len(state_fips))
+state_fips.head(2)
 
 # %%
 shannon_invt_tall = state_USDA_ShannonCattle["shannon_invt_tall"]
@@ -106,32 +111,35 @@ shannon_invt_tall.head(2)
 
 # %%
 beef_price = state_USDA_ShannonCattle["beef_price_at_1982"]
+chicken_price = state_USDA_ShannonCattle["chicken_price_at_1982"]
 hay_price  = state_USDA_ShannonCattle["HayPrice_Q1_at_1982"]
-beef_hay_price_at_1982 = state_USDA_ShannonCattle["beef_hay_price_at_1982"]
-print (beef_hay_price_at_1982.shape)
-beef_hay_price_at_1982.head(2)
+
+beef_chicken_hay_price_at_1982 = state_USDA_ShannonCattle["beef_chicken_hay_price_at_1982"]
+print (beef_chicken_hay_price_at_1982.shape)
+beef_chicken_hay_price_at_1982.head(2)
 
 # %%
-beef_hay_price_at_1982.dropna(how="any", inplace=False).shape
+beef_chicken_hay_price_at_1982.dropna(how="any", inplace=False).shape
 
 # %% [markdown]
 # ## Pick the years that they intersect
 
 # %%
-min_yr = max(beef_hay_price_at_1982.year.min(), shannon_invt_tall.year.min())
-max_yr = min(beef_hay_price_at_1982.year.max(), shannon_invt_tall.year.max())
+min_yr = max(beef_chicken_hay_price_at_1982.year.min(), shannon_invt_tall.year.min())
+max_yr = min(beef_chicken_hay_price_at_1982.year.max(), shannon_invt_tall.year.max())
 print(f"{min_yr = }")
 print(f"{max_yr = }")
 
 # %%
 shannon_invt_tall = shannon_invt_tall[(shannon_invt_tall.year >= min_yr) & (shannon_invt_tall.year <= max_yr)]
 
-beef_hay_price_at_1982 = beef_hay_price_at_1982[
-    (beef_hay_price_at_1982.year >= min_yr) & (beef_hay_price_at_1982.year <= max_yr)]
+beef_chicken_hay_price_at_1982 = beef_chicken_hay_price_at_1982[
+    (beef_chicken_hay_price_at_1982.year >= min_yr) & (beef_chicken_hay_price_at_1982.year <= max_yr)]
 
 # %%
-invt_BH_cost = pd.merge(shannon_invt_tall, beef_hay_price_at_1982, on=["year", "state_fips"], how="left")
-
+invt_BH_cost = pd.merge(shannon_invt_tall, beef_chicken_hay_price_at_1982, 
+                        on=["year", "state_fips"], how="left")
+print(f"{len(invt_BH_cost.state_fips.unique())=}")
 print(f"{invt_BH_cost.shape=}")
 invt_BH_cost.head(3)
 
@@ -144,20 +152,56 @@ list(all_data_dict.keys())
 
 # %%
 all_df_normalized = all_data_dict["all_df_outerjoined_normalized"]
+all_df_normalized = all_df_normalized[all_df_normalized.state_fips.isin(state_fips.state_fips)].copy()
+all_df_normalized.reset_index(drop=True, inplace=True)
+print (len(all_df_normalized.state_fips.unique()))
 print (all_df_normalized.shape)
 all_df_normalized.head(2)
-
-# %%
-all_df_normalized.columns
 
 # %%
 ndvi_columns = [x for x in all_df_normalized.columns if "ndvi" in x.lower()]
 ndvi_columns
 
+# %% [markdown]
+# # Add state-dummy variables
+
 # %%
-all_df_normalized_needed = all_df_normalized[['year', 'state_fips', 'inventory', 
-                                              "max_ndvi_in_year_modis",
-                                              "beef_price_at_1982", "hay_price_at_1982"]].copy()
+all_df_normalized["state_dummy_int"] = all_df_normalized["state_fips"].astype(int)
+all_df_normalized["state_dummy_str"] = all_df_normalized["state_fips"] + "_" + "dummy"
+
+L = list(all_df_normalized.columns)
+L.pop()
+L
+
+all_df_normalized = all_df_normalized.pivot(index=L, columns = "state_dummy_str", values = "state_dummy_int")
+
+all_df_normalized.reset_index(drop=False, inplace=True)
+all_df_normalized.columns = all_df_normalized.columns.values
+
+# replace NAs with zeros and others (state_fips integers) with 1s.
+
+dummy_cols = [x for x in all_df_normalized.columns if "_dummy" in x]
+dummy_cols = [x for x in dummy_cols if not("int" in x)]
+
+for a_col in dummy_cols:
+    all_df_normalized[a_col].fillna(0, inplace=True)
+    all_df_normalized[a_col] = all_df_normalized[a_col].astype(int)
+    
+all_df_normalized[dummy_cols] = np.where(all_df_normalized[dummy_cols]!= 0, 1, 0)
+
+all_df_normalized.head(2)
+
+# %%
+all_df_normalized[["state_fips"]+ dummy_cols].head(5)
+
+# %%
+needed_cols = ['year', 'state_fips', 'inventory', 
+               "max_ndvi_in_year_modis", 
+               "beef_price_at_1982", "hay_price_at_1982", "chicken_price_at_1982"] + \
+               dummy_cols + ["state_dummy_int"]\
+
+
+all_df_normalized_needed = all_df_normalized[needed_cols].copy()
 print (all_df_normalized_needed.shape)
 all_df_normalized_needed.dropna(how="any", inplace=True)
 all_df_normalized_needed.reset_index(drop=True, inplace=True)
@@ -174,40 +218,127 @@ print (all_df_normalized_needed.year.max())
 # We are using national beef and hay prices for all states! if it's the same for all states, what's the diff between including and excluding them.
 
 # %%
-list(inventoryRatio_beefHayCostDeltas.columns)
+# list(inventoryRatio_beefHayCostDeltas.columns)
 
 # %%
 indp_vars = [
-    "state_total_npp",
-    "allHay_wtAvg_2_$perTon_calendar_yr_normal",
-    "steers_medium_large_600_650lbs_$_cwt_yrAvg_normal",
+    "max_ndvi_in_year_modis",
+    "hay_price_at_1982",
+    "beef_price_at_1982",
+    "chicken_price_at_1982",
 ]
-y_var = "inventory_ratio"
+y_var = "inventory"
 
 #################################################################
-X = all_data[indp_vars]
+X = all_df_normalized_needed[indp_vars]
 for col_ in indp_vars:
     X[col_] = X[col_].astype("float")
 
 X = sm.add_constant(X)
-Y = np.log(all_data[y_var].astype(float))
+Y = np.log(all_df_normalized_needed[y_var].astype(float))
 model = sm.OLS(Y, X)
 model_result = model.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["state_total_npp"]
-y_var = "inventory_ratio"
+indp_vars = ["max_ndvi_in_year_modis",
+             "beef_price_at_1982",
+             "hay_price_at_1982"]
+y_var = "inventory"
 
 #################################################################
-X = all_data[indp_vars]
+X = all_df_normalized_needed[indp_vars]
 for col_ in indp_vars:
     X[col_] = X[col_].astype("float")
 
 X = sm.add_constant(X)
-Y = np.log(all_data[y_var].astype(float))
+Y = np.log(all_df_normalized_needed[y_var].astype(float))
 model = sm.OLS(Y, X)
 model_result = model.fit()
 model_result.summary()
+
+# %%
+##### Log base 10
+
+# indp_vars = [
+#     "max_ndvi_in_year_modis",
+#     "hay_price_at_1982",
+#     "beef_price_at_1982",
+# ]
+# y_var = "inventory"
+
+# #################################################################
+# X = all_df_normalized_needed[indp_vars]
+# for col_ in indp_vars:
+#     X[col_] = X[col_].astype("float")
+
+# X = sm.add_constant(X)
+# Y = np.log10(all_df_normalized_needed[y_var].astype(float))
+# model = sm.OLS(Y, X)
+# model_result = model.fit()
+# model_result.summary()
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis",
+             "hay_price_at_1982",
+             "beef_price_at_1982"] + dummy_cols
+y_var = "inventory"
+
+#################################################################
+X = all_df_normalized_needed[indp_vars]
+for col_ in indp_vars:
+    X[col_] = X[col_].astype("float")
+
+X = sm.add_constant(X)
+Y = np.log(all_df_normalized_needed[y_var].astype(float))
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
+
+# %%
+# from statsmodels.formula.api import ols
+# fit = ols('inventory ~ C(state_dummy_int) + max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_at_1982',
+#           data=all_df_normalized_needed).fit()
+
+import statsmodels
+fit = statsmodels.formula.api.ols('inventory ~ C(state_dummy_int) + max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_at_1982', 
+          data=all_df_normalized_needed).fit() 
+
+fit.summary()
+
+# %% [markdown]
+# ### Form Lags of independent variables
+
+# %%
+all_df_normalized_needed.head(2)
+
+# %%
+print (all_df_normalized_needed.dropna(how="any", inplace=False).shape)
+print (all_df_normalized_needed.shape)
+
+# %%
+all_df_normalized_needed.head(2)
+
+# %%
+cc_ = ['year', 'state_fips', 'inventory', 'max_ndvi_in_year_modis',
+       'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
+
+all_df_normalized_needed_1yrbefore = all_df_normalized_needed[cc_].copy()
+all_df_normalized_needed_1yrbefore.drop("inventory", axis=1, inplace=True)
+all_df_normalized_needed_1yrbefore["year"] = all_df_normalized_needed_1yrbefore["year"] + 1
+
+all_df_normalized_needed_1yrbefore.rename(columns={"max_ndvi_in_year_modis": "NDVI1",
+                                                   "beef_price_at_1982": "B1",
+                                                   "hay_price_at_1982" : "H1",
+                                                   "chicken_price_at_1982": "C1"}, 
+                                          inplace=True)
+
+all_df_normalized_needed_1yrbefore.head(2)
+
+# %%
+all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_1yrbefore, 
+                                    on=["year", "state_fips"], how="left")
+
+all_df_normalized_needed.head(2)
 
 # %%

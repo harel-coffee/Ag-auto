@@ -87,6 +87,9 @@ FarmOperation = USDA_data['FarmOperation']
 beef_price_at_1982 = USDA_data['beef_price_at_1982']
 beef_price_deltas_ratios = USDA_data["beef_price_deltas_ratios"]
 
+chicken_price_at_1982 = USDA_data['chicken_price_at_1982']
+chicken_price_deltas_ratios = USDA_data["chicken_price_deltas_ratios"]
+
 feed_expense = USDA_data['feed_expense']
 
 hay_price_Q1_at_1982 = USDA_data['HayPrice_Q1_at_1982']
@@ -492,9 +495,13 @@ export_ = {
     "shannon_invt_deltas_ratios_tall": shannon_invt_deltas_ratios_tall,
     
     "hay_price_Q1_at_1982" : hay_price_Q1_at_1982,
-    "beef_price_at_1982" : beef_price_at_1982,
     "hay_price_deltas_ratios": hay_price_deltas_ratios,
+
+    "beef_price_at_1982" : beef_price_at_1982,
     "beef_price_deltas_ratios" : beef_price_deltas_ratios,
+    
+    "chicken_price_at_1982" : chicken_price_at_1982,
+    "chicken_price_deltas_ratios" : chicken_price_deltas_ratios,
 
     "seasonal_ndvi": seasonal_ndvi,
     "source_code": "state_vars_oneFile_outerjoin",
@@ -630,6 +637,8 @@ annual_outer = pd.merge(annual_outer, beef_price_at_1982[["year", "beef_price_at
                         on=["year"], how="outer")
 
 # %%
+annual_outer = pd.merge(annual_outer, chicken_price_at_1982[["year", "chicken_price_at_1982"]], 
+                        on=["year"], how="outer")
 annual_outer.head(2)
 
 # %% [markdown]
@@ -788,6 +797,7 @@ delta_cols = [
     'agland',
     'hay_price_at_1982',
     'beef_price_at_1982',
+    'chicken_price_at_1982',
     's1_statemean_total_precip',
     's2_statemean_total_precip',
     's3_statemean_total_precip',
@@ -945,10 +955,14 @@ export_ = {
     "shannon_invt_deltas_ratios_tall": shannon_invt_deltas_ratios_tall,
     
     "hay_price_Q1_at_1982" : hay_price_Q1_at_1982,
-    "beef_price_at_1982" : beef_price_at_1982,
     "hay_price_deltas_ratios": hay_price_deltas_ratios,
-    "beef_price_deltas_ratios" : beef_price_deltas_ratios,
     
+    "beef_price_at_1982" : beef_price_at_1982,
+    "beef_price_deltas_ratios" : beef_price_deltas_ratios,
+
+    "chicken_price_at_1982" : chicken_price_at_1982,
+    "chicken_price_deltas_ratios" : chicken_price_deltas_ratios,
+
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
