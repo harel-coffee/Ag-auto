@@ -196,10 +196,34 @@ USDA_files
 
 # %%
 AgLand = pd.read_csv(NASS_downloads_state + "state_AgLand.csv")
-FarmOperation = pd.read_csv(NASS_downloads_state + "state_FarmOperation.csv")
+FarmOperation_count = pd.read_csv(NASS_downloads_state + "state_FarmOperation.csv")
+
 feed_expense = pd.read_csv(NASS_downloads_state + "state_feed_expense.csv")
 slaughter = pd.read_csv(NASS_downloads_state + "state_slaughter.csv")
 wetLand_area = pd.read_csv(NASS_downloads_state + "state_wetLand_area.csv")
+
+# %%
+AgLand["Data Item"].unique()
+
+# %%
+print (FarmOperation_count["Data Item"].unique())
+FarmOperation_count[(FarmOperation_count.Year == 1997) & (FarmOperation_count["State ANSI"] == 1)]
+
+# %%
+FarmOperation = AgLand[AgLand.Commodity == "FARM OPERATIONS"].copy()
+
+# %%
+AgLand[(AgLand.Year == 1997) & (AgLand["State ANSI"] == 1)]
+
+# %%
+AgLand = AgLand[(AgLand.Commodity == "AG LAND")].copy()
+AgLand.reset_index(drop=True, inplace=True)
+
+# %%
+AgLand[(AgLand.Year == 1997) & (AgLand["State ANSI"] == 1)]
+
+# %%
+FarmOperation[(FarmOperation.Year == 1997) & (FarmOperation["State ANSI"] == 1)]
 
 # %% [markdown]
 # # Annual data
@@ -657,8 +681,8 @@ slaughter.rename(columns={"value": "sale_4_slaughter_head",
                  inplace=True)
 
 FarmOperation.rename(columns={"state_ansi": "state_fips",
-                              "value": "number_of_farm_operation",
-                              "cv_(%)": "number_of_farm_operation_cv_(%)"},
+                              "value": "acres_of_farm_operation",
+                              "cv_(%)": "acres_of_farm_operation_cv_(%)"},
                      inplace=True)
 
 beef_price.rename(columns={"state_ansi": "state_fips",
@@ -703,7 +727,7 @@ print(feed_expense.shape)
 
 # %%
 print(FarmOperation.shape)
-FarmOperation = rc.clean_census(df=FarmOperation, col_="number_of_farm_operation")
+FarmOperation = rc.clean_census(df=FarmOperation, col_="acres_of_farm_operation")
 print(FarmOperation.shape)
 
 # %%
@@ -784,8 +808,8 @@ feed_expense.head(2)
 # %%
 print(FarmOperation.data_item.unique())
 FarmOperation = FarmOperation[["year", "state_fips", "data_item",
-                               "number_of_farm_operation",
-                               "number_of_farm_operation_cv_(%)"]]
+                               "acres_of_farm_operation",
+                               "acres_of_farm_operation_cv_(%)"]]
 FarmOperation.head(2)
 
 # %%
@@ -840,6 +864,10 @@ HayPrice_Q1_at_1982["hay_price_at_1982"] = 100 * (HayPrice_Q1_at_1982["hay_price
 
 beef_price_at_1982["beef_price_at_1982"] = 100 * (beef_price_at_1982["beef_price"] / 
                                                              beef_price_at_1982["annual_mean_ppiaco"])
+
+# %%
+HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.state_fips == "01") & 
+                    (HayPrice_Q1_at_1982.year.isin([1955, 1956, 1957, 1958, 1959]))]
 
 # %% [markdown]
 # ## Compute price deltas and ratios as well!
@@ -1046,8 +1074,24 @@ HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.state_fips == "01") &
 36.833856 - 38.377193
 
 # %%
-HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.state_fips == "01") & 
-                    (HayPrice_Q1_at_1982.year.isin([1955, 1956, 1957, 1958, 1959]))]
+yrs = [1996, 1997, 1998, 2001, 2002, 2003]
+HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.state_fips == "01") & (HayPrice_Q1_at_1982.year.isin(yrs))]
+
+# %%
+hay_price_deltas_ratios[(hay_price_deltas_ratios.state_fips == "01") & (hay_price_deltas_ratios.year.isin(yrs))]
+
+# %%
+36.833856 - 38.377193
+
+# %%
+42.594230 - 36.833856
+
+# %%
+FarmOperation
+
+# %%
+
+# %%
 
 # %%
 

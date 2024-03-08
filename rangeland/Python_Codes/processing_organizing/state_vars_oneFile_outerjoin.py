@@ -79,6 +79,8 @@ USDA_data = pd.read_pickle(reOrganized_dir + "state_USDA_ShannonCattle.sav")
 sorted(USDA_data.keys())
 
 # %%
+# Oroginal Agland has repetition in it! commodity in {agland and farm operations}
+# I cleaned the farm operation in '00_state_clean_USDA_data_addFIPS_and_annual_stateLevel_inventoryDeltas'
 AgLand = USDA_data['AgLand']
 FarmOperation = USDA_data['FarmOperation']
 
@@ -98,6 +100,12 @@ shannon_invt_deltas_ratios_tall = USDA_data['shannon_invt_deltas_ratios_tall']
 
 slaughter = USDA_data['slaughter']
 wetLand_area = USDA_data['wetLand_area']
+
+# %%
+FarmOperation.head(2)
+
+# %%
+AgLand[(AgLand.year == 1997) & (AgLand.state_fips == "01")]
 
 # %%
 FarmOperation.head(2)
@@ -496,6 +504,17 @@ export_ = {
 
 pickle.dump(export_, open(filename, "wb"))
 
+# %%
+yrs = [1996, 1997, 1998, 2001, 2002, 2003]
+hay_price_Q1_at_1982[(hay_price_Q1_at_1982.state_fips == "01") & (hay_price_Q1_at_1982.year.isin(yrs))]
+
+# %%
+hay_price_deltas_ratios[(hay_price_deltas_ratios.state_fips == "01") & (hay_price_deltas_ratios.year.isin(yrs))]
+
+# %%
+print (36.833856 - 38.377193)
+print (42.594230 - 36.833856)
+
 # %% [markdown]
 # ## Do the outer join and normalize and save in another file
 #
@@ -531,7 +550,7 @@ AgLand.head(2)
 FarmOperation.head(2)
 
 # %%
-FarmOperation = FarmOperation[["state_fips", "year", "number_of_farm_operation"]]
+FarmOperation = FarmOperation[["state_fips", "year", "acres_of_farm_operation"]]
 FarmOperation.head(2)
 
 # %%
@@ -558,10 +577,29 @@ wetLand_area = wetLand_area[["state_fips", "year", "crp_wetland_acr"]]
 wetLand_area.head(2)
 
 # %%
-AgLand.head(2)
+# AgLand.head(2)
 
 # %%
 # AgLand[AgLand.state_fips == "01"]
+shannon_invt_tall[(shannon_invt_tall.state_fips == "01") & (shannon_invt_tall.year == 1997)]
+
+# %%
+slaughter[(slaughter.state_fips == "01") & (slaughter.year == 1997)]
+
+# %%
+human_population[(human_population.state_fips == "01") & (human_population.year == 1997)]
+
+# %%
+feed_expense[(feed_expense.state_fips == "01") & (feed_expense.year == 1997)]
+
+# %%
+FarmOperation[(FarmOperation.state_fips == "01") & (FarmOperation.year == 1997)]
+
+# %%
+wetLand_area[(wetLand_area.state_fips == "01") & (wetLand_area.year == 1997)]
+
+# %%
+AgLand[(AgLand.state_fips == "01") & (AgLand.year == 1997)]
 
 # %%
 annual_outer = pd.merge(shannon_invt_tall, state_yr_npp, on=["state_fips", "year"], how="outer")
@@ -572,6 +610,9 @@ annual_outer = pd.merge(annual_outer, FarmOperation, on=["state_fips", "year"], 
 annual_outer = pd.merge(annual_outer, wetLand_area, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, AgLand, on=["state_fips", "year"], how="outer")
 annual_outer.head(2)
+
+# %%
+annual_outer[(annual_outer.state_fips == "01") & (annual_outer.year == 1997)]
 
 # %%
 print (beef_price_at_1982.data_item.unique())
@@ -638,8 +679,6 @@ all_df[all_df.state_fips == "01"].maxNDVI_DoY_stateMean.unique()
 all_df.head(2)
 
 # %%
-
-# %%
 list(all_df.columns)
 
 # %%
@@ -669,7 +708,7 @@ list(all_df.columns)
 # ]
 
 non_normal_cols = [
-   'year',
+    'year',
     'inventory',
     'state_fips',
     'max_ndvi_month_avhrr',
@@ -693,6 +732,9 @@ non_normal_cols = [
     'EW_meridian']
 
 numeric_cols = [x for x in sorted(all_df.columns) if not (x in non_normal_cols)]
+
+# %%
+numeric_cols
 
 # %%
 all_df_normalized = all_df.copy()
@@ -741,7 +783,7 @@ delta_cols = [
     'slaughter',
     'population',
     'feed_expense',
-    'number_of_farm_operation',
+    'acres_of_farm_operation',
     'crp_wetland_acr',
     'agland',
     'hay_price_at_1982',
@@ -817,6 +859,14 @@ for a_state in all_df.state_fips.unique():
     del curr_diff
 
 # %%
+yrs = [1996, 1997, 1998, 2001, 2002, 2003]
+A = ind_deltas_df[["year", "state_fips", "hay_price_at_1982"]].copy()
+A[(A.state_fips == "01") & (A.year.isin(yrs))]
+
+# %%
+hay_price_deltas_ratios[(hay_price_deltas_ratios.state_fips == "01") & (hay_price_deltas_ratios.year.isin(yrs))]
+
+# %%
 nonDelta_df = all_df.copy()
 
 nonDelta_df = nonDelta_df[non_delta_cols]
@@ -834,6 +884,10 @@ nonDelta_df.head(2)
 # %%
 delta_data = pd.merge(ind_deltas_df, nonDelta_df, on=["year", "state_fips"], how="left")
 delta_data.head(3)
+
+# %%
+A = delta_data[["year", "state_fips", "hay_price_at_1982"]].copy()
+A[(A.state_fips == "01") & (A.year.isin([1955, 1956, 1957, 1958, 1959]))]
 
 # %%
 print(f"{all_df.shape = }")
@@ -932,6 +986,9 @@ C[C.redundancy != 0]
 # %%
 A = ind_deltas_df[["year", "state_fips", "hay_price_at_1982"]].copy()
 A.dropna()
+
+# %%
+ind_deltas_df[(ind_deltas_df.state_fips == "01") & (ind_deltas_df.year == 1997)]
 
 # %%
 
