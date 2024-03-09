@@ -447,6 +447,12 @@ shannon_invt_tall.head(2)
 seasonal_ndvi.head(2)
 
 # %%
+list(seasonal_ndvi.columns)
+
+# %%
+seasonal_ndvi.loc[seasonal_ndvi.state_fips=="01", ["year", "state_fips", "ndvi_std_modis"]]
+
+# %%
 SW.head(2)
 
 # %%
@@ -465,6 +471,47 @@ SW["annual_statemean_total_emergency"] = (
 )
 
 # %%
+Min_state_NPP.head(2)
+
+# %%
+state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_npp", "state_total_npp"]].copy()
+state_yr_npp.head(2)
+
+# %%
+state_yr_npp.sort_values(by=["state_fips", "year"], inplace=True)
+state_yr_npp.head(4)
+
+# %%
+Min_state_NPP.sort_values(by=["state_fips", "year"], inplace=True)
+Min_state_NPP.head(4)
+
+# %% [markdown]
+# # NPP or NDVI std: Do we want to include this per state?
+# I think so.
+
+# %%
+Min_state_NPP_std = Min_state_NPP.groupby(["state_fips"])["unit_npp"].std(ddof=1).reset_index()
+Min_state_NPP_std.rename(columns={"unit_npp": "unit_npp_std"}, inplace=True)
+
+Min_state_NPP = pd.merge(Min_state_NPP, Min_state_NPP_std, on=["state_fips"], how="outer")
+Min_state_NPP.head(2)
+
+# %%
+state_yr_npp.head(2)
+
+# %%
+state_yr_npp_std = state_yr_npp.groupby(["state_fips"])["state_unit_npp"].std(ddof=1).reset_index()
+state_yr_npp_std.rename(columns={"state_unit_npp": "unit_npp_std"}, inplace=True)
+state_yr_npp_std.head(2)
+state_yr_npp = pd.merge(state_yr_npp, state_yr_npp_std, on=["state_fips"], how="outer")
+state_yr_npp.head(2)
+
+# %%
+state_yr_npp_std = state_yr_npp.groupby(["state_fips"])["state_total_npp"].std(ddof=1).reset_index()
+state_yr_npp_std.rename(columns={"state_total_npp": "total_npp_std"}, inplace=True)
+state_yr_npp_std.head(2)
+state_yr_npp = pd.merge(state_yr_npp, state_yr_npp_std, on=["state_fips"], how="outer")
+state_yr_npp.head(2)
 
 # %% [markdown]
 # ### Subset to states of interest at the end!
@@ -480,7 +527,7 @@ export_ = {
     "SoI": SoI,
     "SoI_abb": SoI_abb,
     "abb_dict": abb_dict,
-    "npp": state_yr_npp,
+    "my_state_npp": state_yr_npp,
     "Min_state_NPP": Min_state_NPP,
     "feed_expense": feed_expense,
     "herb": herb,
@@ -561,13 +608,6 @@ FarmOperation = FarmOperation[["state_fips", "year", "acres_of_farm_operation"]]
 FarmOperation.head(2)
 
 # %%
-Min_state_NPP.head(2)
-
-# %%
-state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_npp", "state_total_npp"]]
-state_yr_npp.head(2)
-
-# %%
 feed_expense.head(2)
 
 # %%
@@ -609,6 +649,11 @@ wetLand_area[(wetLand_area.state_fips == "01") & (wetLand_area.year == 1997)]
 AgLand[(AgLand.state_fips == "01") & (AgLand.year == 1997)]
 
 # %%
+
+# %%
+# I cannot use Min's state NPP cuz, there is no way I can know what is the RA used in there.
+# So, NPP total in there... cannot be.
+# 
 annual_outer = pd.merge(shannon_invt_tall, state_yr_npp, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, slaughter, on=["state_fips", "year"], how="outer")
 annual_outer = pd.merge(annual_outer, human_population, on=["state_fips", "year"], how="outer")
@@ -662,6 +707,9 @@ all_df.head(2)
 all_df = pd.merge(all_df, seasonal_ndvi, on=["state_fips", "year"], how="outer")
 print(all_df.shape)
 all_df.head(2)
+
+# %%
+list(all_df.columns)
 
 # %% [markdown]
 # # normalization, normalize
@@ -751,6 +799,13 @@ all_df_normalized = all_df.copy()
 all_df_normalized[numeric_cols] = (all_df_normalized[numeric_cols] - all_df_normalized[numeric_cols].mean()) / \
                                           all_df_normalized[numeric_cols].std(ddof=1)
 all_df_normalized[all_df_normalized.year == 2002].head(2)
+
+# %%
+all_df[numeric_cols].std(ddof=1)
+
+# %%
+
+# %%
 
 # %%
 all_df[all_df.year == 2002].head(2)
