@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -96,10 +96,10 @@ list(abb_dict.keys())
 
 # %%
 state_fips = abb_dict["state_fips"]
-state_fips = state_fips[state_fips.state.isin(SoI_abb)].copy()
-state_fips.reset_index(drop=True, inplace=True)
-print (len(state_fips))
-state_fips.head(2)
+state_fips_SoI = state_fips[state_fips.state.isin(SoI_abb)].copy()
+state_fips_SoI.reset_index(drop=True, inplace=True)
+print (len(state_fips_SoI))
+state_fips_SoI.head(2)
 
 # %%
 shannon_invt_tall = state_USDA_ShannonCattle["shannon_invt_tall"]
@@ -168,19 +168,19 @@ ndvi_columns
 # # Add state-dummy variables
 
 # %%
-all_df_normalized["state_dummy_int"] = all_df_normalized["state_fips"].astype(int)
-all_df_normalized["state_dummy_str"] = all_df_normalized["state_fips"] + "_" + "dummy"
+# all_df_normalized["state_dummy_int"] = all_df_normalized["state_fips"].astype(int)
+# all_df_normalized["state_dummy_str"] = all_df_normalized["state_fips"] + "_" + "dummy"
 
-L = list(all_df_normalized.columns)
-L.pop()
-L
+# L = list(all_df_normalized.columns)
+# L.pop()
+# L
 
-all_df_normalized = all_df_normalized.pivot(index=L, columns = "state_dummy_str", values = "state_dummy_int")
+# all_df_normalized = all_df_normalized.pivot(index=L, columns = "state_dummy_str", values = "state_dummy_int")
 
-all_df_normalized.reset_index(drop=False, inplace=True)
-all_df_normalized.columns = all_df_normalized.columns.values
+# all_df_normalized.reset_index(drop=False, inplace=True)
+# all_df_normalized.columns = all_df_normalized.columns.values
 
-# replace NAs with zeros and others (state_fips integers) with 1s.
+# # replace NAs with zeros and others (state_fips integers) with 1s.
 
 dummy_cols = [x for x in all_df_normalized.columns if "_dummy" in x]
 dummy_cols = [x for x in dummy_cols if not("int" in x)]
@@ -194,14 +194,10 @@ all_df_normalized[dummy_cols] = np.where(all_df_normalized[dummy_cols]!= 0, 1, 0
 all_df_normalized.head(2)
 
 # %%
-all_df_normalized[["state_fips"]+ dummy_cols].head(5)
-
-# %%
 needed_cols = ['year', 'state_fips', 'inventory', 
                "max_ndvi_in_year_modis", "ndvi_std_modis",
                "beef_price_at_1982", "hay_price_at_1982", "chicken_price_at_1982"] + \
                dummy_cols + ["state_dummy_int"]\
-
 
 all_df_normalized_needed = all_df_normalized[needed_cols].copy()
 print (all_df_normalized_needed.shape)
@@ -223,11 +219,10 @@ print (all_df_normalized_needed.year.max())
 # list(inventoryRatio_beefHayCostDeltas.columns)
 
 # %%
-indp_vars = [
-    "max_ndvi_in_year_modis",
-    "hay_price_at_1982",
-    "beef_price_at_1982",
-    "chicken_price_at_1982"]
+indp_vars = ["max_ndvi_in_year_modis",
+             "hay_price_at_1982",
+             "beef_price_at_1982",
+             "chicken_price_at_1982"]
 y_var = "inventory"
 
 #################################################################
@@ -242,11 +237,12 @@ model_result = model.fit()
 model_result.summary()
 
 # %%
+len(all_df_normalized_needed.state_fips.unique())
 
 # %%
-indp_vars = ["max_ndvi_in_year_modis",
-             "beef_price_at_1982",
-             "hay_price_at_1982"]
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis", "beef_price_at_1982", "hay_price_at_1982"]
 y_var = "inventory"
 
 #################################################################
