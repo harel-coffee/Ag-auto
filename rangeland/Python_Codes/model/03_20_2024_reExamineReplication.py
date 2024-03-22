@@ -291,9 +291,13 @@ fit = ols('inventory ~ max_ndvi_in_year_modis + max_ndvi_in_year_modis_sq + \
 fit.summary()
 
 # %%
-inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "E"]
+print (len(inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "E"].state_fips.unique()))
+print (len(inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "W"].state_fips.unique()))
 
 # %%
-state_fips_SoI[state_fips == "29"]
+state_fips_SoI[state_fips_SoI.state_fips == "47"]
+
+# %%
+len(inv_prices_ndvi_npp_normal.state_fips.unique())
 
 # %%
