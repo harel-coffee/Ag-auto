@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -325,75 +325,12 @@ print (all_df_normalized_needed.shape)
 all_df_normalized_needed.head(2)
 
 # %%
-# 1 year prior
-yr_lag = 1
-cc_ = ['year', 'state_fips', 'inventory', 'max_ndvi_in_year_modis',
-       'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
-
-all_df_normalized_needed_yrbefore = all_df_normalized_needed[cc_].copy()
-all_df_normalized_needed_yrbefore.drop("inventory", axis=1, inplace=True)
-all_df_normalized_needed_yrbefore["year"] = all_df_normalized_needed_yrbefore["year"] + yr_lag
-
-all_df_normalized_needed_yrbefore.rename(columns={"max_ndvi_in_year_modis": "NDVI" + str(yr_lag),
-                                                   "beef_price_at_1982": "B" + str(yr_lag),
-                                                   "hay_price_at_1982" : "H" + str(yr_lag),
-                                                   "chicken_price_at_1982": "C" + str(yr_lag)
-                                                 }, inplace=True)
-
-all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_yrbefore, 
-                                    on=["year", "state_fips"], how="left")
-
-all_df_normalized_needed.head(2)
-
-# %%
-check_cols = ["year", 
-              "max_ndvi_in_year_modis", "NDVI1",
-              "beef_price_at_1982", "B1",
-              "hay_price_at_1982", "H1"]
-
-all_df_normalized_needed.loc[all_df_normalized_needed.state_fips == "01", check_cols].head(4)
-
-# %%
-# 2 year prior
-yr_lag = 2
-cc_ = ['year', 'state_fips', 'inventory', 'max_ndvi_in_year_modis',
-       'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
-
-all_df_normalized_needed_yrbefore = all_df_normalized_needed[cc_].copy()
-all_df_normalized_needed_yrbefore.drop("inventory", axis=1, inplace=True)
-all_df_normalized_needed_yrbefore["year"] = all_df_normalized_needed_yrbefore["year"] + yr_lag
-
-all_df_normalized_needed_yrbefore.rename(columns={"max_ndvi_in_year_modis": "NDVI" + str(yr_lag),
-                                                   "beef_price_at_1982": "B" + str(yr_lag),
-                                                   "hay_price_at_1982" : "H" + str(yr_lag),
-                                                   "chicken_price_at_1982": "C" + str(yr_lag)
-                                                 }, inplace=True)
-
-all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_yrbefore, 
-                                    on=["year", "state_fips"], how="left")
-
-all_df_normalized_needed.head(2)
-
-# %%
-# 2 year prior
-yr_lag = 3
-cc_ = ['year', 'state_fips', 'inventory', 'max_ndvi_in_year_modis',
-       'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
-
-all_df_normalized_needed_yrbefore = all_df_normalized_needed[cc_].copy()
-all_df_normalized_needed_yrbefore.drop("inventory", axis=1, inplace=True)
-all_df_normalized_needed_yrbefore["year"] = all_df_normalized_needed_yrbefore["year"] + yr_lag
-
-all_df_normalized_needed_yrbefore.rename(columns={"max_ndvi_in_year_modis": "NDVI" + str(yr_lag),
-                                                   "beef_price_at_1982": "B" + str(yr_lag),
-                                                   "hay_price_at_1982" : "H" + str(yr_lag),
-                                                   "chicken_price_at_1982": "C" + str(yr_lag)
-                                                 }, inplace=True)
-
-all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_yrbefore, 
-                                    on=["year", "state_fips"], how="left")
-
-all_df_normalized_needed.head(2)
+all_df_normalized_needed = rc.add_lags(df=all_df_normalized_needed, 
+                                       merge_cols=['year', 'state_fips'], 
+                                       lag_vars_ = ['max_ndvi_in_year_modis',
+                                                    'beef_price_at_1982', 'hay_price_at_1982', 
+                                                    'chicken_price_at_1982'], 
+                                       year_count = 3)
 
 # %%
 check_cols = ["year", 

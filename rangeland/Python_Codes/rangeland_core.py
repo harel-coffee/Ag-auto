@@ -6,6 +6,35 @@ from pprint import pprint
 import os, os.path, sys
 
 
+def add_lags(df, merge_cols, lag_vars_, year_count):
+    """
+    This function adds lagged variables.
+    df : pandas dataframe
+    merge_cols : list of column names to merge on: state_fips/county_fips, year
+    lag_vars_ : list of variable/column names to create the lags for
+    year_count : integer: number of lag years we want.
+
+
+    """
+    cc_ = merge_cols + lag_vars_
+    for yr_lag in np.arange(1, year_count + 1):
+        df_needed_yrbefore = df[cc_].copy()
+        df_needed_yrbefore["year"] = df_needed_yrbefore["year"] + yr_lag
+
+        df_needed_yrbefore.rename(
+            columns={
+                "max_ndvi_in_year_modis": "NDVI" + str(yr_lag),
+                "beef_price_at_1982": "B" + str(yr_lag),
+                "hay_price_at_1982": "H" + str(yr_lag),
+                "chicken_price_at_1982": "C" + str(yr_lag),
+            },
+            inplace=True,
+        )
+
+        df = pd.merge(df, df_needed_yrbefore, on=merge_cols, how="left")
+    return df
+
+
 def compute_herbRatio_totalArea(hr):
     """
     We want to use average herb ratio and pixel count

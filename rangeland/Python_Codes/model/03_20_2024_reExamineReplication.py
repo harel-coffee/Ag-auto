@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -210,12 +210,90 @@ fit = ols('inventory ~ max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_a
 
 fit.summary()
 
+# %% [markdown]
+# ### West of Meridian
+
 # %%
-fit = ols('inventory ~ max_ndvi_in_year_modis + hay_price_at_1982 + C(EW_meridian)', 
-          data=inv_prices_ndvi_npp_normal).fit() 
+fit = ols('inventory ~ max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_at_1982 + C(EW_meridian)', 
+          data = inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian=="W"]).fit() 
+
+fit.summary()
+
+# %% [markdown]
+# ### East of Meridian
+
+# %%
+fit = ols('inventory ~ max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_at_1982', 
+          data = inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian=="E"]).fit() 
+
+fit.summary()
+
+# %% [markdown]
+# # Square terms
+
+# %%
+inv_prices_ndvi_npp_normal.head(2)
+
+# %%
+
+# %%
+inv_prices_ndvi_npp_normal["max_ndvi_in_year_modis_sq"] = inv_prices_ndvi_npp_normal["max_ndvi_in_year_modis"]**2
+inv_prices_ndvi_npp_normal["beef_price_at_1982_sq"] = inv_prices_ndvi_npp_normal["beef_price_at_1982"]**2
+inv_prices_ndvi_npp_normal["hay_price_at_1982_sq"] = inv_prices_ndvi_npp_normal["hay_price_at_1982"]**2
+
+# %%
+### aggregate. Everything in there, no dummy
+fit = ols('inventory ~ max_ndvi_in_year_modis + max_ndvi_in_year_modis_sq + \
+                       beef_price_at_1982 + beef_price_at_1982_sq + \
+                       hay_price_at_1982 + hay_price_at_1982_sq', 
+          data = inv_prices_ndvi_npp_normal).fit() 
 
 fit.summary()
 
 # %%
+### state dummy
+fit = ols('inventory ~ max_ndvi_in_year_modis + max_ndvi_in_year_modis_sq + \
+                       beef_price_at_1982 + beef_price_at_1982_sq + \
+                       hay_price_at_1982 + hay_price_at_1982_sq + \
+                       C(state_dummy_int)', 
+          data = inv_prices_ndvi_npp_normal).fit() 
+
+fit.summary()
+
+# %%
+### Meridian dummy
+fit = ols('inventory ~ max_ndvi_in_year_modis + max_ndvi_in_year_modis_sq + \
+                       beef_price_at_1982 + beef_price_at_1982_sq + \
+                       hay_price_at_1982 + hay_price_at_1982_sq + \
+                       C(EW_meridian)', 
+          data = inv_prices_ndvi_npp_normal).fit() 
+
+fit.summary()
+
+# %%
+### west of Meridian
+fit = ols('inventory ~ max_ndvi_in_year_modis + max_ndvi_in_year_modis_sq + \
+                       beef_price_at_1982 + beef_price_at_1982_sq + \
+                       hay_price_at_1982 + hay_price_at_1982_sq + \
+                       C(EW_meridian)', 
+          data = inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "W"]).fit() 
+
+fit.summary()
+
+# %%
+### east of Meridian
+fit = ols('inventory ~ max_ndvi_in_year_modis + max_ndvi_in_year_modis_sq + \
+                       beef_price_at_1982 + beef_price_at_1982_sq + \
+                       hay_price_at_1982 + hay_price_at_1982_sq + \
+                       C(EW_meridian)', 
+          data = inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "E"]).fit() 
+
+fit.summary()
+
+# %%
+inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "E"]
+
+# %%
+state_fips_SoI[state_fips == "29"]
 
 # %%
