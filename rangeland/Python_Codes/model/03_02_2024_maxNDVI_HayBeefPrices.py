@@ -328,7 +328,8 @@ all_df_normalized_needed.head(2)
 all_df_normalized_needed = rc.add_lags(df=all_df_normalized_needed, 
                                        merge_cols=['year', 'state_fips'], 
                                        lag_vars_ = ['max_ndvi_in_year_modis',
-                                                    'beef_price_at_1982', 'hay_price_at_1982', 
+                                                    'beef_price_at_1982', 
+                                                    'hay_price_at_1982', 
                                                     'chicken_price_at_1982'], 
                                        year_count = 3)
 

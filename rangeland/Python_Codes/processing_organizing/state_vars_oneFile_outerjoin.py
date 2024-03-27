@@ -176,27 +176,27 @@ RA["state_fips"] = RA.county_fips.str.slice(start=0, stop=2)
 RA.head(2)
 
 # +
-Min_state_NPP = pd.read_csv(Min_data_base + "statefips_annual_MODIS_NPP.csv")
-Min_state_NPP.rename(columns={"statefips90m": "state_fips", "NPP": "unit_npp"}, inplace=True)
+Min_state_NPP = pd.read_csv(Min_data_base + "statefips_annual_productivity.csv")
+Min_state_NPP.rename(columns={"statefips90m": "state_fips", "productivity": "unit_matt_npp"}, inplace=True)
 Min_state_NPP["state_fips"] = Min_state_NPP["state_fips"].astype(str)
 
 Min_state_NPP["state_fips"] = Min_state_NPP.state_fips.str.slice(start=1, stop=3)
 
-Min_state_NPP.head(2)
-# -
-
 print(f"{Min_state_NPP.year.min() = }")
 print(f"{Min_state_NPP.year.max() = }")
+Min_state_NPP.head(2)
 
 # +
-cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
+cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_MattNPP.csv")
 
-cty_yr_npp.rename(columns={"county": "county_fips", "MODIS_NPP": "unit_npp"}, inplace=True)
+# On March 29 we changed the NPP to Matt NPP.
+# The Matt NPP units are pound/acr.
+cty_yr_npp.rename(columns={"county": "county_fips"}, inplace=True)
 cty_yr_npp = rc.correct_Mins_county_6digitFIPS(df=cty_yr_npp, col_="county_fips")
-cty_yr_npp = cty_yr_npp[["year", "county_fips", "unit_npp"]]
+cty_yr_npp = cty_yr_npp[["year", "county_fips", "unit_matt_npp"]]
 
-# Some counties do not have unit NPPs
-cty_yr_npp.dropna(subset=["unit_npp"], inplace=True)
+# # Some counties do not have unit NPPs
+cty_yr_npp.dropna(subset=["unit_matt_npp"], inplace=True)
 cty_yr_npp.reset_index(drop=True, inplace=True)
 
 cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left")
@@ -204,10 +204,10 @@ cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["co
 cty_yr_npp.head(2)
 # -
 
-cty_yr_npp = rc.covert_unitNPP_2_total(NPP_df=cty_yr_npp, 
-                                       npp_unit_col_="unit_npp",
-                                       acr_area_col_="rangeland_acre",
-                                       npp_area_col_="county_total_npp")
+cty_yr_npp = rc.covert_MattunitNPP_2_total(NPP_df=cty_yr_npp, 
+                                           npp_unit_col_="unit_matt_npp",
+                                           acr_area_col_="rangeland_acre",
+                                           npp_total_col_="county_total_matt_npp")
 cty_yr_npp.head(2)
 
 # ## State-level NPPs
@@ -221,16 +221,16 @@ state_yr_npp["state_fips"] = state_yr_npp.county_fips.str.slice(start=0, stop=2)
 state_yr_npp.head(2)
 # -
 
-state_yr_npp.drop(labels=["county_fips", "unit_npp"], axis=1, inplace=True)
+state_yr_npp.drop(labels=["county_fips", "unit_matt_npp"], axis=1, inplace=True)
 state_yr_npp = state_yr_npp.groupby(["state_fips", "year"]).sum().reset_index()
 state_yr_npp.head(2)
 
-state_yr_npp.rename(columns={"county_total_npp": "state_total_npp"}, inplace=True)
+state_yr_npp.rename(columns={"county_total_matt_npp": "total_matt_npp"}, inplace=True)
 state_yr_npp.head(2)
 # del(cty_yr_npp)
 
 ##### Compute state-level unit-NPP
-state_yr_npp["state_unit_npp"] = (state_yr_npp["state_total_npp"] / state_yr_npp["area_m2"])
+state_yr_npp["unit_matt_npp"] = (state_yr_npp["total_matt_npp"] / state_yr_npp["rangeland_acre"])
 state_yr_npp.head(2)
 
 state_yr_npp[(state_yr_npp.state_fips == "04") & (state_yr_npp.year == 2001)]
@@ -426,7 +426,8 @@ SW["annual_statemean_total_emergency"] = (
 
 Min_state_NPP.head(2)
 
-state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_npp", "state_total_npp"]].copy()
+# state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_npp", "state_total_npp"]].copy()
+state_yr_npp = state_yr_npp[["state_fips", "year", "unit_matt_npp", "total_matt_npp"]].copy()
 state_yr_npp.head(2)
 
 state_yr_npp.sort_values(by=["state_fips", "year"], inplace=True)
@@ -439,8 +440,8 @@ Min_state_NPP.head(4)
 # I think so.
 
 # +
-Min_state_NPP_std = Min_state_NPP.groupby(["state_fips"])["unit_npp"].std(ddof=1).reset_index()
-Min_state_NPP_std.rename(columns={"unit_npp": "unit_npp_std"}, inplace=True)
+Min_state_NPP_std = Min_state_NPP.groupby(["state_fips"])["unit_matt_npp"].std(ddof=1).reset_index()
+Min_state_NPP_std.rename(columns={"unit_matt_npp": "unit_matt_npp_std"}, inplace=True)
 
 Min_state_NPP = pd.merge(Min_state_NPP, Min_state_NPP_std, on=["state_fips"], how="outer")
 Min_state_NPP.head(2)
@@ -448,14 +449,14 @@ Min_state_NPP.head(2)
 
 state_yr_npp.head(2)
 
-state_yr_npp_std = state_yr_npp.groupby(["state_fips"])["state_unit_npp"].std(ddof=1).reset_index()
-state_yr_npp_std.rename(columns={"state_unit_npp": "unit_npp_std"}, inplace=True)
+state_yr_npp_std = state_yr_npp.groupby(["state_fips"])["unit_matt_npp"].std(ddof=1).reset_index()
+state_yr_npp_std.rename(columns={"unit_matt_npp": "unit_matt_npp_std"}, inplace=True)
 state_yr_npp_std.head(2)
 state_yr_npp = pd.merge(state_yr_npp, state_yr_npp_std, on=["state_fips"], how="outer")
 state_yr_npp.head(2)
 
-state_yr_npp_std = state_yr_npp.groupby(["state_fips"])["state_total_npp"].std(ddof=1).reset_index()
-state_yr_npp_std.rename(columns={"state_total_npp": "total_npp_std"}, inplace=True)
+state_yr_npp_std = state_yr_npp.groupby(["state_fips"])["total_matt_npp"].std(ddof=1).reset_index()
+state_yr_npp_std.rename(columns={"total_matt_npp": "total_matt_npp_std"}, inplace=True)
 state_yr_npp_std.head(2)
 state_yr_npp = pd.merge(state_yr_npp, state_yr_npp_std, on=["state_fips"], how="outer")
 state_yr_npp.head(2)
@@ -736,8 +737,8 @@ delta_cols = [
     "year",
     "state_fips",
     'inventory',
-    'state_unit_npp',
-    'state_total_npp',
+    'unit_matt_npp',
+    'total_matt_npp',
     'slaughter',
     'population',
     'feed_expense',
@@ -1045,6 +1046,6 @@ A.dropna()
 
 ind_deltas_df[(ind_deltas_df.state_fips == "01") & (ind_deltas_df.year == 1997)]
 
-
+all_df
 
 

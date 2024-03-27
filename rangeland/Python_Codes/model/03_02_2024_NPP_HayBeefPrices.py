@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -155,37 +155,41 @@ ndvi_columns
 # # Add state-dummy variables
 
 # +
-all_df_normalized["state_dummy_int"] = all_df_normalized["state_fips"].astype(int)
-all_df_normalized["state_dummy_str"] = all_df_normalized["state_fips"] + "_" + "dummy"
+# all_df_normalized["state_dummy_int"] = all_df_normalized["state_fips"].astype(int)
+# all_df_normalized["state_dummy_str"] = all_df_normalized["state_fips"] + "_" + "dummy"
 
-L = list(all_df_normalized.columns)
-L.pop()
-L
+# L = list(all_df_normalized.columns)
+# L.pop()
+# L
 
-all_df_normalized = all_df_normalized.pivot(index=L, columns = "state_dummy_str", values = "state_dummy_int")
+# all_df_normalized = all_df_normalized.pivot(index=L, columns = "state_dummy_str", values = "state_dummy_int")
 
-all_df_normalized.reset_index(drop=False, inplace=True)
-all_df_normalized.columns = all_df_normalized.columns.values
+# all_df_normalized.reset_index(drop=False, inplace=True)
+# all_df_normalized.columns = all_df_normalized.columns.values
 
-# replace NAs with zeros and others (state_fips integers) with 1s.
+# # replace NAs with zeros and others (state_fips integers) with 1s.
+
+# dummy_cols = [x for x in all_df_normalized.columns if "_dummy" in x]
+# dummy_cols = [x for x in dummy_cols if not("int" in x)]
+
+# for a_col in dummy_cols:
+#     all_df_normalized[a_col].fillna(0, inplace=True)
+#     all_df_normalized[a_col] = all_df_normalized[a_col].astype(int)
+    
+# all_df_normalized[dummy_cols] = np.where(all_df_normalized[dummy_cols]!= 0, 1, 0)
+
+# all_df_normalized.head(2)
+# all_df_normalized[["state_fips"]+ dummy_cols].head(5)
+# -
+
+all_df_normalized.head(2)
+
+all_df_normalized.rename(columns={"unit_matt_npp": "npp_u", 
+                                  "total_matt_npp": "npp_t"}, 
+                         inplace=True)
 
 dummy_cols = [x for x in all_df_normalized.columns if "_dummy" in x]
 dummy_cols = [x for x in dummy_cols if not("int" in x)]
-
-for a_col in dummy_cols:
-    all_df_normalized[a_col].fillna(0, inplace=True)
-    all_df_normalized[a_col] = all_df_normalized[a_col].astype(int)
-    
-all_df_normalized[dummy_cols] = np.where(all_df_normalized[dummy_cols]!= 0, 1, 0)
-
-all_df_normalized.head(2)
-# -
-
-all_df_normalized[["state_fips"]+ dummy_cols].head(5)
-
-all_df_normalized.rename(columns={"state_unit_npp": "npp_u",
-                                  "state_total_npp": "npp_t"}, 
-                         inplace=True)
 
 # +
 needed_cols = ['year', 'state_fips', 'inventory', 
@@ -255,71 +259,36 @@ all_df_normalized_needed.head(2)
 print (all_df_normalized_needed.dropna(how="any", inplace=False).shape)
 print (all_df_normalized_needed.shape)
 
-# +
-# 1 year prior
-yr_lag = 1
-cc_ = ['year', 'state_fips', 'inventory', 'npp_t', 'npp_u',
-       'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
 
-all_df_normalized_needed_yrbefore = all_df_normalized_needed[cc_].copy()
-all_df_normalized_needed_yrbefore.drop("inventory", axis=1, inplace=True)
-all_df_normalized_needed_yrbefore["year"] = all_df_normalized_needed_yrbefore["year"] + yr_lag
 
-all_df_normalized_needed_yrbefore.rename(columns={"npp_t": "npp_t" + str(yr_lag),
-                                                  "npp_u": "npp_u" + str(yr_lag),
-                                                  "beef_price_at_1982": "B" + str(yr_lag),
-                                                  "hay_price_at_1982" : "H" + str(yr_lag),
-                                                  "chicken_price_at_1982": "C" + str(yr_lag)
-                                                 }, inplace=True)
-
-all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_yrbefore, 
-                                    on=["year", "state_fips"], how="left")
-
-all_df_normalized_needed.head(2)
+lag_vars = ['npp_t', 'npp_u', 'beef_price_at_1982', 
+            'hay_price_at_1982', 'chicken_price_at_1982']
+all_df_normalized_needed = rc.add_lags(df = all_df_normalized_needed, 
+                                       merge_cols=["year", "state_fips"], 
+                                       lag_vars_ = lag_vars, 
+                                       year_count = 3)
 
 # +
-# 2 year prior
-yr_lag = 2
-cc_ = ['year', 'state_fips', 'inventory', 'npp_t', 'npp_u',
-       'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
+# # 1 year prior
+# yr_lag = 1
+# cc_ = ['year', 'state_fips', 'inventory', 'npp_t', 'npp_u',
+#        'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
 
-all_df_normalized_needed_yrbefore = all_df_normalized_needed[cc_].copy()
-all_df_normalized_needed_yrbefore.drop("inventory", axis=1, inplace=True)
-all_df_normalized_needed_yrbefore["year"] = all_df_normalized_needed_yrbefore["year"] + yr_lag
+# all_df_normalized_needed_yrbefore = all_df_normalized_needed[cc_].copy()
+# all_df_normalized_needed_yrbefore.drop("inventory", axis=1, inplace=True)
+# all_df_normalized_needed_yrbefore["year"] = all_df_normalized_needed_yrbefore["year"] + yr_lag
 
-all_df_normalized_needed_yrbefore.rename(columns={"npp_t": "npp_t" + str(yr_lag),
-                                                  "npp_u": "npp_u" + str(yr_lag),
-                                                  "beef_price_at_1982": "B" + str(yr_lag),
-                                                  "hay_price_at_1982" : "H" + str(yr_lag),
-                                                  "chicken_price_at_1982": "C" + str(yr_lag)
-                                                 }, inplace=True)
+# all_df_normalized_needed_yrbefore.rename(columns={"npp_t": "npp_t" + str(yr_lag),
+#                                                   "npp_u": "npp_u" + str(yr_lag),
+#                                                   "beef_price_at_1982": "B" + str(yr_lag),
+#                                                   "hay_price_at_1982" : "H" + str(yr_lag),
+#                                                   "chicken_price_at_1982": "C" + str(yr_lag)
+#                                                  }, inplace=True)
 
-all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_yrbefore, 
-                                    on=["year", "state_fips"], how="left")
+# all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_yrbefore, 
+#                                     on=["year", "state_fips"], how="left")
 
-all_df_normalized_needed.head(2)
-
-# +
-# 3 year prior
-yr_lag = 3
-cc_ = ['year', 'state_fips', 'inventory', 'npp_t', 'npp_u',
-       'beef_price_at_1982', 'hay_price_at_1982', 'chicken_price_at_1982']
-
-all_df_normalized_needed_yrbefore = all_df_normalized_needed[cc_].copy()
-all_df_normalized_needed_yrbefore.drop("inventory", axis=1, inplace=True)
-all_df_normalized_needed_yrbefore["year"] = all_df_normalized_needed_yrbefore["year"] + yr_lag
-
-all_df_normalized_needed_yrbefore.rename(columns={"npp_t": "npp_t" + str(yr_lag),
-                                                  "npp_u": "npp_u" + str(yr_lag),
-                                                  "beef_price_at_1982": "B" + str(yr_lag),
-                                                  "hay_price_at_1982" : "H" + str(yr_lag),
-                                                  "chicken_price_at_1982": "C" + str(yr_lag)
-                                                 }, inplace=True)
-
-all_df_normalized_needed = pd.merge(all_df_normalized_needed, all_df_normalized_needed_yrbefore, 
-                                    on=["year", "state_fips"], how="left")
-
-all_df_normalized_needed.head(2)
+# all_df_normalized_needed.head(2)
 
 # +
 check_cols = ["year", 
@@ -331,9 +300,6 @@ check_cols = ["year",
 
 all_df_normalized_needed.loc[all_df_normalized_needed.state_fips == "01", check_cols].head(5)
 # -
-
-
-
 # # Model with 1 year lag
 
 all_df_normalized.head(2)
@@ -408,9 +374,7 @@ model_result.summary()
 
 # +
 indp_vars = ["npp_t"]
-
 y_var = "inventory"
-
 #################################################################
 df = all_df_normalized_needed[[y_var] + indp_vars].copy()
 df.dropna(how="any", inplace=True)

@@ -21,15 +21,34 @@ def add_lags(df, merge_cols, lag_vars_, year_count):
         df_needed_yrbefore = df[cc_].copy()
         df_needed_yrbefore["year"] = df_needed_yrbefore["year"] + yr_lag
 
-        df_needed_yrbefore.rename(
-            columns={
-                "max_ndvi_in_year_modis": "NDVI" + str(yr_lag),
-                "beef_price_at_1982": "B" + str(yr_lag),
-                "hay_price_at_1982": "H" + str(yr_lag),
-                "chicken_price_at_1982": "C" + str(yr_lag),
-            },
-            inplace=True,
-        )
+        for a_var in lag_vars_:
+            if a_var == "max_ndvi_in_year_modis":
+                df_needed_yrbefore.rename(
+                    columns={a_var: "NDVI" + str(yr_lag)},
+                    inplace=True,
+                )
+            elif a_var == "beef_price_at_1982":
+                df_needed_yrbefore.rename(
+                    columns={a_var: "B" + str(yr_lag)}, inplace=True
+                )
+            elif a_var == "hay_price_at_1982":
+                df_needed_yrbefore.rename(
+                    columns={a_var: "H" + str(yr_lag)}, inplace=True
+                )
+            elif a_var == "chicken_price_at_1982":
+                df_needed_yrbefore.rename(
+                    columns={a_var: "C" + str(yr_lag)}, inplace=True
+                )
+            elif a_var == "npp_t":
+                df_needed_yrbefore.rename(
+                    columns={a_var: a_var + str(yr_lag)}, inplace=True
+                )
+            elif a_var == "npp_u":
+                df_needed_yrbefore.rename(
+                    columns={a_var: a_var + str(yr_lag)}, inplace=True
+                )
+            else:
+                print("you need to fix add_lags() in rangeland_core")
 
         df = pd.merge(df, df_needed_yrbefore, on=merge_cols, how="left")
     return df
@@ -65,6 +84,38 @@ def covert_totalNpp_2_unit(NPP_df, npp_total_col_, area_m2_col_, npp_unit_col_na
     1 m^2 = 0.000247105 acres
     """
     NPP_df[npp_unit_col_name_] = NPP_df[npp_total_col_] / NPP_df[area_m2_col_]
+    return NPP_df
+
+
+def covert_MattunitNPP_2_total(NPP_df, npp_unit_col_, acr_area_col_, npp_total_col_):
+    """
+    Convert the unit NPP to total area.
+    Total area can be area of rangeland in a county or an state
+
+    Units are punds per acre
+
+    Arguments
+    ---------
+    NPP_df : dataframe
+           whose one column is unit NPP
+
+    npp_unit_col_ : str
+           name of the unit NPP column
+
+    acr_area_col_ : str
+           name of the column that gives area in acres
+
+    npp_area_col_ : str
+           name of new column that will have total NPP
+
+    Returns
+    -------
+    NPP_df : dataframe
+           the dataframe that has a new column in it: total NPP
+
+    """
+    NPP_df[npp_total_col_] = NPP_df[npp_unit_col_] * NPP_df[acr_area_col_]
+
     return NPP_df
 
 

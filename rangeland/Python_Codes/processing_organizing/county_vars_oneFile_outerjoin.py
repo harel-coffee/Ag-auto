@@ -50,23 +50,21 @@ start_b = "\033[1m"
 end_b = "\033[0;0m"
 print("This is " + start_b + "a_bold_text" + end_b + "!")
 
-# %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
-SoI = abb_dict["SoI"]
-SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
-
 # %% [markdown]
 # ## County Fips
 
 # %%
-county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
-county_fips = county_fips["county_fips"]
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+SoI = abb_dict["SoI"]
+SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
+
+county_fips = abb_dict["county_fips"]
 
 print(f"{len(county_fips.state.unique()) = }")
 county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
 county_fips.drop_duplicates(inplace=True)
 county_fips.reset_index(drop=True, inplace=True)
-county_fips = county_fips[["county_fips", "county_name", "state", "EW"]]
+county_fips = county_fips[["county_fips", "county_name", "state", "EW_meridian"]]
 print(f"{len(county_fips.state.unique()) = }")
 
 county_fips.head(2)
@@ -109,32 +107,33 @@ print(f"{len(RA_Pallavi.state.unique()) = }")
 Pallavi_counties = list(RA_Pallavi.county_fips.unique())
 RA_Pallavi.head(2)
 
+# %% [markdown]
+# # March 27. Replace the NPP with Matt
+
 # %%
-cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_NPP_productivity.csv")
+cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_MattNPP.csv")
+cty_yr_npp.head(2)
 
 cty_yr_npp.rename(
-    columns={"county": "county_fips", "MODIS_NPP": "unit_npp"}, inplace=True
+    columns={"county": "county_fips", "matt_unit_npp": "unit_matt_npp"}, inplace=True
 )
 cty_yr_npp = rc.correct_Mins_county_6digitFIPS(df=cty_yr_npp, col_="county_fips")
-cty_yr_npp = cty_yr_npp[["year", "county_fips", "unit_npp"]]
+cty_yr_npp = cty_yr_npp[["year", "county_fips", "unit_matt_npp"]]
 
 # Some counties do not have unit NPPs
-cty_yr_npp.dropna(subset=["unit_npp"], inplace=True)
+cty_yr_npp.dropna(subset=["unit_matt_npp"], inplace=True)
 cty_yr_npp.reset_index(drop=True, inplace=True)
 
 cty_yr_npp.head(2)
 
 # %%
-cty_yr_npp = pd.merge(
-    cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left"
-)
+cty_yr_npp = pd.merge(cty_yr_npp, RA[["county_fips", "rangeland_acre"]], on=["county_fips"], how="left")
 
-cty_yr_npp = rc.covert_unitNPP_2_total(
-    NPP_df=cty_yr_npp,
-    npp_unit_col_="unit_npp",
-    acr_area_col_="rangeland_acre",
-    npp_area_col_="county_total_npp",
-)
+
+cty_yr_npp = rc.covert_MattunitNPP_2_total(NPP_df=cty_yr_npp, 
+                                           npp_unit_col_="unit_matt_npp",
+                                           acr_area_col_="rangeland_acre",
+                                           npp_total_col_="total_matt_npp")
 
 cty_yr_npp.head(2)
 
@@ -142,16 +141,16 @@ cty_yr_npp.head(2)
 # ## add NPP std
 
 # %%
-npp_unit_std = cty_yr_npp.groupby(["county_fips"])["unit_npp"].std(ddof=1).reset_index()
+npp_unit_std = cty_yr_npp.groupby(["county_fips"])["unit_matt_npp"].std(ddof=1).reset_index()
 cty_yr_npp.head(2)
 
 
 # %%
 npp_total_std = (
-    cty_yr_npp.groupby(["county_fips"])["county_total_npp"].std(ddof=1).reset_index()
+    cty_yr_npp.groupby(["county_fips"])["total_matt_npp"].std(ddof=1).reset_index()
 )
-npp_unit_std.rename(columns={"unit_npp": "unit_npp_std"}, inplace=True)
-npp_total_std.rename(columns={"county_total_npp": "county_total_npp_std"}, inplace=True)
+npp_unit_std.rename(columns={"unit_matt_npp": "unit_matt_npp_std"}, inplace=True)
+npp_total_std.rename(columns={"total_matt_npp": "total_matt_npp_std"}, inplace=True)
 npp_std = pd.merge(npp_unit_std, npp_total_std, on=["county_fips"], how="left")
 npp_std.head(2)
 
@@ -244,53 +243,25 @@ S4_heat = S4_heat.groupby(["year", "county_fips"]).sum().reset_index()
 S4_heat.head(2)
 
 # %%
-S1_heat.rename(
-    columns={
-        "normal": "s1_normal",
-        "alert": "s1_alert",
-        "danger": "s1_danger",
-        "emergency": "s1_emergency",
-    },
-    inplace=True,
-)
+S1_heat.rename(columns={"normal": "s1_normal", "alert": "s1_alert",
+                        "danger": "s1_danger", "emergency": "s1_emergency"},
+               inplace=True)
 
-S2_heat.rename(
-    columns={
-        "normal": "s2_normal",
-        "alert": "s2_alert",
-        "danger": "s2_danger",
-        "emergency": "s2_emergency",
-    },
-    inplace=True,
-)
+S2_heat.rename(columns={"normal": "s2_normal", "alert": "s2_alert",
+                        "danger": "s2_danger", "emergency": "s2_emergency"},
+               inplace=True)
 
-S3_heat.rename(
-    columns={
-        "normal": "s3_normal",
-        "alert": "s3_alert",
-        "danger": "s3_danger",
-        "emergency": "s3_emergency",
-    },
-    inplace=True,
-)
+S3_heat.rename(columns={"normal": "s3_normal", "alert": "s3_alert",
+                        "danger": "s3_danger", "emergency": "s3_emergency"},
+               inplace=True)
 
-S4_heat.rename(
-    columns={
-        "normal": "s4_normal",
-        "alert": "s4_alert",
-        "danger": "s4_danger",
-        "emergency": "s4_emergency",
-    },
-    inplace=True,
-)
+S4_heat.rename(columns={"normal": "s4_normal", "alert": "s4_alert",
+                        "danger": "s4_danger", "emergency": "s4_emergency"},
+               inplace=True)
 
 seasonal_heat = pd.merge(S1_heat, S2_heat, on=["county_fips", "year"], how="outer")
-seasonal_heat = pd.merge(
-    seasonal_heat, S3_heat, on=["county_fips", "year"], how="outer"
-)
-seasonal_heat = pd.merge(
-    seasonal_heat, S4_heat, on=["county_fips", "year"], how="outer"
-)
+seasonal_heat = pd.merge(seasonal_heat, S3_heat, on=["county_fips", "year"], how="outer")
+seasonal_heat = pd.merge(seasonal_heat, S4_heat, on=["county_fips", "year"], how="outer")
 
 seasonal_heat.reset_index(drop=True, inplace=True)
 seasonal_heat.head(2)
@@ -298,9 +269,7 @@ seasonal_heat.head(2)
 
 # %%
 annual_heat = cnty_grid_mean_idx.groupby(["year", "county_fips"]).sum().reset_index()
-annual_heat = annual_heat[
-    ["year", "county_fips", "normal", "alert", "danger", "emergency"]
-]
+annual_heat = annual_heat[["year", "county_fips", "normal", "alert", "danger", "emergency"]]
 annual_heat.reset_index(drop=True, inplace=True)
 annual_heat.head(2)
 
@@ -393,6 +362,9 @@ filename = reOrganized_dir + "county_seasonal_ndvi.sav"
 seasonal_ndvi = pd.read_pickle(filename)
 seasonal_ndvi = seasonal_ndvi["seasonal_ndvi"]
 seasonal_ndvi.head(2)
+
+# %%
+seasonal_ndvi.columns
 
 # %%
 FarmOperation.head(2)
@@ -496,16 +468,8 @@ annual_heat.head(2)
 cty_yr_npp.head(2)
 
 # %%
-cty_yr_npp = cty_yr_npp[
-    [
-        "county_fips",
-        "year",
-        "unit_npp",
-        "county_total_npp",
-        "unit_npp_std",
-        "county_total_npp_std",
-    ]
-]
+cty_yr_npp = cty_yr_npp[["county_fips", "year", "unit_matt_npp", 
+                         "total_matt_npp", "unit_matt_npp_std", "total_matt_npp_std"]]
 cty_yr_npp.head(2)
 
 # %%
@@ -533,24 +497,12 @@ wetLand_area.head(2)
 
 # %%
 annual_outer = pd.merge(inventory, cty_yr_npp, on=["county_fips", "year"], how="outer")
-annual_outer = pd.merge(
-    annual_outer, slaughter_Q1, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, human_population, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, feed_expense, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, annual_heat, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, FarmOperation, on=["county_fips", "year"], how="outer"
-)
-annual_outer = pd.merge(
-    annual_outer, wetLand_area, on=["county_fips", "year"], how="outer"
-)
+annual_outer = pd.merge(annual_outer, slaughter_Q1, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, human_population, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, feed_expense, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, annual_heat, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, FarmOperation, on=["county_fips", "year"], how="outer")
+annual_outer = pd.merge(annual_outer, wetLand_area, on=["county_fips", "year"], how="outer")
 annual_outer.head(2)
 
 # %% [markdown]
@@ -596,23 +548,13 @@ all_df.head(2)
 (list(all_df.columns))
 
 # %%
-cc = [
-    "county_fips",
-    "max_ndvi_season_avhrr_s1",
-    "max_ndvi_season_avhrr_s2",
-    "max_ndvi_season_avhrr_s3",
-    "max_ndvi_season_avhrr_s4",
-]
+all_df.head(2)
+
+# %%
+cc = ["county_fips", "s1_max_ndvi_avhrr", "s2_max_ndvi_avhrr", "s3_max_ndvi_avhrr", "s4_max_ndvi_avhrr"]
 all_df.loc[all_df.year == 2000, cc]
 
 # %%
-cc = [
-    "county_fips",
-    "max_ndvi_season_avhrr_s1",
-    "max_ndvi_season_avhrr_s2",
-    "max_ndvi_season_avhrr_s3",
-    "max_ndvi_season_avhrr_s4",
-]
 (all_df.loc[(all_df.county_fips == "01009") & (all_df.year == 2002)])
 
 # %% [markdown]
@@ -628,40 +570,19 @@ all_df_normalized.head(2)
 list(all_df_normalized.columns)
 
 # %%
-all_df_normalized.max_ndvi_season_avhrr.unique()
+non_normal_cols = ['year', 'county_fips',  'county_name', 'state',
+                   'inventory', 'EW_meridian', 'Pallavi', 
+                   'max_ndvi_month_avhrr',
+                   'max_ndvi_month_gimms',
+                   'max_ndvi_month_modis',
+                   'most_imp_season_avhrr',
+                   'most_imp_season_gimms',
+                   'most_imp_season_modis',
+                   'max_ndvi_currYrseason_avhrr',
+                   'max_ndvi_currYrseason_gimms',
+                   'max_ndvi_currYrseason_modis',]
 
-# %%
-non_normal_cols = [
-    "year",
-    "county_fips",
-    "inventory",
-    "county_name",
-    "state",
-    "EW",
-    "Pallavi",
-    "max_ndvi_month_avhrr",
-    "max_ndvi_season_avhrr",
-    "max_ndvi_season_avhrr_s1",
-    "max_ndvi_season_avhrr_s2",
-    "max_ndvi_season_avhrr_s3",
-    "max_ndvi_season_avhrr_s4",
-    "max_ndvi_month_gimms",
-    "max_ndvi_season_gimms",
-    "max_ndvi_season_gimms_s1",
-    "max_ndvi_season_gimms_s2",
-    "max_ndvi_season_gimms_s3",
-    "max_ndvi_season_gimms_s4",
-    "max_ndvi_month_modis",
-    "max_ndvi_season_modis",
-    "max_ndvi_season_modis_s1",
-    "max_ndvi_season_modis_s2",
-    "max_ndvi_season_modis_s3",
-    "max_ndvi_season_modis_s4",
-]
-
-numeric_cols = [
-    x for x in sorted(all_df_normalized.columns) if not (x in non_normal_cols)
-]
+numeric_cols = [x for x in sorted(all_df_normalized.columns) if not (x in non_normal_cols)]
 
 # %%
 numeric_cols
@@ -711,108 +632,72 @@ all_df.loc[(all_df.county_fips == "01001"), "crp_wetland_acr"][0:5]
 all_df.loc[(all_df.county_fips == "01001"), "number_of_farm_operation"][0:5]
 
 # %%
-all_df["max_ndvi_season_avhrr_s2"].unique()
+all_df["s2_max_ndvi_avhrr"].unique()
 
 # %%
+all_df.max_ndvi_currYrseason_modis.unique()[0:10]
+
 # %%
-delta_cols = [
-    "year",
-    "county_fips",
-    "inventory",
-    "unit_npp",
-    "county_total_npp",
-    "slaughter",
-    "population",
-    "feed_expense",
-    "normal",
-    "alert",
-    "danger",
-    "emergency",
-    "number_of_farm_operation",
-    "crp_wetland_acr",
-    "s1_countymean_total_precip",
-    "s2_countymean_total_precip",
-    "s3_countymean_total_precip",
-    "s4_countymean_total_precip",
-    "s1_countymean_avg_tavg",
-    "s2_countymean_avg_tavg",
-    "s3_countymean_avg_tavg",
-    "s4_countymean_avg_tavg",
-    "annual_countymean_total_precip",
-    "annual_avg_tavg",
-    "s1_normal",
-    "s1_alert",
-    "s1_danger",
-    "s1_emergency",
-    "s2_normal",
-    "s2_alert",
-    "s2_danger",
-    "s2_emergency",
-    "s3_normal",
-    "s3_alert",
-    "s3_danger",
-    "s3_emergency",
-    "s4_normal",
-    "s4_alert",
-    "s4_danger",
-    "s4_emergency",
-    "s1_mean_ndvi_avhrr",
-    "s2_mean_ndvi_avhrr",
-    "s3_mean_ndvi_avhrr",
-    "s4_mean_ndvi_avhrr",
-    "max_ndvi_month_avhrr",
-    "max_ndvi_in_year_avhrr",
-    "max_ndvi_season_avhrr",
-    "max_ndvi_season_avhrr_s1",
-    "max_ndvi_season_avhrr_s2",
-    "max_ndvi_season_avhrr_s3",
-    "max_ndvi_season_avhrr_s4",
-    "s1_mean_ndvi_gimms",
-    "s2_mean_ndvi_gimms",
-    "s3_mean_ndvi_gimms",
-    "s4_mean_ndvi_gimms",
-    "max_ndvi_month_gimms",
-    "max_ndvi_in_year_gimms",
-    "max_ndvi_season_gimms",
-    "max_ndvi_season_gimms_s1",
-    "max_ndvi_season_gimms_s2",
-    "max_ndvi_season_gimms_s3",
-    "max_ndvi_season_gimms_s4",
-    "s1_mean_ndvi_modis",
-    "s2_mean_ndvi_modis",
-    "s3_mean_ndvi_modis",
-    "s4_mean_ndvi_modis",
-    "max_ndvi_month_modis",
-    "max_ndvi_in_year_modis",
-    "max_ndvi_season_modis",
-    "max_ndvi_season_modis_s1",
-    "max_ndvi_season_modis_s2",
-    "max_ndvi_season_modis_s3",
-    "max_ndvi_season_modis_s4",
-    "s1_sum_ndvi_avhrr",
-    "s2_sum_ndvi_avhrr",
-    "s3_sum_ndvi_avhrr",
-    "s4_sum_ndvi_avhrr",
-    "s1_sum_ndvi_gimms",
-    "s2_sum_ndvi_gimms",
-    "s3_sum_ndvi_gimms",
-    "s4_sum_ndvi_gimms",
-    "s1_sum_ndvi_modis",
-    "s2_sum_ndvi_modis",
-    "s3_sum_ndvi_modis",
-    "s4_sum_ndvi_modis",
-    "s1_max_ndvi_avhrr",
-    "s2_max_ndvi_avhrr",
-    "s3_max_ndvi_avhrr",
-    "s4_max_ndvi_avhrr",
-    "s1_max_ndvi_gimms",
-    "s2_max_ndvi_gimms",
-    "s3_max_ndvi_gimms",
-    "s4_max_ndvi_gimms",
-    "s1_max_ndvi_modis",
-    "s2_max_ndvi_modis",
-    "s3_max_ndvi_modis",
-    "s4_max_ndvi_modis",
+delta_cols = ['year',
+              'county_fips',
+                'inventory',
+                'unit_matt_npp',
+                'total_matt_npp',
+                'slaughter',
+                'population',
+                'feed_expense',
+                'normal',
+                'alert',
+                'danger',
+                'emergency',
+                'number_of_farm_operation',
+                'crp_wetland_acr',
+                's1_countymean_total_precip',
+                's2_countymean_total_precip',
+                's3_countymean_total_precip',
+                's4_countymean_total_precip',
+                's1_countymean_avg_tavg',
+                's2_countymean_avg_tavg',
+                's3_countymean_avg_tavg',
+                's4_countymean_avg_tavg',
+                'annual_countymean_total_precip',
+                'annual_avg_tavg',
+                's1_normal',
+                's1_alert',
+                's1_danger',
+                's1_emergency',
+                's2_normal',
+                's2_alert',
+                's2_danger',
+                's2_emergency',
+                's3_normal',
+                's3_alert',
+                's3_danger',
+                's3_emergency',
+                's4_normal',
+                's4_alert',
+                's4_danger',
+                's4_emergency',
+                'max_ndvi_month_avhrr',
+                'max_ndvi_in_year_avhrr',
+                'max_ndvi_currYrseason_avhrr',
+                'max_ndvi_month_gimms',
+                'max_ndvi_in_year_gimms',
+                'max_ndvi_currYrseason_gimms',
+                'max_ndvi_month_modis',
+                'max_ndvi_in_year_modis',
+                's1_max_ndvi_avhrr',
+                's2_max_ndvi_avhrr',
+                's3_max_ndvi_avhrr',
+                's4_max_ndvi_avhrr',
+                's1_max_ndvi_gimms',
+                's2_max_ndvi_gimms',
+                's3_max_ndvi_gimms',
+                's4_max_ndvi_gimms',
+                's1_max_ndvi_modis',
+                's2_max_ndvi_modis',
+                's3_max_ndvi_modis',
+                's4_max_ndvi_modis'
 ]
 
 # %%

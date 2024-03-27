@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -43,8 +43,8 @@ os.makedirs(reOrganized_dir, exist_ok=True)
 Min_csvs = sorted([x for x in os.listdir(Min_data_dir_base) if x.endswith(".csv")])
 
 # %%
-ecozone_id_name = pd.read_csv(Min_data_dir_base + "ecozone_id_name.csv")
-ecozone_id_name.head(2)
+# ecozone_id_name = pd.read_csv(Min_data_dir_base + "ecozone_id_name.csv")
+# ecozone_id_name.head(2)
 
 # %%
 county_id_name_fips = pd.read_csv(Min_data_dir_base + "county_id_name_fips.csv")
@@ -74,144 +74,148 @@ for a_file_name in county_annual_files:
     else:
         county_annual = pd.merge(county_annual, a_file, on=['year', 'county'], how='left')
 
-out_name = reOrganized_dir + "county_annual_GPP_NPP_productivity.csv"
+# %%
+county_annual.rename(columns={"productivity": "unit_matt_npp"}, inplace=True)
+
+# %%
+out_name = reOrganized_dir + "county_annual_GPP_MattNPP.csv"
 county_annual.to_csv(out_name, index = False)
 
 county_annual.head(2)
 
 # %%
-ecozone_annual_files = sorted([x for x in Min_csvs if ("ecozone" in x) and ("annual" in x)])
-ecozone_annual = pd.DataFrame()
+# ecozone_annual_files = sorted([x for x in Min_csvs if ("ecozone" in x) and ("annual" in x)])
+# ecozone_annual = pd.DataFrame()
 
-for a_file_name in ecozone_annual_files:
-    print (a_file_name)
-    a_file = pd.read_csv(Min_data_dir_base + a_file_name)
-    print (f"{a_file.year.min()=}")
-    print (f"{a_file.year.max()=}")
-    print ()
-    if ("GPP" in a_file.columns):
-        a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
-    elif("NPP" in a_file.columns):
-        a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
+# for a_file_name in ecozone_annual_files:
+#     print (a_file_name)
+#     a_file = pd.read_csv(Min_data_dir_base + a_file_name)
+#     print (f"{a_file.year.min()=}")
+#     print (f"{a_file.year.max()=}")
+#     print ()
+#     if ("GPP" in a_file.columns):
+#         a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
+#     elif("NPP" in a_file.columns):
+#         a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
         
 
-    if len(ecozone_annual)==0:
-        ecozone_annual = a_file.copy()
-    else:
-        ecozone_annual = pd.merge(ecozone_annual, a_file, on=['year', 'ecozone'], how='left')
+#     if len(ecozone_annual)==0:
+#         ecozone_annual = a_file.copy()
+#     else:
+#         ecozone_annual = pd.merge(ecozone_annual, a_file, on=['year', 'ecozone'], how='left')
 
-out_name = reOrganized_dir + "ecozone_annual.csv"
-ecozone_annual.to_csv(out_name, index = False)
+# out_name = reOrganized_dir + "ecozone_annual.csv"
+# ecozone_annual.to_csv(out_name, index = False)
 
-ecozone_annual.head(2)
-
-# %%
+# ecozone_annual.head(2)
 
 # %%
-prfgrid_annual_files = sorted([x for x in Min_csvs if ("prfgrid" in x) and ("annual" in x)])
-prfgrid_annual = pd.DataFrame()
 
-for a_file_name in prfgrid_annual_files:
-    print (a_file_name)
-    a_file = pd.read_csv(Min_data_dir_base + a_file_name)
-    print (f"{a_file.year.min()=}")
-    print (f"{a_file.year.max()=}")
-    print ()
-    if ("GPP" in a_file.columns):
-        a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
-    elif("NPP" in a_file.columns):
-        a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
+# %%
+# prfgrid_annual_files = sorted([x for x in Min_csvs if ("prfgrid" in x) and ("annual" in x)])
+# prfgrid_annual = pd.DataFrame()
+
+# for a_file_name in prfgrid_annual_files:
+#     print (a_file_name)
+#     a_file = pd.read_csv(Min_data_dir_base + a_file_name)
+#     print (f"{a_file.year.min()=}")
+#     print (f"{a_file.year.max()=}")
+#     print ()
+#     if ("GPP" in a_file.columns):
+#         a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
+#     elif("NPP" in a_file.columns):
+#         a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
         
 
-    if len(prfgrid_annual)==0:
-        prfgrid_annual = a_file.copy()
-    else:
-        prfgrid_annual = pd.merge(prfgrid_annual, a_file, on=['year', 'prfgrid'], how='left')
+#     if len(prfgrid_annual)==0:
+#         prfgrid_annual = a_file.copy()
+#     else:
+#         prfgrid_annual = pd.merge(prfgrid_annual, a_file, on=['year', 'prfgrid'], how='left')
 
-out_name = reOrganized_dir + "prfgrid_annual.csv"
-prfgrid_annual.to_csv(out_name, index = False)
+# out_name = reOrganized_dir + "prfgrid_annual.csv"
+# prfgrid_annual.to_csv(out_name, index = False)
 
-prfgrid_annual.head(2)
-
-# %%
+# prfgrid_annual.head(2)
 
 # %%
-econregion_annual_files = sorted([x for x in Min_csvs if ("econregion" in x) and ("annual" in x)])
-econregion_annual = pd.DataFrame()
 
-for a_file_name in econregion_annual_files:
-    print (a_file_name)
-    a_file = pd.read_csv(Min_data_dir_base + a_file_name)
-    print (f"{a_file.year.min()=}")
-    print (f"{a_file.year.max()=}")
-    print ()
-    if ("GPP" in a_file.columns):
-        a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
-    elif("NPP" in a_file.columns):
-        a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
+# %%
+# econregion_annual_files = sorted([x for x in Min_csvs if ("econregion" in x) and ("annual" in x)])
+# econregion_annual = pd.DataFrame()
+
+# for a_file_name in econregion_annual_files:
+#     print (a_file_name)
+#     a_file = pd.read_csv(Min_data_dir_base + a_file_name)
+#     print (f"{a_file.year.min()=}")
+#     print (f"{a_file.year.max()=}")
+#     print ()
+#     if ("GPP" in a_file.columns):
+#         a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
+#     elif("NPP" in a_file.columns):
+#         a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
         
 
-    if len(econregion_annual)==0:
-        econregion_annual = a_file.copy()
-    else:
-        econregion_annual = pd.merge(econregion_annual, a_file, on=['year', 'econregion'], how='left')
+#     if len(econregion_annual)==0:
+#         econregion_annual = a_file.copy()
+#     else:
+#         econregion_annual = pd.merge(econregion_annual, a_file, on=['year', 'econregion'], how='left')
 
-out_name = reOrganized_dir + "econregion_annual.csv"
-econregion_annual.to_csv(out_name, index = False)
+# out_name = reOrganized_dir + "econregion_annual.csv"
+# econregion_annual.to_csv(out_name, index = False)
 
-econregion_annual.head(2)
-
-# %%
-statefips_annual_files = sorted([x for x in Min_csvs if ("statefips" in x) and ("annual" in x)])
-statefips_annual = pd.DataFrame()
-
-for a_file_name in statefips_annual_files:
-    print (a_file_name)
-    a_file = pd.read_csv(Min_data_dir_base + a_file_name)
-    print (f"{a_file.year.min()=}")
-    print (f"{a_file.year.max()=}")
-    print ()
-    if ("GPP" in a_file.columns):
-        a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
-    elif("NPP" in a_file.columns):
-        a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
-        
-
-    if len(statefips_annual)==0:
-        statefips_annual = a_file.copy()
-    else:
-        statefips_annual = pd.merge(statefips_annual, a_file, on=['year', 'statefips90m'], how='left')
-
-out_name = reOrganized_dir + "statefips_annual.csv"
-statefips_annual.to_csv(out_name, index = False)
-
-statefips_annual.head(2)
+# econregion_annual.head(2)
 
 # %%
-subsection_annual_files = sorted([x for x in Min_csvs if ("subsection" in x) and ("annual" in x)])
-subsection_annual = pd.DataFrame()
+# statefips_annual_files = sorted([x for x in Min_csvs if ("statefips" in x) and ("annual" in x)])
+# statefips_annual = pd.DataFrame()
 
-for a_file_name in subsection_annual_files:
-    print (a_file_name)
-    a_file = pd.read_csv(Min_data_dir_base + a_file_name)
-    print (f"{a_file.year.min()=}")
-    print (f"{a_file.year.max()=}")
-    print ()
-    if ("GPP" in a_file.columns):
-        a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
-    elif("NPP" in a_file.columns):
-        a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
+# for a_file_name in statefips_annual_files:
+#     print (a_file_name)
+#     a_file = pd.read_csv(Min_data_dir_base + a_file_name)
+#     print (f"{a_file.year.min()=}")
+#     print (f"{a_file.year.max()=}")
+#     print ()
+#     if ("GPP" in a_file.columns):
+#         a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
+#     elif("NPP" in a_file.columns):
+#         a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
         
 
-    if len(subsection_annual)==0:
-        subsection_annual = a_file.copy()
-    else:
-        subsection_annual = pd.merge(subsection_annual, a_file, on=['year', 'subsection'], how='left')
+#     if len(statefips_annual)==0:
+#         statefips_annual = a_file.copy()
+#     else:
+#         statefips_annual = pd.merge(statefips_annual, a_file, on=['year', 'statefips90m'], how='left')
 
-out_name = reOrganized_dir + "subsection_annual.csv"
-subsection_annual.to_csv(out_name, index = False)
+# out_name = reOrganized_dir + "statefips_annual.csv"
+# statefips_annual.to_csv(out_name, index = False)
 
-subsection_annual.head(2)
+# statefips_annual.head(2)
+
+# %%
+# subsection_annual_files = sorted([x for x in Min_csvs if ("subsection" in x) and ("annual" in x)])
+# subsection_annual = pd.DataFrame()
+
+# for a_file_name in subsection_annual_files:
+#     print (a_file_name)
+#     a_file = pd.read_csv(Min_data_dir_base + a_file_name)
+#     print (f"{a_file.year.min()=}")
+#     print (f"{a_file.year.max()=}")
+#     print ()
+#     if ("GPP" in a_file.columns):
+#         a_file.rename(columns={"GPP": "MODIS_GPP"}, inplace=True)
+#     elif("NPP" in a_file.columns):
+#         a_file.rename(columns={"NPP": "MODIS_NPP"}, inplace=True)
+        
+
+#     if len(subsection_annual)==0:
+#         subsection_annual = a_file.copy()
+#     else:
+#         subsection_annual = pd.merge(subsection_annual, a_file, on=['year', 'subsection'], how='left')
+
+# out_name = reOrganized_dir + "subsection_annual.csv"
+# subsection_annual.to_csv(out_name, index = False)
+
+# subsection_annual.head(2)
 
 # %% [markdown]
 # # Monthly Data
@@ -267,56 +271,56 @@ econregion_monthly.to_csv(out_name, index = False)
 econregion_monthly.head(2)
 
 # %%
-ecozone_monthly_files = sorted([x for x in Min_csvs if ("ecozone" in x) and ("monthly" in x)])
-ecozone_monthly = pd.DataFrame()
+# ecozone_monthly_files = sorted([x for x in Min_csvs if ("ecozone" in x) and ("monthly" in x)])
+# ecozone_monthly = pd.DataFrame()
 
-for a_file_name in ecozone_monthly_files:
-    print (a_file_name)
-    a_file = pd.read_csv(Min_data_dir_base + a_file_name)
-    print (f"{a_file.year.min()=}")
-    print (f"{a_file.year.max()=}")
-    print ()
+# for a_file_name in ecozone_monthly_files:
+#     print (a_file_name)
+#     a_file = pd.read_csv(Min_data_dir_base + a_file_name)
+#     print (f"{a_file.year.min()=}")
+#     print (f"{a_file.year.max()=}")
+#     print ()
     
-    source = a_file_name.split("_")[2]
-    variable = a_file_name.split("_")[3].split(".")[0]
-    a_file.rename(columns={variable: source + "_" + variable.upper()}, inplace=True)
+#     source = a_file_name.split("_")[2]
+#     variable = a_file_name.split("_")[3].split(".")[0]
+#     a_file.rename(columns={variable: source + "_" + variable.upper()}, inplace=True)
 
-    if len(ecozone_monthly)==0:
-        ecozone_monthly = a_file.copy()
-    else:
-        ecozone_monthly = pd.merge(ecozone_monthly, a_file, on=['year', 'month', 'ecozone'], how='left')
+#     if len(ecozone_monthly)==0:
+#         ecozone_monthly = a_file.copy()
+#     else:
+#         ecozone_monthly = pd.merge(ecozone_monthly, a_file, on=['year', 'month', 'ecozone'], how='left')
 
-out_name = reOrganized_dir + "ecozone_monthly.csv"
-ecozone_monthly.to_csv(out_name, index = False)
+# out_name = reOrganized_dir + "ecozone_monthly.csv"
+# ecozone_monthly.to_csv(out_name, index = False)
 
-ecozone_monthly.head(2)
+# ecozone_monthly.head(2)
 
 # %%
 
 # %%
-prfgrid_monthly_files = sorted([x for x in Min_csvs if ("prfgrid" in x) and ("monthly" in x)])
-prfgrid_monthly = pd.DataFrame()
+# prfgrid_monthly_files = sorted([x for x in Min_csvs if ("prfgrid" in x) and ("monthly" in x)])
+# prfgrid_monthly = pd.DataFrame()
 
-for a_file_name in prfgrid_monthly_files:
-    print (a_file_name)
-    a_file = pd.read_csv(Min_data_dir_base + a_file_name)
-    print (f"{a_file.year.min()=}")
-    print (f"{a_file.year.max()=}")
-    print ()
+# for a_file_name in prfgrid_monthly_files:
+#     print (a_file_name)
+#     a_file = pd.read_csv(Min_data_dir_base + a_file_name)
+#     print (f"{a_file.year.min()=}")
+#     print (f"{a_file.year.max()=}")
+#     print ()
     
-    source = a_file_name.split("_")[2]
-    variable = a_file_name.split("_")[3].split(".")[0]
-    a_file.rename(columns={variable: source + "_" + variable.upper()}, inplace=True)
+#     source = a_file_name.split("_")[2]
+#     variable = a_file_name.split("_")[3].split(".")[0]
+#     a_file.rename(columns={variable: source + "_" + variable.upper()}, inplace=True)
 
-    if len(prfgrid_monthly)==0:
-        prfgrid_monthly = a_file.copy()
-    else:
-        prfgrid_monthly = pd.merge(prfgrid_monthly, a_file, on=['year', 'month', 'prfgrid'], how='left')
+#     if len(prfgrid_monthly)==0:
+#         prfgrid_monthly = a_file.copy()
+#     else:
+#         prfgrid_monthly = pd.merge(prfgrid_monthly, a_file, on=['year', 'month', 'prfgrid'], how='left')
 
-out_name = reOrganized_dir + "prfgrid_monthly.csv"
-prfgrid_monthly.to_csv(out_name, index = False)
+# out_name = reOrganized_dir + "prfgrid_monthly.csv"
+# prfgrid_monthly.to_csv(out_name, index = False)
 
-prfgrid_monthly.head(2)
+# prfgrid_monthly.head(2)
 
 # %%
 statefips_monthly_files = sorted([x for x in Min_csvs if ("statefips" in x) and ("monthly" in x)])
