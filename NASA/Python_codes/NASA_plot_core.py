@@ -101,7 +101,9 @@ def trend_prePost2008(df, ax, ylabel_, title_, color_dictionary, linewidth_=4):
     ax.legend(loc="best")
 
 
-def SG_clean_SOS_orchardinPlot_VerticalLine(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut=0.5):
+def SG_clean_SOS_orchardinPlot_VerticalLine(
+    raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut=0.5
+):
     """
     This is created after the meeting on Jan, 10, 2022.
      Changes made to the previous function (SG_clean_SOS_orchardinPlot):
@@ -173,15 +175,22 @@ def SG_clean_SOS_orchardinPlot_VerticalLine(raw_dt, SG_dt, idx, ax, onset_cut=0.
     yr_count = 0
     for yr in unique_years:
         curr_field_yr = SG_dt[SG_dt["human_system_start_time"].dt.year == yr].copy()
-        y_orchard = curr_field_yr[curr_field_yr["human_system_start_time"].dt.month >= 5]
+        y_orchard = curr_field_yr[
+            curr_field_yr["human_system_start_time"].dt.month >= 5
+        ]
         y_orchard = y_orchard[y_orchard["human_system_start_time"].dt.month <= 10]
         y_orchard_range = max(y_orchard[idx]) - min(y_orchard[idx])
 
         if y_orchard_range > 0.3:
             curr_field_yr = nc.addToDF_SOS_EOS_White(
-                pd_TS=curr_field_yr, VegIdx=idx, onset_thresh=onset_cut, offset_thresh=offset_cut
+                pd_TS=curr_field_yr,
+                VegIdx=idx,
+                onset_thresh=onset_cut,
+                offset_thresh=offset_cut,
             )
-            curr_field_yr = nc.Null_SOS_EOS_by_DoYDiff(pd_TS=curr_field_yr, min_season_length=40)
+            curr_field_yr = nc.Null_SOS_EOS_by_DoYDiff(
+                pd_TS=curr_field_yr, min_season_length=40
+            )
         else:
             VegIdx_min = curr_field_yr[idx].min()
             VegIdx_max = curr_field_yr[idx].max()
@@ -221,7 +230,12 @@ def SG_clean_SOS_orchardinPlot_VerticalLine(raw_dt, SG_dt, idx, ax, onset_cut=0.
         if len(SOS) > 0:  # dataframe might be empty
             if SOS.iloc[0]["SOS"] != 666:
                 ax.scatter(
-                    SOS["human_system_start_time"], SOS["SOS"], marker="+", s=155, c="g", label=""
+                    SOS["human_system_start_time"],
+                    SOS["SOS"],
+                    marker="+",
+                    s=155,
+                    c="g",
+                    label="",
                 )
                 # annotate SOS
                 for ii in np.arange(0, len(SOS)):
@@ -246,7 +260,12 @@ def SG_clean_SOS_orchardinPlot_VerticalLine(raw_dt, SG_dt, idx, ax, onset_cut=0.
         if len(EOS) > 0:  # dataframe might be empty
             if EOS.iloc[0]["EOS"] != 666:
                 ax.scatter(
-                    EOS["human_system_start_time"], EOS["EOS"], marker="+", s=155, c="r", label=""
+                    EOS["human_system_start_time"],
+                    EOS["EOS"],
+                    marker="+",
+                    s=155,
+                    c="r",
+                    label="",
                 )
 
                 # annotate EOS
@@ -354,15 +373,22 @@ def SG_clean_SOS_orchardinPlot(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut
     yr_count = 0
     for yr in unique_years:
         curr_field_yr = SG_dt[SG_dt["human_system_start_time"].dt.year == yr].copy()
-        y_orchard = curr_field_yr[curr_field_yr["human_system_start_time"].dt.month >= 5]
+        y_orchard = curr_field_yr[
+            curr_field_yr["human_system_start_time"].dt.month >= 5
+        ]
         y_orchard = y_orchard[y_orchard["human_system_start_time"].dt.month <= 10]
         y_orchard_range = max(y_orchard[idx]) - min(y_orchard[idx])
 
         if y_orchard_range > 0.3:
             curr_field_yr = nc.addToDF_SOS_EOS_White(
-                pd_TS=curr_field_yr, VegIdx=idx, onset_thresh=onset_cut, offset_thresh=offset_cut
+                pd_TS=curr_field_yr,
+                VegIdx=idx,
+                onset_thresh=onset_cut,
+                offset_thresh=offset_cut,
             )
-            curr_field_yr = nc.Null_SOS_EOS_by_DoYDiff(pd_TS=curr_field_yr, min_season_length=40)
+            curr_field_yr = nc.Null_SOS_EOS_by_DoYDiff(
+                pd_TS=curr_field_yr, min_season_length=40
+            )
         else:
             VegIdx_min = curr_field_yr[idx].min()
             VegIdx_max = curr_field_yr[idx].max()
@@ -402,7 +428,12 @@ def SG_clean_SOS_orchardinPlot(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut
         if len(SOS) > 0:  # dataframe might be empty
             if SOS.iloc[0]["SOS"] != 666:
                 ax.scatter(
-                    SOS["human_system_start_time"], SOS["SOS"], marker="+", s=155, c="g", label=""
+                    SOS["human_system_start_time"],
+                    SOS["SOS"],
+                    marker="+",
+                    s=155,
+                    c="g",
+                    label="",
                 )
                 # annotate SOS
                 for ii in np.arange(0, len(SOS)):
@@ -427,7 +458,12 @@ def SG_clean_SOS_orchardinPlot(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut
         if len(EOS) > 0:  # dataframe might be empty
             if EOS.iloc[0]["EOS"] != 666:
                 ax.scatter(
-                    EOS["human_system_start_time"], EOS["EOS"], marker="+", s=155, c="r", label=""
+                    EOS["human_system_start_time"],
+                    EOS["EOS"],
+                    marker="+",
+                    s=155,
+                    c="r",
+                    label="",
                 )
 
                 # annotate EOS
@@ -436,7 +472,9 @@ def SG_clean_SOS_orchardinPlot(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut
                     ax.text(
                         x=EOS.iloc[ii]["human_system_start_time"].date(),
                         y=-0.1,
-                        s=str(EOS.iloc[ii]["human_system_start_time"].date())[5:],  # [6:]
+                        s=str(EOS.iloc[ii]["human_system_start_time"].date())[
+                            5:
+                        ],  # [6:]
                         **style
                     )
 
@@ -464,7 +502,7 @@ def SG_clean_SOS_orchardinPlot(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut
     )
 
     ax.set_ylim([-0.3, 1.15])
-    ax.xaxis.set_major_locator(mdates.YearLocator(1))  # every year.
+    # ax.xaxis.set_major_locator(mdates.YearLocator(1))  # every year.
     ax.legend(loc="best")
 
 
@@ -532,9 +570,14 @@ def SG_clean_SOS(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut=0.5):
         curr_field_yr = SG_dt[SG_dt["human_system_start_time"].dt.year == yr].copy()
 
         curr_field_yr = nc.addToDF_SOS_EOS_White(
-            pd_TS=curr_field_yr, VegIdx=idx, onset_thresh=onset_cut, offset_thresh=offset_cut
+            pd_TS=curr_field_yr,
+            VegIdx=idx,
+            onset_thresh=onset_cut,
+            offset_thresh=offset_cut,
         )
-        curr_field_yr = nc.Null_SOS_EOS_by_DoYDiff(pd_TS=curr_field_yr, min_season_length=40)
+        curr_field_yr = nc.Null_SOS_EOS_by_DoYDiff(
+            pd_TS=curr_field_yr, min_season_length=40
+        )
 
         #############################################
         ###
@@ -630,7 +673,9 @@ def SG_clean_SOS(raw_dt, SG_dt, idx, ax, onset_cut=0.5, offset_cut=0.5):
 def legend_without_duplicate_labels(ax):
     ax.legend(loc="upper left")
     handles, labels = ax.get_legend_handles_labels()
-    unique = [(h, l) for i, (h, l) in enumerate(zip(handles, labels)) if l not in labels[:i]]
+    unique = [
+        (h, l) for i, (h, l) in enumerate(zip(handles, labels)) if l not in labels[:i]
+    ]
     ax.legend(*zip(*unique))
 
 
@@ -663,7 +708,9 @@ def one_satellite_smoothed(
     assert len(a_df.ID.unique()) == 1
     assert len(a_df.dataset.unique()) == 1
 
-    a_regularized_TS = nc.regularize_a_field(a_df, V_idks=idx, interval_size=time_step_size)
+    a_regularized_TS = nc.regularize_a_field(
+        a_df, V_idks=idx, interval_size=time_step_size
+    )
     # a_regularized_TS_noGap = nc.fill_theGap_linearLine(a_regularized_TS.copy(), V_idx=idx)
     a_regularized_TS_noGap = nc.fill_theGap_linearLine(a_regularized_TS, V_idx=idx)
 
@@ -748,7 +795,9 @@ def all_satellite_smoothed(
         ax.xaxis.set_major_locator(mdates.YearLocator(1))
         ax.set_ylim(a_df[idx].min() - 0.05, 1)
     else:
-        a_regularized_TS = nc.regularize_a_field(a_df, V_idks=idx, interval_size=time_step_size)
+        a_regularized_TS = nc.regularize_a_field(
+            a_df, V_idks=idx, interval_size=time_step_size
+        )
         # a_regularized_TS_noGap = nc.fill_theGap_linearLine(a_regularized_TS.copy(), V_idx=idx)
         a_regularized_TS_noGap = nc.fill_theGap_linearLine(a_regularized_TS, V_idx=idx)
 
@@ -800,7 +849,12 @@ def plot_8dayComposite_and_SG(raw_dt, ax, idx="NDVI"):
     )
 
     ax.plot(
-        a_df["human_system_start_time"], SG, "-", label="SG", linewidth=3, color="dodgerblue"
+        a_df["human_system_start_time"],
+        SG,
+        "-",
+        label="SG",
+        linewidth=3,
+        color="dodgerblue",
     )  # , alpha=0.8
 
     ax.set_title(
@@ -821,7 +875,9 @@ def plot_8dayComposite_and_SG(raw_dt, ax, idx="NDVI"):
 def plot_raw_and_regularized(raw_dt, ax, idx="NDVI", time_step_size=10):
     a_df = raw_dt.copy()
 
-    a_regularized_TS = nc.regularize_a_field(a_df, V_idks=idx, interval_size=time_step_size)
+    a_regularized_TS = nc.regularize_a_field(
+        a_df, V_idks=idx, interval_size=time_step_size
+    )
     # a_regularized_TS_noGap = nc.fill_theGap_linearLine(a_regularized_TS.copy(), V_idx=idx)
     a_regularized_TS_noGap = nc.fill_theGap_linearLine(a_regularized_TS, V_idx=idx)
 
@@ -896,7 +952,9 @@ def plot_oneColumn(raw_dt, ax, idx="NDVI", _label="raw", _color="red"):
     ax.set_ylim(raw_dt[idx].min() - 0.05, 1)
 
 
-def plot_oneColumn_CropTitle_old(raw_dt, ax, idx="NDVI", _label="raw", _color="red", lineStyle="-"):
+def plot_oneColumn_CropTitle_old(
+    raw_dt, ax, idx="NDVI", _label="raw", _color="red", lineStyle="-"
+):
     ax.plot(
         raw_dt["human_system_start_time"],
         raw_dt[idx],
@@ -917,7 +975,9 @@ def plot_oneColumn_CropTitle_old(raw_dt, ax, idx="NDVI", _label="raw", _color="r
     ax.set_ylim(-0.1, 1.1)
 
 
-def plot_oneColumn_CropTitle(dt, raw_dt, titlee, _label="raw", idx="EVI", _color="dodgerblue"):
+def plot_oneColumn_CropTitle(
+    dt, raw_dt, titlee, _label="raw", idx="EVI", _color="dodgerblue"
+):
     fig, ax = plt.subplots(
         1,
         1,
@@ -927,7 +987,9 @@ def plot_oneColumn_CropTitle(dt, raw_dt, titlee, _label="raw", idx="EVI", _color
         gridspec_kw={"hspace": 0.35, "wspace": 0.05},
     )
     ax.grid(True)
-    ax.plot(dt["human_system_start_time"], dt[idx], linewidth=4, color=_color, label=_label)
+    ax.plot(
+        dt["human_system_start_time"], dt[idx], linewidth=4, color=_color, label=_label
+    )
 
     ax.scatter(raw_dt["human_system_start_time"], raw_dt[idx], s=20, c="r", label="raw")
 

@@ -23,8 +23,8 @@ import scipy, scipy.signal
 from datetime import date, datetime
 
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import f1_score, accuracy_score, 
-                            confusion_matrix, balanced_accuracy_score, 
+from sklearn.metrics import f1_score, accuracy_score,\
+                            confusion_matrix, balanced_accuracy_score,\
                             classification_report
 import matplotlib.pyplot as plt
 
@@ -294,6 +294,8 @@ for a_col in col_set:
 acc_table
 
 # %%
+
+# %%
 col="EVI_SG_season_count3"
 print (col)
 print(confusion_matrix(all_season_preds["Vote"].astype(int), all_season_preds[col].astype(int)))
@@ -335,6 +337,9 @@ print ("________________________________________________________________________
 # print(confusion_matrix(all_season_preds["Vote"].astype(int), all_season_preds[col].astype(int)))
 # print(classification_report(all_season_preds["Vote"].astype(int), all_season_preds[col].astype(int)))
 # print ("________________________________________________________________________________________")
+
+
+# %%
 
 # %%
 
@@ -466,6 +471,10 @@ print ("________________________________________________________________________
 # print(confusion_matrix(all_season_preds["Vote"].astype(int), all_season_preds[col].astype(int)))
 # print(classification_report(all_season_preds["Vote"].astype(int), all_season_preds[col].astype(int)))
 # print ("________________________________________________________________________________________")
+
+# %%
+
+# %%
 
 # %%
 
@@ -728,6 +737,8 @@ EVI_SG_confus_tbl_test.loc[1, "Predict_Single"]=true_double_predicted_single
 EVI_SG_confus_tbl_test.loc[1, "Predict_Double"]=true_double_predicted_double
 print (date.today(), "-", datetime.now().strftime("%H:%M:%S"))
 EVI_SG_confus_tbl_test
+
+# %%
 
 # %%
 confusion_matrix(test_season_preds["Vote"].astype(int), test_season_preds[coll].astype(int))
