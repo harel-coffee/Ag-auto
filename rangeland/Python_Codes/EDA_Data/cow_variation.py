@@ -46,7 +46,7 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 plots_dir = data_dir_base + "plots/"
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
@@ -114,7 +114,8 @@ cattle_inventory.head(2)
 # **Min has an extra "1" as leading digit in FIPS!!**
 
 # %%
-NPP = pd.read_csv(Min_data_base + "county_annual_MODIS_NPP.csv")
+a = "/Users/hn/Documents/01_research_data/RangeLand/Data_large_notUsedYet/Min_data/"
+NPP = pd.read_csv(a + "county_annual_MODIS_NPP.csv")
 NPP.rename(columns={"NPP": "modis_npp"}, inplace=True)
 
 NPP = rc.correct_Mins_county_6digitFIPS(df=NPP, col_="county")
@@ -979,8 +980,10 @@ inv_change_state_yr2yr.head(2)
 inv_change_state_yr2yr.window.unique()
 
 # %%
+np.log(np.e)
 
 # %%
+np.exp(0.35)
 
 # %%
 

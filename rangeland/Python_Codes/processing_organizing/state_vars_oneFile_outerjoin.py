@@ -185,6 +185,11 @@ Min_state_NPP["state_fips"] = Min_state_NPP.state_fips.str.slice(start=1, stop=3
 print(f"{Min_state_NPP.year.min() = }")
 print(f"{Min_state_NPP.year.max() = }")
 Min_state_NPP.head(2)
+# -
+
+Min_state_NPP[Min_state_NPP.state_fips == "21"]
+
+sorted(Min_state_NPP.state_fips.unique())
 
 # +
 cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_MattNPP.csv")
@@ -705,6 +710,8 @@ all_df_normalized[numeric_cols] = (all_df_normalized[numeric_cols] - all_df_norm
 all_df_normalized[all_df_normalized.year == 2002].head(2)
 # -
 
+all_df_normalized.unit_matt_npp.unique()
+
 all_df[numeric_cols].std(ddof=1)
 
 all_df[all_df.year == 2002].head(2)
@@ -1046,6 +1053,8 @@ A.dropna()
 
 ind_deltas_df[(ind_deltas_df.state_fips == "01") & (ind_deltas_df.year == 1997)]
 
-all_df
+all_df.dropna(how="any").shape
+
+all_df_normalized.dropna(how="any").shape
 
 

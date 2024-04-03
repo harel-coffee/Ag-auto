@@ -61,8 +61,6 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 os.makedirs(reOrganized_dir, exist_ok=True)
 
 # %%
-
-# %%
 abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
@@ -131,31 +129,44 @@ print (all_data_dict["Date"])
 list(all_data_dict.keys())
 
 # %%
-all_df_old = all_data_dict_old["all_df_outerjoined"]
-all_df_normal_old = all_data_dict_old["all_df_outerjoined_normalized"]
+# all_df_old = all_data_dict_old["all_df_outerjoined"]
+# all_df_normal_old = all_data_dict_old["all_df_outerjoined_normalized"]
 
 # %%
 all_df = all_data_dict["all_df_outerjoined"]
 all_df_normal = all_data_dict["all_df_outerjoined_normalized"]
+print ([x for x in list(all_df.columns) if "npp" in x])
+
+# %%
+all_df_normal.dropna(how="all", inplace=True)
+all_df_normal.shape
+
+# %%
+print ([x for x in list(all_df_normal.columns) if "npp" in x])
+print ([x for x in list(all_df.columns) if "npp" in x])
 
 # %%
 len(all_df.state_fips.unique())
 
 # %%
-cc = [x for x in list(all_df_old.columns) if not(x in list(all_df.columns))]
-all_df_old.drop(columns=cc, inplace=True)
+all_df_normal.dropna(how="all", inplace=False)
 
-cc = [x for x in list(all_df.columns) if not(x in list(all_df_old.columns))]
-all_df.drop(columns=cc, inplace=True)
+# %%
+# cc = [x for x in list(all_df_old.columns) if not(x in list(all_df.columns))]
+# all_df_old.drop(columns=cc, inplace=True)
+
+# cc = [x for x in list(all_df.columns) if not(x in list(all_df_old.columns))]
+# all_df.drop(columns=cc, inplace=True)
 
 # %%
 print (all_df.shape)
-print (all_df_old.shape)
+# print (all_df_old.shape)
 
 # %%
 all_df.head(2)
 
 # %%
+print ([x for x in list(all_df.columns) if "npp" in x])
 
 # %%
 all_df = all_df[all_df.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
@@ -165,69 +176,79 @@ all_df.reset_index(drop=True, inplace=True)
 all_df_normal.reset_index(drop=True, inplace=True)
 
 
-all_df_old = all_df_old[all_df_old.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
-all_df_normal_old = all_df_normal_old[all_df_normal_old.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+# all_df_old = all_df_old[all_df_old.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+# all_df_normal_old = all_df_normal_old[all_df_normal_old.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
 
-all_df_old.reset_index(drop=True, inplace=True)
-all_df_normal_old.reset_index(drop=True, inplace=True)
+# all_df_old.reset_index(drop=True, inplace=True)
+# all_df_normal_old.reset_index(drop=True, inplace=True)
 
 # %%
 print (all_df.shape)
-print (all_df_old.shape)
+# print (all_df_old.shape)
 
 # %%
-all_df.fillna(0, inplace=True)
-all_df_old.fillna(0, inplace=True)
+all_df.head(2)
+
+# %%
+# all_df.fillna(0, inplace=True)
+# all_df_old.fillna(0, inplace=True)
 
 
 cc = ["max_ndvi_in_year_modis", "beef_price_at_1982", "hay_price_at_1982" ]
-all_df.equals(all_df_old)
+# all_df.equals(all_df_old)
 
 # %%
-cc = [x for x in list(all_df_normal_old.columns) if not(x in list(all_df_normal.columns))]
-all_df_normal_old.drop(columns=cc, inplace=True)
-
-cc = [x for x in list(all_df_normal.columns) if not(x in list(all_df_normal_old.columns))]
-all_df_normal.drop(columns=cc, inplace=True)
+print ([x for x in list(all_df_normal.columns) if "npp" in x])
 
 # %%
-all_df_normal.fillna(0, inplace=True)
-all_df_normal_old.fillna(0, inplace=True)
+# cc = [x for x in list(all_df_normal_old.columns) if not(x in list(all_df_normal.columns))]
+# all_df_normal_old.drop(columns=cc, inplace=True)
+
+# cc = [x for x in list(all_df_normal.columns) if not(x in list(all_df_normal_old.columns))]
+# all_df_normal.drop(columns=cc, inplace=True)
+
+# %%
+print ([x for x in list(all_df_normal.columns) if "npp" in x])
+
+# %%
+# all_df_normal.fillna(0, inplace=True)
+# all_df_normal_old.fillna(0, inplace=True)
 
 
 cc = ["max_ndvi_in_year_modis", "beef_price_at_1982", "hay_price_at_1982" ]
-all_df_normal_old.equals(all_df_normal)
+# all_df_normal_old.equals(all_df_normal)
 
 # %%
-not_equal_cols = []
-for a_col in all_df_normal_old.columns:
-    if ((all_df_normal_old[a_col] == all_df_normal[a_col]).sum() != len(all_df_normal_old)):
-        not_eq_indx = np.where(all_df_normal_old[a_col] != all_df_normal[a_col])[0]
-        if (all_df_normal_old.loc[not_eq_indx, a_col] -
-            all_df_normal.loc[not_eq_indx, a_col]).sum() > 0.1:
-            not_equal_cols = not_equal_cols + [a_col]
+# not_equal_cols = []
+# for a_col in all_df_normal_old.columns:
+#     if ((all_df_normal_old[a_col] == all_df_normal[a_col]).sum() != len(all_df_normal_old)):
+#         not_eq_indx = np.where(all_df_normal_old[a_col] != all_df_normal[a_col])[0]
+#         if (all_df_normal_old.loc[not_eq_indx, a_col] -
+#             all_df_normal.loc[not_eq_indx, a_col]).sum() > 0.1:
+#             not_equal_cols = not_equal_cols + [a_col]
 
 # %%
-not_equal_cols
+print ([x for x in list(all_df_normal.columns) if "npp" in x])
+print ([x for x in list(all_df.columns) if "npp" in x])
 
 # %%
-cc = ["year", "state_fips"] + not_equal_cols
-check_old = all_df_normal_old[cc].copy()
-check = all_df_normal[cc].copy()
+# cc = ["year", "state_fips"] + not_equal_cols
+# check_old = all_df_normal_old[cc].copy()
+# check = all_df_normal[cc].copy()
 
 # %%
-check_old.head(2)
+# check_old.head(2)
 
 # %%
-check.head(2)
+# check.head(2)
 
 # %%
-a_col = "herb_area_acr"
-not_eq_indx = np.where(check_old[a_col] != check[a_col])[0]
-check_old.loc[not_eq_indx, a_col] 
+# a_col = "herb_area_acr"
+# not_eq_indx = np.where(check_old[a_col] != check[a_col])[0]
+# check_old.loc[not_eq_indx, a_col] 
 
 # %%
-check.loc[not_eq_indx, a_col] 
+# check.loc[not_eq_indx, a_col] 
 
 # %%
 
@@ -237,8 +258,20 @@ check.loc[not_eq_indx, a_col]
 # ### Convert inventory to log
 
 # %%
+all_df.dropna(how="all", inplace=True)
+all_df.reset_index(drop=True, inplace=True)
+
+all_df_normal.dropna(how="all", inplace=True)
+all_df_normal.reset_index(drop=True, inplace=True)
+
+# %%
+
+# %%
 all_df["inventory"] = np.log(all_df["inventory"])
 all_df_normal["inventory"] = np.log(all_df_normal["inventory"])
+
+# %%
+print ([x for x in list(all_df_normal.columns) if "npp" in x])
 
 # %% [markdown]
 # # Subset to states of interest
@@ -256,6 +289,12 @@ all_df_normal.reset_index(drop=True, inplace=True)
 all_df_normal.head(2)
 
 # %%
+[x for x in list(all_df_normal.columns) if "npp" in x]
+
+# %%
+print ([x for x in list(all_df.columns) if "npp" in x])
+
+# %%
 # EW_meridian exist only for the 29 states of interest. So, here we are automatically subseting
 needed_cols = ["year", "state_fips", "inventory", 
                "total_matt_npp", "unit_matt_npp", "rangeland_acre",
@@ -264,13 +303,22 @@ needed_cols = ["year", "state_fips", "inventory",
                "EW_meridian", "state_dummy_int"]
 
 inv_prices_ndvi_npp = all_df[needed_cols].copy()
+
+# %%
 inv_prices_ndvi_npp_normal = all_df_normal[needed_cols].copy()
 
+# %%
+inv_prices_ndvi_npp_normal
+
+# %%
 inv_prices_ndvi_npp.dropna(how="any", inplace=True)
 inv_prices_ndvi_npp.reset_index(drop=True, inplace=True)
 
 inv_prices_ndvi_npp_normal.dropna(how="any", inplace=True)
 inv_prices_ndvi_npp_normal.reset_index(drop=True, inplace=True)
+
+# %%
+inv_prices_ndvi_npp_normal
 
 # %%
 # non-normal data
@@ -286,6 +334,8 @@ fit = ols('inventory ~ max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_a
           data=inv_prices_ndvi_npp_normal).fit() 
 
 fit.summary()
+
+# %%
 
 # %%
 fit = ols('inventory ~ max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_at_1982 + C(state_dummy_int)', 
@@ -400,5 +450,122 @@ state_fips_SoI[state_fips_SoI.state_fips == "47"]
 
 # %%
 len(inv_prices_ndvi_npp_normal.state_fips.unique())
+
+# %%
+inv_prices_ndvi_npp_normal.columns
+
+# %%
+
+# %%
+
+# %%
+### west of Meridian
+fit = ols('inventory ~ total_matt_npp + beef_price_at_1982 + hay_price_at_1982 + C(EW_meridian)', 
+          data = inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "W"]).fit() 
+
+fit.summary()
+
+# %%
+### west of Meridian
+fit = ols('inventory ~ total_matt_npp + beef_price_at_1982 + hay_price_at_1982 + C(EW_meridian)', 
+          data = inv_prices_ndvi_npp_normal[inv_prices_ndvi_npp_normal.EW_meridian == "E"]).fit() 
+
+fit.summary()
+
+# %%
+inv_prices_ndvi_npp.total_matt_npp.mean()
+
+# %%
+26,786,792,214 
+
+# %%
+
+# %%
+np.exp(inv_prices_ndvi_npp.inventory.mean())
+
+# %%
+755,465
+
+# %%
+26786792214/755465
+
+# %%
+### west of Meridian
+fit = ols('inventory ~ total_matt_npp + beef_price_at_1982 + hay_price_at_1982 + C(EW_meridian)', 
+          data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"]).fit() 
+
+fit.summary()
+
+# %%
+### west of Meridian
+inv_prices_ndvi_npp.total_matt_npp = np.log(inv_prices_ndvi_npp.total_matt_npp )
+
+fit = ols('inventory ~ total_matt_npp + beef_price_at_1982 + hay_price_at_1982 + C(EW_meridian)', 
+          data = inv_prices_ndvi_npp).fit() 
+
+inv_prices_ndvi_npp.total_matt_npp = np.exp(inv_prices_ndvi_npp.total_matt_npp)
+fit.summary()
+
+# %%
+### west of Meridian
+inv_prices_ndvi_npp.total_matt_npp = np.log(inv_prices_ndvi_npp.total_matt_npp)
+
+fit = ols('inventory ~ total_matt_npp + beef_price_at_1982 + hay_price_at_1982 + C(EW_meridian)', 
+          data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.state_fips=="53"]).fit() 
+
+inv_prices_ndvi_npp.total_matt_npp = np.exp(inv_prices_ndvi_npp.total_matt_npp)
+fit.summary()
+
+# %%
+# ### west of Meridian
+# inv_prices_ndvi_npp.total_matt_npp = np.log(inv_prices_ndvi_npp.total_matt_npp)
+
+# fit = ols('inventory ~ total_matt_npp + beef_price_at_1982 + hay_price_at_1982 + C(EW_meridian)', 
+#           data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.state_fips=="53"]).fit() 
+
+# inv_prices_ndvi_npp.total_matt_npp = np.exp(inv_prices_ndvi_npp.total_matt_npp)
+# fit.summary()
+
+# %%
+print (all_df[all_df.state_fips=="53"].total_matt_npp.min())
+print (all_df[all_df.state_fips=="53"].total_matt_npp.max())
+
+# %%
+6,451,447,773
+15,454,643,636
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+df = all_df.copy()
+df = df[["year", "total_matt_npp", "state_fips"]]
+
+df = df[df.state_fips == "53"]
+df.dropna(subset=["year"], inplace=True)
+df.dropna(subset=["total_matt_npp"], inplace=True)
+
+axs.grid(axis="y", which="both")
+
+axs.plot(df.year, df.total_matt_npp);
+
+plots_dir = data_dir_base + "00_plots/"
+
+# %%
+df.year.unique()
+
+# %%
+inv_prices_ndvi_npp.columns
+
+# %%
+# fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+
+# axs.grid(axis="y", which="both")
+
+# axs.scatter(all_df_normal.inventory, total_matt_npp.unit_matt_npp, 
+#             s = 20, c="r", marker="x");
+
+# axs.set_xlabel("max NDVI in a year (normalized)")
+# axs.set_ylabel("unit Matt's NPP in a year (normalized)")
+
+# plots_dir = data_dir_base + "00_plots/"
 
 # %%

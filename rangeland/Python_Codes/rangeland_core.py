@@ -6,6 +6,30 @@ from pprint import pprint
 import os, os.path, sys
 
 
+def convert_lb_2_kg(df, matt_total_npp_col, new_col_name):
+    """
+    Convert weight in lb to kg
+    """
+    df[new_col_name] = df[matt_total_npp_col] / 2.205
+    return df
+
+
+def convert_lbperAcr_2_kg_in_sqM(df, matt_unit_npp_col, new_col_name):
+    """
+    Convert lb/acr to kg/m2
+
+    1 acre is 4046.86 m2
+    1 lb is 0.453592 kg (multiplying by 0.453592 is the same as diving by 2.205)
+    Or just multiply by 0.000112085
+    """
+    # lb_2_kg = df[matt_unit_npp_col] / 2.205
+    # lbAcr_2_kgm2 = lb_2_kg / 4046.86
+    # df[new_col_name] = lbAcr_2_kgm2
+
+    df[new_col_name] = df[matt_unit_npp_col] * 0.000112085
+    return df
+
+
 def add_lags(df, merge_cols, lag_vars_, year_count):
     """
     This function adds lagged variables.
