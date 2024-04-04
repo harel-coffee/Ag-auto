@@ -40,6 +40,27 @@ print("Today's date:", date.today())
 print("Current Time =", current_time)
 
 # %%
+# https://geographicdata.science/book/notebooks/11_regression.html
+
+# %%
+tick_legend_FontSize = 8
+
+params = {
+    "legend.fontsize": tick_legend_FontSize,  # medium, large
+    # 'figure.figsize': (6, 4),
+    "axes.labelsize": tick_legend_FontSize * 1.5,
+    "axes.titlesize": tick_legend_FontSize * 1.3,
+    "xtick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "ytick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "axes.titlepad": 10,
+}
+
+plt.rc("font", family="Palatino")
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["xtick.labelbottom"] = True
+plt.rcParams["ytick.labelleft"] = True
+plt.rcParams.update(params)
 
 # %%
 from statsmodels.formula.api import ols
@@ -247,21 +268,216 @@ state_fips_SoI[state_fips_SoI.state_fips=="35"]
 # [inv_prices_ndvi_npp.EW_meridian == "W"]
 # + beef_price_at_1982 + hay_price_at_1982
 
-fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M + beef_price_at_1982 + hay_price_at_1982',
-          data = inv_prices_ndvi_npp).fit() 
+fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M',
+          data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"]).fit() 
+
+print (f"{fit.pvalues['metric_total_matt_nppDiv10M'] = }")
 
 fit.summary()
 
 # %%
 
 # %%
-inv_prices_ndvi_npp.total_matt_npp.mean()
+fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+x_col = "metric_total_matt_nppDiv10M"
+y_col = "inventoryDiv1000"
+
+x = inv_prices_ndvi_npp.loc[inv_prices_ndvi_npp.EW_meridian == "W", x_col]
+y = inv_prices_ndvi_npp.loc[inv_prices_ndvi_npp.EW_meridian == "W", y_col]
+
+axs.scatter(x, y, s = 20, c="dodgerblue", marker="x");
+
+x_line = np.arange(min(x), max(x), 0.01)
+y_line = fit.predict(pd.DataFrame(x_line).rename(columns = {0:x_col}))
+axs.plot(x_line, y_line, color="r", linewidth=4)
+
+plt.text(min(x), max(y)-.2, 'West of meridian.')
+
+axs.set_xlabel(x_col);
+axs.set_ylabel(y_col);
+
+plots_dir = data_dir_base + "00_plots/"
+fig_name = plots_dir + y_col + "_" + x_col + "_WestMeridian.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
-26,786,792,214 
+df_ = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"].copy()
+df_[df_["inventoryDiv1000"]>3000].state_fips.unique()
 
 # %%
-755,465
+state_fips_SoI[state_fips_SoI.state_fips=="48"]
+
+# %%
+
+# %%
+### Remove Texas for ```inventoryDiv1000``` against ```metric_total_matt_nppDiv10M```
+
+
+### west of Meridian
+# + C(state_dummy_int)
+# + C(EW_meridian)
+# [inv_prices_ndvi_npp.EW_meridian == "W"]
+# + beef_price_at_1982 + hay_price_at_1982
+df_ = inv_prices_ndvi_npp.copy()
+df_ = df_[df_.EW_meridian == "W"]
+df_ = df_[df_["state_fips"]!="48"]
+
+x_col = "metric_total_matt_nppDiv10M"
+y_col = "inventoryDiv1000"
+df_ = df_[[y_col, x_col]]
+
+fit_noTexas = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M', data = df_).fit() 
+print (f"{fit_noTexas.pvalues['metric_total_matt_nppDiv10M'] = }")
+
+fit_noTexas.summary()
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+x = df_[x_col]
+y = df_[y_col]
+
+axs.scatter(x, y, s = 20, c="dodgerblue", marker="x");
+
+x_line = np.arange(min(x), max(x), 0.01)
+y_line = fit_noTexas.predict(pd.DataFrame(x_line).rename(columns = {0:x_col}))
+axs.plot(x_line, y_line, color="r", linewidth=4)
+
+plt.text(min(x), max(y)-.2, 'West of meridian. No texas')
+
+axs.set_xlabel(x_col);
+axs.set_ylabel(y_col);
+
+plots_dir = data_dir_base + "00_plots/"
+
+fig_name = plots_dir + y_col + "_" + x_col + "_WestMeridian_NoTexas.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+
+# Let texas be in the scatter plot and plot both lines
+x = inv_prices_ndvi_npp.loc[inv_prices_ndvi_npp.EW_meridian == "W", x_col]
+y = inv_prices_ndvi_npp.loc[inv_prices_ndvi_npp.EW_meridian == "W", y_col]
+axs.scatter(x, y, s = 20, c="dodgerblue", marker="x");
+
+x_line = np.arange(min(x), max(x), 0.01)
+y_line = fit.predict(pd.DataFrame(x_line).rename(columns = {0:x_col}))
+axs.plot(x_line, y_line, color="r", linewidth=4, label="Texas in regression")
+
+
+# Line with no Texas in regression
+x_line = np.arange(min(x), max(x), 0.01)
+y_line = fit_noTexas.predict(pd.DataFrame(x_line).rename(columns = {0:x_col}))
+axs.plot(x_line, y_line, color="k", linewidth=4, label="Texas removed")
+
+
+plt.text(min(x), max(y)-.2, 'West of meridian')
+
+axs.set_xlabel(x_col);
+axs.set_ylabel(y_col);
+axs.legend(loc="lower right")
+
+plots_dir = data_dir_base + "00_plots/"
+
+fig_name = plots_dir + y_col + "_" + x_col + "_WestMeridian_NoTexasinModel_TexasinScatter.pdf"
+fig_name = plots_dir + y_col + "_" + x_col + "_WestMeridian.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+inv_prices_ndvi_npp.columns
+
+# %%
+
+# %%
+df = inv_prices_ndvi_npp.copy()
+y_col = "metric_total_matt_npp"
+df = df[["year", y_col, "state_fips"]]
+
+df = df[df.state_fips == "48"]
+df.dropna(subset=["year"], inplace=True)
+df.dropna(subset=[y_col], inplace=True)
+
+
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+# axs.grid(axis="y", which="both")
+axs.grid(which="both")
+
+axs.plot(df.year, df[y_col], color="dodgerblue", linewidth=4);
+axs.set_xticks(np.arange(2001, 2021, 2))
+axs.set_xlabel("year");
+axs.set_ylabel(y_col);
+
+axs.title.set_text(y_col.replace("_", " ") + " in Texas (kg)")
+
+
+plots_dir = data_dir_base + "00_plots/"
+fig_name = plots_dir + "Texas_" + y_col + "_WestMeridian.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+
+# %%
+### Remove that outlier in (20, 13)
+# for ```log_inventory``` against ```log_metric_total_matt_npp```
+
+
+### west of Meridian
+# + C(state_dummy_int)
+# + C(EW_meridian)
+# [inv_prices_ndvi_npp.EW_meridian == "W"]
+# + beef_price_at_1982 + hay_price_at_1982
+df_ = inv_prices_ndvi_npp.copy()
+df_ = df_[df_.EW_meridian == "W"]
+df_ = df_[["log_inventory", "log_metric_total_matt_npp"]]
+
+m_ = df_["log_metric_total_matt_npp"].min()
+
+print (df_.shape)
+df_ = df_[df_["log_metric_total_matt_npp"] != m_]
+print (df_.shape)
+
+fit = ols('log_inventory ~ log_metric_total_matt_npp', data = df_).fit() 
+print (f"{fit.pvalues['log_metric_total_matt_npp'] = }")
+
+fit.summary()
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+x_col = "log_metric_total_matt_npp"
+y_col = "log_inventory"
+x = df_[x_col]
+y = df_[y_col]
+
+axs.scatter(x, y, s = 20, c="dodgerblue", marker="x");
+
+x_line = np.arange(min(x), max(x), 0.01)
+y_line = fit.predict(pd.DataFrame(x_line).rename(columns = {0:x_col}))
+axs.plot(x_line, y_line, color="r", linewidth=4)
+
+plt.text(min(x), max(y)-.2, 'West of meridian.')
+
+axs.set_xlabel(x_col);
+axs.set_ylabel(y_col);
+
+# plots_dir = data_dir_base + "00_plots/"
+# fig_name = plots_dir + "log_log_metric_westMeridian.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
 26786792214/755465
@@ -283,5 +499,7 @@ print (all_df[all_df.state_fips=="53"].total_matt_npp.max())
 # %%
 6,451,447,773
 15,454,643,636
+
+# %%
 
 # %%

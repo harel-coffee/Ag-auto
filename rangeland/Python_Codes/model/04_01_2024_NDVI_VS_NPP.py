@@ -78,20 +78,28 @@ list(all_data_dict.keys())
 
 # %%
 all_df = all_data_dict["all_df_outerjoined"]
-all_df_normal = all_data_dict["all_df_outerjoined_normalized"]
+# all_df_normal = all_data_dict["all_df_outerjoined_normalized"]
 
 # %%
 all_df = all_df[all_df.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
-all_df_normal = all_df_normal[all_df_normal.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+# all_df_normal = all_df_normal[all_df_normal.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
 
 all_df.reset_index(drop=True, inplace=True)
-all_df_normal.reset_index(drop=True, inplace=True)
+# all_df_normal.reset_index(drop=True, inplace=True)
 
 # %%
+all_df = rc.convert_lb_2_kg(df=all_df, 
+                            matt_total_npp_col="total_matt_npp", 
+                            new_col_name="metric_total_matt_npp")
 
 # %%
-npp_cols  = [x for x in all_df_normal.columns if "npp" in x ]
-NDVI_cols = [x for x in all_df_normal.columns if "ndvi" in x ]
+all_df = rc.convert_lbperAcr_2_kg_in_sqM(df=all_df, 
+                                      matt_unit_npp_col = "unit_matt_npp", 
+                                      new_col_name = "metric_unit_matt_npp")
+
+# %%
+npp_cols  = [x for x in all_df.columns if "npp" in x ]
+NDVI_cols = [x for x in all_df.columns if "ndvi" in x ]
 NDVI_cols = [x for x in NDVI_cols if "modis" in x ]
 NDVI_cols
 
@@ -106,23 +114,25 @@ fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace
 
 axs.grid(axis="y", which="both")
 
-axs.scatter(all_df_normal.max_ndvi_in_year_modis, all_df_normal.unit_matt_npp, 
-            s = 20, c="r", marker="x");
+NDVI_col = "max_ndvi_in_year_modis"
+npp_col = 'metric_unit_matt_npp'
 
-axs.set_xlabel("max NDVI in a year (normalized)")
-axs.set_ylabel("unit Matt's NPP in a year (normalized)")
+axs.scatter(all_df[NDVI_col], all_df[npp_col], s = 20, c="r", marker="x");
+
+axs.set_xlabel(NDVI_col)
+axs.set_ylabel(npp_col)
 
 plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NormalNDVI_mattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "NDVI_metricMattUnitNPP_Scatter.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
-fit = ols('unit_matt_npp ~ max_ndvi_in_year_modis', data=all_df_normal).fit() 
+fit = ols('metric_unit_matt_npp ~ max_ndvi_in_year_modis', data=all_df).fit() 
 fit.summary()
 
 # %%
 fit.params['Intercept'].round(2)
-fit.params['max_ndvi_in_year_modis'].round(2)
+fit.params[NDVI_col].round(2)
 
 # %%
 
@@ -134,8 +144,9 @@ fit.params['max_ndvi_in_year_modis'].round(2)
 # # Create linear regression object
 # regr = linear_model.LinearRegression()
 
-# df_ = all_df[["max_ndvi_in_year_modis", "unit_matt_npp"]].copy()
-# df_.dropna(how="any", inplace=True)
+df_ = all_df[[NDVI_col, npp_col]].copy()
+df_.dropna(how="any", inplace=True)
+
 # # Train the model using the training sets
 # regr.fit(df_.max_ndvi_in_year_modis.values.reshape(-1, 1), 
 #          df_.unit_matt_npp.values.reshape(-1, 1))
@@ -148,11 +159,12 @@ fit.params['max_ndvi_in_year_modis'].round(2)
 # print("Coefficient of determination: %.2f" % r2_score(y_pred, df_.unit_matt_npp.values))
 
 # %%
-X = all_df[["max_ndvi_in_year_modis", "unit_matt_npp"]].copy()
+
+X = all_df[[NDVI_col, npp_col]].copy()
 X.dropna(how="any", inplace=True)
 X = sm.add_constant(X)
-Y = X["unit_matt_npp"].astype(float)
-X = X.drop("unit_matt_npp", axis=1)
+Y = X[npp_col].astype(float)
+X = X.drop(npp_col, axis=1)
 ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 y_pred = ks_result.predict(X)
@@ -163,20 +175,18 @@ fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace
 
 axs.grid(axis="y", which="both")
 
-axs.scatter(all_df.max_ndvi_in_year_modis, all_df.unit_matt_npp, 
-            s = 20, c="r", marker="x");
-
-axs.plot(X["max_ndvi_in_year_modis"], y_pred, color="blue", linewidth=3)
+axs.scatter(all_df[NDVI_col], all_df[npp_col], s = 20, c="r", marker="x");
+axs.plot(X[NDVI_col], y_pred, color="blue", linewidth=3)
 
 constant = ks_result.params["const"].round(2)
-slope = ks_result.params["max_ndvi_in_year_modis"].round(2)
-plt.text(0.2, 5100, f'y = {constant} + {slope} $x$')
+slope = ks_result.params[NDVI_col].round(2)
+plt.text(0.2, 0.52, f'y = {constant} + {slope} $x$')
 
-axs.set_xlabel("max NDVI in a year")
-axs.set_ylabel("unit Matt's NPP in a year")
+axs.set_xlabel(NDVI_col)
+axs.set_ylabel(npp_col)
 
 plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NDVI_mattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "NDVI_metricMattUnitNPP_Scatter.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 
@@ -184,41 +194,37 @@ plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 # # Transfered model
 
 # %%
-X = df_["max_ndvi_in_year_modis"]
+X = df_[NDVI_col]
 X = sm.add_constant(X)
-Y = np.sqrt(df_["unit_matt_npp"].astype(float))
+Y = np.sqrt(df_[npp_col].astype(float))
 ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 y_pred = ks_result.predict(X)
 ks_result.summary()
 
 
-fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, 
-                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
-
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
-axs.scatter(X.max_ndvi_in_year_modis, Y, 
-            s = 20, c="dodgerblue", marker="x");
+axs.scatter(X.max_ndvi_in_year_modis, Y, s = 20, c="dodgerblue", marker="x");
 
-axs.plot(X["max_ndvi_in_year_modis"], y_pred, color="red", linewidth=3)
-
+axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
 
 constant = ks_result.params["const"].round(2)
-slope = ks_result.params["max_ndvi_in_year_modis"].round(2)
-plt.text(0.2, 70, f'y = {constant} + {slope} $x$')
+slope = ks_result.params[NDVI_col].round(2)
+plt.text(0.2, .7, f'y = {constant} + {slope} $x$')
 
-axs.set_xlabel("max NDVI in a year")
-axs.set_ylabel("sqrt unit Matt's NPP in a year")
+axs.set_xlabel(NDVI_col)
+axs.set_ylabel("meric sqrt metric unit Matt's NPP in a year")
 
 plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NDVI_sqrtMattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "NDVI_sqrtMetricMattUnitNPP_Scatter.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
-X = df_["max_ndvi_in_year_modis"]
+X = df_[NDVI_col]
 X = sm.add_constant(X)
-Y = np.log(df_["unit_matt_npp"].astype(float))
+Y = np.log(df_[npp_col].astype(float))
 ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 y_pred = ks_result.predict(X)
@@ -229,20 +235,20 @@ fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True,
 
 axs.grid(axis="y", which="both")
 
-axs.scatter(X.max_ndvi_in_year_modis, Y, 
+axs.scatter(X[NDVI_col], Y, 
             s = 20, c="dodgerblue", marker="x");
 
-axs.plot(X["max_ndvi_in_year_modis"], y_pred, color="red", linewidth=3)
+axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
 
 
 constant = ks_result.params["const"].round(2)
-slope = ks_result.params["max_ndvi_in_year_modis"].round(2)
-plt.text(0.2, 8.5, f'y = {constant} + {slope} $x$')
-axs.set_xlabel("max NDVI in a year")
-axs.set_ylabel("log unit Matt's NPP in a year")
+slope = ks_result.params[NDVI_col].round(2)
+plt.text(0.2, -0.5, f'y = {constant} + {slope} $x$')
+axs.set_xlabel(NDVI_col)
+axs.set_ylabel(f"log " + npp_col)
 
 plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NDVI_LogMattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "NDVI_LogMetricMattUnitNPP_Scatter.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %% [markdown]
@@ -257,77 +263,39 @@ from matplotlib import pyplot
 
 # define the true objective function
 def objective(x, a, b, c):
-    return a * x + b * x**2 + c
-
-# choose the input and output variables
-x, y = df_["max_ndvi_in_year_modis"], df_["unit_matt_npp"].astype(float)
-# curve fit
-popt, _ = curve_fit(objective, x, y)
-# summarize the parameter values
-a, b, c = popt
-
-print('y = %.5f * x + %.5f * x^2 + %.5f' % (a, b, c))
-# plot input vs output
-
-fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
-
-axs.grid(axis="y", which="both")
-
-axs.scatter(all_df.max_ndvi_in_year_modis, all_df.unit_matt_npp, 
-            s = 20, c="dodgerblue", marker="x");
-
-
-x_line = arange(min(x), max(x), 0.01)
-y_line = objective(x_line, a, b, c)
-axs.plot(x_line, y_line, color="r", linewidth=4)
-plt.text(0.2, 5100, f'y = {c.round(1)} + {a.round(1)} $x$ + {b.round(1)} $x^2$')
-
-axs.set_xlabel("max NDVI in a year")
-axs.set_ylabel("unit Matt's NPP in a year")
-
-plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "squaredNDVI_mattUnitNPP_Scatter.pdf"
-plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
-
-
-# %%
-def objective(x, a, b, c):
     return a * (x**2) + b*x + c
 
 # choose the input and output variables
-x, y = df_["max_ndvi_in_year_modis"], df_["unit_matt_npp"].astype(float)
+x, y = df_[NDVI_col], df_[npp_col].astype(float)
 # curve fit
 popt, _ = curve_fit(objective, x, y)
 # summarize the parameter values
 a, b, c = popt
 
-print(f'y =  {a.round(1)} * x^2 + {b} * x  + {c}')
+print(f'y =  {a.round(1)} * x^2 + {b.round(2)} * x  + {c.round(2)}')
 
 fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
-
 axs.grid(axis="y", which="both")
 
-axs.scatter(all_df.max_ndvi_in_year_modis, all_df.unit_matt_npp, 
-            s = 20, c="dodgerblue", marker="x");
-
+axs.scatter(all_df[NDVI_col], all_df[npp_col], s = 20, c="dodgerblue", marker="x");
 
 x_line = arange(min(x), max(x), 0.01)
 y_line = objective(x_line, a, b, c)
 axs.plot(x_line, y_line, color="r", linewidth=4)
-plt.text(0.2, 5100, f'y = {a.round(1)} $x^2$ + {b.round(1)} $x$ + {c.round(1)}')
+round_d = 3
+plt.text(0.2, 0.5, f'y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$ + {c.round(round_d)}');
 
-axs.set_xlabel("max NDVI in a year")
-axs.set_ylabel("unit Matt's NPP in a year")
+axs.set_xlabel(NDVI_col);
+axs.set_ylabel(npp_col);
 
 plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "squaredNDVI_mattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "squaredNDVI_metricMattUnitNPP_Scatter.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 del(x_line)
 
 # %%
-
 # X = df_["max_ndvi_in_year_modis"].copy()
 # X = sm.add_constant(X)
 # X["max_ndvi_in_year_modis_sq"] = X["max_ndvi_in_year_modis"] ** 2
@@ -363,7 +331,7 @@ fit = ols('unit_matt_npp ~ max_ndvi_in_year_modis', data=all_df).fit()
 fit.summary()
 
 # %%
-fit = ols('total_matt_npp ~ max_ndvi_in_year_modis', data=all_df_normal).fit() 
+fit = ols('total_matt_npp ~ max_ndvi_in_year_modis', data=all_df).fit() 
 fit.summary()
 
 # %%
