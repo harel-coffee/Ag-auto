@@ -13,6 +13,9 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# The link Mike sent about [spatial correlation](https://geographicdata.science/book/notebooks/11_regression.html)
+
 # %%
 import shutup
 
@@ -40,9 +43,6 @@ print("Today's date:", date.today())
 print("Current Time =", current_time)
 
 # %%
-# https://geographicdata.science/book/notebooks/11_regression.html
-
-# %%
 tick_legend_FontSize = 8
 
 params = {
@@ -61,6 +61,30 @@ plt.rcParams["ytick.left"] = True
 plt.rcParams["xtick.labelbottom"] = True
 plt.rcParams["ytick.labelleft"] = True
 plt.rcParams.update(params)
+
+# %%
+# In the context of this chapter, it makes sense to start with spreg, 
+# as that is the only library that will allow us to move into 
+# explicitly spatial econometric models
+
+from pysal.lib import weights
+from pysal.model import spreg
+from pysal.explore import esda
+import geopandas, contextily
+
+from scipy.stats import ttest_ind
+# ttest_ind(coastal, not_coastal)
+
+# %% [markdown]
+# #### Fit OLS model with Spreg
+#
+# \begin{equation}
+# m1 = spreg.OLS(db[["log_price"]].values, #Dependent variable
+#                     db[variable_names].values, # Independent variables
+#                name_y="log_price", # Dependent variable name
+#                name_x=variable_names # Independent variable name
+#                )
+# \end{equation}
 
 # %%
 from statsmodels.formula.api import ols
