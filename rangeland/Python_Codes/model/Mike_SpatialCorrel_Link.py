@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -18,6 +18,12 @@
 # https://geographicdata.science/book/data/airbnb/regression_cleaning.html
 
 # %%
+# # !pip3 install geopandas
+# # !pip3 install geopy
+# # !pip3 install mapclassify
+# # !pip3 install googlemaps
+
+# %%
 # %matplotlib inline
 
 import numpy as np
@@ -28,12 +34,9 @@ import geopandas as gpd
 from scipy.spatial.distance import cdist
 
 # %%
-# # !pip3 install geopandas
-# # !pip3 install geopy
-
-# %%
 import os
-os.chdir("/Users/hn/Documents/01_research_data/rangeland/Mike_SpatialCorr/SanDiego/")
+os.chdir("/Users/hn/Documents/01_research_data/RangeLand/Data/Mike_SpatialCorr/SanDiego/")
+          
 
 # %%
 # outdated and do not exist.
@@ -89,6 +92,7 @@ os.chdir("/Users/hn/Documents/01_research_data/rangeland/Mike_SpatialCorr/SanDie
 #     df = pd.read_csv(fio)
 
 # %%
+os.getcwd()
 
 # %%
 lst = pd.read_csv('listings.csv.gz')

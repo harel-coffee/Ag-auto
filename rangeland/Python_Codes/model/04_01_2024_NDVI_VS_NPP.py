@@ -58,6 +58,9 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 os.makedirs(reOrganized_dir, exist_ok=True)
 
 # %%
+plots_dir = data_dir_base + "00_plots/NDVI_NPP/"
+
+# %%
 abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
@@ -117,17 +120,24 @@ axs.grid(axis="y", which="both")
 NDVI_col = "max_ndvi_in_year_modis"
 npp_col = 'metric_unit_matt_npp'
 
+if npp_col == "metric_unit_matt_npp":
+    meteric_name = "metric"
+else:
+    meteric_name = ""
+
 axs.scatter(all_df[NDVI_col], all_df[npp_col], s = 20, c="r", marker="x");
 
 axs.set_xlabel(NDVI_col)
 axs.set_ylabel(npp_col)
 
-plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NDVI_metricMattUnitNPP_Scatter.pdf"
-plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+fig_name = plots_dir + "NDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print (f"{fig_name = }")
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
-fit = ols('metric_unit_matt_npp ~ max_ndvi_in_year_modis', data=all_df).fit() 
+
+# %%
+fit = ols(npp_col + ' ~ max_ndvi_in_year_modis', data=all_df).fit() 
 fit.summary()
 
 # %%
@@ -159,7 +169,6 @@ df_.dropna(how="any", inplace=True)
 # print("Coefficient of determination: %.2f" % r2_score(y_pred, df_.unit_matt_npp.values))
 
 # %%
-
 X = all_df[[NDVI_col, npp_col]].copy()
 X.dropna(how="any", inplace=True)
 X = sm.add_constant(X)
@@ -171,24 +180,34 @@ y_pred = ks_result.predict(X)
 ks_result.summary()
 
 # %%
+R2 = ks_result.rsquared.round(2)
+
+# %%
 fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 
 axs.grid(axis="y", which="both")
 
-axs.scatter(all_df[NDVI_col], all_df[npp_col], s = 20, c="r", marker="x");
-axs.plot(X[NDVI_col], y_pred, color="blue", linewidth=3)
+axs.scatter(all_df[NDVI_col], all_df[npp_col], s = 20, c="dodgerblue", marker="x");
+axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
 
 constant = ks_result.params["const"].round(2)
 slope = ks_result.params[NDVI_col].round(2)
-plt.text(0.2, 0.52, f'y = {constant} + {slope} $x$')
+
+
+if meteric_name == "metric":
+    plt.text(0.2, 0.52, f'y = {constant} + {slope} $x$, ($R^2 $={R2})')
+else:
+    plt.text(0.2, 5000, f'y = {constant} + {slope} $x$, ($R^2 $={R2})')
 
 axs.set_xlabel(NDVI_col)
 axs.set_ylabel(npp_col)
 
-plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NDVI_metricMattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "NDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print (f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
+
+# %%
 
 # %% [markdown]
 # # Transfered model
@@ -202,7 +221,6 @@ ks_result = ks.fit()
 y_pred = ks_result.predict(X)
 ks_result.summary()
 
-
 fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
@@ -212,13 +230,18 @@ axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
 
 constant = ks_result.params["const"].round(2)
 slope = ks_result.params[NDVI_col].round(2)
-plt.text(0.2, .7, f'y = {constant} + {slope} $x$')
+
+R2 = ks_result.rsquared.round(2)
+if meteric_name == "metric":
+    plt.text(0.2, .7, f'y = {constant} + {slope} $x$, ($R^2 $={R2})')
+else:
+    plt.text(0.2, 70, f'y = {constant} + {slope} $x$, ($R^2 $={R2})')
 
 axs.set_xlabel(NDVI_col)
-axs.set_ylabel("meric sqrt metric unit Matt's NPP in a year")
+axs.set_ylabel("sqrt "+ npp_col)
 
-plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NDVI_sqrtMetricMattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "NDVI_sqrt" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print (f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
@@ -230,25 +253,27 @@ ks_result = ks.fit()
 y_pred = ks_result.predict(X)
 ks_result.summary()
 
-fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, 
-                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 
 axs.grid(axis="y", which="both")
 
-axs.scatter(X[NDVI_col], Y, 
-            s = 20, c="dodgerblue", marker="x");
-
+axs.scatter(X[NDVI_col], Y, s = 20, c="dodgerblue", marker="x");
 axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
-
 
 constant = ks_result.params["const"].round(2)
 slope = ks_result.params[NDVI_col].round(2)
-plt.text(0.2, -0.5, f'y = {constant} + {slope} $x$')
+R2 = ks_result.rsquared.round(2)
+
+if meteric_name == "metric":
+    plt.text(0.2, -0.5, f'y = {constant} + {slope} $x$, ($R^2 $={R2})')
+else:
+    plt.text(0.2, 8.5, f'y = {constant} + {slope} $x$, ($R^2 $={R2})')
+
 axs.set_xlabel(NDVI_col)
 axs.set_ylabel(f"log " + npp_col)
 
-plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "NDVI_LogMetricMattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "NDVI_Log" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print (f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %% [markdown]
@@ -283,13 +308,17 @@ x_line = arange(min(x), max(x), 0.01)
 y_line = objective(x_line, a, b, c)
 axs.plot(x_line, y_line, color="r", linewidth=4)
 round_d = 3
-plt.text(0.2, 0.5, f'y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$ + {c.round(round_d)}');
+R2 = ks_result.rsquared.round(2)
+if meteric_name == "metric":
+    plt.text(0.2, 0.5, f'y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+{c.round(round_d)}, ($R^2 $={R2})');
+else:
+    plt.text(0.2, 5000, f'y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+ {c.round(round_d)}, ($R^2 $={R2})');
 
 axs.set_xlabel(NDVI_col);
 axs.set_ylabel(npp_col);
 
-plots_dir = data_dir_base + "00_plots/"
-fig_name = plots_dir + "squaredNDVI_metricMattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "squaredNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print (f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
@@ -327,7 +356,7 @@ del(x_line)
 
 
 # %%
-fit = ols('unit_matt_npp ~ max_ndvi_in_year_modis', data=all_df).fit() 
+fit = ols(npp_col + ' ~ max_ndvi_in_year_modis', data=all_df).fit() 
 fit.summary()
 
 # %%
@@ -345,5 +374,6 @@ from plspm.mode import Mode
 
 
 # %%
+7.934**2
 
 # %%

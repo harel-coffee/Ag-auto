@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -300,6 +300,15 @@ print (f"{fit.pvalues['metric_total_matt_nppDiv10M'] = }")
 fit.summary()
 
 # %%
+fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M + C(state_dummy_int) - 1',
+          data = inv_prices_ndvi_npp).fit() 
+
+print (f"{fit.pvalues['metric_total_matt_nppDiv10M'] = }")
+
+fit.summary()
+
+# %%
+fit.params.filter(like="state_dummy_int")
 
 # %%
 fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
