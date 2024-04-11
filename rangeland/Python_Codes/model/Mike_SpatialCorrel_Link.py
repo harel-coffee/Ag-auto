@@ -21,10 +21,11 @@
 # https://geographicdata.science/book/data/airbnb/regression_cleaning.html
 
 # %%
+
+# %%
 import shutup
 shutup.please()
 
-# %%
 # In the context of this chapter, it makes sense to start with spreg, 
 # as that is the only library that will allow us to move into 
 # explicitly spatial econometric models
@@ -264,9 +265,6 @@ xs = ['accommodates', 'bathrooms', 'bedrooms',
 # %%
 rt = pd.get_dummies(gdb['room_type'], prefix='rt').rename(columns=lambda x: x.replace(' ', '_'))
 
-# %%
-rt["rt_Hotel_room"]
-
 
 # %%
 
@@ -328,9 +326,9 @@ final = gdb[xs].join(pg)\
 # %%
 
 # %%
-final = final.rename(columns=dict(neighbourhood_cleansed='neighborhood', 
-                          coastal_neig='coastal',
-                          l_price = 'log_price'))
+final = final.rename(columns=dict(neighbourhood_cleansed='neighborhood',
+                                  coastal_neig='coastal',
+                                  l_price = 'log_price'))
 
 # %%
 # !rm regression_db.geojson
@@ -367,12 +365,8 @@ db.dropna(inplace=True)
 
 # %%
 # db_original = db.copy()
-
-# %%
 # db = db[variable_names + ["log_price"]].copy()
 # db.head(2)
-
-# %%
 
 # %%
 db["rt_Private_room"] = db["rt_Private_room"].astype(float)
@@ -382,7 +376,6 @@ db["pg_House"] = db["pg_House"].astype(float)
 db["pg_Other"] = db["pg_Other"].astype(float)
 db["pg_Townhouse"] = db["pg_Townhouse"].astype(float)
 
-# %%
 db.head(2)
 
 # %%
@@ -455,6 +448,9 @@ db["pg_Apartment"].unique()
 
 # %%
 knn = weights.KNN.from_dataframe(db, k=1)
+
+# %%
+db.head(2)
 
 # %%
 lag_residual = weights.spatial_lag.lag_spatial(knn, m1.u)

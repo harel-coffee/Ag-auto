@@ -49,17 +49,22 @@ print("Today's date:", date.today())
 print("Current Time =", current_time)
 
 # %%
+from pysal.lib import weights
+from pysal.model import spreg
+from pysal.explore import esda
+import geopandas, contextily
+
+from scipy.stats import ttest_ind
+
+# %%
 tick_legend_FontSize = 8
 
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
-    # 'figure.figsize': (6, 4),
-    "axes.labelsize": tick_legend_FontSize * 1.5,
-    "axes.titlesize": tick_legend_FontSize * 1.3,
-    "xtick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
-    "axes.titlepad": 10,
-}
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
+          "axes.labelsize": tick_legend_FontSize * 1.5,
+          "axes.titlesize": tick_legend_FontSize * 1.3,
+          "xtick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+          "axes.titlepad": 10}
 
 plt.rc("font", family="Palatino")
 plt.rcParams["xtick.bottom"] = True
@@ -164,7 +169,6 @@ all_df["inventoryDiv1000"] = all_df["inventory"]/1000
 all_df["log_total_matt_npp"] = np.log(all_df["total_matt_npp"])
 all_df["total_matt_nppDiv1B"] = all_df["total_matt_npp"] / 1000000000
 
-
 all_df["log_metric_total_matt_npp"] = np.log(all_df["metric_total_matt_npp"])
 all_df["metric_total_matt_nppDiv10M"] = all_df["metric_total_matt_npp"] / 10000000
 all_df["metric_total_matt_nppDiv500K"] = all_df["metric_total_matt_npp"] / 500000
@@ -226,16 +230,95 @@ state_fips[state_fips["state_fips"]=="21"]
 
 # %%
 # non-normal data
-
 # log_inventory, inventoryDiv1000, C(EW_meridian)
 # [inv_prices_ndvi_npp.EW_meridian=="E"]
-fit = ols('inventory ~ max_ndvi_in_year_modis + beef_price_at_1982 + hay_price_at_1982', 
+
+depen_var_name = "inventory"
+indp_vars = ["max_ndvi_in_year_modis", "beef_price_at_1982", "hay_price_at_1982"]
+
+fit = ols(depen_var_name + " ~ " + " + ".join(indp_vars), 
            data=inv_prices_ndvi_npp).fit()
 
 fit.summary()
 
 # %%
-inv_prices_ndvi_npp.columns
+spreg_fit = spreg.OLS(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
+                      x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
+                      name_y=depen_var_name, # Dependent variable name
+                      name_x=indp_vars)
+
+pd.DataFrame({"Coeff.": spreg_fit.betas.flatten(),
+              "Std. Error": spreg_fit.std_err.flatten(),
+              "P-Value": [i[1] for i in spreg_fit.t_stat]},
+              index = spreg_fit.name_x).round(4)
+
+# %%
+depen_var_name = "inventoryDiv1000"
+indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
+m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
+                       x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
+
+                       # Variable specifying neighborhood membership
+                       regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
+              
+                       # Variables to be allowed to vary (True) or kept
+                       # constant (False). Here we set all to False
+                       # cols2regi=[False] * len(indp_vars),
+                        
+                       # Allow the constant term to vary by group/regime
+                       constant_regi="many",
+                        
+                       # Allow separate sigma coefficients to be estimated
+                       # by regime (False so a single sigma)
+                       regime_err_sep=False,
+                       name_y=depen_var_name, # Dependent variable name
+                       name_x=indp_vars)
+
+m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
+                           }, index=m5.name_x)
+
+m5_results
+
+# West regime
+## Extract variables for the west side regime
+west_m = [i for i in m5_results.index if "W_" in i]
+
+## Subset results to west side and remove the W_
+west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
+## Build multi-index column names
+west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
+
+# East model
+## Extract variables for the eastern regime
+east_m = [i for i in m5_results.index if "E_" in i]
+east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
+## Build multi-index column names
+east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
+# Concat both models
+pd.concat([west, east], axis=1)
+
+# %%
+# variable_list = fit.params.index.to_list() 
+# coef_dict = fit.params.to_dict()  # coefficient dictionary
+# pval_dict = fit.pvalues.to_dict()  # pvalues dictionary
+# std_error_dict = fit.bse.to_dict()
+
+# aic_val = round(fit.aic, 2) # aic value
+# adj_rsqured = round(fit.rsquared_adj, 3) # adjusted rsqured
+# info_index = ['Num', 'AIC', 'Adjusted R2']
+# index_list = variable_list + info_index
+
+# %%
+
+# %%
+short_summ =pd.DataFrame({"Coeff.": fit.params.values,          
+                          "Std. Error": fit.bse.values.round(2),
+                          "t": fit.tvalues.values,
+                          "P-Value": fit.pvalues.values},
+                          index = list(fit.params.index))
+short_summ
 
 # %%
 print (len(inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "E"].state_fips.unique()))
@@ -434,11 +517,8 @@ m5.chow.joint
 
 # %%
 pd.DataFrame(m5.chow.regi, # Chow results by variable
-             index=m5.name_x_r, # Name of variables
-             columns=["Statistic", "P-value"]# Column names
-            )
-
-# %%
+             index = m5.name_x_r, # Name of variables
+             columns = ["Statistic", "P-value"])
 
 # %%
 ### west of Meridian
@@ -455,12 +535,18 @@ print (f"{fit.pvalues['metric_total_matt_nppDiv10M'] = }")
 fit.summary()
 
 # %%
+
+# %%
+
+# %%
 fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M + C(state_dummy_int) - 1',
           data = inv_prices_ndvi_npp).fit() 
 
-print (f"{fit.pvalues['metric_total_matt_nppDiv10M'] = }")
+print (f"{fit.pvalues['metric_total_matt_nppDiv10M'].round(3) = }")
 
 fit.summary()
+
+# %%
 
 # %%
 # fit.params.filter(like="state_dummy_int")
@@ -649,8 +735,6 @@ x_line = np.arange(min(df_[x_col]), max(df_[x_col]), 0.01)
 y_line = log_log_fit.predict(pd.DataFrame(x_line).rename(columns = {0:x_col}))
 axs.plot(x_line, y_line, color="r", linewidth=4, label="minimum included for fit")
 
-
-
 axs.legend(loc="lower right")
 plt.text(min(df_[x_col]), max(df_[y_col])-.2, 'West of meridian.')
 axs.set_xlabel(x_col.replace("_", " "));
@@ -662,7 +746,6 @@ plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 # # !pip3 install spreg
-import spreg
 
 # %%
 inv_prices_ndvi_npp.head(2)
@@ -673,86 +756,8 @@ list(inv_prices_ndvi_npp.columns)
 # %%
 inv_prices_ndvi_npp["W_meridian_bool"] = True
 inv_prices_ndvi_npp.loc[inv_prices_ndvi_npp.EW_meridian=="E", "W_meridian_bool"] = False
+
 inv_prices_ndvi_npp.W_meridian_bool.head(2)
-
-# %%
-depen_var_name = "inventoryDiv1000"
-indp_vars = ["metric_total_matt_nppDiv10M"]
-m5 = spreg.OLS_Regimes(# Dependent variable
-                       y = inv_prices_ndvi_npp[depen_var_name].values,
-    
-                       # Independent variables
-                       x = inv_prices_ndvi_npp[indp_vars].values,
-
-                       # Variable specifying neighborhood membership
-                       regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
-              
-                       # Variables to be allowed to vary (True) or kept
-                       # constant (False). Here we set all to False
-                       # cols2regi=[False] * len(indp_vars),
-                        
-                       # Allow the constant term to vary by group/regime
-                       constant_regi="many",
-                        
-                       # Allow separate sigma coefficients to be estimated
-                       # by regime (False so a single sigma)
-                       regime_err_sep=False,
-                        
-                       # Dependent variable name
-                       name_y=depen_var_name,
-                        
-                       # Independent variables names
-                       name_x=indp_vars)
-
-m5_results = pd.DataFrame({# Pull out regression coefficients and
-                           # flatten as they are returned as Nx1 array
-                           "Coeff.": m5.betas.flatten(),
-                           # Pull out and flatten standard errors
-                           "Std. Error": m5.std_err.flatten(),
-                           # Pull out P-values from t-stat object
-                           "P-Value": [i[1] for i in m5.t_stat],
-                           }, index=m5.name_x)
-
-m5_results
-
-# %%
-inv_prices_ndvi_npp["EW_meridian"]
-
-# %%
-# West regime
-## Extract variables for the coastal regime
-west_m = [i for i in m5_results.index if "W_" in i]
-
-## Subset results to coastal and remove the 1_ underscore
-west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
-## Build multi-index column names
-west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
-
-# East model
-## Extract variables for the non-coastal regime
-east_m = [i for i in m5_results.index if "E_" in i]
-## Subset results to non-coastal and remove the 0_ underscore
-east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
-## Build multi-index column names
-east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
-# Concat both models
-pd.concat([west, east], axis=1)
-
-# %%
-
-# %%
-
-# %%
-fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M',
-          data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"]).fit()
-fit.params
-
-# %%
-fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M',
-          data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "E"]).fit()
-fit.params
-
-# %%
 
 # %%
 26786792214/755465
@@ -766,14 +771,6 @@ fit = ols('inventory ~ total_matt_npp + beef_price_at_1982 + hay_price_at_1982 +
 
 inv_prices_ndvi_npp.total_matt_npp = np.exp(inv_prices_ndvi_npp.total_matt_npp)
 fit.summary()
-
-# %%
-print (all_df[all_df.state_fips=="53"].total_matt_npp.min())
-print (all_df[all_df.state_fips=="53"].total_matt_npp.max())
-
-# %%
-6,451,447,773
-15,454,643,636
 
 # %% [raw]
 # m4 = spreg.OLS_Regimes(
@@ -818,5 +815,6 @@ print (all_df[all_df.state_fips=="53"].total_matt_npp.max())
 # )
 
 # %%
+knn = weights.KNN.from_dataframe(inv_prices_ndvi_npp, k=1)
 
 # %%
