@@ -334,9 +334,6 @@ len(inv_prices_ndvi_npp.state_fips.unique())
 # ## NPP Models
 
 # %%
-inv_prices_ndvi_npp.columns
-
-# %%
 print (inv_prices_ndvi_npp.beef_price_at_1982.min())
 print (inv_prices_ndvi_npp.beef_price_at_1982.max())
 print ()
@@ -366,11 +363,8 @@ state_fips_SoI[state_fips_SoI.state_fips=="35"]
 
 depen_var_name = "inventoryDiv1000"
 indp_vars = ["metric_total_matt_nppDiv10M"]
-m5 = spreg.OLS_Regimes(# Dependent variable
-                       y = inv_prices_ndvi_npp[depen_var_name].values,
-    
-                       # Independent variables
-                       x = inv_prices_ndvi_npp[indp_vars].values,
+m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
+                       x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
 
                        # Variable specifying neighborhood membership
                        regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
@@ -385,20 +379,14 @@ m5 = spreg.OLS_Regimes(# Dependent variable
                        # Allow separate sigma coefficients to be estimated
                        # by regime (False so a single sigma)
                        regime_err_sep=False,
-                        
-                       # Dependent variable name
-                       name_y=depen_var_name,
-                        
-                       # Independent variables names
+                       name_y=depen_var_name, # Dependent variable name 
                        name_x=indp_vars)
+                      
 
-m5_results = pd.DataFrame({# Pull out regression coefficients and
-                           # flatten as they are returned as Nx1 array
+m5_results = pd.DataFrame({# Pull out regression coefficients and flatten
                            "Coeff.": m5.betas.flatten(),
-                           # Pull out and flatten standard errors
-                           "Std. Error": m5.std_err.flatten(),
-                           # Pull out P-values from t-stat object
-                           "P-Value": [i[1] for i in m5.t_stat],
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
                            }, index=m5.name_x)
 
 # West regime
@@ -420,7 +408,7 @@ east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
 # Concat both models
 pd.concat([west, east], axis=1)
 
-# %% [markdown]
+# %% [raw]
 # An interesting question arises around the relevance of the regimes. Are estimates for each variable across regimes statistically different? For this, the model object also calculates for us what is called a ```Chow``` test. This is a statistic that tests the null hypothesis that estimates from different regimes are undistinguishable. If we reject the null, we have evidence suggesting the regimes actually make a difference.
 #
 #
@@ -539,14 +527,14 @@ fit.summary()
 # %%
 
 # %%
-fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M + C(state_dummy_int) - 1',
+y_var = "inventoryDiv1000"
+x_vars = ["metric_total_matt_nppDiv10M", "C(state_dummy_int) - 1"] # -1 came from Mike's Tutorial. sth about under
+fit = ols(y_var + ' ~ ' + "+".join(x_vars),
           data = inv_prices_ndvi_npp).fit() 
 
 print (f"{fit.pvalues['metric_total_matt_nppDiv10M'].round(3) = }")
 
 fit.summary()
-
-# %%
 
 # %%
 # fit.params.filter(like="state_dummy_int")
@@ -813,8 +801,5 @@ fit.summary()
 #     # Independent variables names
 #     name_x=variable_names,
 # )
-
-# %%
-knn = weights.KNN.from_dataframe(inv_prices_ndvi_npp, k=1)
 
 # %%

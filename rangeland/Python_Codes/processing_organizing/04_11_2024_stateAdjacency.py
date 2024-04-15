@@ -108,10 +108,72 @@ print (adj_df_SoI.shape)
 adj_df_SoI.head(2)
 
 # %%
+adj_df_fips.shape
+
+# %%
 adj_df_fips_SoI = adj_df_fips[list(state_fips_SoI.state_fips)].copy()
-adj_df_fips_SoI = adj_df_fips.loc[list(state_fips_SoI.state_fips)]
+adj_df_fips_SoI = adj_df_fips_SoI.loc[list(state_fips_SoI.state_fips)]
 print (adj_df_fips_SoI.shape)
 adj_df_fips_SoI.head(2)
+
+# %%
+import numpy as np
+np.diag(adj_df_SoI)
+
+# %% [markdown]
+# # Spectral normalized
+
+# %%
+eigenvalues, eigenvectors = np.linalg.eig(adj_df)
+print (eigenvalues.max().round(2))
+adj_df_spectralNormalized = adj_df / max(eigenvalues)
+
+eigenvalues, _ = np.linalg.eig(adj_df_spectralNormalized)
+eigenvalues.max().round(2)
+
+# %%
+eigenvalues, eigenvectors = np.linalg.eig(adj_df_SoI)
+adj_df_SoI_spectralNormalized = adj_df_SoI / max(eigenvalues)
+
+eigenvalues, eigenvectors = np.linalg.eig(adj_df_fips)
+adj_df_fips_spectralNormalized = adj_df_fips / max(eigenvalues)
+
+eigenvalues, eigenvectors = np.linalg.eig(adj_df_fips_SoI)
+adj_df_fips_SoI_spectralNormalized = adj_df_fips_SoI / max(eigenvalues)
+
+# %% [markdown]
+# ### Row normalized
+
+# %%
+adj_df_rowNormalized = adj_df.div(adj_df.sum(axis=0), axis=0)
+adj_df_SoI_rowNormalized = adj_df_SoI.div(adj_df_SoI.sum(axis=0), axis=0)
+adj_df_fips_rowNormalized = adj_df_fips.div(adj_df_fips.sum(axis=0), axis=0)
+adj_df_fips_SoI_rowNormalized = adj_df_fips_SoI.div(adj_df_fips_SoI.sum(axis=0), axis=0)
+
+# %%
+
+# %%
+neighbors_dict_abb = {}
+
+for entry in gitHubStateAdj:
+    curr_list = entry.split(",")
+    curr_state = curr_list.pop(0)
+    neighbors_dict_abb[curr_state] = curr_list 
+
+    
+df = state_fips.copy()
+df.set_index('state', inplace=True)
+df.head(2)
+
+neighbors_dict_fips = {}
+for entry in gitHubStateAdj:
+    curr_list = entry.split(",")
+    curr_state = curr_list.pop(0)
+    neighbors_dict_fips[df.loc[curr_state]["state_fips"]] = df.loc[curr_list]["state_fips"].to_list() 
+
+# %%
+
+# %%
 
 # %%
 import pickle
@@ -123,6 +185,21 @@ export_ = {"adj_df": adj_df,
            "adj_df_SoI" : adj_df_SoI,
            "adj_df_fips": adj_df_fips,
            "adj_df_fips_SoI": adj_df_fips_SoI,
+           
+           "adj_df_spectralNormalized": adj_df_spectralNormalized,
+           "adj_df_SoI_spectralNormalized" : adj_df_SoI_spectralNormalized,
+           "adj_df_fips_spectralNormalized": adj_df_fips_spectralNormalized,
+           "adj_df_fips_SoI_spectralNormalized": adj_df_fips_SoI_spectralNormalized,
+           
+           
+           "adj_df_rowNormalized" : adj_df_rowNormalized,
+           "adj_df_SoI_rowNormalized" : adj_df_SoI_rowNormalized,
+           "adj_df_fips_rowNormalized" : adj_df_fips_rowNormalized,
+           "adj_df_fips_SoI_rowNormalized" : adj_df_fips_SoI_rowNormalized,
+           
+           "neighbors_dict_abb" : neighbors_dict_abb,
+           "neighbors_dict_fips" : neighbors_dict_fips,
+
            "source_code" : "04_11_2024_stateAdjacency",
            "Author": "HN",
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -130,7 +207,27 @@ export_ = {"adj_df": adj_df,
 pickle.dump(export_, open(filename, 'wb'))
 
 # %%
-import numpy as np
-np.diag(adj_df_SoI)
+neighbors_dict_abb
+
+# %%
+
+# %%
+neighbors_dict_fips
+
+# %%
+from libpysal.weights import W
+
+# %%
+weights = {}
+for a_key in neighbors_dict_fips.keys():
+    weights[a_key] = [1] * len(neighbors_dict_fips[a_key])
+
+# %%
+adj_pysal_weights_ = W(neighbors_dict_fips, weights)
+
+# %%
+adj_pysal_weights_.histogram
+
+# %%
 
 # %%
