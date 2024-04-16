@@ -46,6 +46,7 @@ sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 from datetime import datetime, date
+from scipy.linalg import inv
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print("Today's date:", date.today())
@@ -141,9 +142,7 @@ all_df = rc.convert_lb_2_kg(df=all_df,
                             new_col_name="metric_total_matt_npp")
 
 # %%
-len(all_df.state_fips.unique())
-
-# %%
+print (len(all_df.state_fips.unique()))
 all_df.head(2)
 
 # %%
@@ -162,8 +161,9 @@ print (all_df.shape)
 all_df = all_df[all_df.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
 all_df.reset_index(drop=True, inplace=True)
 
-# %%
 all_df.head(2)
+
+# %%
 
 # %%
 all_df["log_inventory"] = np.log(all_df["inventory"])
@@ -369,7 +369,7 @@ inv_prices_ndvi_npp.loc[inv_prices_ndvi_npp.EW_meridian=="E", "W_meridian_bool"]
 inv_prices_ndvi_npp.W_meridian_bool.head(2)
 
 # %%
-inv_prices_ndvi_npp
+inv_prices_ndvi_npp.head(2)
 
 # %% [markdown]
 # # Weighted LS
@@ -396,6 +396,8 @@ list(state_adj_dfs.keys())
 
 # %%
 # Adjacency matrices:
+
+adj_df_fips = state_adj_dfs["adj_df_fips"]
 adj_df_fips_SoI = state_adj_dfs["adj_df_fips_SoI"]
 adj_df_SoI = state_adj_dfs["adj_df_SoI"]
 
@@ -415,11 +417,11 @@ print (len(fit.fittedvalues))
 #                    'score': [48, 78, 72, 70, 66, 92, 93, 75, 75, 80, 95, 97,
 #                              90, 96, 99, 99]})
 
-########################################################################
-########################################################################
-########################################################################
+# #######################################################################
+# #######################################################################
+# #######################################################################
 
-# define predictor and response variables
+# # define predictor and response variables
 # y = df['score']
 # X = df['hours']
 
@@ -431,16 +433,18 @@ print (len(fit.fittedvalues))
 # print (f"{y.shape = }")
 # fit = sm.OLS(y, X).fit()
 
-########################################################################
-########################################################################
-########################################################################
+# #######################################################################
+# #######################################################################
+# #######################################################################
 # wt = 1 / ols('fit.resid.abs() ~ fit.fittedvalues', data=df).fit().fittedvalues**2
 
-# fit weighted least squares regression model
+# # fit weighted least squares regression model
 # fit_wls = sm.WLS(y, X, weights=wt).fit()
 
-# view summary of weighted least squares regression model
+# # view summary of weighted least squares regression model
 # print(fit_wls.summary())
+
+# %%
 
 # %%
 # d = {"resid_": fit.resid.abs(), "preds_" : fit.fittedvalues}
@@ -463,6 +467,32 @@ print (len(fit.fittedvalues))
 # wt_2
 
 # %%
+fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M',
+          data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"]).fit()
+fit.summary()
+
+
+# %%
+block_diag_weights = rc.create_adj_weight_matrix(data_df=inv_prices_ndvi_npp, 
+                                                 adj_df=adj_df_fips, 
+                                                 fips_var="state_fips")
+
+block_diag_weights.head(2)
+
+# %%
+y_var = "inventoryDiv1000"
+X_vars = ["metric_total_matt_nppDiv10M"]
+
+y = inv_prices_ndvi_npp[y_var]
+X = inv_prices_ndvi_npp[X_vars]
+X = sm.add_constant(X)
+
+
+theta = inv(X.T.values @ block_diag_weights.values @ X.values) @ X.T.values @ block_diag_weights.values @ y
+theta
+
+# %%
+list(X.columns)
 
 # %%
 

@@ -4,6 +4,54 @@ import pandas as pd
 import time, datetime
 from pprint import pprint
 import os, os.path, sys
+import scipy
+
+"""
+There are scipy.linalg.block_diag() and scipy.sparse.block_diag()
+"""
+
+
+def create_adj_weight_matrix(data_df, adj_df, fips_var="state_fips"):
+    """
+    We need to make a block-diagonal weight matrix
+    out of adjacency matrix.
+
+    We need data_df and fips_var since the data might not be complete.
+    For example, an state might be missing from a given year. So, we cannot
+    use the adj_df in full.
+
+    We need fips_var for distinguishing state or county
+
+    data_df : dataframe of data to use for iterating over years.
+    fips_var : string
+    adj_df : dataframe of adjacency matrix
+    """
+
+    # Sort data
+    data_df.sort_values(by=[fips_var, "year"], inplace=True)
+
+    blocks = []
+    diag_col_names = []
+    for a_year in data_df.year.unique():
+        curr_df = data_df[data_df.year == a_year]
+
+        assert len(curr_df[fips_var].unique()) == len(curr_df[fips_var])
+        curr_fips = list(curr_df[fips_var].unique())
+        curr_adj_block = adj_df.loc[curr_fips, curr_fips].copy()
+        assert (curr_adj_block.columns == curr_adj_block.index).all()
+
+        blocks.append(curr_adj_block)
+        diag_col_names = diag_col_names + list(curr_adj_block.columns)
+    # the * allows to use a list.
+
+    diag_block = scipy.linalg.block_diag(*blocks)
+    diag_block = pd.DataFrame(diag_block)
+
+    # rename columns so we know what's what
+    diag_block.columns = diag_col_names
+    diag_block.index = diag_col_names
+
+    return diag_block
 
 
 def convert_lb_2_kg(df, matt_total_npp_col, new_col_name):
