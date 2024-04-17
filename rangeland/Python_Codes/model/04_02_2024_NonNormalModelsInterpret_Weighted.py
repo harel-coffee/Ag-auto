@@ -467,37 +467,129 @@ print (len(fit.fittedvalues))
 # wt_2
 
 # %%
-fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M',
+
+# %%
+fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M', 
           data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"]).fit()
 fit.summary()
 
 
 # %%
-block_diag_weights = rc.create_adj_weight_matrix(data_df=inv_prices_ndvi_npp, 
-                                                 adj_df=adj_df_fips, 
-                                                 fips_var="state_fips")
+from sklearn.metrics import r2_score
+
+r2_score(inv_prices_ndvi_npp["inventoryDiv1000"], 
+         fit.predict(inv_prices_ndvi_npp["metric_total_matt_nppDiv10M"])).round(3)
+
+# %%
+
+# %%
+state_fips_west = pd.merge(state_fips, 
+                           inv_prices_ndvi_npp[["state_fips", "EW_meridian"]].drop_duplicates(),
+                           how="left", 
+                           on="state_fips")
+
+state_fips_west = state_fips_west[state_fips_west.EW_meridian == "W"].copy()
+state_fips_west.reset_index(drop=True, inplace=True)
+state_fips_west = state_fips_west[["state_fips", "state"]]
+##########
+state_fips_east = pd.merge(state_fips, 
+                           inv_prices_ndvi_npp[["state_fips", "EW_meridian"]].drop_duplicates(),
+                           how="left", 
+                           on="state_fips")
+
+state_fips_east = state_fips_east[state_fips_east.EW_meridian == "E"].copy()
+state_fips_east.reset_index(drop=True, inplace=True)
+state_fips_east = state_fips_east[["state_fips", "state"]]
+state_fips_east.head()
+
+# %%
+adj_df_fips_west = adj_df_fips[list(state_fips_west.state_fips)].copy()
+adj_df_fips_west = adj_df_fips_west.loc[list(state_fips_west.state_fips)]
+print (adj_df_fips_west.shape)
+
+adj_df_fips_east = adj_df_fips[list(state_fips_east.state_fips)].copy()
+adj_df_fips_east = adj_df_fips_east.loc[list(state_fips_east.state_fips)]
+adj_df_fips_east.shape
+
+# %% [markdown]
+# ### Create adjacency matrix for west and est meridian
+
+# %%
+block_diag_weights = rc.create_adj_weight_matrix(data_df = inv_prices_ndvi_npp, 
+                                                 adj_df = adj_df_fips, 
+                                                 fips_var = "state_fips")
 
 block_diag_weights.head(2)
 
 # %%
-y_var = "inventoryDiv1000"
-X_vars = ["metric_total_matt_nppDiv10M"]
+inv_prices_ndvi_npp_west = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"].copy()
+inv_prices_ndvi_npp_west.reset_index(drop=True, inplace=True)
+
+block_diag_weights_west = rc.create_adj_weight_matrix(data_df = inv_prices_ndvi_npp_west, 
+                                                      adj_df = adj_df_fips_west, 
+                                                      fips_var = "state_fips")
+print (block_diag_weights_west.shape)
+block_diag_weights_west.head(2)
+
+# %%
+
+# %%
+inv_prices_ndvi_npp_east = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "E"].copy()
+inv_prices_ndvi_npp_east.reset_index(drop=True, inplace=True)
+
+block_diag_weights_east = rc.create_adj_weight_matrix(data_df = inv_prices_ndvi_npp_east, 
+                                                      adj_df = adj_df_fips_east, 
+                                                      fips_var = "state_fips")
+print (block_diag_weights_east.shape)
+block_diag_weights_east.head(2)
+
+# %%
+inv_prices_ndvi_npp.columns
+
+# %% [markdown]
+# # All together
+
+# %%
+y_var = "log_inventory"
+X_vars = ["max_ndvi_in_year_modis"]
 
 y = inv_prices_ndvi_npp[y_var]
 X = inv_prices_ndvi_npp[X_vars]
 X = sm.add_constant(X)
 
+beta = inv(X.T.values @ block_diag_weights.values @ X.values) @ X.T.values @ block_diag_weights.values @ y
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
-theta = inv(X.T.values @ block_diag_weights.values @ X.values) @ X.T.values @ block_diag_weights.values @ y
-theta
-
-# %%
-list(X.columns)
-
-# %%
+# %% [markdown]
+# # West side
 
 # %%
+y = inv_prices_ndvi_npp_west[y_var]
+X = inv_prices_ndvi_npp_west[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_west.values @ X.values) @ X.T.values @ \
+               block_diag_weights_west.values @ y
+
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %%
+r2_score(y, X@beta).round(3)
+
+# %% [markdown]
+# # East side
+
+# %%
+y = inv_prices_ndvi_npp_east[y_var]
+X = inv_prices_ndvi_npp_east[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_east.values @ X.values) @ X.T.values @ \
+               block_diag_weights_east.values @ y
+
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+r2_score(y, X@beta).round(3)
 
 # %%
