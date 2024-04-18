@@ -311,13 +311,11 @@ pd.concat([west, east], axis=1)
 # index_list = variable_list + info_index
 
 # %%
-
-# %%
-short_summ =pd.DataFrame({"Coeff.": fit.params.values,          
-                          "Std. Error": fit.bse.values.round(2),
-                          "t": fit.tvalues.values,
-                          "P-Value": fit.pvalues.values},
-                          index = list(fit.params.index))
+short_summ = pd.DataFrame({"Coeff.": fit.params.values,          
+                           "Std. Error": fit.bse.values.round(2),
+                           "t": fit.tvalues.values,
+                           "P-Value": fit.pvalues.values},
+                           index = list(fit.params.index))
 short_summ
 
 # %%
@@ -529,8 +527,7 @@ fit.summary()
 # %%
 y_var = "inventoryDiv1000"
 x_vars = ["metric_total_matt_nppDiv10M", "C(state_dummy_int) - 1"] # -1 came from Mike's Tutorial. sth about under
-fit = ols(y_var + ' ~ ' + "+".join(x_vars),
-          data = inv_prices_ndvi_npp).fit() 
+fit = ols(y_var + ' ~ ' + "+".join(x_vars), data = inv_prices_ndvi_npp).fit() 
 
 print (f"{fit.pvalues['metric_total_matt_nppDiv10M'].round(3) = }")
 
@@ -801,5 +798,180 @@ fit.summary()
 #     # Independent variables names
 #     name_x=variable_names,
 # )
+
+# %% [markdown]
+# # NDVI and rangeland area herb ratio
+
+# %%
+inv_prices_ndvi_npp.columns
+
+# %%
+depen_var_name = "log_inventory"
+indp_vars = ["max_ndvi_in_year_modis", "beef_price_at_1982", "hay_price_at_1982", "rangeland_acre"]
+m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
+                       x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
+
+                       # Variable specifying neighborhood membership
+                       regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
+              
+                       # Variables to be allowed to vary (True) or kept
+                       # constant (False). Here we set all to False
+                       # cols2regi=[False] * len(indp_vars),                        
+                       # Allow the constant term to vary by group/regime
+                       constant_regi="many",
+                       
+                       # Allow separate sigma coefficients to be estimated
+                       # by regime (False so a single sigma)
+                       regime_err_sep=False,
+                       name_y=depen_var_name, # Dependent variable name
+                       name_x=indp_vars)
+
+m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
+                           }, index=m5.name_x)
+
+m5_results
+
+# West regime
+## Extract variables for the west side regime
+west_m = [i for i in m5_results.index if "W_" in i]
+
+## Subset results to west side and remove the W_
+west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
+## Build multi-index column names
+west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
+
+# East model
+## Extract variables for the eastern regime
+east_m = [i for i in m5_results.index if "E_" in i]
+east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
+## Build multi-index column names
+east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
+# Concat both models
+pd.concat([west, east], axis=1)
+
+# %%
+depen_var_name = "log_inventory" # C(EW_meridian)
+indp_vars = ["max_ndvi_in_year_modis", "beef_price_at_1982",
+             "hay_price_at_1982", "rangeland_acre", "C(EW_meridian)"]
+
+fit = ols(depen_var_name + " ~ " + " + ".join(indp_vars), data=inv_prices_ndvi_npp).fit()
+
+print (f"{fit.rsquared.round(2) = }")
+pd.DataFrame({"Coeff.": fit.params.values,          
+              "Std. Error": fit.bse.values.round(2),
+              "t": fit.tvalues.values,
+              "P-Value": fit.pvalues.values},
+              index = list(fit.params.index))
+
+# %% [markdown]
+# # Indp. Lagged
+
+# %%
+lag_vars = ['metric_total_matt_npp', 'metric_total_matt_nppDiv10M', 'log_metric_total_matt_npp',
+             'total_matt_npp', 'log_total_matt_npp', 'unit_matt_npp',
+             'inventory', 'log_inventory', 'inventoryDiv1000',
+             'beef_price_at_1982', 'hay_price_at_1982']
+
+inv_prices_ndvi_npp_lagged = rc.add_lags(df = inv_prices_ndvi_npp, 
+                                         merge_cols = ["state_fips", "year"], 
+                                         lag_vars_ = lag_vars, 
+                                         year_count = 3)
+
+print (f"{inv_prices_ndvi_npp.shape = }")
+print (f"{inv_prices_ndvi_npp.year.min() = }")
+print (f"{inv_prices_ndvi_npp.year.max() = }")
+inv_prices_ndvi_npp_lagged.dropna(subset=["hay_price_at_1982_lag3"], inplace=True)
+print ()
+print (f"{inv_prices_ndvi_npp_lagged.shape = }")
+print (f"{inv_prices_ndvi_npp_lagged.year.min() = }")
+print (f"{inv_prices_ndvi_npp_lagged.year.max() = }")
+
+# %%
+lagged_vars = sorted([x for x in inv_prices_ndvi_npp_lagged.columns if "lag" in x])
+lagged_vars
+
+# %%
+
+# %%
+y_var = "inventoryDiv1000"
+
+
+x_vars = ["metric_total_matt_nppDiv10M",      
+          'metric_total_matt_nppDiv10M_lag1', # 'beef_price_at_1982_lag1', 'hay_price_at_1982_lag1',
+          'metric_total_matt_nppDiv10M_lag2', # 'beef_price_at_1982_lag2', 'hay_price_at_1982_lag2',
+          'metric_total_matt_nppDiv10M_lag3', # 'beef_price_at_1982_lag3', 'hay_price_at_1982_lag3',
+          'beef_price_at_1982',      'hay_price_at_1982',
+          
+         ]
+
+fit = ols(y_var + ' ~ ' + "+".join(x_vars), data = inv_prices_ndvi_npp_lagged).fit() 
+fit.summary()
+
+# %%
+fit.params.round(2)
+
+# %%
+
+# %%
+### Allows for different slopes per category:
+depen_var_name = "inventoryDiv1000"
+indp_vars = ["metric_total_matt_nppDiv10M",      # 'beef_price_at_1982',      'hay_price_at_1982',
+             'metric_total_matt_nppDiv10M_lag1', # 'beef_price_at_1982_lag1', 'hay_price_at_1982_lag1',
+             'metric_total_matt_nppDiv10M_lag2', # 'beef_price_at_1982_lag2', 'hay_price_at_1982_lag2',
+             'metric_total_matt_nppDiv10M_lag3', # 'beef_price_at_1982_lag3', 'hay_price_at_1982_lag3',
+              ]
+
+
+m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp_lagged[depen_var_name].values, # Dependent variable
+                       x = inv_prices_ndvi_npp_lagged[indp_vars].values, # Independent variables
+
+                       # Variable specifying neighborhood membership
+                       regimes = inv_prices_ndvi_npp_lagged["EW_meridian"].tolist(),
+              
+                       # Variables to be allowed to vary (True) or kept
+                       # constant (False). Here we set all to False
+                       # cols2regi=[False] * len(indp_vars),
+                        
+                       # Allow the constant term to vary by group/regime
+                       constant_regi="many",
+                        
+                       # Allow separate sigma coefficients to be estimated
+                       # by regime (False so a single sigma)
+                       regime_err_sep=False,
+                       name_y=depen_var_name, # Dependent variable name 
+                       name_x=indp_vars)
+                      
+
+m5_results = pd.DataFrame({# Pull out regression coefficients and flatten
+                           "Coeff.": m5.betas.flatten(),
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
+                           }, index=m5.name_x)
+
+# West regime
+## Extract variables for the coastal regime
+west_m = [i for i in m5_results.index if "W_" in i]
+
+## Subset results to coastal and remove the 1_ underscore
+west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
+## Build multi-index column names
+west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
+
+# East model
+## Extract variables for the non-coastal regime
+east_m = [i for i in m5_results.index if "E_" in i]
+## Subset results to non-coastal and remove the 0_ underscore
+east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
+## Build multi-index column names
+east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
+
+# Concat both models
+result_ = pd.concat([west, east], axis=1)
+result_
+
+# %%
+print (list(result_["West Meridian", "Coeff."].round(2)))
 
 # %%

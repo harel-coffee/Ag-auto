@@ -85,42 +85,13 @@ def add_lags(df, merge_cols, lag_vars_, year_count):
     merge_cols : list of column names to merge on: state_fips/county_fips, year
     lag_vars_ : list of variable/column names to create the lags for
     year_count : integer: number of lag years we want.
-
-
     """
     cc_ = merge_cols + lag_vars_
     for yr_lag in np.arange(1, year_count + 1):
         df_needed_yrbefore = df[cc_].copy()
         df_needed_yrbefore["year"] = df_needed_yrbefore["year"] + yr_lag
-
-        for a_var in lag_vars_:
-            if a_var == "max_ndvi_in_year_modis":
-                df_needed_yrbefore.rename(
-                    columns={a_var: "NDVI" + str(yr_lag)},
-                    inplace=True,
-                )
-            elif a_var == "beef_price_at_1982":
-                df_needed_yrbefore.rename(
-                    columns={a_var: "B" + str(yr_lag)}, inplace=True
-                )
-            elif a_var == "hay_price_at_1982":
-                df_needed_yrbefore.rename(
-                    columns={a_var: "H" + str(yr_lag)}, inplace=True
-                )
-            elif a_var == "chicken_price_at_1982":
-                df_needed_yrbefore.rename(
-                    columns={a_var: "C" + str(yr_lag)}, inplace=True
-                )
-            elif a_var == "npp_t":
-                df_needed_yrbefore.rename(
-                    columns={a_var: a_var + str(yr_lag)}, inplace=True
-                )
-            elif a_var == "npp_u":
-                df_needed_yrbefore.rename(
-                    columns={a_var: a_var + str(yr_lag)}, inplace=True
-                )
-            else:
-                print("you need to fix add_lags() in rangeland_core")
+        lag_col_names = [x + "_lag" + str(yr_lag) for x in lag_vars_]
+        df_needed_yrbefore.columns = merge_cols + lag_col_names
 
         df = pd.merge(df, df_needed_yrbefore, on=merge_cols, how="left")
     return df

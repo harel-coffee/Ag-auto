@@ -546,18 +546,47 @@ block_diag_weights_east.head(2)
 # %%
 inv_prices_ndvi_npp.columns
 
+# %%
+
+# %%
+print (inv_prices_ndvi_npp["inventory"].min())
+print (inv_prices_ndvi_npp["inventory"].max())
+print ()
+print (inv_prices_ndvi_npp["rangeland_acre"].min())
+print (inv_prices_ndvi_npp["rangeland_acre"].max())
+print ()
+
+# %%
+print (inv_prices_ndvi_npp["inventory"].max() - inv_prices_ndvi_npp["inventory"].min())
+print (((inv_prices_ndvi_npp["rangeland_acre"]/10).max() - (inv_prices_ndvi_npp["rangeland_acre"]/10).min()))
+
 # %% [markdown]
 # # All together
 
 # %%
+y_var = "inventory" # log_inventory
+X_vars = ["max_ndvi_in_year_modis", "rangeland_acre"]
+
+y = inv_prices_ndvi_npp[y_var]/10000
+X = inv_prices_ndvi_npp[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights.values @ X.values) @ X.T.values @ block_diag_weights.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
 y_var = "log_inventory"
-X_vars = ["max_ndvi_in_year_modis"]
+X_vars = ["max_ndvi_in_year_modis", "rangeland_acre"]
 
 y = inv_prices_ndvi_npp[y_var]
 X = inv_prices_ndvi_npp[X_vars]
 X = sm.add_constant(X)
 
 beta = inv(X.T.values @ block_diag_weights.values @ X.values) @ X.T.values @ block_diag_weights.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %% [markdown]
