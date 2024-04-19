@@ -78,6 +78,35 @@ def convert_lbperAcr_2_kg_in_sqM(df, matt_unit_npp_col, new_col_name):
     return df
 
 
+def add_lags_avg(df, lag_vars_, year_count, fips_name):
+    """
+    This function adds lagged variables in the sense of average.
+    if year_count is 3, then average of past year, 2 years before, and 3 years before
+          are averaged.
+    df : pandas dataframe
+    lag_vars_ : list of variable/column names to create the lags for
+    year_count : integer: number of lag years we want.
+    fips_name : str : name of column of fips; e.g. state_fips/county_fips
+    """
+    df_lag = df[["year", fips_name] + lag_vars_]
+    df_lag = df_lag.groupby([fips_name]).rolling(year_count, on="year").mean()
+    df_lag.reset_index(drop=False, inplace=True)
+    df_lag.drop(columns=["level_1"], inplace=True)
+    df_lag.dropna(subset=lag_vars_, inplace=True)
+
+    df_lag["year"] = df_lag["year"] + 1
+    df_lag.reset_index(inplace=True, drop=True)
+
+    for a_col in lag_vars_:
+        new_col = a_col + "_lagAvg" + str(year_count)
+        df_lag.rename(columns={a_col: new_col}, inplace=True)
+        df.dropna(subset=[new_col], inplace=True)
+
+    df = pd.merge(df, df_lag, on=["year", fips_name], how="left")
+    df.dropna(subset=lag_vars_, inplace=True)
+    return df
+
+
 def add_lags(df, merge_cols, lag_vars_, year_count):
     """
     This function adds lagged variables.
