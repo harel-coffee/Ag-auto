@@ -606,8 +606,6 @@ df_[df_["inventoryDiv1000"]>3000].state_fips.unique()
 state_fips_SoI[state_fips_SoI.state_fips=="48"]
 
 # %%
-
-# %%
 tick_legend_FontSize = 12
 
 params = {
@@ -627,7 +625,7 @@ plt.rcParams["xtick.labelbottom"] = True
 plt.rcParams["ytick.labelleft"] = True
 plt.rcParams.update(params)
 
-
+# %%
 df = inv_prices_ndvi_npp.copy()
 y_col = "metric_total_matt_npp"
 df = df[["year", y_col, "state_fips"]]
@@ -636,10 +634,8 @@ df = df[df.state_fips == "48"]
 df.dropna(subset=["year"], inplace=True)
 df.dropna(subset=[y_col], inplace=True)
 
-
 fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
-# axs.grid(axis="y", which="both")
-axs.grid(which="both")
+axs.grid(which="both"); # axs.grid(axis="y", which="both")
 
 axs.plot(df.year, df[y_col], color="dodgerblue", linewidth=4);
 axs.set_xticks(np.arange(2001, 2021, 2))
@@ -647,7 +643,6 @@ axs.set_xlabel("year");
 axs.set_ylabel(y_col.replace("_", " "));
 
 axs.title.set_text(y_col.replace("_", " ") + " in Texas (kg)")
-
 
 plots_dir = data_dir_base + "00_plots/"
 fig_name = plots_dir + "Texas_" + y_col + "_WestMeridian.pdf"
@@ -908,8 +903,18 @@ fit = ols(y_var + ' ~ ' + "+".join(x_vars), data = inv_prices_ndvi_npp_lagged).f
 fit.summary()
 
 # %%
+inv_prices_ndvi_npp_lagged.columns
 
 # %%
+y_var = "inventoryDiv1000"
+
+x_vars = ["metric_total_matt_nppDiv10M",      
+          'metric_total_matt_nppDiv10M_lag1', # 'beef_price_at_1982_lag1', 'hay_price_at_1982_lag1',
+          'metric_total_matt_nppDiv10M_lag2', # 'beef_price_at_1982_lag2', 'hay_price_at_1982_lag2',
+          'metric_total_matt_nppDiv10M_lag3', # 'beef_price_at_1982_lag3', 'hay_price_at_1982_lag3',
+          'beef_price_at_1982',      'hay_price_at_1982',
+         ]
+
 ### Allows for different slopes per category:
 m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp_lagged[y_var].values, # Dependent variable
                        x = inv_prices_ndvi_npp_lagged[x_vars].values, # Independent variables
@@ -930,7 +935,6 @@ m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp_lagged[y_var].values, # Dependent
                        name_y = y_var, # Dependent variable name 
                        name_x = x_vars)
                       
-
 m5_results = pd.DataFrame({# Pull out regression coefficients and flatten
                            "Coeff.": m5.betas.flatten(),
                            "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
@@ -979,7 +983,7 @@ inv_prices_ndvi_npp_lagAvg3 = rc.add_lags_avg(df = inv_prices_ndvi_npp, lag_vars
 y_var = "inventoryDiv1000"
 
 x_vars = ["metric_total_matt_nppDiv10M", 'metric_total_matt_nppDiv10M_lagAvg3',
-          'beef_price_at_1982',         'hay_price_at_1982',
+          'beef_price_at_1982',          'hay_price_at_1982',
 #           'beef_price_at_1982_lagAvg3', 'hay_price_at_1982_lagAvg3',
 #           "C(EW_meridian)"
          ]

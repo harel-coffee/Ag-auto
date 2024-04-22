@@ -100,10 +100,11 @@ def add_lags_avg(df, lag_vars_, year_count, fips_name):
     for a_col in lag_vars_:
         new_col = a_col + "_lagAvg" + str(year_count)
         df_lag.rename(columns={a_col: new_col}, inplace=True)
-        df.dropna(subset=[new_col], inplace=True)
+        df_lag.dropna(subset=[new_col], inplace=True)
 
     df = pd.merge(df, df_lag, on=["year", fips_name], how="left")
-    df.dropna(subset=lag_vars_, inplace=True)
+    df.dropna(subset=new_col, inplace=True)
+    df.reset_index(drop=True, inplace=True)
     return df
 
 

@@ -564,10 +564,10 @@ print (((inv_prices_ndvi_npp["rangeland_acre"]/10).max() - (inv_prices_ndvi_npp[
 # # All together
 
 # %%
-y_var = "inventory" # log_inventory
+y_var = "inventoryDiv1000" # log_inventory
 X_vars = ["max_ndvi_in_year_modis", "rangeland_acre"]
 
-y = inv_prices_ndvi_npp[y_var]/10000
+y = inv_prices_ndvi_npp[y_var]
 X = inv_prices_ndvi_npp[X_vars]
 X = sm.add_constant(X)
 
@@ -620,5 +620,207 @@ pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %%
 r2_score(y, X@beta).round(3)
+
+# %% [markdown]
+# # Indp. Lagged
+
+# %%
+lag_vars = ['metric_total_matt_npp', 'metric_total_matt_nppDiv10M', 'log_metric_total_matt_npp',
+             'total_matt_npp', 'log_total_matt_npp', 'unit_matt_npp',
+             'inventory', 'log_inventory', 'inventoryDiv1000',
+             'beef_price_at_1982', 'hay_price_at_1982']
+
+inv_prices_ndvi_npp_lagged = rc.add_lags(df = inv_prices_ndvi_npp, 
+                                         merge_cols = ["state_fips", "year"], 
+                                         lag_vars_ = lag_vars, 
+                                         year_count = 3)
+
+print (f"{inv_prices_ndvi_npp.shape = }")
+print (f"{inv_prices_ndvi_npp.year.min() = }")
+print (f"{inv_prices_ndvi_npp.year.max() = }")
+inv_prices_ndvi_npp_lagged.dropna(subset=["hay_price_at_1982_lag3"], inplace=True)
+print ()
+print (f"{inv_prices_ndvi_npp_lagged.shape = }")
+print (f"{inv_prices_ndvi_npp_lagged.year.min() = }")
+print (f"{inv_prices_ndvi_npp_lagged.year.max() = }")
+
+# %%
+lagged_vars = sorted([x for x in inv_prices_ndvi_npp_lagged.columns if "lag" in x])
+lagged_vars[1:10]
+
+# %% [markdown]
+# # Redefine Weights
+#
+# We need to redefine weights as we have missed some years to lag
+
+# %%
+block_diag_weights_lagged = rc.create_adj_weight_matrix(data_df = inv_prices_ndvi_npp_lagged, 
+                                                     adj_df = adj_df_fips, 
+                                                     fips_var = "state_fips")
+print (f"{block_diag_weights_lagged.shape = }")
+
+#### West Meridian
+inv_prices_ndvi_npp_west_lagged = inv_prices_ndvi_npp_lagged[inv_prices_ndvi_npp_lagged.EW_meridian == "W"].copy()
+inv_prices_ndvi_npp_west_lagged.reset_index(drop=True, inplace=True)
+
+block_diag_weights_west_lagged = rc.create_adj_weight_matrix(data_df = inv_prices_ndvi_npp_west_lagged, 
+                                                             adj_df = adj_df_fips_west, 
+                                                             fips_var = "state_fips")
+
+print (f"{block_diag_weights_west_lagged.shape = }")
+
+#### East Meridian
+inv_prices_ndvi_npp_east_lagged = inv_prices_ndvi_npp_lagged[inv_prices_ndvi_npp_lagged.EW_meridian == "E"].copy()
+inv_prices_ndvi_npp_east_lagged.reset_index(drop=True, inplace=True)
+
+block_diag_weights_east_lagged = rc.create_adj_weight_matrix(data_df = inv_prices_ndvi_npp_east_lagged, 
+                                                             adj_df = adj_df_fips_east, 
+                                                             fips_var = "state_fips")
+print (f"{block_diag_weights_east_lagged.shape = }")
+
+# %% [markdown]
+# ### All together lagged
+
+# %%
+y_var = "inventoryDiv1000"
+
+X_vars = ["metric_total_matt_nppDiv10M",      
+          'metric_total_matt_nppDiv10M_lag1', # 'beef_price_at_1982_lag1', 'hay_price_at_1982_lag1',
+          'metric_total_matt_nppDiv10M_lag2', # 'beef_price_at_1982_lag2', 'hay_price_at_1982_lag2',
+          'metric_total_matt_nppDiv10M_lag3', # 'beef_price_at_1982_lag3', 'hay_price_at_1982_lag3',
+          'beef_price_at_1982',      'hay_price_at_1982',
+         ]
+
+y = inv_prices_ndvi_npp_lagged[y_var]
+X = inv_prices_ndvi_npp_lagged[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_lagged.values @ X.values) \
+                       @ X.T.values @ block_diag_weights_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %% [markdown]
+# ### East Lagged
+
+# %%
+y = inv_prices_ndvi_npp_east_lagged[y_var]
+X = inv_prices_ndvi_npp_east_lagged[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_east_lagged.values @ X.values) @ X.T.values @ \
+               block_diag_weights_east_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+y[1:5]
+
+# %%
+print (len(inv_prices_ndvi_npp_east_lagged.year.unique()))
+print (len(block_diag_weights_east_lagged.columns.unique()))
+print (block_diag_weights_east_lagged.shape)
+
+# %% [markdown]
+# ### West Lagged
+
+# %%
+y = inv_prices_ndvi_npp_west_lagged[y_var]
+X = inv_prices_ndvi_npp_west_lagged[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_west_lagged.values @ X.values) @ X.T.values @ \
+               block_diag_weights_west_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+y[1:5]
+
+# %%
+
+# %% [markdown]
+# # Indp. Avg. Lagged
+
+# %%
+inv_prices_ndvi_npp.sort_values(by=["state_fips", "year"], inplace=True)
+inv_prices_ndvi_npp.reset_index(inplace=True, drop=True)
+inv_prices_ndvi_npp.head(2)
+
+# %%
+lag_vars_ = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
+
+inv_prices_ndvi_npp_lagAvg3 = rc.add_lags_avg(df = inv_prices_ndvi_npp, lag_vars_ = lag_vars_, 
+                                              year_count = 3, fips_name = "state_fips")
+
+inv_prices_ndvi_npp_lagAvg3.head(2)
+
+# %%
+inv_prices_ndvi_npp_west_lagAvg3 = inv_prices_ndvi_npp_lagAvg3[
+                                      inv_prices_ndvi_npp_lagAvg3.EW_meridian == "W"].copy()
+inv_prices_ndvi_npp_west_lagAvg3.reset_index(drop=True, inplace=True)
+
+
+#### East Meridian
+inv_prices_ndvi_npp_east_lagAvg3 = inv_prices_ndvi_npp_lagAvg3[
+                                      inv_prices_ndvi_npp_lagAvg3.EW_meridian == "E"].copy()
+inv_prices_ndvi_npp_east_lagAvg3.reset_index(drop=True, inplace=True)
+
+# %% [markdown]
+# ### Indp. Avg. Lagged Altogether
+
+# %%
+y_var = "inventoryDiv1000"
+X_vars = ["metric_total_matt_nppDiv10M", 'metric_total_matt_nppDiv10M_lagAvg3',
+          "beef_price_at_1982", "hay_price_at_1982"]
+
+y = inv_prices_ndvi_npp_lagAvg3[y_var]
+X = inv_prices_ndvi_npp_lagAvg3[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_lagged.values @ X.values) \
+                       @ X.T.values @ block_diag_weights_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+inv_prices_ndvi_npp_west_lagAvg3.shape
+
+# %% [markdown]
+# ### Indp. Avg. Lagged West
+
+# %%
+print (y_var)
+y = inv_prices_ndvi_npp_west_lagAvg3[y_var]
+X = inv_prices_ndvi_npp_west_lagAvg3[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_west_lagged.values @ X.values) \
+                       @ X.T.values @ block_diag_weights_west_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %% [markdown]
+# ### Indp. Avg. Lagged East
+
+# %%
+y = inv_prices_ndvi_npp_east_lagAvg3[y_var]
+X = inv_prices_ndvi_npp_east_lagAvg3[X_vars]
+X = sm.add_constant(X)
+
+beta = inv(X.T.values @ block_diag_weights_east_lagged.values @ X.values) \
+                       @ X.T.values @ block_diag_weights_east_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+
+# %%
 
 # %%
