@@ -613,6 +613,8 @@ y = inv_prices_ndvi_npp_east[y_var]
 X = inv_prices_ndvi_npp_east[X_vars]
 X = sm.add_constant(X)
 
+
+print (f"{y_var = }")
 beta = inv(X.T.values @ block_diag_weights_east.values @ X.values) @ X.T.values @ \
                block_diag_weights_east.values @ y
 
@@ -708,7 +710,7 @@ pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 y = inv_prices_ndvi_npp_east_lagged[y_var]
 X = inv_prices_ndvi_npp_east_lagged[X_vars]
 X = sm.add_constant(X)
-
+print (f"{y_var = }") 
 beta = inv(X.T.values @ block_diag_weights_east_lagged.values @ X.values) @ X.T.values @ \
                block_diag_weights_east_lagged.values @ y
 
@@ -727,9 +729,12 @@ print (block_diag_weights_east_lagged.shape)
 # ### West Lagged
 
 # %%
+y_var = 'inventoryDiv1000'
+# y_var = 'log_inventory'
 y = inv_prices_ndvi_npp_west_lagged[y_var]
 X = inv_prices_ndvi_npp_west_lagged[X_vars]
 X = sm.add_constant(X)
+print (f"{y_var = }")
 
 beta = inv(X.T.values @ block_diag_weights_west_lagged.values @ X.values) @ X.T.values @ \
                block_diag_weights_west_lagged.values @ y
@@ -738,9 +743,32 @@ print (f"{r2_score(y, X@beta).round(3) = }")
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %%
-y[1:5]
+y_var = 'inventoryDiv1000'
+beta = inv(X.T.values @ inv(block_diag_weights_west_lagged.values) @ X.values) @ X.T.values @ \
+               inv(block_diag_weights_west_lagged.values) @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %%
+y_var = "log_inventory"
+y = inv_prices_ndvi_npp_west_lagged[y_var]
+X = inv_prices_ndvi_npp_west_lagged[X_vars]
+X = sm.add_constant(X)
+print (f"{y_var = }")
+
+beta = inv(X.T.values @ block_diag_weights_west_lagged.values @ X.values) @ X.T.values @ \
+               block_diag_weights_west_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+beta = inv(X.T.values @ inv(block_diag_weights_west_lagged.values) @ X.values) @ X.T.values @ \
+               inv(block_diag_weights_west_lagged.values) @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %% [markdown]
 # # Indp. Avg. Lagged
@@ -788,6 +816,13 @@ print (f"{r2_score(y, X@beta).round(3) = }")
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %%
+beta = inv(X.T.values @ inv(block_diag_weights_lagged.values) @ X.values) \
+                       @ X.T.values @ inv(block_diag_weights_lagged.values) @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
 inv_prices_ndvi_npp_west_lagAvg3.shape
 
 # %% [markdown]
@@ -801,6 +836,13 @@ X = sm.add_constant(X)
 
 beta = inv(X.T.values @ block_diag_weights_west_lagged.values @ X.values) \
                        @ X.T.values @ block_diag_weights_west_lagged.values @ y
+
+print (f"{r2_score(y, X@beta).round(3) = }")
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+beta = inv(X.T.values @ inv(block_diag_weights_west_lagged.values) @ X.values) \
+                       @ X.T.values @ inv(block_diag_weights_west_lagged.values) @ y
 
 print (f"{r2_score(y, X@beta).round(3) = }")
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
