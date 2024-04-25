@@ -1054,7 +1054,8 @@ y_pred.min()
 fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
-axs.scatter(y_pred, fit.resid, s = 20, c="r", marker="x");
+axs.axhline(y = 0, color = 'r', linestyle = '-', linewidth=4, zorder=0)
+axs.scatter(y_pred, fit.resid, s = 20, c="dodgerblue", marker="x");
 axs.set_xlabel("$\\hat y$");
 axs.set_ylabel("residual");
 
