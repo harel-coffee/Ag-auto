@@ -104,6 +104,9 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 os.makedirs(reOrganized_dir, exist_ok=True)
 
 # %%
+plots_dir = data_dir_base + "00_plots/"
+
+# %%
 abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
@@ -549,10 +552,8 @@ x_col = "metric_total_matt_nppDiv10M"
 west_fit = ols(y_col + "~" +  x_col, data = inv_prices_ndvi_npp_west).fit()
 west_noTexas_fit = ols(y_col + "~" +  x_col, data = inv_prices_ndvi_npp_west_noTexas).fit()
 
-
 fig, axs = plt.subplots(1, 2, figsize=(10, 5), sharex=False, gridspec_kw={"hspace": 1, "wspace": 0.1})
 axs[0].grid(axis="y", which="both"); axs[1].grid(axis="y", which="both")
-
 
 ####### Texas included predictions
 
@@ -588,8 +589,6 @@ axs[1].legend(loc="lower right")
 axs[1].set_xlabel(x_col);
 axs[1].text(min(x_noTexas), max(y_noTexas)-.2, 'West of meridian. No texas')
 
-
-plots_dir = data_dir_base + "00_plots/"
 fig_name = plots_dir + y_col + "_" + x_col + "_WestMeridian.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -644,7 +643,6 @@ axs.set_ylabel(y_col.replace("_", " "));
 
 axs.title.set_text(y_col.replace("_", " ") + " in Texas (kg)")
 
-plots_dir = data_dir_base + "00_plots/"
 fig_name = plots_dir + "Texas_" + y_col + "_WestMeridian.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -720,7 +718,6 @@ plt.text(min(df_[x_col]), max(df_[y_col])-.2, 'West of meridian.')
 axs.set_xlabel(x_col.replace("_", " "));
 axs.set_ylabel(y_col.replace("_", " "));
 
-plots_dir = data_dir_base + "00_plots/"
 fig_name = plots_dir + "log_log_metric_westMeridian.pdf"
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -1026,6 +1023,64 @@ x_vars = ["metric_total_matt_nppDiv10M", 'metric_total_matt_nppDiv10M_lagAvg3',
 
 fit = ols(y_var + ' ~ ' + "+".join(x_vars), data = inv_prices_ndvi_npp_lagAvg3).fit() 
 fit.summary()
+
+# %%
+
+# %% [markdown]
+# # Residual Plots
+
+# %%
+y_var = "log_inventory"
+# y_var = "inventoryDiv1000"
+
+x_vars = ['metric_total_matt_nppDiv10M', 'beef_price_at_1982', 'hay_price_at_1982']
+
+fit = ols(y_var + '~' + " + ".join(x_vars),
+          data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"]).fit() 
+
+print (f"{fit.pvalues['metric_total_matt_nppDiv10M'] = }")
+
+fit.summary()
+
+# %%
+sm.graphics.influence_plot(fit);
+
+# %%
+X = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"].copy()
+y_pred = fit.predict(X[x_vars])
+y_pred.min()
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+axs.scatter(y_pred, fit.resid, s = 20, c="r", marker="x");
+axs.set_xlabel("$\\hat y$");
+axs.set_ylabel("residual");
+
+# fig_name = plots_dir + ".pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %%
+
+# %% [markdown]
+# # External studentized residuals
+
+# %%
+from statsmodels.stats.outliers_influence import OLSInfluence
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+# change order of layers: zorder=0
+axs.axhline(y = 0, color = 'r', linestyle = '-', linewidth=4, zorder=0)
+axs.scatter(y_pred, OLSInfluence(fit).resid_studentized_external, s = 20, c="dodgerblue", marker="x");
+axs.set_xlabel("$\\hat y$");
+axs.set_ylabel("externally studentized residual");
+
+# fig_name = plots_dir + ".pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 

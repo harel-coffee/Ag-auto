@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -538,7 +538,7 @@ print (sorted(HayPrice_Q1[HayPrice_Q1["state_ansi"] == 1].year.unique()))
 # # <span style='color:red'>STOP</span>
 #
 #
-# Fucking ```HayPrice_Q1``` is messed up. 
+# ```HayPrice_Q1``` is messed up. 
 # For some years, marketing year is the only thing we have. So, we cannot take median in a given year.
 #
 
