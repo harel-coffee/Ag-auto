@@ -85,9 +85,10 @@ gdf.head(3)
 
 # %%
 gdf.rename(columns={"STUSPS": "state"}, inplace=True)
+gdf = gdf[~gdf.state.isin(["PR", "VI", "AS", "GU", "MP"])]
+gdf.to_crs({'init':'epsg:2163'})
 
 # %%
-gdf.to_crs({'init':'epsg:2163'})
 
 # %%
 visframe = gdf.to_crs({'init':'epsg:2163'})
@@ -98,7 +99,7 @@ fig, ax = plt.subplots(1, figsize=(18, 14))
 ax.axis('off')
 
 # create map of all states except AK and HI in the main map axis
-visframe[~visframe.state.isin(['HI','AK'])].plot(color='lightblue', 
+visframe[~visframe.state.isin(["AK", "HI"])].plot(color='lightblue', 
                                                   linewidth=0.8, ax=ax, edgecolor='0.8');
 
 
@@ -427,7 +428,7 @@ for row in visframe.itertuples():
 tick_legend_FontSize = 12
 
 params = {
-    "legend.fontsize": tick_legend_FontSize * 1.2,  # medium, large
+    "legend.fontsize": tick_legend_FontSize * 1.5,  # medium, large
     # 'figure.figsize': (6, 4),
     "axes.labelsize": tick_legend_FontSize * 1.5,
     "axes.titlesize": tick_legend_FontSize * 1.3,
@@ -486,7 +487,7 @@ for key in legend_dict:
 
 plt.legend(handles=patchList);
 
-fig.savefig(plot_dir + 'study_area.pdf', dpi=800, bbox_inches="tight")
+# fig.savefig(plot_dir + 'study_area.pdf', dpi=800, bbox_inches="tight")
 
 # %%
 import matplotlib.colors as mcolors
@@ -532,12 +533,13 @@ legend_dict = {"west meridian": "dodgerblue",
                "east meridian": east_color}
 patchList = []
 for key in legend_dict:
-        data_key = mpatches.Patch(color=legend_dict[key], label=key)
+        data_key = mpatches.Patch(color=legend_dict[key], label=key, lw=0.5)
         patchList.append(data_key)
 
 plt.legend(handles=patchList);
-
 fig.savefig(plot_dir + 'study_area_red.pdf', dpi=800, bbox_inches="tight")
+
+# %%
 
 # %%
 print (state_abb_state_fips.shape)
@@ -555,5 +557,29 @@ len(state_abb_state_fips_SoI[state_abb_state_fips_SoI.EW_meridian=="W"])
 
 # %%
 len(state_abb_state_fips_SoI[state_abb_state_fips_SoI.EW_meridian=="E"])
+
+# %%
+tonsor_states = "Alabama, Arkansas, California, Colorado, Florida, Georgia, Idaho," + \
+                 "Illinois, Iowa, Kansas, Kentucky," + \
+                 "Louisiana, Missouri, Mississippi, Montana," + \
+                 "Nebraska, New Mexico, North Dakota, Oklahoma, Oregon," + \
+                 "South Dakota, Tennessee, Texas, Virginia, Wyoming"
+tonsor_states = tonsor_states.replace(", ", ",")
+tonsor_states = tonsor_states.split(",")
+print (len(tonsor_states))
+tonsor_states[:3]
+
+# %%
+abb_dict.keys()
+
+# %%
+SoI_full_names = [x for x in SoI if not (x in tonsor_states)]
+SoI_full_names
+
+# %%
+tonsor_states
+
+# %%
+SoI
 
 # %%
