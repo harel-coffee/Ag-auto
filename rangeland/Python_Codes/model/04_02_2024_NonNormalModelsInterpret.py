@@ -41,6 +41,7 @@ import statsmodels.api as sm
 
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
+import rangeland_plot_core as rcp
 
 from datetime import datetime, date
 
@@ -111,6 +112,12 @@ abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 list(abb_dict.keys())
+
+# %%
+state_name_fips = pd.DataFrame({"state_full" : list(abb_dict["full_2_abb"].keys()),
+                                "state" : list(abb_dict["full_2_abb"].values())})
+state_name_fips = pd.merge(state_name_fips, abb_dict["state_fips"], on=["state"], how="left")
+state_name_fips.head(2)
 
 # %%
 state_fips = abb_dict["state_fips"]
@@ -1083,6 +1090,436 @@ axs.set_ylabel("externally studentized residual");
 # fig_name = plots_dir + ".pdf"
 # plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
+# %% [markdown]
+# # Residuals on the map
+#
+# train east and west separate: both with log and 1000-head.
+
 # %%
+depen_var_name = "inventoryDiv1000"
+indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
+m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
+                       x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
+
+                       # Variable specifying neighborhood membership
+                       regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
+              
+                       # Variables to be allowed to vary (True) or kept
+                       # constant (False). Here we set all to False
+                       # cols2regi=[False] * len(indp_vars),
+                        
+                       # Allow the constant term to vary by group/regime
+                       constant_regi="many",
+                        
+                       # Allow separate sigma coefficients to be estimated
+                       # by regime (False so a single sigma)
+                       regime_err_sep=False,
+                       name_y=depen_var_name, # Dependent variable name
+                       name_x=indp_vars)
+
+m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
+                           }, index=m5.name_x)
+
+residuals_1000head = m5.u
+
+# %%
+depen_var_name = "log_inventory"
+indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
+m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
+                       x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
+
+                       # Variable specifying neighborhood membership
+                       regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
+              
+                       # Variables to be allowed to vary (True) or kept
+                       # constant (False). Here we set all to False
+                       # cols2regi=[False] * len(indp_vars),
+                        
+                       # Allow the constant term to vary by group/regime
+                       constant_regi="many",
+                        
+                       # Allow separate sigma coefficients to be estimated
+                       # by regime (False so a single sigma)
+                       regime_err_sep=False,
+                       name_y=depen_var_name, # Dependent variable name
+                       name_x=indp_vars)
+
+m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
+                           }, index=m5.name_x)
+
+residuals_logInv = m5.u
+
+# %%
+A = {"state_fips" : list(inv_prices_ndvi_npp["state_fips"].values.flatten()), 
+     "year" : list(inv_prices_ndvi_npp["year"].values.flatten()),
+     "residuals_1000head" : list(residuals_1000head.flatten()),
+     "residuals_logInv" : list(residuals_logInv.flatten())}
+residuals = pd.DataFrame(A)
+residuals.head(3)
+
+# %%
+residuals_median = residuals.groupby(["state_fips"]).median()
+residuals_median.head(5)
+residuals_median = residuals_median.reset_index().round(2)
+residuals_median.drop(columns=["year"], inplace=True)
+
+residuals_median.rename(columns={"residuals_1000head": "residuals_1000head_median", 
+                                 "residuals_logInv": "residuals_logInv_median"}, inplace=True)
+
+residuals_median.head(5)
+
+# %%
+
+# %%
+good_col = ["state_fips", "residuals_1000head", "residuals_logInv"]
+residuals_color = pd.merge(residuals.loc[residuals.year==2017, good_col],
+                           residuals_median, on=["state_fips"], how="left")
+residuals_color = residuals_color.round(2)
+residuals_color.head(4)
+
+# %%
+import warnings
+warnings.filterwarnings('ignore')
+
+import matplotlib
+from matplotlib.ticker import FuncFormatter
+import matplotlib.colors as mcolors
+
+import geopandas as gpd
+from shapely.geometry import Polygon
+# import missingno as msno
+# import wget
+# import openpyxl
+import math
+
+# %%
+# we need geometry of states which is in this file
+# we have to add residuals to it to use for coloring the map
+gdf = gpd.read_file(data_dir_base + 'cb_2018_us_state_500k.zip')
+gdf.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
+
+gdf.rename(columns={"statefp": "state_fips", "stusps": "residuals_logInv_median",
+                      "name": "state_full", "stusps" : "state" }, inplace=True)
+
+gdf = gdf[~gdf.state.isin(["PR", "VI", "AS", "GU", "MP"])]
+
+gdf = pd.merge(gdf, residuals_color, on=["state_fips"], how="left")
+
+gdf.head(3)
+
+# %%
+gdf["SoI"] = 0
+gdf.loc[gdf.state_full.isin(abb_dict["SoI"]), "SoI"] = 1
+gdf.head(3)
+
+# %%
+
+# %%
+tick_legend_FontSize = 15
+
+params = {
+    "legend.fontsize": tick_legend_FontSize * 1.5,  # medium, large
+    # 'figure.figsize': (6, 4),
+    "axes.labelsize": tick_legend_FontSize * 1.5,
+    "axes.titlesize": tick_legend_FontSize * 1.8, # this changes legend title,
+    "xtick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "ytick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "axes.titlepad": 10,
+}
+
+plt.rc("font", family="Palatino")
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["xtick.labelbottom"] = True
+plt.rcParams["ytick.labelleft"] = True
+plt.rcParams.update(params)
+
+title_font_size="40"
+
+# %%
+colormap = "YlOrBr"
+
+# %%
+plot_dir = data_dir_base + "00_plots/residual_on_map/"
+os.makedirs(plot_dir, exist_ok=True)
+
+# %%
+# **************************
+# set the value column that will be visualised
+variable = "residuals_1000head"
+
+# make a column for value_determined_color in gdf
+# set the range for the choropleth values with the upper bound the rounded up maximum value
+vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
+gdf = rcp.makeColorColumn(gdf,variable,vmin,vmax)
+
+# create "visframe" as a re-projected gdf using EPSG 2163 for CONUS
+visframe = gdf.to_crs({'init':'epsg:2163'})
+
+# create figure and axes for Matplotlib
+fig, ax = plt.subplots(1, figsize=(18, 14))
+ax.axis('off') # remove the axis box
+
+# add a title and annotation
+txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)\n year=2017"
+ax.set_title(txt_, fontdict={'fontsize': title_font_size, 'fontweight' : '1'})
+
+# Create colorbar legend
+fig = ax.get_figure()
+# add colorbar axes to the figure
+# This will take some iterating to get it where you want it [l,b,w,h] right
+# l:left, b:bottom, w:width, h:height; in normalized unit (0-1)
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+txt_ = variable
+cbax.set_title(txt_) #
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+# reformat tick labels on legend
+sm._A = []
+# comma_fmt = FuncFormatter(lambda x, p: format(x/100, '.0%'))
+comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+# annotate the data source, date of access, and hyperlink
+text_ = "Data: USDA Economic Research Service"  
+# ax.annotate(text_, xy=(0.22, .085), xycoords='figure fraction', fontsize=14, color='#555555')
+
+
+# create map
+# Note: we're going state by state here because of unusual coloring behavior 
+# when trying to plot the entire dataframe using the "value_determined_color" column
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf[gdf.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+fig.savefig(plot_dir + 'residuals_2017_1000Head.pdf', dpi=200, bbox_inches="tight")
+
+# %%
+
+# %%
+# **************************
+# set the value column that will be visualised
+variable = "residuals_logInv"
+
+vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
+gdf = rcp.makeColorColumn(gdf,variable,vmin,vmax)
+
+visframe = gdf.to_crs({'init':'epsg:2163'})
+
+fig, ax = plt.subplots(1, figsize=(18, 14))
+ax.axis('off') # remove the axis box
+
+txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)\n year=2017"
+ax.set_title(txt_, fontdict={'fontsize': title_font_size, 'fontweight' : '1'})
+
+# Create colorbar legend
+fig = ax.get_figure()
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+txt_ = variable
+cbax.set_title(txt_, fontdict={'fontweight' : '0'}) # 'fontsize': '20', 
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+sm._A = [] # reformat tick labels on legend
+comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf[gdf.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+fig.savefig(plot_dir + 'residuals_2017_logInv.pdf', dpi=200, bbox_inches="tight")
+
+# %%
+
+# %%
+# **************************
+# set the value column that will be visualised
+variable = "residuals_1000head_median"
+
+vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
+gdf = rcp.makeColorColumn(gdf,variable,vmin,vmax)
+
+visframe = gdf.to_crs({'init':'epsg:2163'})
+
+fig, ax = plt.subplots(1, figsize=(18, 14))
+ax.axis('off') # remove the axis box
+
+txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)\n year=median"
+ax.set_title(txt_, fontdict={'fontsize': title_font_size, 'fontweight' : '1'})
+
+# Create colorbar legend
+fig = ax.get_figure()
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+txt_ = variable
+cbax.set_title(txt_, fontdict={'fontsize': '25', 'fontweight' : '0'}) # 
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+sm._A = [] # reformat tick labels on legend
+comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf[gdf.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+fig.savefig(plot_dir + 'residuals_median_1000head.pdf', dpi=200, bbox_inches="tight")
+
+# %%
+
+# %%
+# **************************
+# set the value column that will be visualised
+variable = "residuals_logInv_median"
+
+vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
+gdf = rcp.makeColorColumn(gdf,variable,vmin,vmax)
+
+visframe = gdf.to_crs({'init':'epsg:2163'})
+
+fig, ax = plt.subplots(1, figsize=(18, 14))
+ax.axis('off') # remove the axis box
+
+txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)\n year=median"
+ax.set_title(txt_, fontdict={'fontweight' : '1'}) # 'fontsize': '20',
+
+# Create colorbar legend
+fig = ax.get_figure()
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+txt_ = variable
+cbax.set_title(txt_, fontdict={'fontsize': '25', 'fontweight' : '0'}) # 
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+sm._A = [] # reformat tick labels on legend
+comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf[gdf.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+fig.savefig(plot_dir + 'residuals_median_logInv.pdf', dpi=200, bbox_inches="tight")
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+gdf_copy = gdf.copy()
+
+# values = {"A": 0, "B": 1, "C": 2, "D": 3}
+# gdf_copy.fillna(value=values)
+# gdf_copy.fillna(100000, inplace=True)
+gdf_copy.dropna(inplace=True)
+
+# %%
+# **************************
+# set the value column that will be visualised
+colormap = "YlOrBr"
+variable = "residuals_1000head"
+
+# make a column for value_determined_color in gdf_copy
+# set the range for the choropleth values with the upper bound the rounded up maximum value
+vmin, vmax = gdf_copy[variable].min(), gdf_copy[variable].max() #math.ceil(gdf_copy.pct_food_insecure.max())
+gdf_copy = rcp.makeColorColumn(gdf_copy,variable,vmin,vmax)
+
+# create "visframe" as a re-projected gdf_copy using EPSG 2163 for CONUS
+visframe = gdf_copy.to_crs({'init':'epsg:2163'})
+
+# create figure and axes for Matplotlib
+fig, ax = plt.subplots(1, figsize=(18, 14))
+# remove the axis box around the vis
+ax.axis('off')
+
+# set the font for the visualization to Helvetica
+hfont = {'fontname':'Helvetica'}
+
+# add a title and annotation
+txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)"
+ax.set_title(txt_, **hfont, fontdict={'fontsize': '20', 'fontweight' : '1'})
+
+# Create colorbar legend
+fig = ax.get_figure()
+# add colorbar axes to the figure
+# This will take some iterating to get it where you want it [l,b,w,h] right
+# l:left, b:bottom, w:width, h:height; in normalized unit (0-1)
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+txt_ = "residuals_1000head"
+cbax.set_title(txt_, **hfont, fontdict={'fontsize': '20', 'fontweight' : '0'})
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+# reformat tick labels on legend
+sm._A = []
+# comma_fmt = FuncFormatter(lambda x, p: format(x/100, '.0%'))
+comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+# annotate the data source, date of access, and hyperlink
+text_ = "Data: USDA Economic Research Service"  
+# ax.annotate(text_, xy=(0.22, .085), xycoords='figure fraction', fontsize=14, color='#555555')
+
+
+# create map
+# Note: we're going state by state here because of unusual coloring behavior 
+# when trying to plot the entire dataframe using the "value_determined_color" column
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf_copy[gdf_copy.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+
+# fig.savefig(os.getcwd()+'study_area.pdf',dpi=400, bbox_inches="tight")
+# bbox_inches="tight" keeps the vis from getting cut off at the edges in the saved png
+
+# %%
+print (f"{inv_prices_ndvi_npp.year.min() = }")
+print (f"{inv_prices_ndvi_npp.year.max() = }")
 
 # %%
