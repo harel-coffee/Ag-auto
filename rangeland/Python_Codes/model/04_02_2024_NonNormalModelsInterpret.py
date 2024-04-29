@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -1095,8 +1095,8 @@ axs.set_ylabel("externally studentized residual");
 #
 # train east and west separate: both with log and 1000-head.
 
-# %%
-depen_var_name = "inventoryDiv1000"
+    # %%
+    depen_var_name = "inventoryDiv1000"
 indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
 m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
                        x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
@@ -1209,12 +1209,13 @@ gdf = gdf[~gdf.state.isin(["PR", "VI", "AS", "GU", "MP"])]
 
 gdf = pd.merge(gdf, residuals_color, on=["state_fips"], how="left")
 
+gdf["SoI"] = 0
+gdf.loc[gdf.state_full.isin(abb_dict["SoI"]), "SoI"] = 1
+
+
 gdf.head(3)
 
 # %%
-gdf["SoI"] = 0
-gdf.loc[gdf.state_full.isin(abb_dict["SoI"]), "SoI"] = 1
-gdf.head(3)
 
 # %%
 
@@ -1354,7 +1355,7 @@ fig.savefig(plot_dir + 'residuals_2017_logInv.pdf', dpi=200, bbox_inches="tight"
 variable = "residuals_1000head_median"
 
 vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
-gdf = rcp.makeColorColumn(gdf,variable,vmin,vmax)
+gdf = rcp.makeColorColumn(gdf, variable,vmin,vmax)
 
 visframe = gdf.to_crs({'init':'epsg:2163'})
 
@@ -1430,11 +1431,177 @@ for row in visframe.itertuples():
 
 fig.savefig(plot_dir + 'residuals_median_logInv.pdf', dpi=200, bbox_inches="tight")
 
+# %% [markdown]
+# # Cross Sectional model:2017
+
 # %%
+cross_2017 = inv_prices_ndvi_npp.copy()
+cross_2017 = cross_2017[cross_2017.year==2017]
+depen_var_name = "log_inventory"
+indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
+m5 = spreg.OLS_Regimes(y = cross_2017[depen_var_name].values, # Dependent variable
+                       x = cross_2017[indp_vars].values, # Independent variables
+
+                       # Variable specifying neighborhood membership
+                       regimes = cross_2017["EW_meridian"].tolist(),
+              
+                       # Variables to be allowed to vary (True) or kept
+                       # constant (False). Here we set all to False
+                       # cols2regi=[False] * len(indp_vars),
+                        
+                       # Allow the constant term to vary by group/regime
+                       constant_regi="many",
+                        
+                       # Allow separate sigma coefficients to be estimated
+                       # by regime (False so a single sigma)
+                       regime_err_sep=False,
+                       name_y=depen_var_name, # Dependent variable name
+                       name_x=indp_vars)
+
+m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
+                           }, index=m5.name_x)
+
+cross_2017_residuals_logInv = m5.u
+
+# %%
+cross_2017 = inv_prices_ndvi_npp.copy()
+cross_2017 = cross_2017[cross_2017.year==2017]
+depen_var_name = "inventoryDiv1000"
+indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
+m5 = spreg.OLS_Regimes(y = cross_2017[depen_var_name].values, # Dependent variable
+                       x = cross_2017[indp_vars].values, # Independent variables
+
+                       # Variable specifying neighborhood membership
+                       regimes = cross_2017["EW_meridian"].tolist(),
+              
+                       # Variables to be allowed to vary (True) or kept
+                       # constant (False). Here we set all to False
+                       # cols2regi=[False] * len(indp_vars),
+                        
+                       # Allow the constant term to vary by group/regime
+                       constant_regi="many",
+                        
+                       # Allow separate sigma coefficients to be estimated
+                       # by regime (False so a single sigma)
+                       regime_err_sep=False,
+                       name_y=depen_var_name, # Dependent variable name
+                       name_x=indp_vars)
+
+m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
+                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
+                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
+                           }, index=m5.name_x)
+
+cross_2017_residuals_inventoryDiv1000 = m5.u
+
+# %%
+A = {"state_fips" : list(cross_2017["state_fips"].values.flatten()), 
+     # "year" : list(cross_2017["year"].values.flatten()),
+     "cross_2017_residuals_1000head" : list(cross_2017_residuals_inventoryDiv1000.flatten()),
+     "cross_2017_residuals_logInv" : list(cross_2017_residuals_logInv.flatten())}
+cross_2017_residuals = pd.DataFrame(A).round(2)
+cross_2017_residuals.head(3)
+
+# %%
+gdf_cross = gpd.read_file(data_dir_base + 'cb_2018_us_state_500k.zip')
+gdf_cross.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
+
+gdf_cross.rename(columns={"statefp": "state_fips", "stusps": "residuals_logInv_median",
+                      "name": "state_full", "stusps" : "state" }, inplace=True)
+
+gdf_cross = gdf_cross[~gdf_cross.state.isin(["PR", "VI", "AS", "GU", "MP"])]
+
+gdf_cross = pd.merge(gdf_cross, cross_2017_residuals, on=["state_fips"], how="left")
+
+gdf_cross["SoI"] = 0
+gdf_cross.loc[gdf_cross.state_full.isin(abb_dict["SoI"]), "SoI"] = 1
+
+
+gdf_cross.head(2)
+
+# %%
+# **************************
+# set the value column that will be visualised
+variable = "cross_2017_residuals_logInv"
+
+vmin, vmax = gdf_cross[variable].min(), gdf_cross[variable].max() #math.ceil(gdf_cross.pct_food_insecure.max())
+gdf_cross = rcp.makeColorColumn(gdf_cross,variable,vmin,vmax)
+
+visframe = gdf_cross.to_crs({'init':'epsg:2163'})
+
+fig, ax = plt.subplots(1, figsize=(18, 14))
+ax.axis('off') # remove the axis box
+
+txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)\n year=cross 2017"
+ax.set_title(txt_, fontdict={'fontweight' : '1'}) # 'fontsize': '20',
+
+# Create colorbar legend
+fig = ax.get_figure()
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+txt_ = variable
+cbax.set_title(txt_, fontdict={'fontsize': '25', 'fontweight' : '0'}) # 
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+sm._A = [] # reformat tick labels on legend
+comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf_cross[gdf_cross.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+fig.savefig(plot_dir + 'cross_2017_residuals_logInv.pdf', dpi=200, bbox_inches="tight")
 
 # %%
 
 # %%
+# **************************
+# set the value column that will be visualised
+variable = "cross_2017_residuals_1000head"
+
+vmin, vmax = gdf_cross[variable].min(), gdf_cross[variable].max() #math.ceil(gdf_cross.pct_food_insecure.max())
+gdf_cross = rcp.makeColorColumn(gdf_cross,variable,vmin,vmax)
+
+visframe = gdf_cross.to_crs({'init':'epsg:2163'})
+
+fig, ax = plt.subplots(1, figsize=(18, 14))
+ax.axis('off') # remove the axis box
+
+txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)\n year=cross 2017"
+ax.set_title(txt_, fontdict={'fontweight' : '1'}) # 'fontsize': '20',
+
+# Create colorbar legend
+fig = ax.get_figure()
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+txt_ = variable
+cbax.set_title(txt_, fontdict={'fontsize': '25', 'fontweight' : '0'}) # 
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+sm._A = [] # reformat tick labels on legend
+comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf_cross[gdf_cross.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+fig.savefig(plot_dir + 'cross_2017_residuals_1000head.pdf', dpi=200, bbox_inches="tight")
 
 # %%
 
@@ -1515,7 +1682,7 @@ for row in visframe.itertuples():
         vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
 
 
-# fig.savefig(os.getcwd()+'study_area.pdf',dpi=400, bbox_inches="tight")
+# fig.savefig(os.getcwd()+'study_area.pdf', dpi=400, bbox_inches="tight")
 # bbox_inches="tight" keeps the vis from getting cut off at the edges in the saved png
 
 # %%
