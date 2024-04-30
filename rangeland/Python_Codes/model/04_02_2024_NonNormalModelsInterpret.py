@@ -1242,7 +1242,9 @@ plt.rcParams.update(params)
 title_font_size="40"
 
 # %%
-colormap = "YlOrBr"
+# This color map cannot change or it also need to change in 
+# makeColorColumn() in rangeland_plot_core.py as well.
+colormap = "YlGnBu" 
 
 # %%
 plot_dir = data_dir_base + "00_plots/residual_on_map/"
@@ -1255,8 +1257,76 @@ variable = "residuals_1000head"
 
 # make a column for value_determined_color in gdf
 # set the range for the choropleth values with the upper bound the rounded up maximum value
-vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
+vmin, vmax = gdf[variable].min(), gdf[variable].max() # math.ceil(gdf.pct_food_insecure.max())
+# from https://matplotlib.org/stable/tutorials/colors/colormaps.html
 gdf = rcp.makeColorColumn(gdf,variable,vmin,vmax)
+
+# create "visframe" as a re-projected gdf using EPSG 2163 for CONUS
+visframe = gdf.to_crs({'init':'epsg:2163'})
+
+
+# create figure and axes for Matplotlib
+fig, ax = plt.subplots(1, figsize=(18, 14))
+# remove the axis box around the vis
+ax.axis('off')
+
+# set the font for the visualization to Helvetica
+hfont = {'fontname':'Helvetica'}
+
+# add a title and annotation
+title_ = 'Food Insecurity by Percentage of State Households\n2019-2021'
+ax.set_title(title_, **hfont, fontdict={'fontsize': '42', 'fontweight' : '1'})
+
+# Create colorbar legend
+fig = ax.get_figure()
+# add colorbar axes to the figure
+# This will take some iterating to get it where you want it [l,b,w,h] right
+# l:left, b:bottom, w:width, h:height; in normalized unit (0-1)
+cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
+
+title_2 = "'Percentage of state households\nexperiencing food insecurity\n'"
+cbax.set_title(title_2, **hfont, fontdict={'fontsize': '15', 'fontweight' : '0'})
+
+# add color scale
+sm = plt.cm.ScalarMappable(cmap=colormap, \
+                 norm=plt.Normalize(vmin=vmin, vmax=vmax))
+# reformat tick labels on legend
+sm._A = []
+comma_fmt = FuncFormatter(lambda x, p: format(x/100, '.0%'))
+fig.colorbar(sm, cax=cbax, format=comma_fmt)
+tick_font_size = 16
+cbax.tick_params(labelsize=tick_font_size)
+# annotate the data source, date of access, and hyperlink
+ann_txt_ = "Data: USDA Economic Research Service, accessed 15 Jan 23"
+ax.annotate(ann_txt_, xy=(0.22, .085), xycoords='figure fraction', fontsize=14, color='#555555')
+
+
+# create map
+# Note: we're going state by state here because of unusual 
+# coloring behavior when trying to plot the entire dataframe using the "value_determined_color" column
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = gdf[gdf.state==row.state][0:1].value_determined_color.item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+
+
+# %%
+
+# %%
+
+# %%
+# https://medium.com/@alex_44314/use-python-geopandas-to-make-a-us-map-with-alaska-and-hawaii-39a9f5c222c6
+
+# **************************
+# set the value column that will be visualised
+variable = "residuals_1000head"
+
+# make a column for value_determined_color in gdf
+# set the range for the choropleth values with the upper bound the rounded up maximum value
+vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
+gdf = rcp.makeColorColumn(gdf, variable, vmin, vmax)
 
 # create "visframe" as a re-projected gdf using EPSG 2163 for CONUS
 visframe = gdf.to_crs({'init':'epsg:2163'})
@@ -1265,14 +1335,10 @@ visframe = gdf.to_crs({'init':'epsg:2163'})
 fig, ax = plt.subplots(1, figsize=(18, 14))
 ax.axis('off') # remove the axis box
 
-# add a title and annotation
 txt_ = "y = f(metric_total_matt_nppDiv10M, $b_p$, $h_p$)\n year=2017"
 ax.set_title(txt_, fontdict={'fontsize': title_font_size, 'fontweight' : '1'})
 
-# Create colorbar legend
-fig = ax.get_figure()
-# add colorbar axes to the figure
-# This will take some iterating to get it where you want it [l,b,w,h] right
+fig = ax.get_figure() # Create colorbar legend
 # l:left, b:bottom, w:width, h:height; in normalized unit (0-1)
 cbax = fig.add_axes([0.89, 0.21, 0.03, 0.31])   
 
@@ -1294,16 +1360,54 @@ text_ = "Data: USDA Economic Research Service"
 # ax.annotate(text_, xy=(0.22, .085), xycoords='figure fraction', fontsize=14, color='#555555')
 
 
-# create map
 # Note: we're going state by state here because of unusual coloring behavior 
 # when trying to plot the entire dataframe using the "value_determined_color" column
 for row in visframe.itertuples():
     if row.state not in ['AK','HI']:
         vf = visframe[visframe.state==row.state]
-        c = gdf[gdf.state==row.state][0:1].value_determined_color.item()
+        c = visframe[visframe.state==row.state][0:1].value_determined_color.item()
         vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
 
 fig.savefig(plot_dir + 'residuals_2017_1000Head.pdf', dpi=200, bbox_inches="tight")
+
+# %%
+import plotly.graph_objects as go
+
+variable = "residuals_1000head"
+
+fig = go.Figure(data=go.Choropleth(
+    locations= gdf['state'],
+    z = gdf[variable].astype(float),
+    locationmode='USA-states',
+    colorscale='Reds',
+    autocolorscale=False,
+    # text=df['text'], # hover text
+    marker_line_color='white', # line markers between states
+    colorbar_title = variable
+))
+
+fig.update_layout(
+    title_text = "y = f(metric_total_matt_nppDiv10M, b_p, h_p),\n year=2017",
+    geo = dict(
+        scope='usa',
+        projection=go.layout.geo.Projection(type = 'albers usa'),
+        showlakes=True, # lakes
+        lakecolor='rgb(255, 255, 255)'),
+)
+
+fig.show()
+fig.write_image(plot_dir + 'residuals_2017_1000Head_goFigure.pdf')
+
+# %%
+gdf.head(2)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
 
@@ -1437,6 +1541,9 @@ fig.savefig(plot_dir + 'residuals_median_logInv.pdf', dpi=200, bbox_inches="tigh
 # %%
 cross_2017 = inv_prices_ndvi_npp.copy()
 cross_2017 = cross_2017[cross_2017.year==2017]
+cross_2017.head(3)
+
+# %%
 depen_var_name = "log_inventory"
 indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
 m5 = spreg.OLS_Regimes(y = cross_2017[depen_var_name].values, # Dependent variable
@@ -1547,7 +1654,7 @@ cbax.set_title(txt_, fontdict={'fontsize': '25', 'fontweight' : '0'}) #
 # add color scale
 sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
 sm._A = [] # reformat tick labels on legend
-comma_fmt = FuncFormatter(lambda x, p: format(int(x)))
+comma_fmt = FuncFormatter(lambda x, p: format(float(x.round(3))))
 fig.colorbar(sm, cax=cbax, format=comma_fmt)
 
 tick_font_size = 16
@@ -1560,6 +1667,10 @@ for row in visframe.itertuples():
         vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
 
 fig.savefig(plot_dir + 'cross_2017_residuals_logInv.pdf', dpi=200, bbox_inches="tight")
+
+# %%
+
+# %%
 
 # %%
 

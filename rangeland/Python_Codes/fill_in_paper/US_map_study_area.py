@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -155,7 +155,7 @@ variable = "SoI"
 # make a column for value_determined_color in gdf
 # set the range for the choropleth values with the upper bound the rounded up maximum value
 vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
-gdf = makeColorColumn(gdf,variable,vmin,vmax)
+gdf = makeColorColumn(gdf, variable, vmin, vmax)
 
 # create "visframe" as a re-projected gdf using EPSG 2163 for CONUS
 visframe = gdf.to_crs({'init':'epsg:2163'})
@@ -165,7 +165,6 @@ fig, ax = plt.subplots(1, figsize=(18, 14))
 # remove the axis box around the vis
 ax.axis('off')
 
-# set the font for the visualization to Helvetica
 hfont = {'fontname':'Helvetica'}
 
 # add a title and annotation
@@ -312,6 +311,11 @@ fig.update_layout(
 )
 
 fig.show()
+
+# %%
+df.head(2)
+
+# %%
 
 # %%
 fig = go.Figure(data=go.Choropleth(locations = gdf.state,
@@ -487,6 +491,8 @@ for key in legend_dict:
 plt.legend(handles=patchList);
 
 # fig.savefig(plot_dir + 'study_area.pdf', dpi=800, bbox_inches="tight")
+
+# %%
 
 # %%
 import matplotlib.colors as mcolors
