@@ -5,10 +5,34 @@ import time, datetime
 from pprint import pprint
 import os, os.path, sys
 import scipy
+from scipy.linalg import inv
 
 """
 There are scipy.linalg.block_diag() and scipy.sparse.block_diag()
 """
+
+
+def GLS(X, y, weight_):
+    """
+    This function returns a generalized least square solution
+    where the weight matrix is inverted in analytical form.
+    """
+    return (
+        inv(X.T.values @ inv(weight_.values) @ X.values)
+        @ X.T.values
+        @ inv(weight_.values)
+        @ y
+    )
+
+
+def WLS(X, y, weight_):
+    """
+    This function returns a weighted least square solution
+    where the weight matrix is not inverted in analytical form.
+    The weight matrix is already degined as inverse of the diagonal matrix
+    where each random variable has different variance but they are un-correlated.
+    """
+    return inv(X.T.values @ weight_.values @ X.values) @ X.T.values @ weight_.values @ y
 
 
 def create_adj_weight_matrix(data_df, adj_df, fips_var="state_fips"):
