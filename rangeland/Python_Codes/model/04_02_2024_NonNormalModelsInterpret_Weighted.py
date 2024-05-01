@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -566,20 +566,7 @@ print (((inv_prices_ndvi_npp["rangeland_acre"]/10).max() - (inv_prices_ndvi_npp[
 # # All together
 
 # %%
-y_var = "log_inventory" # log_inventory, inventoryDiv1000
-X_vars = ["metric_total_matt_nppDiv10M", "rangeland_acre"]
-
-y = inv_prices_ndvi_npp[y_var]
-X = inv_prices_ndvi_npp[X_vars]
-X = sm.add_constant(X)
-
-beta = rc.GLS(X, y, block_diag_weights)
-
-print (f"{r2_score(y, X@beta).round(3) = }")
-pd.DataFrame(beta, index=list(X.columns), columns=["coef"]).round(5)
-
-# %%
-X_vars = ["metric_total_matt_nppDiv10M"]
+X_vars = ["metric_total_matt_nppDiv10M", 'beef_price_at_1982', 'hay_price_at_1982']
 
 y = inv_prices_ndvi_npp[y_var]
 X = inv_prices_ndvi_npp[X_vars]
@@ -595,26 +582,6 @@ pd.DataFrame(beta, index=list(X.columns), columns=["coef"]).round(5)
 # # West side
 
 # %%
-print (round(inv_prices_ndvi_npp_west.log_inventory.max() /
-       inv_prices_ndvi_npp_west.log_inventory.min(), 2))
-
-print (round(inv_prices_ndvi_npp_west.inventoryDiv1000.max() /
-       inv_prices_ndvi_npp_west.inventoryDiv1000.min(), 2))
-
-print (round(inv_prices_ndvi_npp_west.metric_total_matt_nppDiv10M.max()/
-       inv_prices_ndvi_npp_west.metric_total_matt_nppDiv10M.min(), 2))
-
-print ("-------------------------------------------------------")
-print (round(inv_prices_ndvi_npp_west.log_inventory.max() -
-       inv_prices_ndvi_npp_west.log_inventory.min(), 2))
-
-print (round(inv_prices_ndvi_npp_west.inventoryDiv1000.max() -
-       inv_prices_ndvi_npp_west.inventoryDiv1000.min(),2))
-
-print (round(inv_prices_ndvi_npp_west.metric_total_matt_nppDiv10M.max()-
-       inv_prices_ndvi_npp_west.metric_total_matt_nppDiv10M.min(), 2))
-
-# %%
 y = inv_prices_ndvi_npp_west[y_var]
 X = inv_prices_ndvi_npp_west[X_vars]
 X = sm.add_constant(X)
@@ -624,19 +591,6 @@ beta = rc.GLS(X, y, block_diag_weights_west)
 print (f"{y_var =}")
 print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
-
-# %%
-y = inv_prices_ndvi_npp_west[y_var]
-X = inv_prices_ndvi_npp_west[X_vars]/1000
-X = sm.add_constant(X)
-
-beta = rc.GLS(X, y, block_diag_weights_west)
-
-print (f"{y_var =}")
-print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
-pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
-
-# %%
 
 # %% [markdown]
 # # East side
@@ -650,6 +604,14 @@ beta = rc.GLS(X, y, block_diag_weights_east)
 print (f"{y_var =}")
 print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %% [markdown]
+# # Lagged vs No Lag
+# Lagged data will have less data in them. So, do not use anything below this cell for no-lag models
+
+# %%
+
+# %%
 
 # %% [markdown]
 # # Indp. Lagged
@@ -788,25 +750,24 @@ inv_prices_ndvi_npp_east_lagAvg3 = inv_prices_ndvi_npp_lagAvg3[
                                       inv_prices_ndvi_npp_lagAvg3.EW_meridian == "E"].copy()
 inv_prices_ndvi_npp_east_lagAvg3.reset_index(drop=True, inplace=True)
 
-# %% [markdown]
-# ### Indp. Avg. Lagged Altogether
-
-# %%
-X_vars = ["metric_total_matt_nppDiv10M", 'metric_total_matt_nppDiv10M_lagAvg3',
-          "beef_price_at_1982", "hay_price_at_1982"]
-
-y = inv_prices_ndvi_npp_lagAvg3[y_var]
-X = inv_prices_ndvi_npp_lagAvg3[X_vars]
-X = sm.add_constant(X)
-
-beta = rc.GLS(X, y, block_diag_weights_lagged)
-
-print (f"{y_var = }")
-print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
-pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
-
 # %%
 inv_prices_ndvi_npp_west_lagAvg3.shape
+
+# %%
+X_vars = ["metric_total_matt_nppDiv10M", 'metric_total_matt_nppDiv10M_lagAvg3']
+
+# %% [markdown]
+# ### Indp. Avg. Lagged East
+
+# %%
+y = inv_prices_ndvi_npp_east_lagAvg3[y_var]
+X = inv_prices_ndvi_npp_east_lagAvg3[X_vars]
+X = sm.add_constant(X)
+
+beta = rc.GLS(X, y, block_diag_weights_east_lagged)
+
+print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
+pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %% [markdown]
 # ### Indp. Avg. Lagged West
@@ -823,18 +784,17 @@ print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %% [markdown]
-# ### Indp. Avg. Lagged East
+# ### Indp. Avg. Lagged Altogether
 
 # %%
-y = inv_prices_ndvi_npp_east_lagAvg3[y_var]
-X = inv_prices_ndvi_npp_east_lagAvg3[X_vars]
+y = inv_prices_ndvi_npp_lagAvg3[y_var]
+X = inv_prices_ndvi_npp_lagAvg3[X_vars]
 X = sm.add_constant(X)
 
-beta = rc.GLS(X, y, block_diag_weights_east_lagged)
+beta = rc.GLS(X, y, block_diag_weights_lagged)
 
+print (f"{y_var = }")
 print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
-
-# %%
 
 # %%
