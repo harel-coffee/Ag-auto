@@ -22,6 +22,75 @@
 #
 # https://pysal.org/libpysal/generated/libpysal.weights.KNN.html
 
+# %% [raw]
+# An interesting question arises around the relevance of the regimes. Are estimates for each variable across regimes statistically different? For this, the model object also calculates for us what is called a ```Chow``` test. This is a statistic that tests the null hypothesis that estimates from different regimes are undistinguishable. If we reject the null, we have evidence suggesting the regimes actually make a difference.
+#
+#
+# The first value represents the ```statistic```, while the second one captures the ```p-value```. 
+#
+# In this case, the two regimes are statistically different from each other.
+#
+# The text above this line is for the following model (for the record, just in case the model is changed in above cell):
+#
+# ### Allows for different slopes per category:
+#
+# depen_var_name = "inventoryDiv1000"
+# indp_vars = ["metric_total_matt_nppDiv10M"]
+# m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
+#                        x = inv_prices_ndvi_npp[indp_vars].values,  # Independent variables
+#
+#                        # Variable specifying neighborhood membership
+#                        regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
+#               
+#                        # Variables to be allowed to vary (True) or kept
+#                        # constant (False). Here we set all to False
+#                        # cols2regi=[False] * len(indp_vars),
+#                         
+#                        # Allow the constant term to vary by group/regime
+#                        constant_regi="many",
+#                         
+#                        # Allow separate sigma coefficients to be estimated
+#                        # by regime (False so a single sigma)
+#                        regime_err_sep=False,
+#                        name_y=depen_var_name, # Dependent variable name
+#                         
+#                        # Independent variables names
+#                        name_x=indp_vars)
+#
+# m5_results = pd.DataFrame({# Pull out regression coefficients and
+#                            # flatten as they are returned as Nx1 array
+#                            "Coeff.": m5.betas.flatten(),
+#                            # Pull out and flatten standard errors
+#                            "Std. Error": m5.std_err.flatten(),
+#                            # Pull out P-values from t-stat object
+#                            "P-Value": [i[1] for i in m5.t_stat],
+#                            }, index=m5.name_x)
+#
+#
+# \# West regime ## Extract variables for the coastal regime
+# west_m = [i for i in m5_results.index if "W_" in i]
+#
+# \## Subset results to coastal and remove the 1_ underscore
+# west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
+#
+#
+# \## Build multi-index column names
+# west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
+#
+# \# East model ## Extract variables for the non-coastal regime
+# east_m = [i for i in m5_results.index if "E_" in i]
+#
+# \## Subset results to non-coastal and remove the 0_ underscore
+# east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
+#
+# \## Build multi-index column names
+# east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
+#
+# \# Concat both models
+# pd.concat([east, west], axis=1)
+#
+# [Reference is here](https://geographicdata.science/book/notebooks/11_regression.html)
+
 # %%
 import shutup
 
@@ -219,6 +288,15 @@ needed_cols = ["year", "state_fips",
                "EW_meridian", "state_dummy_int"]
 
 inv_prices_ndvi_npp = all_df[needed_cols].copy()
+inv_prices_ndvi_npp.head(2)
+
+# %%
+# [x for x in sorted(list(all_df.columns)) if not ("dumm" in x)]
+
+# %%
+inv_prices_ndvi_npp
+
+# %%
 
 # %%
 len(inv_prices_ndvi_npp.state_fips.unique())
@@ -239,6 +317,35 @@ state_fips = abb_dict["state_fips"]
 state_fips[state_fips["state_fips"]=="21"]
 
 # %%
+inv_prices_ndvi_npp.head(2)
+
+# %%
+inv_prices_ndvi_npp.columns
+
+# %% [markdown]
+# # Add mean and variance of NPP to the data
+
+# %%
+mean_NPP = inv_prices_ndvi_npp.groupby(["state_fips"])["metric_total_matt_nppDiv10M"].mean()
+mean_NPP = mean_NPP.reset_index()
+mean_NPP.rename(columns={"metric_total_matt_nppDiv10M": "mean_metric_total_matt_nppDiv10M_2001_2020"}, 
+                inplace=True)
+mean_NPP.head(2)
+
+# %%
+var_NPP = inv_prices_ndvi_npp.groupby(["state_fips"])["metric_total_matt_nppDiv10M"].var()
+var_NPP = var_NPP.reset_index()
+var_NPP.rename(columns={"metric_total_matt_nppDiv10M": "var_metric_total_matt_nppDiv10M_2001_2020"}, inplace=True)
+var_NPP.head(2)
+
+# %%
+inv_prices_ndvi_npp = pd.merge(inv_prices_ndvi_npp, mean_NPP, on=["state_fips"], how="left")
+inv_prices_ndvi_npp = pd.merge(inv_prices_ndvi_npp, var_NPP, on=["state_fips"], how="left")
+
+# %%
+inv_prices_ndvi_npp.head(2)
+
+# %%
 # non-normal data
 # log_inventory, inventoryDiv1000, C(EW_meridian)
 # [inv_prices_ndvi_npp.EW_meridian=="E"]
@@ -252,6 +359,14 @@ fit = ols(depen_var_name + " ~ " + " + ".join(indp_vars),
 fit.summary()
 
 # %%
+short_summ = pd.DataFrame({"Coeff.": fit.params.values,          
+                           "Std. Error": fit.bse.values.round(2),
+                           "t": fit.tvalues.values,
+                           "P-Value": fit.pvalues.values},
+                           index = list(fit.params.index))
+short_summ
+
+# %%
 spreg_fit = spreg.OLS(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
                       x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
                       name_y=depen_var_name, # Dependent variable name
@@ -263,53 +378,6 @@ pd.DataFrame({"Coeff.": spreg_fit.betas.flatten(),
               index = spreg_fit.name_x).round(4)
 
 # %%
-depen_var_name = "inventoryDiv1000"
-indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982"]
-m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
-                       x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
-
-                       # Variable specifying neighborhood membership
-                       regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
-              
-                       # Variables to be allowed to vary (True) or kept
-                       # constant (False). Here we set all to False
-                       # cols2regi=[False] * len(indp_vars),
-                        
-                       # Allow the constant term to vary by group/regime
-                       constant_regi="many",
-                        
-                       # Allow separate sigma coefficients to be estimated
-                       # by regime (False so a single sigma)
-                       regime_err_sep=False,
-                       name_y=depen_var_name, # Dependent variable name
-                       name_x=indp_vars)
-
-m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
-                           "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
-                           "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
-                           }, index=m5.name_x)
-
-m5_results
-
-# West regime
-## Extract variables for the west side regime
-west_m = [i for i in m5_results.index if "W_" in i]
-
-## Subset results to west side and remove the W_
-west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
-## Build multi-index column names
-west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
-
-# East model
-## Extract variables for the eastern regime
-east_m = [i for i in m5_results.index if "E_" in i]
-east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
-## Build multi-index column names
-east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
-# Concat both models
-pd.concat([east, west], axis=1)
-
-# %%
 # variable_list = fit.params.index.to_list() 
 # coef_dict = fit.params.to_dict()  # coefficient dictionary
 # pval_dict = fit.pvalues.to_dict()  # pvalues dictionary
@@ -319,14 +387,6 @@ pd.concat([east, west], axis=1)
 # adj_rsqured = round(fit.rsquared_adj, 3) # adjusted rsqured
 # info_index = ['Num', 'AIC', 'Adjusted R2']
 # index_list = variable_list + info_index
-
-# %%
-short_summ = pd.DataFrame({"Coeff.": fit.params.values,          
-                           "Std. Error": fit.bse.values.round(2),
-                           "t": fit.tvalues.values,
-                           "P-Value": fit.pvalues.values},
-                           index = list(fit.params.index))
-short_summ
 
 # %%
 print (len(inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "E"].state_fips.unique()))
@@ -367,10 +427,13 @@ state_fips_SoI[state_fips_SoI.state_fips=="35"]
 [x for x in inv_prices_ndvi_npp.columns if "inventory" in x]
 
 # %%
-### Allows for different slopes per category:
+inv_prices_ndvi_npp.columns
 
-depen_var_name = "inventoryDiv1000"
-indp_vars = ["metric_total_matt_nppDiv10M"]
+# %%
+depen_var_name = "log_inventory"
+indp_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982", 
+             # "var_metric_total_matt_nppDiv10M_2001_2020"
+            ]
 m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Dependent variable
                        x = inv_prices_ndvi_npp[indp_vars].values, # Independent variables
 
@@ -387,123 +450,36 @@ m5 = spreg.OLS_Regimes(y = inv_prices_ndvi_npp[depen_var_name].values, # Depende
                        # Allow separate sigma coefficients to be estimated
                        # by regime (False so a single sigma)
                        regime_err_sep=False,
-                       name_y=depen_var_name, # Dependent variable name 
+                       name_y=depen_var_name, # Dependent variable name
                        name_x=indp_vars)
-                      
 
-m5_results = pd.DataFrame({# Pull out regression coefficients and flatten
-                           "Coeff.": m5.betas.flatten(),
+print (m5.r2.round(2))
+
+m5_results = pd.DataFrame({"Coeff.": m5.betas.flatten(), # Pull out regression coefficients and
                            "Std. Error": m5.std_err.flatten(), # Pull out and flatten standard errors
                            "P-Value": [i[1] for i in m5.t_stat], # Pull out P-values from t-stat object
                            }, index=m5.name_x)
 
+m5_results
+
 # West regime
-## Extract variables for the West regime
+## Extract variables for the west side 
 west_m = [i for i in m5_results.index if "W_" in i]
 
-## Subset results to West and remove the 1_ underscore
+## Subset results to west side and remove the W_
 west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
 ## Build multi-index column names
 west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
 
 # East model
-## Extract variables for the east regime
+## Extract variables for the east side
 east_m = [i for i in m5_results.index if "E_" in i]
-## Subset results to east and remove the 0_ underscore
 east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
 ## Build multi-index column names
 east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
-# Concat both models
-pd.concat([east, west], axis=1)
 
-# %% [raw]
-# An interesting question arises around the relevance of the regimes. Are estimates for each variable across regimes statistically different? For this, the model object also calculates for us what is called a ```Chow``` test. This is a statistic that tests the null hypothesis that estimates from different regimes are undistinguishable. If we reject the null, we have evidence suggesting the regimes actually make a difference.
-#
-#
-# The first value represents the ```statistic```, while the second one captures the ```p-value```. 
-#
-# In this case, the two regimes are statistically different from each other.
-#
-# The text above this line is for the following model (for the record, just in case the model is changed in above cell):
-#
-#
-# ### Allows for different slopes per category:
-#
-# depen_var_name = "inventoryDiv1000"
-# indp_vars = ["metric_total_matt_nppDiv10M"]
-# m5 = spreg.OLS_Regimes(# Dependent variable
-#                        y = inv_prices_ndvi_npp[depen_var_name].values,
-#     
-#                        # Independent variables
-#                        x = inv_prices_ndvi_npp[indp_vars].values,
-#
-#                        # Variable specifying neighborhood membership
-#                        regimes = inv_prices_ndvi_npp["EW_meridian"].tolist(),
-#               
-#                        # Variables to be allowed to vary (True) or kept
-#                        # constant (False). Here we set all to False
-#                        # cols2regi=[False] * len(indp_vars),
-#                         
-#                        # Allow the constant term to vary by group/regime
-#                        constant_regi="many",
-#                         
-#                        # Allow separate sigma coefficients to be estimated
-#                        # by regime (False so a single sigma)
-#                        regime_err_sep=False,
-#                         
-#                        # Dependent variable name
-#                        name_y=depen_var_name,
-#                         
-#                        # Independent variables names
-#                        name_x=indp_vars)
-#
-# m5_results = pd.DataFrame({# Pull out regression coefficients and
-#                            # flatten as they are returned as Nx1 array
-#                            "Coeff.": m5.betas.flatten(),
-#                            # Pull out and flatten standard errors
-#                            "Std. Error": m5.std_err.flatten(),
-#                            # Pull out P-values from t-stat object
-#                            "P-Value": [i[1] for i in m5.t_stat],
-#                            }, index=m5.name_x)
-#
-#
-# \# West regime
-# \## Extract variables for the coastal regime
-#
-#
-# west_m = [i for i in m5_results.index if "W_" in i]
-#
-#
-# \## Subset results to coastal and remove the 1_ underscore
-#
-# west = m5_results.loc[west_m, :].rename(lambda i: i.replace("W_", ""))
-#
-#
-# \## Build multi-index column names
-#
-# west.columns = pd.MultiIndex.from_product([["West Meridian"], west.columns])
-#
-#
-# \# East model
-#
-# \## Extract variables for the non-coastal regime
-#
-# east_m = [i for i in m5_results.index if "E_" in i]
-#
-# \## Subset results to non-coastal and remove the 0_ underscore
-#
-# east = m5_results.loc[east_m, :].rename(lambda i: i.replace("E_", ""))
-#
-# \## Build multi-index column names
-#
-# east.columns = pd.MultiIndex.from_product([["East Meridian"], east.columns])
-#
-# \# Concat both models
-#
-# pd.concat([east, west], axis=1)
-#
-#
-# [Reference is here](https://geographicdata.science/book/notebooks/11_regression.html)
+# Concat both models
+pd.concat([east, west], axis=1).round(5)
 
 # %%
 m5.chow.joint
@@ -522,26 +498,38 @@ pd.DataFrame(m5.chow.regi, # Chow results by variable
 # + C(EW_meridian)
 # [inv_prices_ndvi_npp.EW_meridian == "W"]
 # + beef_price_at_1982 + hay_price_at_1982
-
-fit = ols('inventoryDiv1000 ~ metric_total_matt_nppDiv10M',
+x_vars = ["metric_total_matt_nppDiv10M", "beef_price_at_1982", "hay_price_at_1982", 
+          "var_metric_total_matt_nppDiv10M_2001_2020"]
+fit = ols('inventoryDiv1000 ~ ' + "+".join(x_vars),
           data = inv_prices_ndvi_npp[inv_prices_ndvi_npp.EW_meridian == "W"]).fit() 
 
 print (f"{fit.pvalues['metric_total_matt_nppDiv10M'] = }")
-
 fit.summary()
 
 # %%
 
 # %%
+y_var = "log_inventory" # log_inventory, inventoryDiv1000
+# -1 came from Mike's Tutorial. sth about under "C(state_dummy_int) - 1" "C(EW_meridian)"
+x_vars = ["metric_total_matt_nppDiv10M",  "beef_price_at_1982", "hay_price_at_1982"]
 
-# %%
-y_var = "inventoryDiv1000"
-x_vars = ["metric_total_matt_nppDiv10M", "C(state_dummy_int) - 1"] # -1 came from Mike's Tutorial. sth about under
 fit = ols(y_var + ' ~ ' + "+".join(x_vars), data = inv_prices_ndvi_npp).fit() 
 
 print (f"{fit.pvalues['metric_total_matt_nppDiv10M'].round(3) = }")
-
 fit.summary()
+
+# %%
+x_vars = ["metric_total_matt_nppDiv10M",  "beef_price_at_1982", "hay_price_at_1982",
+          "var_metric_total_matt_nppDiv10M_2001_2020"]
+yhats = fit.predict(inv_prices_ndvi_npp[x_vars])
+
+d_ = {"yhats":yhats, y_var: inv_prices_ndvi_npp[y_var]}
+y_and_hats = pd.DataFrame(d_)
+y_and_hats.loc[y_and_hats.yhats.idxmin()]
+
+# %%
+
+# %%
 
 # %%
 # fit.params.filter(like="state_dummy_int")
