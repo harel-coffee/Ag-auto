@@ -82,7 +82,7 @@ def convert_lb_2_kg(df, matt_total_npp_col, new_col_name):
     """
     Convert weight in lb to kg
     """
-    df[new_col_name] = df[matt_total_npp_col] / 2.205
+    df[new_col_name] = df[matt_total_npp_col] / 2.2046226218
     return df
 
 

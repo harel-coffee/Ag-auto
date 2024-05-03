@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -109,10 +109,22 @@ all_df.reset_index(drop=True, inplace=True)
 all_df.head(2)
 
 # %%
+all_df = rc.convert_lb_2_kg(df=all_df, 
+                            matt_total_npp_col="total_matt_npp", 
+                            new_col_name="metric_total_matt_npp")
+
+# %%
 all_df = pd.merge(all_df, state_name_fips, on=["state_fips"], how="left")
 all_df.head(2)
 
 # %%
+all_df.total_matt_npp[0]/2.2046226218
+
+# %%
+all_df.metric_total_matt_npp[0]
+
+# %%
+15979574020
 
 # %%
 # converting to CSV file
@@ -120,5 +132,7 @@ all_df.to_csv(reOrganized_dir + "NPP_NDVI_Invent_Mike_2May2024.csv")
 
 # %%
 reOrganized_dir
+
+# %%
 
 # %%

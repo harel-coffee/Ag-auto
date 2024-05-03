@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -195,7 +195,7 @@ all_df_normalized.head(2)
 
 # %%
 needed_cols = ['year', 'state_fips', 'inventory', 
-               "max_ndvi_in_year_modis", "ndvi_std_modis",
+               "max_ndvi_in_year_modis", "ndvi_std_modis", "rangeland_acre",
                "beef_price_at_1982", "hay_price_at_1982", "chicken_price_at_1982"] + \
                dummy_cols + ["state_dummy_int"]\
 
@@ -334,10 +334,16 @@ all_df_normalized_needed = rc.add_lags(df=all_df_normalized_needed,
                                        year_count = 3)
 
 # %%
+all_df_normalized_needed.columns
+
+# %%
 check_cols = ["year", 
-              "max_ndvi_in_year_modis", "NDVI1", "NDVI2", "NDVI3",
-              "beef_price_at_1982", "B1", "B2", "B3",
-              "hay_price_at_1982", "H1", "H2", "H3",
+              "max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1", 
+              "max_ndvi_in_year_modis_lag2", "max_ndvi_in_year_modis_lag3",
+              "beef_price_at_1982", "beef_price_at_1982_lag1", 
+              "beef_price_at_1982_lag2", "beef_price_at_1982_lag3",
+              "hay_price_at_1982", "hay_price_at_1982_lag1", 
+              "hay_price_at_1982_lag2", "hay_price_at_1982_lag3",
              ]
 
 all_df_normalized_needed.loc[all_df_normalized_needed.state_fips == "01", check_cols].head(5)
@@ -365,29 +371,9 @@ all_df_normalized.head(2)
 all_df_normalized_needed.head(2)
 
 # %%
-indp_vars = ["max_ndvi_in_year_modis", "NDVI1",
-             "beef_price_at_1982", "B1",
-             "hay_price_at_1982",  "H1",]
-
-y_var = "inventory"
-
-#################################################################
-df = all_df_normalized_needed[[y_var] + indp_vars].copy()
-df.dropna(how="any", inplace=True)
-X = df[indp_vars]
-for col_ in indp_vars:
-    X[col_] = X[col_].astype("float")
-
-X = sm.add_constant(X)
-Y = np.log(df[y_var].astype(float))
-model = sm.OLS(Y, X)
-model_result = model.fit()
-model_result.summary()
-
-# %%
-indp_vars = ["max_ndvi_in_year_modis", "NDVI1", "NDVI2",
-             "beef_price_at_1982", "B1", "B2",
-             "hay_price_at_1982",  "H1", "H2"]
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1",
+             "beef_price_at_1982", "beef_price_at_1982_lag1",
+             "hay_price_at_1982",  "hay_price_at_1982_lag1",]
 
 y_var = "inventory"
 
@@ -407,7 +393,29 @@ model_result.summary()
 # %%
 
 # %%
-indp_vars = ["max_ndvi_in_year_modis", "NDVI1",
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1", "max_ndvi_in_year_modis_lag2",
+             "beef_price_at_1982", "beef_price_at_1982_lag1", "beef_price_at_1982_lag2",
+             "hay_price_at_1982",  "hay_price_at_1982_lag1", "hay_price_at_1982_lag2"]
+
+y_var = "inventory"
+
+#################################################################
+df = all_df_normalized_needed[[y_var] + indp_vars].copy()
+df.dropna(how="any", inplace=True)
+X = df[indp_vars]
+for col_ in indp_vars:
+    X[col_] = X[col_].astype("float")
+
+X = sm.add_constant(X)
+Y = np.log(df[y_var].astype(float))
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
+
+# %%
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1",
              "beef_price_at_1982", "hay_price_at_1982"]
 
 y_var = "inventory"
@@ -426,7 +434,9 @@ model_result = model.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["max_ndvi_in_year_modis", "NDVI1", "NDVI2",
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1", "max_ndvi_in_year_modis_lag2",
              "beef_price_at_1982", "hay_price_at_1982"]
 
 y_var = "inventory"
@@ -445,7 +455,9 @@ model_result = model.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["max_ndvi_in_year_modis", "NDVI1"]
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1"]
 
 y_var = "inventory"
 
@@ -463,7 +475,9 @@ model_result = model.fit()
 model_result.summary()
 
 # %%
-indp_vars = ["max_ndvi_in_year_modis", "NDVI1", "NDVI2"]
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1", "max_ndvi_in_year_modis_lag2"]
 
 y_var = "inventory"
 
@@ -483,7 +497,8 @@ model_result.summary()
 # %%
 
 # %%
-indp_vars = ["max_ndvi_in_year_modis", "NDVI1", "NDVI2", "NDVI3"]
+indp_vars = ["max_ndvi_in_year_modis", "max_ndvi_in_year_modis_lag1", "max_ndvi_in_year_modis_lag2", 
+             "max_ndvi_in_year_modis_lag3"]
 
 y_var = "inventory"
 
@@ -500,6 +515,57 @@ model = sm.OLS(Y, X)
 model_result = model.fit()
 model_result.summary()
 
+# %% [markdown]
+# # Model w/ not Normalized data
+
+# %% [markdown]
+# # Avg Lag. 
+#
+# Average lag
+
 # %%
+all_df_outerjoined = all_data_dict["all_df_outerjoined"]
+all_df_outerjoined = all_df_outerjoined[needed_cols]
+all_df_outerjoined.head(2)
+
+# %%
+all_df_outerjoined = rc.add_lags_avg(df = all_df_outerjoined, 
+                                     lag_vars_ = ["max_ndvi_in_year_modis", "beef_price_at_1982", 
+                                                  "hay_price_at_1982"], 
+                                     year_count=3, fips_name="state_fips")
+all_df_outerjoined.head(2)
+
+# %%
+all_df_outerjoined = rc.add_lags(df = all_df_outerjoined, 
+                                 merge_cols=['year', 'state_fips'], 
+                                 lag_vars_ = ['max_ndvi_in_year_modis',
+                                              'beef_price_at_1982', 
+                                              'hay_price_at_1982', 
+                                              'chicken_price_at_1982'], 
+                                 year_count = 3)
+
+all_df_outerjoined.head(2)
+
+# %%
+all_df_outerjoined.columns
+
+# %%
+indp_vars = ["max_ndvi_in_year_modis", "rangeland_acre",
+             "beef_price_at_1982", "hay_price_at_1982"]
+
+y_var = "inventory"
+
+#################################################################
+df = all_df_outerjoined[[y_var] + indp_vars].copy()
+df.dropna(how="any", inplace=True)
+X = df[indp_vars]
+for col_ in indp_vars:
+    X[col_] = X[col_].astype("float")
+
+X = sm.add_constant(X)
+Y = np.log(df[y_var].astype(float))
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
 
 # %%
