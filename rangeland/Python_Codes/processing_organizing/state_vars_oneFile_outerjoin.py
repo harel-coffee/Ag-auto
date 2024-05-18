@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -33,6 +33,8 @@ import rangeland_core as rc
 
 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 # -
+
+
 
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
 census_population_dir = data_dir_base + "census/"
