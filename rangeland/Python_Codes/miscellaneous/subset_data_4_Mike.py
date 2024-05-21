@@ -97,6 +97,18 @@ print (test_inventory_yr.year.min())
 print (test_inventory_yr.year.max())
 
 # %%
+productivity = pd.read_csv(Min_data_dir_base + "statefips_annual_productivity.csv")
+productivity.head(2)
+
+productivity = pd.read_csv(Min_data_dir_base + "county_annual_productivity.csv")
+productivity.head(2)
+
+# %%
+MODIS_NPP = pd.read_csv("/Users/hn/Documents/01_research_data/RangeLand/Data_large_notUsedYet/" + \
+                        "Min_data/county_annual_MODIS_NPP.csv")
+MODIS_NPP.head(2)
+
+# %%
 test_inventory_yr = all_df[["year", "inventory"]]
 test_inventory_yr.dropna(how="any", inplace=True)
 print (test_inventory_yr.year.min())
@@ -155,10 +167,10 @@ all_df = pd.merge(all_df, state_name_fips, on=["state_fips"], how="left")
 all_df.head(2)
 
 # %%
-all_df.total_matt_npp[0]/2.2046226218
+all_df[["year", "unit_matt_npp"]].dropna(how="any", inplace=False).year.max()
 
 # %%
-all_df.metric_total_matt_npp[0]
+all_df[["year", "max_ndvi_in_year_modis"]].dropna(how="any", inplace=False).head(2)
 
 # %%
 15979574020
@@ -177,5 +189,98 @@ reOrganized_dir
 
 # %%
 all_df.year.max()
+
+# %%
+all_df.head(2)
+
+# %%
+Mike_Dell_df = all_df[["year", "inventory", "rangeland_acre", "unit_matt_npp", "state"]].copy()
+Mike_Dell_df.dropna(subset=["inventory", "unit_matt_npp"], inplace=True)
+Mike_Dell_df.reset_index(drop=True, inplace=True)
+
+Mike_Dell_df["inventory_div_RA"] = Mike_Dell_df['inventory'] / Mike_Dell_df['rangeland_acre']
+Mike_Dell_df.head(2)
+
+# %%
+Mike_Dell_df_min = Mike_Dell_df.groupby(["state"])["unit_matt_npp"].min().reset_index().round(4)
+Mike_Dell_df_min.rename(columns={"unit_matt_npp": "min_unit_matt_npp"}, inplace=True)
+
+Mike_Dell_df_mean = Mike_Dell_df.groupby(["state"])["unit_matt_npp"].mean().reset_index().round(4)
+Mike_Dell_df_mean.rename(columns={"unit_matt_npp": "mean_unit_matt_npp"}, inplace=True)
+
+Mike_Dell_df_max = Mike_Dell_df.groupby(["state"])["unit_matt_npp"].max().reset_index().round(4)
+Mike_Dell_df_max.rename(columns={"unit_matt_npp": "max_unit_matt_npp"}, inplace=True)
+
+Mike_Dell_df_range = pd.merge(Mike_Dell_df_min, Mike_Dell_df_mean, on=["state"], how="left")
+Mike_Dell_df_range = pd.merge(Mike_Dell_df_range, Mike_Dell_df_max, on=["state"], how="left")
+Mike_Dell_df_range.head(2)
+
+# %%
+Mike_Dell_df_min = Mike_Dell_df.groupby(["state"])["inventory_div_RA"].min().reset_index().round(4)
+Mike_Dell_df_min.rename(columns={"inventory_div_RA": "min_inventory_div_RA"}, inplace=True)
+Mike_Dell_df_min
+
+Mike_Dell_df_mean = Mike_Dell_df.groupby(["state"])["inventory_div_RA"].mean().reset_index().round(4)
+Mike_Dell_df_mean.rename(columns={"inventory_div_RA": "mean_inventory_div_RA"}, inplace=True)
+Mike_Dell_df_mean
+
+Mike_Dell_df_max = Mike_Dell_df.groupby(["state"])["inventory_div_RA"].max().reset_index().round(4)
+Mike_Dell_df_max.rename(columns={"inventory_div_RA": "max_inventory_div_RA"}, inplace=True)
+
+Mike_Dell_df_range = pd.merge(Mike_Dell_df_min, Mike_Dell_df_mean, on=["state"], how="left")
+Mike_Dell_df_range = pd.merge(Mike_Dell_df_range, Mike_Dell_df_max, on=["state"], how="left")
+Mike_Dell_df_range.head(2)
+
+# %%
+tick_legend_FontSize = 10
+
+params = {
+    "legend.fontsize": tick_legend_FontSize,  # medium, large
+    # 'figure.figsize': (6, 4),
+    "axes.labelsize": tick_legend_FontSize * 1.2,
+    "axes.titlesize": tick_legend_FontSize * 1.3,
+    "xtick.labelsize": tick_legend_FontSize,  #  * 0.75
+    "ytick.labelsize": tick_legend_FontSize,  #  * 0.75
+    "axes.titlepad": 10,
+}
+
+plt.rc("font", family="Palatino")
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["xtick.labelbottom"] = True
+plt.rcParams["ytick.labelleft"] = True
+plt.rcParams.update(params)
+
+# %%
+
+# %%
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+X_axis = np.arange(len(df.county))
+
+bar_width_ = 1
+step_size_ = 5 * bar_width_
+X_axis = np.array(range(0, step_size_ * len(df.county), step_size_))
+
+axs.bar(X_axis - bar_width_ * 2, df["double-cropped"], color=color_dict["double-cropped"],
+        width=bar_width_, label="double-cropped",)
+
+axs.bar(X_axis - bar_width_, df["single-cropped"], color=color_dict["single-cropped"],
+        width=bar_width_, label="single-cropped")
+
+axs.tick_params(axis="x", labelrotation=90)
+axs.set_xticks(X_axis, df.county)
+
+axs.set_ylabel("acreage")
+axs.legend(loc="best")
+axs.xaxis.set_ticks_position("none")
+
+# send the guidelines back
+ymin, ymax = axs.get_ylim()
+axs.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
+
 
 # %%

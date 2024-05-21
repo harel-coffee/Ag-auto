@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -461,7 +461,201 @@ for ii in range(3, 11):
     )
 
 # %%
-out_name = reOrganized_dir + "Beef_Cows_fromWeeklyRegionalCowSlaughter.csv"
+curr_sheet.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+curr_sheet.rename(columns=lambda x: x.lower().replace("&", ""), inplace=True)
+curr_sheet.rename(columns=lambda x: x.lower().replace("%", "percent"), inplace=True)
+curr_sheet.rename(columns=lambda x: x.lower().replace("__", "_"), inplace=True)
+curr_sheet.head(2)
+
+# %%
+curr_sheet.date = pd.to_datetime(curr_sheet.date)
+
+# %%
+# Drop rows for which the week is NA
+curr_sheet.dropna(subset="week", inplace=True)
+curr_sheet.reset_index(drop=True, inplace=True)
+curr_sheet.head(2)
+
+# %%
+drop_cols_ = ['calculated_totalbeef', 'calculated_percentbeeftotal',
+              'calculated_totaldairy', 'calculated_totalbfdairy',
+              'reported_calculated_totaldairy', 'reported_calculated_totalbfdairy',
+              'reported_totaldairy',
+              'reported_totalbfdairy',]
+
+curr_sheet.drop(columns=drop_cols_, inplace=True)
+curr_sheet.head(2)
+
+# %%
+beef_cols = [x for x in curr_sheet.columns if not ("dairy" in x)]
+beef_cols
+
+beef_slaughter = curr_sheet[beef_cols].copy()
+# beef_slaughter.dropna(subset="week", inplace=True)
+# beef_slaughter.reset_index(drop=True, inplace=True)
+beef_slaughter.head(2)
+
+# beef_slaughter["year"] = beef_slaughter.date.dt.year
+# beef_slaughter["month"] = beef_slaughter.date.dt.month
+
+# %% [markdown]
+# ### Change Format:
+# Some regions have weeks/months of missing data. Dropping NA in this fashion is hard. We can change the format
+# to tall so that each ro corresponds to a given pair of (region, week). Then dropping NAs would not be problematic.
+
+# %%
+curr_sheet_tall = pd.melt(curr_sheet, id_vars=['date', 'week'])
+beef_slaughter_tall = pd.melt(beef_slaughter, id_vars=['date', 'week'])
+
+beef_slaughter_tall.rename(columns={"variable": "region",
+                                    "value": "slaughter_count"},
+                           inplace=True)
+
+curr_sheet_tall.rename(columns={"variable": "region",
+                                "value": "slaughter_count"},
+                           inplace=True)
+
+
+curr_sheet_tall.head(5)
+
+# %%
+beef_slaughter_tall.head(5)
+
+# %%
+print (curr_sheet_tall.shape)
+curr_sheet_tall.dropna(subset=["slaughter_count"], inplace=True)
+print (curr_sheet_tall.shape)
+print ()
+print (beef_slaughter_tall.shape)
+beef_slaughter_tall.dropna(subset=["slaughter_count"], inplace=True)
+print (beef_slaughter_tall.shape)
+
+beef_slaughter_tall.head(2)
+
+# %% [markdown]
+# # Multipy things by 1000
+
+# %%
+curr_sheet_tall["slaughter_count"] = curr_sheet_tall["slaughter_count"]*1000
+beef_slaughter_tall["slaughter_count"] = beef_slaughter_tall["slaughter_count"]*1000
+beef_slaughter_tall.head(2)
+
+# %% [markdown]
+# # Go back to wide
+# Now that slaughter numbers are in real count (not in 1000 Head)
+
+# %%
+beef_slaughter_wide = beef_slaughter_tall.pivot(index=["date", "week"], 
+                                                columns='region', values='slaughter_count')
+beef_slaughter_wide.reset_index(drop=False, inplace=True)
+beef_slaughter_wide.columns = beef_slaughter_wide.columns.values
+##########################################################################################
+curr_sheet_wide = curr_sheet_tall.pivot(index=["date", "week"], 
+                                                columns='region', values='slaughter_count')
+curr_sheet_wide.reset_index(drop=False, inplace=True)
+curr_sheet_wide.columns = curr_sheet_wide.columns.values
+
+
+beef_slaughter_wide.head(2)
+
+# %%
+### Re-order columns back to original
+curr_sheet_wide = curr_sheet_wide[list(curr_sheet.columns)]
+beef_slaughter_wide = beef_slaughter_wide[list(beef_slaughter.columns)]
+beef_slaughter_wide.head(2)
+
+# %%
+beef_slaughter.head(2)
+
+# %%
+
+# %%
+# Some rows have nothing but date and week in them:
+print (beef_slaughter_wide.shape)
+print (beef_slaughter.shape)
+print ()
+print (curr_sheet_wide.shape)
+print (curr_sheet.shape)
+
+A = curr_sheet.copy()
+A.drop(["date", "week"], inplace=True, axis=1)
+A.dropna(how="all", inplace=False).shape
+
+# %%
+# Safe to delete them 
+curr_sheet = curr_sheet_wide.copy()
+beef_slaughter = beef_slaughter_wide.copy()
+
+del(beef_slaughter_wide, curr_sheet_wide)
+
+# %%
+region_columns = [x for x in curr_sheet.columns if "region" in x]
+region_columns
+# curr_sheet[region_columns] = curr_sheet*1000
+# curr_sheet.head(2)
+
+# %%
+curr_sheet["region_1_region_2_dairy"].unique()
+region_columns
+
+# %%
+curr_sheet["year"] = curr_sheet.date.dt.year
+curr_sheet["month"] = curr_sheet.date.dt.month
+
+curr_sheet_tall["year"] = curr_sheet_tall.date.dt.year
+curr_sheet_tall["month"] = curr_sheet_tall.date.dt.month
+
+beef_slaughter["year"] = beef_slaughter.date.dt.year
+beef_slaughter["month"] = beef_slaughter.date.dt.month
+
+beef_slaughter_tall["year"] = beef_slaughter_tall.date.dt.year
+beef_slaughter_tall["month"] = beef_slaughter_tall.date.dt.month
+
+# %%
+beef_slaughter_tall.head(2)
+
+# %%
+beef_slaughter.head(2)
+
+# %%
+curr_sheet_tall.head(2)
+
+# %%
+curr_sheet.head(2)
+
+# %%
+regions_dict = {"region_1" : ['CT', 'ME', 'NH', 'VT', 'MA', 'RI'], 
+                "region_2" : ['NY', 'NJ'],
+                "region_3" : ['DE', 'MD', 'PA', 'WV', 'VA'],
+                "region_4" : ['AL', 'FL', 'GA', 'KY', 'MS', 'NC', 'SC', 'TN'],
+                "region_5" : ['IL', 'IN', 'MI', 'MN', 'OH', 'WI'],
+                "region_6" : ['AR', 'LA', 'NM', 'OK', 'TX'],
+                "region_7" : ['IA', 'KS', 'MO', 'NE'],
+                "region_8" : ['CO', 'MT', 'ND', 'SD', 'UT', 'WY'],
+                "region_9" : ['AZ', 'CA', 'HI', 'NV'],
+                "region_10": ['AK', 'ID', 'OR', 'WA']}
+
+# %%
+
+# %%
+filename = reOrganized_dir + "shannon_slaughter_data.sav"
+
+export_ = {"beef_slaughter_tall": beef_slaughter_tall,
+           "beef_slaughter" : beef_slaughter, 
+           "beef_dairy_slaughter_tall" : curr_sheet_tall,
+           "beef_dairy_slaughter" : curr_sheet,
+           "regions": regions_dict,
+           "source_code": "convertShannonData.ipynb",
+           "Author": "HN",
+           "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+pickle.dump(export_, open(filename, "wb"))
+
+# %%
+reOrganized_dir
+
+# %%
+# out_name = reOrganized_dir + "Beef_Cows_fromWeeklyRegionalCowSlaughter.csv"
 curr_sheet.to_csv(out_name, index=False)
 
 # %%
