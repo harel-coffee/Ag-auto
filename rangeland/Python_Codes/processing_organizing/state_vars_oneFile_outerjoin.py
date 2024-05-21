@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -194,6 +194,9 @@ Min_state_NPP[Min_state_NPP.state_fips == "21"]
 sorted(Min_state_NPP.state_fips.unique())
 
 # +
+
+A = pd.read_csv(Min_data_base+"statefips_annual_productivity.csv")
+
 cty_yr_npp = pd.read_csv(reOrganized_dir + "county_annual_GPP_MattNPP.csv")
 
 # On March 29 we changed the NPP to Matt NPP.
@@ -216,6 +219,10 @@ cty_yr_npp = rc.covert_MattunitNPP_2_total(NPP_df=cty_yr_npp,
                                            acr_area_col_="rangeland_acre",
                                            npp_total_col_="county_total_matt_npp")
 cty_yr_npp.head(2)
+
+cty_yr_npp.year.max()
+
+
 
 # ## State-level NPPs
 #
@@ -520,6 +527,8 @@ hay_price_deltas_ratios[(hay_price_deltas_ratios.state_fips == "01") & (hay_pric
 
 print (36.833856 - 38.377193)
 print (42.594230 - 36.833856)
+
+state_yr_npp.year.max()
 
 # ## Do the outer join and normalize and save in another file
 #
@@ -1039,7 +1048,11 @@ print (A.year.min())
 print (A.year.max())
 A.head(2)
 
-
+A = all_df[["year", "state_fips", "unit_matt_npp"]].copy()
+A.dropna(inplace=True)
+print (A.year.min())
+print (A.year.max())
+A.head(2)
 
 # # Correct the inventory year: 1 Jan 2024 -> 2023. (May 17, 2024)
 #
@@ -1075,5 +1088,7 @@ ind_deltas_df[(ind_deltas_df.state_fips == "01") & (ind_deltas_df.year == 1997)]
 all_df.dropna(how="any").shape
 
 all_df_normalized.dropna(how="any").shape
+
+
 
 

@@ -72,10 +72,13 @@ for a_file_name in county_annual_files:
     if len(county_annual)==0:
         county_annual = a_file.copy()
     else:
-        county_annual = pd.merge(county_annual, a_file, on=['year', 'county'], how='left')
+        county_annual = pd.merge(county_annual, a_file, on=['year', 'county'], how='outer')
 
 # %%
 county_annual.rename(columns={"productivity": "unit_matt_npp"}, inplace=True)
+
+# %%
+county_annual.year.max()
 
 # %%
 out_name = reOrganized_dir + "county_annual_GPP_MattNPP.csv"
@@ -238,7 +241,7 @@ for a_file_name in county_monthly_files:
     if len(county_monthly)==0:
         county_monthly = a_file.copy()
     else:
-        county_monthly = pd.merge(county_monthly, a_file, on=['year', 'month', 'county'], how='left')
+        county_monthly = pd.merge(county_monthly, a_file, on=['year', 'month', 'county'], how='outer')
 
 out_name = reOrganized_dir + "county_monthly.csv"
 county_monthly.to_csv(out_name, index = False)
@@ -263,7 +266,7 @@ for a_file_name in econregion_monthly_files:
     if len(econregion_monthly)==0:
         econregion_monthly = a_file.copy()
     else:
-        econregion_monthly = pd.merge(econregion_monthly, a_file, on=['year', 'month', 'econregion'], how='left')
+        econregion_monthly = pd.merge(econregion_monthly, a_file, on=['year', 'month', 'econregion'], how='outer')
 
 out_name = reOrganized_dir + "econregion_monthly.csv"
 econregion_monthly.to_csv(out_name, index = False)
@@ -340,7 +343,7 @@ for a_file_name in statefips_monthly_files:
     if len(statefips_monthly)==0:
         statefips_monthly = a_file.copy()
     else:
-        statefips_monthly = pd.merge(statefips_monthly, a_file, on=['year', 'month', 'statefips90m'], how='left')
+        statefips_monthly = pd.merge(statefips_monthly, a_file, on=['year', 'month', 'statefips90m'], how='outer')
 
 out_name = reOrganized_dir + "statefips_monthly.csv"
 statefips_monthly.to_csv(out_name, index = False)
@@ -367,7 +370,7 @@ for a_file_name in subsection_monthly_files:
     if len(subsection_monthly)==0:
         subsection_monthly = a_file.copy()
     else:
-        subsection_monthly = pd.merge(subsection_monthly, a_file, on=['year', 'month', 'subsection'], how='left')
+        subsection_monthly = pd.merge(subsection_monthly, a_file, on=['year', 'month', 'subsection'], how='outer')
 
 out_name = reOrganized_dir + "subsection_monthly.csv"
 subsection_monthly.to_csv(out_name, index = False)

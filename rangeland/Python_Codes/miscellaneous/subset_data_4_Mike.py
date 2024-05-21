@@ -91,6 +91,24 @@ all_df = all_data_dict["all_df_outerjoined"]
 all_df.head(2)
 
 # %%
+test_inventory_yr = all_df[["year", "unit_matt_npp"]]
+test_inventory_yr.dropna(how="any", inplace=True)
+print (test_inventory_yr.year.min())
+print (test_inventory_yr.year.max())
+
+# %%
+test_inventory_yr = all_df[["year", "inventory"]]
+test_inventory_yr.dropna(how="any", inplace=True)
+print (test_inventory_yr.year.min())
+print (test_inventory_yr.year.max())
+
+# %%
+test_inventory_yr = all_df[["year", "max_ndvi_in_year_modis"]]
+test_inventory_yr.dropna(how="any", inplace=True)
+print (test_inventory_yr.year.min())
+print (test_inventory_yr.year.max())
+
+# %%
 dummy_cols = [x for x in all_df.columns if "dumm" in x]
 all_df.drop(columns = dummy_cols, inplace=True)
 
@@ -102,11 +120,30 @@ keep_cols = ['year', 'inventory', 'state_fips',
              'rangeland_acre', 'max_ndvi_in_year_modis',
              'EW_meridian', 'herb_avg', 'herb_std']
 
+print (all_df.year.min())
+print (all_df.year.max())
+
 all_df = all_df[keep_cols]
-all_df.dropna(subset = ["total_matt_npp"], inplace=True)
+# all_df.dropna(subset = ["total_matt_npp"], inplace=True)
+
+print (all_df.year.min())
+print (all_df.year.max())
+
 all_df = all_df[all_df.state_fips.isin(list(state_fips_SoI.state_fips))]
 all_df.reset_index(drop=True, inplace=True)
 all_df.head(2)
+
+# %%
+print (all_df.year.min())
+print (all_df.year.max())
+
+# %%
+test_inventory_yr = all_df[["year", "inventory"]]
+test_inventory_yr.dropna(how="any", inplace=True)
+print (test_inventory_yr.year.min())
+print (test_inventory_yr.year.max())
+
+# %%
 
 # %%
 all_df = rc.convert_lb_2_kg(df=all_df, 
@@ -127,6 +164,11 @@ all_df.metric_total_matt_npp[0]
 15979574020
 
 # %%
+all_df.tail(2)
+
+# %%
+
+# %%
 # converting to CSV file
 all_df.to_csv(reOrganized_dir + "NPP_NDVI_Invent_Mike_2May2024.csv")
 
@@ -134,5 +176,6 @@ all_df.to_csv(reOrganized_dir + "NPP_NDVI_Invent_Mike_2May2024.csv")
 reOrganized_dir
 
 # %%
+all_df.year.max()
 
 # %%
