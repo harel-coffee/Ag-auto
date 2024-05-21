@@ -299,14 +299,14 @@ Beef_Cows_annual.tail(4)
 
 # %%
 out_name = reOrganized_dir + "Beef_Cows_fromAnnualCattleInventorybyState.csv"
-Beef_Cows_CATINV.to_csv(out_name, index=False)
+# Beef_Cows_annual.to_csv(out_name, index=False)
 
 # %%
 print(f"{Beef_Cows_CATINV.shape=}")
 print(f"{Beef_Cows_annual.shape=}")
 
 # %%
-Beef_Cows_CATINV.head(4)
+Beef_Cows_annual.head(4)
 
 # %%
 Beef_Cows_annual.head(4)
@@ -375,10 +375,11 @@ B.reset_index(drop=True, inplace=True)
 A.equals(B)
 
 # %%
-filename = reOrganized_dir + "Shannon_Beef_Cows_fromAnnualCattleInventorybyState_tall.sav"
+filename = reOrganized_dir + "Shannon_Beef_Cows_AnnualCattleInventorybyState.sav"
 
 export_ = {
     "Cows_annual_df_tall": Cows_annual_df_tall,
+    "Beef_Cows_annual": Beef_Cows_annual,
     "source_code": "convertShannonData",
     "Author": "HN",
     "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -387,6 +388,10 @@ export_ = {
 pickle.dump(export_, open(filename, "wb"))
 
 # %%
+Cows_annual_df_tall.head(2)
+
+# %%
+Cows_annual_df_tall.year.max()
 
 # %% [markdown]
 # ## We just need sheet B (beef cows) from Weekly Regional Cow Slaughter

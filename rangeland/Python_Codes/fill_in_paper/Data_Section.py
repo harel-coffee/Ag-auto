@@ -82,13 +82,19 @@ print (beef_price.shape)
 beef_price.head(2)
 
 # %%
-beef_price_down = pd.read_csv("/Users/hn/Downloads/DAAB6D8D-5E25-3608-9D89-BB8096AC01A1.csv")
-beef_price_down = beef_price_down[beef_price_down.Year < 2024].copy()
-beef_price_down.reset_index(drop=True, inplace=True)
+# The following file is the same as "Census_BeefPriceMikeMarch62024Email.csv"
+# beef_price_down = pd.read_csv("/Users/hn/Downloads/DAAB6D8D-5E25-3608-9D89-BB8096AC01A1.csv")
+beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
+
+# beef_price_down = beef_price_down[beef_price_down.Year < 2024].copy()
+# beef_price_down.reset_index(drop=True, inplace=True)
 
 print (beef_price_down.shape)
 
 # %%
 beef_price_down.equals(beef_price)
+
+# %%
+beef_price_down.head(2)
 
 # %%

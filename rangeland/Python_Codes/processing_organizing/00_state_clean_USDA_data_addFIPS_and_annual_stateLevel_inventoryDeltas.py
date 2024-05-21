@@ -13,6 +13,12 @@
 # ---
 
 # %% [markdown]
+# # Correct the inventory year: 1 Jan 2024 -> 2023. (May 17, 2024)
+#
+# The beef cows (sheet A) of files from Shannon, ```CATINV.xls``` and Annual ```Cattle Inventory by State.xls```
+# are identical, except for year 2021. And Annual ```Cattle Inventory by State.xl``` goes up to 2023, the formore one goes only up to 2021!
+
+# %% [markdown]
 # ### State level:
 #
 # - [state_slaughter](https://quickstats.nass.usda.gov/#79E47847-EA4F-33E4-8665-5DBEC5AB1947)
@@ -98,7 +104,10 @@ state_abb_state_fips.head(2)
 # ```Beef_Cows_fromCATINV.csv``` and ```Shannon_Beef_Cows_fromCATINV.csv``` are the same.
 
 # %%
-shannon_annual = pd.read_csv(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV.csv")
+shannon_annual = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_AnnualCattleInventorybyState.sav")
+shannon_annual.keys()
+
+shannon_annual = shannon_annual["Beef_Cows_annual"]
 shannon_annual = shannon_annual[shannon_annual.state.isin(list(state_abb_state_fips.state.unique()))]
 print(shannon_annual.state.unique())
 shannon_annual.reset_index(drop=True, inplace=True)
@@ -108,13 +117,19 @@ shannon_annual.head(2)
 # ## Compute deltas
 
 # %%
+min_year = int(shannon_annual.columns[1])
+max_year = int(shannon_annual.columns[-1])
+print (f"{min_year=}")
+print (f"{max_year=}")
+
+# %%
 # form deltas: inventort(t+1) - inventory (t)
 inv_deltas = (
     shannon_annual[list(shannon_annual.columns)[2:]].values
     - shannon_annual[list(shannon_annual.columns)[1:-1]].values
 )
 
-delta_columns = [(str(x) + "_" + str(x - 1)) for x in np.arange(1921, 2022)]
+delta_columns = [(str(x) + "_" + str(x - 1)) for x in np.arange(min_year+1, max_year+1)]
 # form deltas dataframe
 inventory_annual_deltas = pd.DataFrame(data=inv_deltas, columns=delta_columns)
 inventory_annual_deltas["state"] = shannon_annual["state"]
@@ -133,7 +148,7 @@ inv_ratios = (
     / shannon_annual[list(shannon_annual.columns)[1:-1]].values
 )
 
-delta_columns = [(str(x) + "_" + str(x - 1)) for x in np.arange(1921, 2022)]
+delta_columns = [(str(x) + "_" + str(x - 1)) for x in np.arange(min_year+1, max_year+1)]
 # form ratios dataframe
 inventory_annual_ratios = pd.DataFrame(data=inv_ratios, columns=delta_columns)
 inventory_annual_ratios["state"] = shannon_annual["state"]
@@ -265,7 +280,6 @@ HayPrice_Q1.head(3)
 # Pick up ```MARKETING YEAR``` for now.
 #
 # **<span style='color:red'>WARNING</span>:** Market Price does NOT exist pre-2003!
-# FUUUUCKKKKKK
 
 # %%
 beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
@@ -900,9 +914,11 @@ slaughter.head(2)
 shannon_annual.head(2)
 
 # %%
-shannon_Beef_Cows_fromCATINV_tall = pd.read_pickle(reOrganized_dir + "Shannon_Beef_Cows_fromCATINV_tall.sav")
+shannon_Beef_Cows_fromCATINV_tall = pd.read_pickle(reOrganized_dir + \
+                                                   "Shannon_Beef_Cows_AnnualCattleInventorybyState.sav")
+
 print(shannon_Beef_Cows_fromCATINV_tall.keys())
-shannon_Beef_Cows_fromCATINV_tall = shannon_Beef_Cows_fromCATINV_tall["CATINV_annual_tall"]
+shannon_Beef_Cows_fromCATINV_tall = shannon_Beef_Cows_fromCATINV_tall["Cows_annual_df_tall"]
 shannon_Beef_Cows_fromCATINV_tall.head(2)
 
 # %%
@@ -1218,6 +1234,16 @@ export_ = {"AgLand": AgLand,
 pickle.dump(export_, open(filename, "wb"))
 
 # %%
+print (shannon_Beef_Cows_fromCATINV_tall.year.min())
+print (shannon_Beef_Cows_fromCATINV_tall.year.max())
+
+# %%
+print (inventory_deltas_ratio_tall.year.min())
+print (inventory_deltas_ratio_tall.year.max())
+
+# %%
+
+# %%
 HayPrice_Q1_at_1982[(HayPrice_Q1_at_1982.year == 2017) & (HayPrice_Q1_at_1982.state_fips == "01")]
 
 # %%
@@ -1265,7 +1291,7 @@ chicken_price_at_1982.head(2)
 beef_price_at_1982.head(2)
 
 # %%
-chicken_price_at_1982
+chicken_price_at_1982.head(5)
 
 # %%
 

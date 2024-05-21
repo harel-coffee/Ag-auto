@@ -1029,6 +1029,23 @@ export_ = {
 pickle.dump(export_, open(filename, "wb"))
 # -
 
+# ### Check if inventory Jan 1, Yr problem:
+
+all_df.head(2)
+
+A = all_df[["year", "state_fips", "inventory"]].copy()
+A.dropna(inplace=True)
+print (A.year.min())
+print (A.year.max())
+A.head(2)
+
+
+
+# # Correct the inventory year: 1 Jan 2024 -> 2023. (May 17, 2024)
+#
+# The beef cows (sheet A) of files from Shannon, ```CATINV.xls``` and Annual ```Cattle Inventory by State.xls```
+# are identical, except for year 2021. And Annual ```Cattle Inventory by State.xl``` goes up to 2023, the formore one goes only up to 2021!
+
 ind_deltas_df.head(2)
 
 ind_deltas_df.columns

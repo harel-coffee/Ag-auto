@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -13,7 +13,11 @@
 # ---
 
 # %% [markdown]
-# March 01, 2024
+# # Old
+# The file used here ```LivestockPrices.xlsx``` is old. On March 6, Mike sent another file for beef and feed/hay prices.
+
+# %% [markdown]
+# **March 01, 2024**
 #
 # Mike and HN had a meeting. It was mentioned that we want state-level modeling. Modeling the changes/deltas. If something significant is not discovered we will look into county-level and maybe slaughter stuff.
 #
@@ -27,7 +31,6 @@ shutup.please()
 
 import pandas as pd
 import numpy as np
-import os
 
 from datetime import datetime, date
 
@@ -390,7 +393,7 @@ export_ = {"beef_hay_cost_MikeLinkandFile" : beefPrice_hayCost,
            "Author": "HN",
            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
-pickle.dump(export_, open(filename, "wb"))
+# pickle.dump(export_, open(filename, "wb"))
 
 # %%
 beefPrice_hayCost.head(2)
