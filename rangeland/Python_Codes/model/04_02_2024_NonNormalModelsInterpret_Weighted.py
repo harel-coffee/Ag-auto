@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -80,13 +80,13 @@ plt.rcParams.update(params)
 # %% [markdown]
 # #### Fit OLS model with Spreg
 #
-# \begin{equation}
-# m1 = spreg.OLS(db[["log_price"]].values, #Dependent variable
-#                     db[variable_names].values, # Independent variables
+#
+# m1 = spreg.OLS(db[["log_price"]].values, # Dependent variable
+#
+#                db[variable_names].values, # Independent variables
 #                name_y="log_price", # Dependent variable name
 #                name_x=variable_names # Independent variable name
 #                )
-# \end{equation}
 
 # %%
 from statsmodels.formula.api import ols
@@ -567,6 +567,8 @@ print (((inv_prices_ndvi_npp["rangeland_acre"]/10).max() - (inv_prices_ndvi_npp[
 
 # %%
 X_vars = ["metric_total_matt_nppDiv10M", 'beef_price_at_1982', 'hay_price_at_1982']
+y_var = "inventory"
+# y_var = "log_inventory"
 
 y = inv_prices_ndvi_npp[y_var]
 X = inv_prices_ndvi_npp[X_vars]
@@ -604,6 +606,9 @@ beta = rc.GLS(X, y, block_diag_weights_east)
 print (f"{y_var =}")
 print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
+X
 
 # %% [markdown]
 # # Lagged vs No Lag
@@ -705,6 +710,23 @@ print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
 
 # %%
+inv(X.T.values @ inv(block_diag_weights_east_lagged.values) @ X.values)
+
+# %%
+block_diag_weights_east_lagged
+
+# %%
+block_diag_weights_east_lagged.columns.unique()
+
+# %%
+state_fips_SoI[state_fips_SoI.state_fips.isin(list(block_diag_weights_east_lagged.columns.unique()))]
+
+# %%
+block_diag_weights_east_lagged.iloc[0][block_diag_weights_east_lagged.iloc[0]==1]
+
+# %%
+
+# %%
 print (len(inv_prices_ndvi_npp_east_lagged.year.unique()))
 print (len(block_diag_weights_east_lagged.columns.unique()))
 print (block_diag_weights_east_lagged.shape)
@@ -796,5 +818,7 @@ beta = rc.GLS(X, y, block_diag_weights_lagged)
 print (f"{y_var = }")
 print ("R2 = {}".format(r2_score(y, X@beta).round(3)))
 pd.DataFrame(beta, index=list(X.columns), columns=["coef"])
+
+# %%
 
 # %%

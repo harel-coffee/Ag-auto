@@ -565,8 +565,17 @@ county_fips.head(2)
 list(abb_2_full_dict.keys()) == sorted(states_abb_list)
 
 # %%
+county_fips.head(2)
 
+# %%
+filtered_counties_29States.head(2)
 
+# %%
+state_fips = pd.merge(state_fips, county_fips[["state_fips", "EW_meridian"]].drop_duplicates(), 
+                      how="left", on="state_fips")
+state_fips.head(2)
+
+# %%
 filename = reOrganized_dir + "county_fips.sav"
 
 export_ = {
