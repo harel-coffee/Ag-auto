@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -144,7 +144,6 @@ list(state_adj_dfs.keys())
 
 # %%
 # Adjacency matrices:
-
 adj_df_fips = state_adj_dfs["adj_df_fips_rowNormalized"]
 adj_df_fips_SoI = state_adj_dfs["adj_df_fips_SoI_rowNormalized"]
 adj_df_SoI = state_adj_dfs["adj_df_SoI_rowNormalized"]
@@ -159,6 +158,8 @@ filename = reOrganized_dir + "state_data_and_deltas_and_normalDelta_OuterJoined.
 all_data_dict = pd.read_pickle(filename)
 print (all_data_dict["Date"])
 list(all_data_dict.keys())
+
+# %%
 
 # %%
 all_df = all_data_dict["all_df_outerjoined"]
@@ -286,7 +287,7 @@ adj_df_fips_SoI_west.head(2)
 df_2017_west.head(2)
 
 # %%
-df_2017_west.state_fips
+print (list(df_2017_west.state_fips))
 
 # %%
 adj_df_fips_SoI_west = adj_df_fips_SoI_west[list(df_2017_west.state_fips)]
@@ -298,18 +299,44 @@ print (list(adj_df_fips_SoI_west.index))
 adj_df_fips_SoI_west.head(2)
 
 # %%
-list(state_adj_dfs.keys())
+# u is residuals. To be consistent with
+# the Kelejian paper.
+
+u = np.array(west_2017_residuals)
+N = len(u)
+M = adj_df_fips_SoI_west.copy()
+
 
 # %%
-state_adj_dfs["source_code"]
+Mu = M @ u
+G11 = 2/N * np.dot(u, Mu)
+G12 = -1/N * np.dot(Mu, Mu)
+G13 = 1
+
+
+Msq_u = (M @ M) @ u
+G21 = 2/N * np.dot(Msq_u, Mu)
+G22 = -1/N * Msq_u @ Msq_u
+G23 = 1/N * np.trace(np.transpose(M) @ M)
 
 # %%
+G31 = 1/N * (u @ Msq_u + Mu @ Mu)
+G32 = -1/N * Mu @ Msq_u
+G33 = 0
 
 # %%
+G = np.array([G11, G12, G13, G21, G22, G23, G31, G32, G33])
+G = G.reshape(3, 3)
+G
 
 # %%
+g = 1/N * np.array([u @ u, Mu @ Mu, u @ Mu]).reshape(3,)
+g
 
 # %%
+# lambda_model = sm.OLS(g, G)
+# lambda_results = lambda_model.fit()
+# lambda_results.summary()
 
 # %%
 
