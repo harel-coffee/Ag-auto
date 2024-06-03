@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -334,9 +334,40 @@ g = 1/N * np.array([u @ u, Mu @ Mu, u @ Mu]).reshape(3,)
 g
 
 # %%
-# lambda_model = sm.OLS(g, G)
-# lambda_results = lambda_model.fit()
-# lambda_results.summary()
+lambda_model = sm.OLS(g, G)
+lambda_results = lambda_model.fit()
+lambda_results.summary()
+
+# %%
+from scipy.optimize import leastsq
+from scipy.optimize import least_squares
+
+
+# %%
+def Kelejian_GMM(lambda_sigma_):
+    """
+    This functions is the one we need
+    to solve Eq. 7 of the paper Kelejian and Prucha (1999).
+    
+    We have to use the matrix G and vector g
+    defined above.
+    """
+    lambda_ = lambda_sigma_[0]
+    sigma_ =  lambda_sigma_[1]
+    residuals = G @ np.array ([lambda_, lambda_**2, sigma_]) - g
+    return residuals
+
+
+# %%
+# initial guess for sigma
+sigma_0 = np.var(west_2017_residuals)
+print (f"{sigma_0 = }")
+x0_Kelejian = [1, sigma_0]
+res = least_squares(Kelejian_GMM, x0_Kelejian, bounds=([-1, 1], np.inf))
+
+res.x
+
+# %%
 
 # %%
 
