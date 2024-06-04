@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -48,7 +48,8 @@ from keras.layers import Conv2D, Flatten, Dense, MaxPooling2D
 # SGD = gradient_descent_v2.SGD(...)
 
 from tensorflow.keras.optimizers import SGD
-from keras.preprocessing.image import ImageDataGenerator
+# from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 import h5py
 import sys
@@ -197,7 +198,6 @@ print ("--------- first loop done ---------")
 for VI_idx in VI_idxs:
     for smooth_type in smooth_types:
         # print ("line 3:" + VI_idx + ", " + smooth_type )
-        
         out_name = "01_" + smooth_type + "_" + VI_idx + "_TL_testPreds.csv"
         test_df = pd.read_csv(out_dir + out_name)
 
