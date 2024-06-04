@@ -576,12 +576,31 @@ state_fips = pd.merge(state_fips, county_fips[["state_fips", "EW_meridian"]].dro
 state_fips.head(2)
 
 # %%
+abb_full_df = pd.DataFrame.from_dict(abb_2_full_dict, orient='index').reset_index(drop=False)
+abb_full_df.rename(columns={"index": "state", 0: "state_full"}, inplace=True)
+
+abb_full_df.head(2)
+
+# %%
+state_fips = pd.merge(state_fips, abb_full_df, on="state", how="outer")
+state_fips.head(2)
+
+# %%
+county_fips = pd.merge(county_fips, abb_full_df, on="state", how="outer")
+county_fips.head(2)
+
+# %%
+
+# %%
+
+# %%
 filename = reOrganized_dir + "county_fips.sav"
 
 export_ = {
     "county_fips": county_fips,
     "full_2_abb" : state_to_abbrev,
-    "abb_2_full" : abb_2_full_dict,
+    "abb_2_full_dict" : abb_2_full_dict,
+    "abb_full_df" : abb_full_df,
     'filtered_counties_29States':filtered_counties_29States,
     "SoI" : SoI,
     "state_fips" : state_fips,

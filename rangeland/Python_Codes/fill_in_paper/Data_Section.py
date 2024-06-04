@@ -89,6 +89,172 @@ state_fips_SoI.head(2)
 # %%
 
 # %%
+filename = reOrganized_dir + "state_data_and_deltas_and_normalDelta_OuterJoined.sav"
+all_data_dict = pd.read_pickle(filename)
+print (all_data_dict["Date"])
+list(all_data_dict.keys())
+
+# %%
+all_df = all_data_dict["all_df_outerjoined"]
+all_df.head(2)
+
+# %%
+
+# %% [markdown]
+# # Inventory
+#
+# Wrote it up using Shannon's CSV.
+
+# %%
+inventory = all_df[["year", "state_fips", "inventory"]].copy()
+inventory = pd.merge(inventory, state_fips_SoI, how="left", on="state_fips")
+
+inventory = inventory[inventory.state_fips.isin(list(state_fips_SoI.state_fips))]
+
+inventory.dropna(subset=["inventory"], inplace=True)
+inventory.reset_index(drop=True, inplace=True)
+
+inventory.head(2)
+
+# %%
+print (inventory.inventory.mean())
+print (inventory.inventory.std())
+
+# %%
+inventory.describe()
+
+# %%
+print (inventory.year.min())
+print (inventory.year.max())
+print (len(inventory.state_fips.unique()))
+
+# %%
+for a_state in inventory.state_full.unique():
+    df = inventory[inventory.state_full == a_state].copy()
+    print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+
+# %%
+print (len(inventory))
+print (29 * (2022-1919+1))
+
+# %% [markdown]
+# # NDVIs
+
+# %%
+
+# %%
+
+# %% [markdown]
+# # NPPs
+#
+# ### Matt NPP
+
+# %%
+matt_npp = all_df[["year", "state_fips", "unit_matt_npp"]].copy()
+matt_npp = pd.merge(matt_npp, state_fips_SoI, how="left", on="state_fips")
+
+matt_npp = matt_npp[matt_npp.state_fips.isin(list(state_fips_SoI.state_fips))]
+
+matt_npp.dropna(subset=["unit_matt_npp"], inplace=True)
+matt_npp.reset_index(drop=True, inplace=True)
+
+print (f"{len(matt_npp.state.unique()) = }")
+print (f"{matt_npp.shape = }")
+matt_npp.head(2)
+
+# %%
+for a_state in matt_npp.state_full.unique():
+    df = matt_npp[matt_npp.state_full == a_state].copy()
+    print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+
+# %%
+A = pd.read_csv("/Users/hn/Documents/01_research_data/RangeLand/Data/Min_Data/statefips_annual_productivity.csv")
+A.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
+A['state_fips'] = A['state_fips'].astype("str").str.slice(start=1, stop=3)
+A = A[A.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+
+A = pd.merge(A, state_fips_SoI, how="left", on="state_fips")
+print (f"{A.shape = }")
+A.head(2)
+
+# %%
+for a_state in A.state_full.unique():
+    df = A[A.state_full == a_state].copy()
+    print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+
+# %%
+
+# %% [markdown]
+# # RA
+# Rangeland area is important to understand the filtering process: Kentucky and such.
+
+# %%
+
+# %%
+
+# %%
+
+# %% [markdown]
+# # State-level Hay Price
+#
+# There is a link on the first cell that gives the hay price on Monthly and Marketing-Year levels.
+# It is possible that hay prices came from Mike. Lets see.
+#
+# Upon checking codes, seems I have used the priced from the link in cell 1 here and the file that Mike had sent
+# is not used. Why? I cannot recall.
+#
+# The file that Mike had sent was called "Feed Grains Yearbook Tables-All Years.xlsx" which I cannot find in the emails.
+
+# %%
+
+# %%
+
+# %%
+hay_price_inModels = all_df[["year", "state_fips", "hay_price_at_1982"]].copy()
+hay_price_inModels.dropna(how="any", inplace=True)
+hay_price_inModels.reset_index(drop=True, inplace=True)
+hay_price_inModels.head(5)
+
+# %%
+hay_price_inModels = hay_price_inModels[hay_price_inModels.state_fips.isin(state_fips_SoI.state_fips)]
+hay_price_inModels = pd.merge(hay_price_inModels, state_fips_SoI, on="state_fips", how="left")
+hay_price_inModels.head(2)
+
+# %%
+print (f"{hay_price_inModels.year.min() = }")
+print (f"{hay_price_inModels.year.max() = }")
+
+# %%
+for a_state in hay_price_inModels.state_full.unique():
+    df = hay_price_inModels[hay_price_inModels.state_full == a_state].copy()
+    print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+
+# %%
+unit_matt_npp = all_df[["year", "unit_matt_npp", "state_fips"]].copy()
+unit_matt_npp.dropna(how="any", inplace=True)
+unit_matt_npp.year.max()
+
+# %%
+A = pd.read_csv("/Users/hn/Documents/01_research_data/RangeLand/Data/Min_Data/county_annual_productivity.csv")
+print (A.year.max())
+A.head(2)
+
+# %%
+A = pd.read_csv("/Users/hn/Documents/01_research_data/RangeLand/Data/Min_Data/statefips_monthly_MODIS_NDVI.csv")
+print (A.year.max())
+A.head(2)
+
+# %%
+# filename = reOrganized_dir + "old/" + "beef_hay_cost_fromMikeLinkandFile.sav"
+# Mike_beef_hay_cost = pd.read_pickle(filename)
+# Mike_beef_hay_cost.keys()
+# Mike_beef_hay_cost = Mike_beef_hay_cost["beef_hay_cost_MikeLinkandFile"].copy()
+# Mike_beef_hay_cost.head(2)
+
+# %% [markdown]
+# # Beef Price
+
+# %%
 beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
 beef_price = beef_price[beef_price.Year < 2024].copy()
 beef_price.reset_index(drop=True, inplace=True)
@@ -107,5 +273,20 @@ beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
 
 # print (beef_price_down.shape)
 # beef_price_down.equals(beef_price)
+
+# %% [markdown]
+# # Regional Data
+
+# %%
+filename = reOrganized_dir + "monthly_NDVI_beef_slaughter.sav"
+monthly_NDVI_beef_slaughter = pd.read_pickle(filename)
+monthly_NDVI_beef_slaughter.keys()
+
+# %%
+monthly_NDVI_slaughter = monthly_NDVI_beef_slaughter["monthly_NDVI_beef_slaughter"].copy()
+weekly_beef_slaughter_wide = monthly_NDVI_beef_slaughter["weekly_beef_slaughter_wide"].copy()
+
+# %%
+monthly_NDVI_slaughter.head(2)
 
 # %%
