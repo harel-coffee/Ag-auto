@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -96,7 +96,19 @@ list(all_data_dict.keys())
 
 # %%
 all_df = all_data_dict["all_df_outerjoined"]
+dummy_ = [x for x in list(all_df.columns) if "dummy" in x]
+all_df.drop(columns=dummy_, inplace=True)
 all_df.head(2)
+
+# %%
+all_df = rc.convert_lb_2_kg(df=all_df, 
+                            matt_total_npp_col="total_matt_npp", 
+                            new_col_name="metric_total_matt_npp")
+
+# %%
+all_df = rc.convert_lbperAcr_2_kg_in_sqM(df=all_df, 
+                                         matt_unit_npp_col = "unit_matt_npp", 
+                                         new_col_name = "metric_unit_matt_npp")
 
 # %%
 
@@ -141,6 +153,54 @@ print (29 * (2022-1919+1))
 # # NDVIs
 
 # %%
+# statefips_monthly_AVHRR_NDVI statefips_monthly_GIMMS_NDVI statefips_monthly_MODIS_NDVI
+A = pd.read_csv(Min_data_dir_base + "statefips_monthly_GIMMS_NDVI.csv")
+
+A.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
+A['state_fips'] = A['state_fips'].astype("str").str.slice(start=1, stop=3)
+A = A[A.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+
+A = pd.merge(A, state_fips_SoI, on="state_fips", how="left")
+
+print (A.year.min())
+print (A.year.max())
+A.head(2)
+
+# %%
+[x for x in all_df.columns if "max_ndvi_in_year" in x]
+
+# %%
+ndvi_col = "max_ndvi_in_year_avhrr"
+
+ndvi = all_df[["year", "state_fips", ndvi_col ]].copy()
+ndvi = pd.merge(ndvi, state_fips_SoI, how="left", on="state_fips")
+
+ndvi = ndvi[ndvi.state_fips.isin(list(state_fips_SoI.state_fips))]
+
+ndvi.dropna(subset=[ndvi_col], inplace=True)
+ndvi.reset_index(drop=True, inplace=True)
+
+print (f"{len(ndvi.state.unique()) = }")
+print (f"{ndvi.year.min() = }")
+print (f"{ndvi.year.max() = }")
+print ()
+print (f"{ndvi[ndvi_col].mean().round(3) = }")
+print (f"{ndvi[ndvi_col].std().round(3) = }")
+
+print (f"{ndvi.shape = }")
+ndvi.head(2)
+
+# %%
+min_year, max_year = ndvi.year.min(), ndvi.year.max()
+
+for a_state in ndvi.state_full.unique():
+    df = ndvi[ndvi.state_full == a_state].copy()
+    if (df.year.min() != min_year) or (df.year.max() != max_year):
+        print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+
+# %%
+
+# %%
 
 # %%
 
@@ -150,12 +210,36 @@ print (29 * (2022-1919+1))
 # ### Matt NPP
 
 # %%
-matt_npp = all_df[["year", "state_fips", "unit_matt_npp"]].copy()
+A = pd.read_csv(Min_data_dir_base + "county_annual_productivity.csv")
+print (A.year.max())
+A.head(2)
+
+# %%
+A = pd.read_csv(Min_data_dir_base + "/statefips_annual_productivity.csv")
+A.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
+A['state_fips'] = A['state_fips'].astype("str").str.slice(start=1, stop=3)
+A = A[A.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+
+A = pd.merge(A, state_fips_SoI, how="left", on="state_fips")
+print (f"{A.shape = }")
+A.head(2)
+
+# %%
+for a_state in A.state_full.unique():
+    df = A[A.state_full == a_state].copy()
+    print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+
+# %%
+[x for x in list(all_df.columns) if "npp" in x]
+
+# %%
+npp_col = "metric_total_matt_npp"
+matt_npp = all_df[["year", "state_fips", npp_col ]].copy()
 matt_npp = pd.merge(matt_npp, state_fips_SoI, how="left", on="state_fips")
 
 matt_npp = matt_npp[matt_npp.state_fips.isin(list(state_fips_SoI.state_fips))]
 
-matt_npp.dropna(subset=["unit_matt_npp"], inplace=True)
+matt_npp.dropna(subset=[npp_col], inplace=True)
 matt_npp.reset_index(drop=True, inplace=True)
 
 print (f"{len(matt_npp.state.unique()) = }")
@@ -163,12 +247,19 @@ print (f"{matt_npp.shape = }")
 matt_npp.head(2)
 
 # %%
+print (matt_npp[npp_col].mean())
+print (matt_npp[npp_col].std())
+
+# %%
+npp_col
+
+# %%
 for a_state in matt_npp.state_full.unique():
     df = matt_npp[matt_npp.state_full == a_state].copy()
     print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
 
 # %%
-A = pd.read_csv("/Users/hn/Documents/01_research_data/RangeLand/Data/Min_Data/statefips_annual_productivity.csv")
+A = pd.read_csv(Min_data_dir_base + "/statefips_annual_productivity.csv")
 A.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
 A['state_fips'] = A['state_fips'].astype("str").str.slice(start=1, stop=3)
 A = A[A.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
@@ -189,8 +280,19 @@ for a_state in A.state_full.unique():
 # Rangeland area is important to understand the filtering process: Kentucky and such.
 
 # %%
+state_RA_area = pd.read_pickle(reOrganized_dir + "state_RA_area.sav")
+state_RA_area = state_RA_area["state_RA_area"]
+state_RA_area.rename({"state_fip": "state_fips",}, axis=1, inplace=True)
+state_RA_area = state_RA_area[state_RA_area.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+state_RA_area.reset_index(drop=True, inplace=True)
+
+state_RA_area = pd.merge(state_RA_area, state_fips_SoI, on="state_fips", how="left")
+state_RA_area.head(2)
 
 # %%
+print (state_RA_area["rangeland_acre"].mean())
+print (state_RA_area["rangeland_acre"].std())
+len(state_RA_area.state_fips)
 
 # %%
 
@@ -235,14 +337,8 @@ unit_matt_npp.dropna(how="any", inplace=True)
 unit_matt_npp.year.max()
 
 # %%
-A = pd.read_csv("/Users/hn/Documents/01_research_data/RangeLand/Data/Min_Data/county_annual_productivity.csv")
-print (A.year.max())
-A.head(2)
 
 # %%
-A = pd.read_csv("/Users/hn/Documents/01_research_data/RangeLand/Data/Min_Data/statefips_monthly_MODIS_NDVI.csv")
-print (A.year.max())
-A.head(2)
 
 # %%
 # filename = reOrganized_dir + "old/" + "beef_hay_cost_fromMikeLinkandFile.sav"
@@ -288,5 +384,11 @@ weekly_beef_slaughter_wide = monthly_NDVI_beef_slaughter["weekly_beef_slaughter_
 
 # %%
 monthly_NDVI_slaughter.head(2)
+
+# %%
+
+# %%
+
+# %%
 
 # %%
