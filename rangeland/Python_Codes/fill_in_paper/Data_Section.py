@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -184,8 +184,8 @@ print (f"{len(ndvi.state.unique()) = }")
 print (f"{ndvi.year.min() = }")
 print (f"{ndvi.year.max() = }")
 print ()
-print (f"{ndvi[ndvi_col].mean().round(3) = }")
-print (f"{ndvi[ndvi_col].std().round(3) = }")
+print (f"{round(ndvi[ndvi_col].mean(), 3) = }")
+print (f"{round(ndvi[ndvi_col].std(), 3) = }")
 
 print (f"{ndvi.shape = }")
 ndvi.head(2)
@@ -215,19 +215,17 @@ print (A.year.max())
 A.head(2)
 
 # %%
-A = pd.read_csv(Min_data_dir_base + "/statefips_annual_productivity.csv")
-A.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
-A['state_fips'] = A['state_fips'].astype("str").str.slice(start=1, stop=3)
-A = A[A.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+# A = pd.read_csv(Min_data_dir_base + "/statefips_annual_productivity.csv")
+# A.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
+# A['state_fips'] = A['state_fips'].astype("str").str.slice(start=1, stop=3)
+# A = A[A.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
 
-A = pd.merge(A, state_fips_SoI, how="left", on="state_fips")
-print (f"{A.shape = }")
-A.head(2)
-
-# %%
-for a_state in A.state_full.unique():
-    df = A[A.state_full == a_state].copy()
-    print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+# A = pd.merge(A, state_fips_SoI, how="left", on="state_fips")
+# print (f"{A.shape = }")
+# A.head(2)
+# for a_state in A.state_full.unique():
+#     df = A[A.state_full == a_state].copy()
+#     print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
 
 # %%
 [x for x in list(all_df.columns) if "npp" in x]
@@ -259,19 +257,31 @@ for a_state in matt_npp.state_full.unique():
     print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
 
 # %%
-A = pd.read_csv(Min_data_dir_base + "/statefips_annual_productivity.csv")
-A.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
-A['state_fips'] = A['state_fips'].astype("str").str.slice(start=1, stop=3)
-A = A[A.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
 
-A = pd.merge(A, state_fips_SoI, how="left", on="state_fips")
-print (f"{A.shape = }")
-A.head(2)
+# %% [markdown]
+# ### MODIS-NPP
 
 # %%
-for a_state in A.state_full.unique():
-    df = A[A.state_full == a_state].copy()
+d_dir = "/Users/hn/Documents/01_research_data/RangeLand/"
+MODIS_NPP = pd.read_csv(d_dir + "Data_large_notUsedYet/Min_data/statefips_annual_MODIS_NPP.csv")
+MODIS_NPP.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
+MODIS_NPP['state_fips'] = MODIS_NPP['state_fips'].astype("str").str.slice(start=1, stop=3)
+MODIS_NPP = MODIS_NPP[MODIS_NPP.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+
+MODIS_NPP = pd.merge(MODIS_NPP, state_fips_SoI, how="left", on="state_fips")
+print (f"{MODIS_NPP.shape = }")
+print (len(MODIS_NPP.state_full.unique()))
+print ()
+print (f'{round(MODIS_NPP["NPP"].mean(), 3) =}')
+print (f'{round(MODIS_NPP["NPP"].std(), 3)  =}')
+print (len(MODIS_NPP.state_fips))
+print ()
+MODIS_NPP.head(2)
+for a_state in MODIS_NPP.state_full.unique():
+    df = MODIS_NPP[MODIS_NPP.state_full == a_state].copy()
     print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+
+# %%
 
 # %%
 
@@ -293,6 +303,29 @@ state_RA_area.head(2)
 print (state_RA_area["rangeland_acre"].mean())
 print (state_RA_area["rangeland_acre"].std())
 len(state_RA_area.state_fips)
+
+# %%
+chosen_sts = ['Arizona', 'Nevada', 'Utah', 'Washington', "Kentucky"]
+five_states_RA = state_RA_area[state_RA_area.state_full.isin(chosen_sts)].copy()
+five_states_RA = five_states_RA.sort_values(by="state_full")
+five_states_RA.reset_index(inplace=True, drop=True)
+five_states_RA["rangeland_acre"] = five_states_RA["rangeland_acre"].astype(int)
+five_states_RA
+
+# %%
+print (state_RA_area.shape)
+list(five_states_RA["rangeland_acre"].values)
+
+# %%
+state_RA_area["rangeland_acre"] = state_RA_area["rangeland_acre"].astype(int)
+state_RA_area.to_csv(data_dir_base + "for_paper/" + "States_on_Map.csv", index=False)
+
+# %%
+state_RA_area.head(2)
+
+# %%
+
+# %%
 
 # %%
 
