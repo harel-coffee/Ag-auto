@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -318,16 +318,20 @@ list(five_states_RA["rangeland_acre"].values)
 
 # %%
 state_RA_area["rangeland_acre"] = state_RA_area["rangeland_acre"].astype(int)
-state_RA_area.to_csv(data_dir_base + "for_paper/" + "States_on_Map.csv", index=False)
+
+state_RA_area = state_RA_area[state_RA_area.state_full != "Kentucky"]
+
+# add comma to rangeland acre so that it is easy(?) to add to map.
+state_RA_area['rangeland_acre_comma'] = state_RA_area['rangeland_acre']
+state_RA_area['rangeland_acre_comma'] = state_RA_area.apply(lambda x: format (x['rangeland_acre'], ',d'), axis=1)
+
+state_RA_area.to_csv(data_dir_base + "data_4_plot/" + "SoI_on_Map.csv", index=False)
 
 # %%
 state_RA_area.head(2)
 
 # %%
-
-# %%
-
-# %%
+state_RA_area.head(2)
 
 # %% [markdown]
 # # State-level Hay Price

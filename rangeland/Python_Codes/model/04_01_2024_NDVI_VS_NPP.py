@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -33,6 +33,8 @@ sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 from datetime import datetime, date
+
+from sklearn.metrics import r2_score
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print("Today's date:", date.today())
@@ -92,14 +94,15 @@ all_df.reset_index(drop=True, inplace=True)
 # all_df_normal.reset_index(drop=True, inplace=True)
 
 # %%
-all_df = rc.convert_lb_2_kg(
-    df=all_df, matt_total_npp_col="total_matt_npp", new_col_name="metric_total_matt_npp"
-)
+all_df = rc.convert_lb_2_kg(df=all_df, 
+                            matt_total_npp_col="total_matt_npp", 
+                            new_col_name="metric_total_matt_npp")
+
+all_df = rc.convert_lbperAcr_2_kg_in_sqM(df=all_df, 
+                                         matt_unit_npp_col="unit_matt_npp", 
+                                         new_col_name="metric_unit_matt_npp")
 
 # %%
-all_df = rc.convert_lbperAcr_2_kg_in_sqM(
-    df=all_df, matt_unit_npp_col="unit_matt_npp", new_col_name="metric_unit_matt_npp"
-)
 
 # %%
 npp_cols = [x for x in all_df.columns if "npp" in x]
@@ -108,32 +111,27 @@ NDVI_cols = [x for x in NDVI_cols if "modis" in x]
 NDVI_cols
 
 # %%
-npp_cols
-
-# %%
-data_dir_base
-
-# %%
-fig, axs = plt.subplots(
-    1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05}
-)
-
-axs.grid(axis="y", which="both")
-
 NDVI_col = "max_ndvi_in_year_modis"
 npp_col = "metric_unit_matt_npp"
+x_label = "MODIS-NDVI (annual maximum)"
 
 if npp_col == "metric_unit_matt_npp":
     meteric_name = "metric"
+    y_label = "unit NPP ($kg/m^2)$"
 else:
     meteric_name = ""
+    
+round_d = 3
 
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
 axs.scatter(all_df[NDVI_col], all_df[npp_col], s=20, c="r", marker="x")
 
-axs.set_xlabel(NDVI_col)
-axs.set_ylabel(npp_col)
+axs.set_xlabel(x_label)
+axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "NDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
 print(f"{fig_name = }")
 # plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -172,6 +170,10 @@ df_.dropna(how="any", inplace=True)
 # print("Coefficient of determination: %.2f" % r2_score(y_pred, df_.unit_matt_npp.values))
 
 # %%
+
+# %%
+
+# %%
 X = all_df[[NDVI_col, npp_col]].copy()
 X.dropna(how="any", inplace=True)
 X = sm.add_constant(X)
@@ -181,15 +183,9 @@ ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 y_pred = ks_result.predict(X)
 ks_result.summary()
-
-# %%
 R2 = ks_result.rsquared.round(2)
-
-# %%
-fig, axs = plt.subplots(
-    1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05}
-)
-
+############################################################
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
 axs.scatter(all_df[NDVI_col], all_df[npp_col], s=20, c="dodgerblue", marker="x")
@@ -198,24 +194,25 @@ axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
 constant = ks_result.params["const"].round(2)
 slope = ks_result.params[NDVI_col].round(2)
 
-
 if meteric_name == "metric":
     plt.text(0.2, 0.52, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
 else:
     plt.text(0.2, 5000, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
 
-axs.set_xlabel(NDVI_col)
-axs.set_ylabel(npp_col)
+axs.set_xlabel(x_label)
+axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "NDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+del(ks_result, R2)
 
 
 # %%
 
 # %% [markdown]
-# # Transfered model
+# # Transferred model
 
 # %%
 X = df_[NDVI_col]
@@ -225,31 +222,32 @@ ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 y_pred = ks_result.predict(X)
 ks_result.summary()
+R2 = ks_result.rsquared.round(2)
+###########################################
 
-fig, axs = plt.subplots(
-    1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05}
-)
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 axs.grid(axis="y", which="both")
-
 axs.scatter(X.max_ndvi_in_year_modis, Y, s=20, c="dodgerblue", marker="x")
-
 axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
 
 constant = ks_result.params["const"].round(2)
 slope = ks_result.params[NDVI_col].round(2)
 
-R2 = ks_result.rsquared.round(2)
 if meteric_name == "metric":
     plt.text(0.2, 0.7, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
 else:
     plt.text(0.2, 70, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
 
-axs.set_xlabel(NDVI_col)
-axs.set_ylabel("sqrt " + npp_col)
+axs.set_xlabel(x_label)
+axs.set_ylabel("sqrt " + y_label)
 
-fig_name = plots_dir + "NDVI_sqrt" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_sqrt" + meteric_name + "MattUnitNPP_Scatter.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+del(R2, ks_result)
+
+# %%
 
 # %%
 X = df_[NDVI_col]
@@ -259,34 +257,32 @@ ks = sm.OLS(Y, X)
 ks_result = ks.fit()
 y_pred = ks_result.predict(X)
 ks_result.summary()
-
-fig, axs = plt.subplots(
-    1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05}
-)
-
+R2 = ks_result.rsquared.round(2)
+constant = ks_result.params["const"].round(2)
+slope = ks_result.params[NDVI_col].round(2)
+########################################################
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
 axs.scatter(X[NDVI_col], Y, s=20, c="dodgerblue", marker="x")
 axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
-
-constant = ks_result.params["const"].round(2)
-slope = ks_result.params[NDVI_col].round(2)
-R2 = ks_result.rsquared.round(2)
 
 if meteric_name == "metric":
     plt.text(0.2, -0.5, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
 else:
     plt.text(0.2, 8.5, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
 
-axs.set_xlabel(NDVI_col)
-axs.set_ylabel(f"log " + npp_col)
+axs.set_xlabel(x_label)
+axs.set_ylabel(f"log " + y_label)
 
-fig_name = plots_dir + "NDVI_Log" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_Log" + meteric_name + "MattUnitNPP_Scatter.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
+del(R2, ks_result)
+
 # %% [markdown]
-# # Square model
+# ### Square model
 
 # %%
 # fit a second degree polynomial to the economic data
@@ -295,12 +291,12 @@ from pandas import read_csv
 from scipy.optimize import curve_fit
 from matplotlib import pyplot
 
-
 # define the true objective function
 def objective(x, a, b, c):
     return a * (x**2) + b * x + c
 
 
+# %%
 # choose the input and output variables
 x, y = df_[NDVI_col], df_[npp_col].astype(float)
 # curve fit
@@ -310,9 +306,7 @@ a, b, c = popt
 
 print(f"y =  {a.round(1)} * x^2 + {b.round(2)} * x  + {c.round(2)}")
 
-fig, axs = plt.subplots(
-    1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05}
-)
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
 axs.scatter(all_df[NDVI_col], all_df[npp_col], s=20, c="dodgerblue", marker="x")
@@ -320,27 +314,26 @@ axs.scatter(all_df[NDVI_col], all_df[npp_col], s=20, c="dodgerblue", marker="x")
 x_line = arange(min(x), max(x), 0.01)
 y_line = objective(x_line, a, b, c)
 axs.plot(x_line, y_line, color="r", linewidth=4)
-round_d = 3
-R2 = ks_result.rsquared.round(2)
+
+
+yhat = objective(x, a, b, c)
+R2 = r2_score(y, yhat).round(2)
+
 if meteric_name == "metric":
-    plt.text(
-        0.2,
-        0.5,
-        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+{c.round(round_d)}, ($R^2 $={R2})",
-    )
+    plt.text(0.2, 0.5,
+        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+{c.round(round_d)}, ($R^2 $={R2})")
 else:
-    plt.text(
-        0.2,
-        5000,
-        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+ {c.round(round_d)}, ($R^2 $={R2})",
-    )
+    plt.text(0.2, 5000,
+        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+ {c.round(round_d)}, ($R^2 $={R2})")
 
-axs.set_xlabel(NDVI_col)
-axs.set_ylabel(npp_col)
+axs.set_xlabel(x_label)
+axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "squaredNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
-print(f"{fig_name = }")
-plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+fig_name = plots_dir + "statesquaredNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print(f"{fig_name = }");
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
+
+del(R2)
 
 # %%
 del x_line
@@ -388,13 +381,234 @@ fit.summary()
 # # !pip3 install plspm
 
 # %%
-import plspm.config as c
-from plspm.plspm import Plspm
-from plspm.scheme import Scheme
-from plspm.mode import Mode
+# import plspm.config as c
+# from plspm.plspm import Plspm
+# from plspm.scheme import Scheme
+# from plspm.mode import Mode
 
 
 # %%
-7.934**2
+all_df_Inventory = all_df[["year", "inventory", "state_fips"]].copy()
+all_df_Inventory.dropna(subset="inventory", inplace=True)
+all_df_Inventory.reset_index(drop=True, inplace=True)
+
+all_df_Inventory = pd.merge(all_df_Inventory, state_fips_SoI, how="left", on="state_fips")
+all_df_Inventory.head(2)
+
+# %%
+all_df_Inventory.tail(2)
+
+# %%
+del(all_df, df_)
+
+# %% [markdown]
+# ### Model Using County-level data
+#
+# For a larger dataset.
+
+# %%
+filename = reOrganized_dir + "county_data_and_normalData_OuterJoined.sav"
+all_county_dict = pd.read_pickle(filename)
+all_county_df = all_county_dict["all_df"].copy()
+
+all_county_df.head(2)
+
+# %%
+# list(all_county_df.columns)
+
+# %%
+keep_cols = ["year", "county_fips", "state", "unit_matt_npp", 
+             "total_matt_npp", "max_ndvi_in_year_modis"]
+all_county_df = all_county_df[keep_cols]
+
+
+all_county_df = all_county_df[all_county_df.state.isin(list(state_fips_SoI.state))].copy()
+all_county_df.dropna(subset=["unit_matt_npp"], inplace=True)
+all_county_df.reset_index(drop=True, inplace=True)
+all_county_df.head(2)
+
+# %%
+print (sorted(all_county_df.max_ndvi_in_year_modis.unique())[1:3])
+print (sorted(all_county_df.max_ndvi_in_year_modis.unique())[-3:])
+
+# %%
+
+# %%
+all_county_df = rc.convert_lb_2_kg(df=all_county_df, 
+                                   matt_total_npp_col="total_matt_npp", 
+                                   new_col_name="metric_total_matt_npp")
+
+all_county_df = rc.convert_lbperAcr_2_kg_in_sqM(df=all_county_df, 
+                                                matt_unit_npp_col="unit_matt_npp", 
+                                                new_col_name="metric_unit_matt_npp")
+all_county_df.head(2)
+
+# %%
+print (f"{NDVI_col = }")
+print (f"{npp_col = }")
+
+# %%
+# Train the model
+X = all_county_df[[NDVI_col, npp_col]].copy()
+X.dropna(how="any", inplace=True)
+X = sm.add_constant(X)
+Y = X[npp_col].astype(float)
+X = X.drop(npp_col, axis=1)
+ks = sm.OLS(Y, X)
+ks_result = ks.fit()
+y_pred = ks_result.predict(X)
+ks_result.summary()
+R2 = ks_result.rsquared.round(2)
+constant = ks_result.params["const"].round(2)
+slope = ks_result.params[NDVI_col].round(2)
+############################################################
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+axs.scatter(all_county_df[NDVI_col], all_county_df[npp_col], s=20, c="dodgerblue", marker="x")
+axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
+
+if meteric_name == "metric":
+    plt.text(0.1, 0.52, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
+else:
+    plt.text(0.1, 5000, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
+
+axs.set_xlabel(x_label)
+axs.set_ylabel(y_label)
+
+fig_name = plots_dir + "countyNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf";
+print(f"{fig_name = }");
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
+
+del(ks_result, R2)
+
+# %% [markdown]
+# # Transferred Models
+
+# %%
+X = all_county_df[NDVI_col]
+X = sm.add_constant(X)
+Y = np.sqrt(all_county_df[npp_col].astype(float))
+ks = sm.OLS(Y, X)
+ks_result = ks.fit()
+y_pred = ks_result.predict(X)
+ks_result.summary()
+
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+axs.scatter(X.max_ndvi_in_year_modis, Y, s=20, c="dodgerblue", marker="x")
+axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
+
+constant = ks_result.params["const"].round(2)
+slope = ks_result.params[NDVI_col].round(2)
+R2 = ks_result.rsquared.round(2)
+
+
+if meteric_name == "metric":
+    plt.text(0.1, 0.7, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
+else:
+    plt.text(0.2, 70, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
+
+axs.set_xlabel(x_label)
+axs.set_ylabel("sqrt " + y_label)
+
+fig_name = plots_dir + "countyNDVI_sqrt" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print(f"{fig_name = }")
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+del(ks_result, R2)
+
+# %%
+X = all_county_df[NDVI_col]
+X = sm.add_constant(X)
+Y = np.log(all_county_df[npp_col].astype(float))
+ks = sm.OLS(Y, X)
+ks_result = ks.fit()
+y_pred = ks_result.predict(X)
+ks_result.summary()
+R2 = ks_result.rsquared.round(2)
+constant = ks_result.params["const"].round(2)
+slope = ks_result.params[NDVI_col].round(2)
+##################################################################
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+axs.scatter(X[NDVI_col], Y, s=20, c="dodgerblue", marker="x")
+axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
+
+if meteric_name == "metric":
+    plt.text(0.1, -0.5, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
+else:
+    plt.text(0.2, 8.5, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
+
+axs.set_xlabel(x_label)
+axs.set_ylabel(f"log " + y_label)
+
+fig_name = plots_dir + "countyNDVI_Log" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print(f"{fig_name = }")
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+del(ks_result, R2)
+
+# %% [markdown]
+# ## square model
+
+# %%
+# choose the input and output variables
+x, y = all_county_df[NDVI_col], all_county_df[npp_col].astype(float)
+# curve fit
+popt, _ = curve_fit(objective, x, y)
+# summarize the parameter values
+a, b, c = popt
+
+# print(f"y =  {a.round(3)} * x^2 + {b.round(3)} * x  + {c.round(2)}")
+###################################################################################
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+axs.scatter(all_county_df[NDVI_col], all_county_df[npp_col], s=20, c="dodgerblue", marker="x")
+
+x_line = arange(min(x), max(x), 0.01)
+y_line = objective(x_line, a, b, c)
+axs.plot(x_line, y_line, color="r", linewidth=4)
+
+yhat = objective(x, a, b, c)
+R2 = r2_score(y, yhat).round(2)
+if meteric_name == "metric":
+    plt.text(0.1, 0.5,
+        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+{c.round(round_d)} ($R^2 $={R2})")
+else:
+    plt.text(0.2, 5000,
+        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+ {c.round(round_d)} ($R^2 $={R2})")
+
+axs.set_xlabel(x_label)
+axs.set_ylabel(y_label)
+
+fig_name = plots_dir + "countysquaredNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+print(f"{fig_name = }");
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
+
+del(R2)
+
+# %% [markdown]
+# ### Plot curves of polydomial from state- and county- training
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+# county-level training
+x_line = arange(min(x), max(x), 0.01)
+y_line_county = objective(x_line, a, b, c)
+axs.plot(x_line, y_line_county, color="r", linewidth=4, label="county-train");
+
+
+y_line_state = objective(x_line, 0.779, 0.011, 0.019);
+axs.plot(x_line, y_line_state, color="dodgerblue", linewidth=4, label="state-train");
+plt.legend(loc="best");
+
+fig_name = plots_dir + "county_vs_state_trains_" + meteric_name + "MattUnitNPP.pdf"
+print(f"{fig_name = }");
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
+
 
 # %%
