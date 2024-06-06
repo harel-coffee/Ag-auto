@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -47,6 +47,29 @@ from statsmodels.formula.api import ols
 #           data=all_df_normalized_needed).fit()
 
 # fit.summary()
+
+# %%
+font = {'size' : 14}
+matplotlib.rc('font', **font)
+
+tick_legend_FontSize = 12
+
+params = {
+    "legend.fontsize": tick_legend_FontSize * 1.5,  # medium, large
+    # 'figure.figsize': (6, 4),
+    "axes.labelsize": tick_legend_FontSize * 1.2,
+    "axes.titlesize": tick_legend_FontSize * 1.2,
+    "xtick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "ytick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+    "axes.titlepad": 10,
+}
+
+plt.rc("font", family="Palatino")
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["xtick.labelbottom"] = True
+plt.rcParams["ytick.labelleft"] = True
+plt.rcParams.update(params)
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -131,7 +154,7 @@ axs.scatter(all_df[NDVI_col], all_df[npp_col], s=20, c="r", marker="x")
 axs.set_xlabel(x_label)
 axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "stateNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }")
 # plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -195,24 +218,24 @@ constant = ks_result.params["const"].round(2)
 slope = ks_result.params[NDVI_col].round(2)
 
 if meteric_name == "metric":
-    plt.text(0.2, 0.52, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
+    plt.text(0.2, 0.52, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
 else:
-    plt.text(0.2, 5000, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
+    plt.text(0.2, 5000, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
 
 axs.set_xlabel(x_label)
 axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "stateNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 del(ks_result, R2)
 
 
-# %%
-
 # %% [markdown]
 # # Transferred model
+
+# %%
 
 # %%
 X = df_[NDVI_col]
@@ -234,14 +257,14 @@ constant = ks_result.params["const"].round(2)
 slope = ks_result.params[NDVI_col].round(2)
 
 if meteric_name == "metric":
-    plt.text(0.2, 0.7, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
+    plt.text(0.2, 0.7, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
 else:
-    plt.text(0.2, 70, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
+    plt.text(0.2, 70, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
 
 axs.set_xlabel(x_label)
 axs.set_ylabel("sqrt " + y_label)
 
-fig_name = plots_dir + "stateNDVI_sqrt" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_sqrt" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -268,14 +291,14 @@ axs.scatter(X[NDVI_col], Y, s=20, c="dodgerblue", marker="x")
 axs.plot(X[NDVI_col], y_pred, color="red", linewidth=3)
 
 if meteric_name == "metric":
-    plt.text(0.2, -0.5, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
+    plt.text(0.2, -0.5, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
 else:
-    plt.text(0.2, 8.5, f"y = {constant} + {slope} $x$, ($R^2 $={R2})")
+    plt.text(0.2, 8.5, f"y = {constant} + {slope} $x$ ($R^2 $={R2})")
 
 axs.set_xlabel(x_label)
 axs.set_ylabel(f"log " + y_label)
 
-fig_name = plots_dir + "stateNDVI_Log" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "stateNDVI_Log" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -321,15 +344,17 @@ R2 = r2_score(y, yhat).round(2)
 
 if meteric_name == "metric":
     plt.text(0.2, 0.5,
-        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+{c.round(round_d)}, ($R^2 $={R2})")
+        # f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$ + {c.round(round_d)} ($R^2 $={R2})"
+            f"y = {c.round(round_d)} + {b.round(round_d)} $x$ + {a.round(round_d)} $x^2$ ($R^2 $={R2}) "
+            )
 else:
     plt.text(0.2, 5000,
-        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+ {c.round(round_d)}, ($R^2 $={R2})")
+        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$ + {c.round(round_d)} ($R^2 $={R2})")
 
 axs.set_xlabel(x_label)
 axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "statesquaredNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "statesquaredNDVI_" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }");
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
 
@@ -476,7 +501,7 @@ else:
 axs.set_xlabel(x_label)
 axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "countyNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf";
+fig_name = plots_dir + "countyNDVI_" + meteric_name + "MattUnitNPP.pdf";
 print(f"{fig_name = }");
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
 
@@ -512,11 +537,13 @@ else:
 axs.set_xlabel(x_label)
 axs.set_ylabel("sqrt " + y_label)
 
-fig_name = plots_dir + "countyNDVI_sqrt" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "countyNDVI_sqrt" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 del(ks_result, R2)
+
+# %%
 
 # %%
 X = all_county_df[NDVI_col]
@@ -543,7 +570,7 @@ else:
 axs.set_xlabel(x_label)
 axs.set_ylabel(f"log " + y_label)
 
-fig_name = plots_dir + "countyNDVI_Log" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "countyNDVI_Log" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
@@ -551,6 +578,10 @@ del(ks_result, R2)
 
 # %% [markdown]
 # ## square model
+
+# %%
+
+# %%
 
 # %%
 # choose the input and output variables
@@ -574,20 +605,33 @@ axs.plot(x_line, y_line, color="r", linewidth=4)
 yhat = objective(x, a, b, c)
 R2 = r2_score(y, yhat).round(2)
 if meteric_name == "metric":
-    plt.text(0.1, 0.5,
-        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+{c.round(round_d)} ($R^2 $={R2})")
+    plt.text(0.1, 0.5, 
+        # f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$ + {c.round(round_d)} ($R^2 $={R2})"
+             f"y = {c.round(round_d)} + {b.round(round_d)} $x$ + {a.round(round_d)} $x^2$ ($R^2 $={R2}) "
+            )
+
 else:
     plt.text(0.2, 5000,
-        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$+ {c.round(round_d)} ($R^2 $={R2})")
+        f"y = {a.round(round_d)} $x^2$ + {b.round(round_d)} $x$ + {c.round(round_d)} ($R^2 $={R2})")
 
 axs.set_xlabel(x_label)
 axs.set_ylabel(y_label)
 
-fig_name = plots_dir + "countysquaredNDVI_" + meteric_name + "MattUnitNPP_Scatter.pdf"
+fig_name = plots_dir + "countysquaredNDVI_" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }");
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
 
 del(R2)
+
+# %%
+
+# %%
+sorted(all_county_df["metric_unit_matt_npp"].values)[0:10]
+
+# %%
+all_county_df[all_county_df["metric_unit_matt_npp"] < 0.0099]
+
+# %%
 
 # %% [markdown]
 # ### Plot curves of polydomial from state- and county- training
