@@ -541,7 +541,20 @@ fig_name = plots_dir + "countyNDVI_sqrt" + meteric_name + "MattUnitNPP.pdf"
 print(f"{fig_name = }")
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
-del(ks_result, R2)
+# del(ks_result, R2)
+
+# %%
+import statsmodels.stats.api as sms
+from statsmodels.compat import lzip
+
+test_result = sms.het_breuschpagan(ks_result.resid, ks_result.model.exog)
+
+# Conduct the Breusch-Pagan test
+names = ['Lagrange multiplier statistic', 'p-value',
+         'f-value', 'f p-value']
+lzip(names, test_result)
+
+# %%
 
 # %%
 
