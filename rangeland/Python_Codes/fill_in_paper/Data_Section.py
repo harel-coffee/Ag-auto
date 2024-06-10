@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -45,7 +45,6 @@
 
 # %%
 import shutup
-
 shutup.please()
 
 import pandas as pd
@@ -86,7 +85,12 @@ state_fips_SoI.reset_index(drop=True, inplace=True)
 print(len(state_fips_SoI))
 state_fips_SoI.head(2)
 
+# %% [markdown]
+# # Remove Kentucky
+
 # %%
+state_fips_SoI = state_fips_SoI[state_fips_SoI.state_full!="Kentucky"].copy()
+print(len(state_fips_SoI))
 
 # %%
 filename = reOrganized_dir + "state_data_and_deltas_and_normalDelta_OuterJoined.sav"
@@ -99,6 +103,12 @@ all_df = all_data_dict["all_df_outerjoined"]
 dummy_ = [x for x in list(all_df.columns) if "dummy" in x]
 all_df.drop(columns=dummy_, inplace=True)
 all_df.head(2)
+
+# %% [markdown]
+# # Limit to states of interest
+
+# %%
+all_df = all_df[all_df.state_fips.isin(state_fips_SoI.state_fips)].copy()
 
 # %%
 all_df = rc.convert_lb_2_kg(df=all_df, 
@@ -126,11 +136,9 @@ inventory = inventory[inventory.state_fips.isin(list(state_fips_SoI.state_fips))
 inventory.dropna(subset=["inventory"], inplace=True)
 inventory.reset_index(drop=True, inplace=True)
 
+print (f"{round(inventory.inventory.mean(), 2) = }")
+print (f"{round(inventory.inventory.std(), 2) = }")
 inventory.head(2)
-
-# %%
-print (inventory.inventory.mean())
-print (inventory.inventory.std())
 
 # %%
 inventory.describe()
@@ -147,7 +155,7 @@ for a_state in inventory.state_full.unique():
 
 # %%
 print (len(inventory))
-print (29 * (2022-1919+1))
+print (28 * (2022-1919+1))
 
 # %% [markdown]
 # # NDVIs
@@ -170,7 +178,7 @@ A.head(2)
 [x for x in all_df.columns if "max_ndvi_in_year" in x]
 
 # %%
-ndvi_col = "max_ndvi_in_year_avhrr"
+ndvi_col = "max_ndvi_in_year_modis"
 
 ndvi = all_df[["year", "state_fips", ndvi_col ]].copy()
 ndvi = pd.merge(ndvi, state_fips_SoI, how="left", on="state_fips")
@@ -197,10 +205,6 @@ for a_state in ndvi.state_full.unique():
     df = ndvi[ndvi.state_full == a_state].copy()
     if (df.year.min() != min_year) or (df.year.max() != max_year):
         print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
-
-# %%
-
-# %%
 
 # %%
 
@@ -242,14 +246,12 @@ matt_npp.reset_index(drop=True, inplace=True)
 
 print (f"{len(matt_npp.state.unique()) = }")
 print (f"{matt_npp.shape = }")
+print ()
+print (f"{round(matt_npp[npp_col].mean(), 2) = }")
+print (f"{round(matt_npp[npp_col].std(), 2) = }")
 matt_npp.head(2)
 
 # %%
-print (matt_npp[npp_col].mean())
-print (matt_npp[npp_col].std())
-
-# %%
-npp_col
 
 # %%
 for a_state in matt_npp.state_full.unique():
@@ -262,24 +264,24 @@ for a_state in matt_npp.state_full.unique():
 # ### MODIS-NPP
 
 # %%
-d_dir = "/Users/hn/Documents/01_research_data/RangeLand/"
-MODIS_NPP = pd.read_csv(d_dir + "Data_large_notUsedYet/Min_data/statefips_annual_MODIS_NPP.csv")
-MODIS_NPP.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
-MODIS_NPP['state_fips'] = MODIS_NPP['state_fips'].astype("str").str.slice(start=1, stop=3)
-MODIS_NPP = MODIS_NPP[MODIS_NPP.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
+# d_dir = "/Users/hn/Documents/01_research_data/RangeLand/"
+# MODIS_NPP = pd.read_csv(d_dir + "Data_large_notUsedYet/Min_data/statefips_annual_MODIS_NPP.csv")
+# MODIS_NPP.rename({"statefips90m": "state_fips",}, axis=1, inplace=True)
+# MODIS_NPP['state_fips'] = MODIS_NPP['state_fips'].astype("str").str.slice(start=1, stop=3)
+# MODIS_NPP = MODIS_NPP[MODIS_NPP.state_fips.isin(list(state_fips_SoI.state_fips))].copy()
 
-MODIS_NPP = pd.merge(MODIS_NPP, state_fips_SoI, how="left", on="state_fips")
-print (f"{MODIS_NPP.shape = }")
-print (len(MODIS_NPP.state_full.unique()))
-print ()
-print (f'{round(MODIS_NPP["NPP"].mean(), 3) =}')
-print (f'{round(MODIS_NPP["NPP"].std(), 3)  =}')
-print (len(MODIS_NPP.state_fips))
-print ()
-MODIS_NPP.head(2)
-for a_state in MODIS_NPP.state_full.unique():
-    df = MODIS_NPP[MODIS_NPP.state_full == a_state].copy()
-    print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
+# MODIS_NPP = pd.merge(MODIS_NPP, state_fips_SoI, how="left", on="state_fips")
+# print (f"{MODIS_NPP.shape = }")
+# print (len(MODIS_NPP.state_full.unique()))
+# print ()
+# print (f'{round(MODIS_NPP["NPP"].mean(), 3) =}')
+# print (f'{round(MODIS_NPP["NPP"].std(), 3)  =}')
+# print (len(MODIS_NPP.state_fips))
+# print ()
+# MODIS_NPP.head(2)
+# for a_state in MODIS_NPP.state_full.unique():
+#     df = MODIS_NPP[MODIS_NPP.state_full == a_state].copy()
+#     print ("{}: {}, {}, {}".format(a_state, df.year.min(), df.year.max(), len(df.year)))
 
 # %%
 
@@ -300,21 +302,15 @@ state_RA_area = pd.merge(state_RA_area, state_fips_SoI, on="state_fips", how="le
 state_RA_area.head(2)
 
 # %%
-print (state_RA_area["rangeland_acre"].mean())
-print (state_RA_area["rangeland_acre"].std())
+state_RA_area["rangeland_km2"] = (state_RA_area["rangeland_acre"]*4046.856422)/(10**6)
+state_RA_area.head(2)
+
+# %%
+print ("average of rangeland_km2 is {}".format(format (int(state_RA_area["rangeland_km2"].mean()), ',d')))
+print ("std of rangeland_km2 is {}".format(format (int(state_RA_area["rangeland_km2"].std()), ',d')))
 len(state_RA_area.state_fips)
 
 # %%
-chosen_sts = ['Arizona', 'Nevada', 'Utah', 'Washington', "Kentucky"]
-five_states_RA = state_RA_area[state_RA_area.state_full.isin(chosen_sts)].copy()
-five_states_RA = five_states_RA.sort_values(by="state_full")
-five_states_RA.reset_index(inplace=True, drop=True)
-five_states_RA["rangeland_acre"] = five_states_RA["rangeland_acre"].astype(int)
-five_states_RA
-
-# %%
-print (state_RA_area.shape)
-list(five_states_RA["rangeland_acre"].values)
 
 # %%
 state_RA_area["rangeland_acre"] = state_RA_area["rangeland_acre"].astype(int)
@@ -322,8 +318,9 @@ state_RA_area["rangeland_acre"] = state_RA_area["rangeland_acre"].astype(int)
 state_RA_area = state_RA_area[state_RA_area.state_full != "Kentucky"]
 
 # add comma to rangeland acre so that it is easy(?) to add to map.
-state_RA_area['rangeland_acre_comma'] = state_RA_area['rangeland_acre']
-state_RA_area['rangeland_acre_comma'] = state_RA_area.apply(lambda x: format (x['rangeland_acre'], ',d'), axis=1)
+state_RA_area['rangeland_km2_comma'] = state_RA_area['rangeland_km2']
+state_RA_area['rangeland_km2_comma'] = state_RA_area.apply(lambda x:\
+                                                           format (int(x['rangeland_km2_comma']), ',d'), axis=1)
 
 state_RA_area.to_csv(data_dir_base + "data_4_plot/" + "SoI_on_Map.csv", index=False)
 
@@ -332,6 +329,52 @@ state_RA_area.head(2)
 
 # %%
 state_RA_area.head(2)
+
+# %%
+# Kentucky was 1,533 acres
+(1533 * 4046.856422)/(10**6)
+
+# %%
+chosen_sts = ['Arizona', 'Nevada', 'Utah', 'Washington', "Kentucky"]
+five_states_RA = state_RA_area[state_RA_area.state_full.isin(chosen_sts)].copy()
+five_states_RA = five_states_RA.sort_values(by="state_full")
+five_states_RA.reset_index(inplace=True, drop=True)
+
+print (state_RA_area.shape)
+list(five_states_RA["rangeland_km2_comma"].values)
+
+# %%
+(27618628 * 4046.856422) / (10**6)
+
+# %% [markdown]
+# ### Herb ratio
+
+# %%
+herb_df = all_df[["state_fips", "herb_avg", "herb_area_acr"]].copy()
+herb_df.drop_duplicates(inplace=True)
+
+herb_df["herb_area_km2"] = (herb_df["herb_area_acr"]*4046.856422)/(10**6)
+
+print (herb_df.shape)
+
+print (f'{round(herb_df["herb_avg"].mean(), 2) = }')
+print (f'{round(herb_df["herb_avg"].std(), 2) = }')
+print ()
+# print (f'{round(herb_df["herb_area_acr"].mean(), 2) = }')
+# print (f'{round(herb_df["herb_area_acr"].std(), 2) = }')
+
+print ("average of herb_area_acr is {}".format(format (int(herb_df["herb_area_acr"].mean()), ',d')))
+print ("std of herb_area_acr is {}".format(format (int(herb_df["herb_area_acr"].std()), ',d')))
+
+print ()
+# print (f'{round(herb_df["herb_area_km2"].mean(), 2) = }')
+# print (f'{round(herb_df["herb_area_km2"].std(), 2) = }')
+print ("average of herb_area_km2 is {}".format(format (int(herb_df["herb_area_km2"].mean()), ',d')))
+print ("std of herb_area_km2 is {}".format(format (int(herb_df["herb_area_km2"].std()), ',d')))
+
+herb_df.head(2)
+
+# %%
 
 # %% [markdown]
 # # State-level Hay Price
@@ -343,10 +386,6 @@ state_RA_area.head(2)
 # is not used. Why? I cannot recall.
 #
 # The file that Mike had sent was called "Feed Grains Yearbook Tables-All Years.xlsx" which I cannot find in the emails.
-
-# %%
-
-# %%
 
 # %%
 hay_price_inModels = all_df[["year", "state_fips", "hay_price_at_1982"]].copy()
@@ -406,6 +445,8 @@ beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
 
 # print (beef_price_down.shape)
 # beef_price_down.equals(beef_price)
+
+# %%
 
 # %% [markdown]
 # # Regional Data

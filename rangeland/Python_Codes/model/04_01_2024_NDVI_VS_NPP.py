@@ -669,3 +669,34 @@ plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
 
 
 # %%
+all_county_df.head(2)
+
+# %%
+all_county_df[(all_county_df["max_ndvi_in_year_modis"]>0.1) & (all_county_df["max_ndvi_in_year_modis"]<0.2)].shape
+
+# %%
+all_county_df[(all_county_df["max_ndvi_in_year_modis"]>0.7) & (all_county_df["max_ndvi_in_year_modis"]<0.8)].shape
+
+# %%
+import random
+random.seed(7)
+
+fiveHundreds = pd.DataFrame()
+ndvi_col = "max_ndvi_in_year_modis"
+for ii in np.arange(1, 8):
+    curr_df = all_county_df.copy()
+    curr_df = curr_df[(curr_df[ndvi_col]>ii/10) & (curr_df[ndvi_col]<(ii+1)/10)].copy()
+    curr_df = curr_df.sample(n=400)
+    fiveHundreds = pd.concat([fiveHundreds, curr_df])
+    
+fig, axs = plt.subplots(1, 1, figsize=(10, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+axs.scatter(fiveHundreds[NDVI_col], fiveHundreds[npp_col], s=20, c="dodgerblue", marker="x");
+
+# %%
+len(all_county_df.state.unique())
+
+# %%
+
+# %%
