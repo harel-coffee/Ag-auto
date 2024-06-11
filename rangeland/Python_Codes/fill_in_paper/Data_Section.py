@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -435,7 +435,6 @@ print(beef_price.shape)
 beef_price.head(2)
 
 # %%
-
 # The following file is the same as "Census_BeefPriceMikeMarch62024Email.csv"
 # beef_price_down = pd.read_csv("/Users/hn/Downloads/DAAB6D8D-5E25-3608-9D89-BB8096AC01A1.csv")
 beef_price = pd.read_csv(Mike_dir + "Census_BeefPriceMikeMarch62024Email.csv")
