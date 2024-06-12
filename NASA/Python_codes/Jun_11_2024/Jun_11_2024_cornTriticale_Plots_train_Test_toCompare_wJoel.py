@@ -69,6 +69,18 @@ ground_truth_labels = pd.merge(ground_truth_labels, meta, how="left", on="ID")
 ground_truth_labels.head(2)
 
 # %%
+ground_truth_labels["train_test"] = "train"
+ground_truth_labels.head(2)
+
+# %%
+training_set_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
+test20 = pd.read_csv(training_set_dir + "test20_split_2Bconsistent_Oct17.csv")
+
+# %%
+ground_truth_labels.loc[ground_truth_labels.ID.isin(list(test20.ID.unique())), "train_test"] = "test"
+ground_truth_labels.head(2)
+
+# %%
 
 # %%
 # we want only corns and triticale
@@ -180,6 +192,7 @@ print (format(DL_predictions_.shape[0], ",d"))
 DL_predictions_.head(2)
 
 # %%
+ground_truth_labels.head(2)
 
 # %%
 
@@ -222,6 +235,8 @@ for an_ID in list(DL_predictions_.ID.unique()):
     label_prob = DL_predictions_[DL_predictions_.ID==an_ID]["prob_single"].values[0]
     label_prob = round(label_prob, 2)
     human_label = str(ground_truth_labels[ground_truth_labels.ID == an_ID].Vote.values[0])
+    
+    train_or_test = ground_truth_labels[ground_truth_labels.ID == an_ID].train_test.values[0]
 
     ax.set_title(crop_ + ", human: " + human_label + ", pred: " + \
                  label_ + " (prob_single= " + str(label_prob) + "), " + 
@@ -229,7 +244,7 @@ for an_ID in list(DL_predictions_.ID.unique()):
     ax.legend(loc="lower right");
     plt.ylim([-0.5, 1.2]);
 
-    plot_dir = out_dir + crop_.replace(",", "").replace(" ", "_") + "/"
+    plot_dir = out_dir + crop_.replace(",", "").replace(" ", "_") + "_" + train_or_test + "/"
     
     if human_label=="1":
         sub_human_ = "A1_"
@@ -248,12 +263,6 @@ for an_ID in list(DL_predictions_.ID.unique()):
     plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
     plt.close()
 
-
-# %%
-
-# %%
-
-# %%
 
 # %% [markdown]
 # # Test and see if p=0.3 was the correct one used in the paper:
