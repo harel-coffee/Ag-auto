@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -51,12 +51,13 @@ plots_dir = data_dir_base + "plots/scatterPlots/"
 os.makedirs(plots_dir, exist_ok=True)
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
-df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_OuterJoined.sav")
+# df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_OuterJoined.sav")
+df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_and_normalData_OuterJoined.sav")
 df_OuterJoined = df_OuterJoined["all_df"]
 df_OuterJoined.head(2)
 
@@ -70,23 +71,18 @@ df_OuterJoined.reset_index(drop=True, inplace=True)
 # %%
 df_OuterJoined["dangerEncy"] = df_OuterJoined["danger"] + df_OuterJoined["emergency"]
 
-df_OuterJoined["s1_dangerEncy"] = (
-    df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"]
-)
-df_OuterJoined["s2_dangerEncy"] = (
-    df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"]
-)
-df_OuterJoined["s3_dangerEncy"] = (
-    df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"]
-)
-df_OuterJoined["s4_dangerEncy"] = (
-    df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"]
-)
+df_OuterJoined["s1_dangerEncy"] = (df_OuterJoined["s1_danger"] + df_OuterJoined["s1_emergency"])
+df_OuterJoined["s2_dangerEncy"] = (df_OuterJoined["s2_danger"] + df_OuterJoined["s2_emergency"])
+df_OuterJoined["s3_dangerEncy"] = (df_OuterJoined["s3_danger"] + df_OuterJoined["s3_emergency"])
+df_OuterJoined["s4_dangerEncy"] = (df_OuterJoined["s4_danger"] + df_OuterJoined["s4_emergency"])
+
+# %%
+df_OuterJoined.columns
 
 # %%
 df_OuterJoined.drop(
     labels=[
-        "EW",
+        "EW_meridian",
         "Pallavi",
         "normal",
         "alert",
@@ -108,19 +104,17 @@ df_OuterJoined.drop(
         "s4_alert",
         "s4_danger",
         "s4_emergency",
-        "s1_avhrr_ndvi",
-        "s2_avhrr_ndvi",
-        "s3_avhrr_ndvi",
-        "s4_avhrr_ndvi",
-        "s1_gimms_ndvi",
-        "s2_gimms_ndvi",
-        "s3_gimms_ndvi",
-        "s4_gimms_ndvi",
+        "s1_max_ndvi_avhrr",
+        "s2_max_ndvi_avhrr",
+        "s3_max_ndvi_avhrr",
+        "s4_max_ndvi_avhrr",
+        "s1_max_ndvi_gimms",
+        "s2_max_ndvi_gimms",
+        "s3_max_ndvi_gimms",
+        "s4_max_ndvi_gimms",
         "state",
     ],
-    axis=1,
-    inplace=True,
-)
+    axis=1, inplace=True)
 
 # %%
 sorted(df_OuterJoined.columns)
@@ -131,16 +125,8 @@ sorted(df_OuterJoined.columns)
 # mpl.rcParams.update(mpl.rcParamsDefault)
 
 # %%
-X = df_OuterJoined[
-    [
-        "inventory",
-        "rangeland_acre",
-        "herb_avg",
-        "herb_area_acr",
-        "county_total_npp",
-        "irr_hay_area",
-    ]
-]
+X = df_OuterJoined[["inventory", "rangeland_acre", "herb_avg", 
+                    "herb_area_acr", "total_matt_npp", "irr_hay_area"]]
 
 # %%
 tick_legend_FontSize = 10
@@ -180,7 +166,7 @@ for ax in my_scatter.flatten():
 # fig_name = plots_dir + "pandasScatter.pdf"
 # plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 fig_name = plots_dir + "pandasScatter.png"
-plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 tick_legend_FontSize = 10
@@ -200,12 +186,10 @@ plt.rcParams.update(params)
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter.png"
-plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
-X = df_OuterJoined[
-    ["inventory", "rangeland_acre", "herb_area_acr", "county_total_npp", "irr_hay_area"]
-]
+X = df_OuterJoined[["inventory", "rangeland_acre", "herb_area_acr", "total_matt_npp", "irr_hay_area"]]
 
 tick_legend_FontSize = 10
 params = {
@@ -225,7 +209,7 @@ my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 # plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 fig_name = plots_dir + "snsScatter_herbArea.png"
-plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 
@@ -234,81 +218,66 @@ X = df_OuterJoined[["inventory", "rangeland_acre", "herb_area_acr", "herb_avg"]]
 
 
 tick_legend_FontSize = 10
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
-    # 'figure.figsize': (6, 4),
-    "axes.labelsize": tick_legend_FontSize * 1.4,
-    "axes.titlesize": tick_legend_FontSize * 2,
-    "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "axes.titlepad": 10,
-}
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
+          # 'figure.figsize': (6, 4),
+          "axes.labelsize": tick_legend_FontSize * 1.4,
+          "axes.titlesize": tick_legend_FontSize * 2,
+          "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
+          "axes.titlepad": 10}
 plt.rcParams.update(params)
 
 
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter_herbBattle.png"
-plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
-df_OuterJoined.rename(
-    columns={"yr_countyMean_total_precip": "yr_cntymean_precip"}, inplace=True
-)
+df_OuterJoined.rename(columns={"annual_countymean_total_precip": "yr_cntymean_precip"}, inplace=True)
 
 # %%
-X = df_OuterJoined[
-    ["county_total_npp", "dangerEncy", "yr_cntymean_precip", "annual_avg_Tavg"]
-]
+X = df_OuterJoined[["total_matt_npp", "dangerEncy", "yr_cntymean_precip", "annual_avg_tavg"]]
 
 tick_legend_FontSize = 10
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
-    # 'figure.figsize': (6, 4),
-    "axes.labelsize": tick_legend_FontSize * 1.4,
-    "axes.titlesize": tick_legend_FontSize * 2,
-    "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "axes.titlepad": 10,
-}
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
+          # 'figure.figsize': (6, 4),
+          "axes.labelsize": tick_legend_FontSize * 1.4,
+          "axes.titlesize": tick_legend_FontSize * 2,
+          "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
+          "axes.titlepad": 10}
 plt.rcParams.update(params)
 
 
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter_heatPrecipTemp.png"
-plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 sorted(df_OuterJoined.columns)
 
 # %%
-cols_ = [
-    "S1_countyMean_avg_Tavg",
-    "S2_countyMean_avg_Tavg",
-    "S3_countyMean_avg_Tavg",
-    "S4_countyMean_avg_Tavg",
-]
+cols_ = ["s1_countymean_avg_tavg", "s2_countymean_avg_tavg",
+         "s3_countymean_avg_tavg", "s4_countymean_avg_tavg"]
 
-X = df_OuterJoined[["county_total_npp"] + cols_]
+X = df_OuterJoined[["total_matt_npp"] + cols_]
 
 tick_legend_FontSize = 10
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
-    # 'figure.figsize': (6, 4),
-    "axes.labelsize": tick_legend_FontSize * 1,
-    "axes.titlesize": tick_legend_FontSize * 2,
-    "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "axes.titlepad": 10,
-}
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
+          # 'figure.figsize': (6, 4),
+          "axes.labelsize": tick_legend_FontSize * 1,
+          "axes.titlesize": tick_legend_FontSize * 2,
+          "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
+          "axes.titlepad": 10}
 plt.rcParams.update(params)
-
 
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter_SWNPP.png"
-plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 
