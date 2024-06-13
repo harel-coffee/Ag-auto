@@ -463,8 +463,47 @@ weekly_beef_slaughter_wide = monthly_NDVI_beef_slaughter["weekly_beef_slaughter_
 monthly_NDVI_slaughter.head(2)
 
 # %%
+0.84**2
+
 
 # %%
+def npp_(ndvi):
+    return (0.05+0.84*ndvi)**2
+
+def npp_sq_model(ndvi):
+    return 0.019 + (0.011 * ndvi) + (0.779 * (ndvi**2))
+
+
+# %%
+ndvi_1 = 0.1
+ndvi_2 = 0.2
+
+print('ndvi_1 = {},  ndvi_2 = {}'.format(ndvi_1, ndvi_2))
+print (f"{round(npp_(ndvi_1), 3) = }")
+print (f"{round(npp_(ndvi_2), 3) = }")
+round(npp_(ndvi_2) - npp_(ndvi_1), 3)
+
+# %%
+print('ndvi_1 = {},  ndvi_2 = {}'.format(ndvi_1, ndvi_2))
+
+print (f"{round(npp_sq_model(ndvi_1), 3) = }")
+print (f"{round(npp_sq_model(ndvi_2), 3) = }")
+round(npp_sq_model(ndvi_2) - npp_sq_model(ndvi_1), 3)
+
+# %%
+ndvi_1 = 0.9
+ndvi_2 = 1
+
+print('ndvi_1 = {},  ndvi_2 = {}'.format(ndvi_1, ndvi_2))
+print (f"{round(npp_(ndvi_1), 3) = }")
+print (f"{round(npp_(ndvi_2), 3) = }")
+round(npp_(ndvi_2) - npp_(ndvi_1), 3)
+
+# %%
+print('ndvi_1 = {},  ndvi_2 = {}'.format(ndvi_1, ndvi_2))
+print (f"{round(npp_sq_model(ndvi_1), 3) = }")
+print (f"{round(npp_sq_model(ndvi_2), 3) = }")
+round(npp_sq_model(ndvi_2) - npp_sq_model(ndvi_1), 3)
 
 # %%
 
