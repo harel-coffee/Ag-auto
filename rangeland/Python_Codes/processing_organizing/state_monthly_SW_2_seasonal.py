@@ -40,7 +40,7 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 seasonal_dir = reOrganized_dir + "seasonal_variables/02_merged_mean_over_county/"
 
 # %%
-abb_dict = pd.read_pickle(param_dir + "county_fips.sav")
+abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
 SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
@@ -48,9 +48,8 @@ SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 # ### county_fips
 
 # %%
-county_fips = pd.read_pickle(reOrganized_dir + "county_fips.sav")
-county_fips = county_fips["county_fips"]
-
+fips_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
+county_fips = fips_dict["county_fips"]
 
 L = len(county_fips[county_fips.state == "SD"])
 print("number of counties in SD is {}".format(L))
@@ -58,13 +57,22 @@ county_fips = county_fips[county_fips.state.isin(SoI_abb)]
 county_fips.head(2)
 
 # %%
-county_id_name_fips = pd.read_csv(Min_data_base + "county_id_name_fips.csv")
+# county_id_name_fips = pd.read_csv(Min_data_base + "county_id_name_fips.csv")
 
-L = len(county_id_name_fips[county_id_name_fips.STATE == "SD"])
-print("number of counties in SD is {}".format(L))
+# L = len(county_id_name_fips[county_id_name_fips.STATE == "SD"])
+# print("number of counties in SD is {}".format(L))
+# county_id_name_fips.head(2)
+# Min's file ("county_id_name_fips.csv") has a missing county in it county_fips = 46102
 
 # %%
-# Min's file ("county_id_name_fips.csv") has a missing county in it county_fips = 46102
+SoI_full = fips_dict["SoI"]
+
+# %%
+state_fips = fips_dict["state_fips"]
+state_fips_SoI = state_fips[state_fips.state_full.isin(SoI_full)]
+state_fips_SoI.head(2)
+
+# %%
 
 # %%
 gridmet_mean_indices = pd.read_csv(Min_data_base + "statefips_gridmet_mean_indices.csv")
@@ -74,9 +82,7 @@ gridmet_mean_indices.rename(columns={"statefips": "state_fips"}, inplace=True)
 gridmet_mean_indices.state_fips = gridmet_mean_indices.state_fips.astype(str)
 gridmet_mean_indices.state_fips = gridmet_mean_indices.state_fips.str.slice(1, 3)
 
-gridmet_mean_indices = gridmet_mean_indices[
-    gridmet_mean_indices.state_fips.isin(county_fips.state_fips.unique())
-]
+gridmet_mean_indices = gridmet_mean_indices[gridmet_mean_indices.state_fips.isin(county_fips.state_fips.unique())]
 
 print(gridmet_mean_indices.shape)
 print(f"{len(gridmet_mean_indices.state_fips.unique()) = }")
@@ -98,34 +104,22 @@ gridmet_mean_indices.head(2)
 #  - October – December
 
 # %%
-tonsor_seasons = {
-    "season_1": [1, 2, 3],
-    "season_2": [4, 5, 6, 7],
-    "season_3": [8, 9],
-    "season_4": [10, 11, 12],
-}
+tonsor_seasons = {"season_1": [1, 2, 3],
+                  "season_2": [4, 5, 6, 7],
+                  "season_3": [8, 9],
+                  "season_4": [10, 11, 12]}
 
-days_per_month = {
-    "1": 31,
-    "2": 28,
-    "3": 31,
-    "4": 30,
-    "5": 31,
-    "6": 30,
-    "7": 31,
-    "8": 31,
-    "9": 30,
-    "10": 31,
-    "11": 30,
-    "12": 31,
-}
+days_per_month = {"1": 31, "2": 28,    
+                  "3": 31, "4": 30,
+                  "5": 31, "6": 30,
+                  "7": 31, "8": 31,
+                  "9": 30, "10": 31, 
+                  "11": 30, "12": 31}
 
-no_days_in_each_season = {
-    "season_1": 90,
-    "season_2": 122,
-    "season_3": 61,
-    "season_4": 92,
-}
+no_days_in_each_season = {"season_1": 90, "season_2": 122, "season_3": 61, "season_4": 92}
+
+# %%
+gridmet_mean_indices.head(2)
 
 # %%
 gridmet_mean_indices["sum_tavg"] = 666
@@ -136,27 +130,22 @@ gridmet_mean_indices.head(2)
 for a_year in gridmet_mean_indices.year.unique():
     leap_ = calendar.isleap(a_year)
     for a_month in gridmet_mean_indices.month.unique():
-        curr_df = gridmet_mean_indices[
-            (gridmet_mean_indices.year == a_year)
-            & (gridmet_mean_indices.month == a_month)
-        ]
+        curr_df = gridmet_mean_indices[(gridmet_mean_indices.year == a_year)
+                                       & (gridmet_mean_indices.month == a_month)]
         curr_locs = curr_df.index
         if leap_:
             if a_month == 2:
-                gridmet_mean_indices.loc[
-                    curr_locs, "sum_tavg"
-                ] = gridmet_mean_indices.loc[curr_locs, "tavg_avg"] * (
-                    days_per_month[str(a_month)] + 1
-                )
+                gridmet_mean_indices.loc[curr_locs, "sum_tavg"] = \
+                gridmet_mean_indices.loc[curr_locs, "tavg_avg"] * (days_per_month[str(a_month)] + 1)
+            else:
+                gridmet_mean_indices.loc[curr_locs, "sum_tavg"] = (\
+                       gridmet_mean_indices.loc[curr_locs, "tavg_avg"]* days_per_month[str(a_month)])
+                    
         else:
-            gridmet_mean_indices.loc[curr_locs, "sum_tavg"] = (
-                gridmet_mean_indices.loc[curr_locs, "tavg_avg"]
-                * days_per_month[str(a_month)]
-            )
+            gridmet_mean_indices.loc[curr_locs, "sum_tavg"] = (\
+                       gridmet_mean_indices.loc[curr_locs, "tavg_avg"]* days_per_month[str(a_month)])
 
 gridmet_mean_indices.head(5)
-
-# %%
 
 # %%
 # %%time
@@ -182,9 +171,7 @@ needed_cols = [
     "s4_statemean_total_emergency",
 ]
 
-nu_rows = len(gridmet_mean_indices.year.unique()) * len(
-    gridmet_mean_indices.state_fips.unique()
-)
+nu_rows = len(gridmet_mean_indices.year.unique()) * len(gridmet_mean_indices.state_fips.unique())
 seasonal = pd.DataFrame(columns=needed_cols, index=range(nu_rows))
 
 wide_pointer = 0
@@ -192,10 +179,8 @@ for a_year in gridmet_mean_indices.year.unique():
     leap_ = calendar.isleap(a_year)
 
     for fip in gridmet_mean_indices.state_fips.unique():
-        curr_df = gridmet_mean_indices[
-            (gridmet_mean_indices.year == a_year)
-            & (gridmet_mean_indices.state_fips == fip)
-        ]
+        curr_df = gridmet_mean_indices[(gridmet_mean_indices.year == a_year)
+                                       & (gridmet_mean_indices.state_fips == fip)].copy()
 
         curr_df_s1 = curr_df[curr_df.month.isin(tonsor_seasons["season_1"])]
         curr_df_s2 = curr_df[curr_df.month.isin(tonsor_seasons["season_2"])]
@@ -212,66 +197,42 @@ for a_year in gridmet_mean_indices.year.unique():
         seasonal.loc[wide_pointer, "s4_statemean_total_precip"] = curr_df_s4.ppt.sum()
 
         # danger
-        seasonal.loc[
-            wide_pointer, "s1_statemean_total_danger"
-        ] = curr_df_s1.danger.sum()
-        seasonal.loc[
-            wide_pointer, "s2_statemean_total_danger"
-        ] = curr_df_s2.danger.sum()
-        seasonal.loc[
-            wide_pointer, "s3_statemean_total_danger"
-        ] = curr_df_s3.danger.sum()
-        seasonal.loc[
-            wide_pointer, "s4_statemean_total_danger"
-        ] = curr_df_s4.danger.sum()
+        seasonal.loc[wide_pointer, "s1_statemean_total_danger"] = curr_df_s1.danger.sum()
+        seasonal.loc[wide_pointer, "s2_statemean_total_danger"] = curr_df_s2.danger.sum()
+        seasonal.loc[wide_pointer, "s3_statemean_total_danger"] = curr_df_s3.danger.sum()
+        seasonal.loc[wide_pointer, "s4_statemean_total_danger"] = curr_df_s4.danger.sum()
 
         # emergency
-        seasonal.loc[
-            wide_pointer, "s1_statemean_total_emergency"
-        ] = curr_df_s1.emergency.sum()
-        seasonal.loc[
-            wide_pointer, "s2_statemean_total_emergency"
-        ] = curr_df_s2.emergency.sum()
-        seasonal.loc[
-            wide_pointer, "s3_statemean_total_emergency"
-        ] = curr_df_s3.emergency.sum()
-        seasonal.loc[
-            wide_pointer, "s4_statemean_total_emergency"
-        ] = curr_df_s4.emergency.sum()
+        seasonal.loc[wide_pointer, "s1_statemean_total_emergency"] = curr_df_s1.emergency.sum()
+        seasonal.loc[wide_pointer, "s2_statemean_total_emergency"] = curr_df_s2.emergency.sum()
+        seasonal.loc[wide_pointer, "s3_statemean_total_emergency"] = curr_df_s3.emergency.sum()
+        seasonal.loc[wide_pointer, "s4_statemean_total_emergency"] = curr_df_s4.emergency.sum()
+        
+        seasonal.loc[wide_pointer, "s2_statemean_avg_tavg"] = (curr_df_s2.sum_tavg.sum() / \
+                                                               no_days_in_each_season["season_2"])
+
+        seasonal.loc[wide_pointer, "s3_statemean_avg_tavg"] = (curr_df_s3.sum_tavg.sum() /\
+                                                               no_days_in_each_season["season_3"])
+
+        seasonal.loc[wide_pointer, "s4_statemean_avg_tavg"] = (curr_df_s4.sum_tavg.sum() / \
+                                                               no_days_in_each_season["season_4"])
 
         if leap_:
-            seasonal.loc[
-                wide_pointer, "s1_statemean_avg_tavg"
-            ] = curr_df_s1.sum_tavg.sum() / (no_days_in_each_season["season_1"] + 1)
+            seasonal.loc[wide_pointer, "s1_statemean_avg_tavg"] = curr_df_s1.sum_tavg.sum() / \
+                                                      (no_days_in_each_season["season_1"] + 1)
         else:
-            seasonal.loc[wide_pointer, "s1_statemean_avg_tavg"] = (
-                curr_df_s1.sum_tavg.sum() / no_days_in_each_season["season_1"]
-            )
-
-        seasonal.loc[wide_pointer, "s2_statemean_avg_tavg"] = (
-            curr_df_s2.sum_tavg.sum() / no_days_in_each_season["season_2"]
-        )
-
-        seasonal.loc[wide_pointer, "s3_statemean_avg_tavg"] = (
-            curr_df_s3.sum_tavg.sum() / no_days_in_each_season["season_3"]
-        )
-
-        seasonal.loc[wide_pointer, "s4_statemean_avg_tavg"] = (
-            curr_df_s4.sum_tavg.sum() / no_days_in_each_season["season_4"]
-        )
+            seasonal.loc[wide_pointer, "s1_statemean_avg_tavg"] = (curr_df_s1.sum_tavg.sum() / \
+                                                                   no_days_in_each_season["season_1"])
         wide_pointer += 1
+        # del (curr_df, curr_df_s1, curr_df_s2, curr_df_s3, curr_df_s4)
 
-        del (curr_df, curr_df_s1, curr_df_s2, curr_df_s3, curr_df_s4)
-
-seasonal.head(5)
+seasonal.head(2)
 
 # %%
 fip = "01"
 a_year = 1979
 
-curr_df = gridmet_mean_indices[
-    (gridmet_mean_indices.year == a_year) & (gridmet_mean_indices.state_fips == fip)
-]
+curr_df = gridmet_mean_indices[(gridmet_mean_indices.year == a_year) & (gridmet_mean_indices.state_fips == fip)]
 
 curr_df_S1 = curr_df[curr_df.month.isin(tonsor_seasons["season_1"])]
 curr_df_S2 = curr_df[curr_df.month.isin(tonsor_seasons["season_2"])]
@@ -292,11 +253,6 @@ print(curr_df_S3.emergency.sum())
 print(curr_df_S4.emergency.sum())
 
 # %%
-curr_df_S2
-
-# %%
-
-# %%
 
 # %%
 
@@ -307,8 +263,6 @@ for a_col in needed_cols[2:]:
 seasonal = seasonal.round(decimals=2)
 # seasonal = rc.correct_Mins_county_6digitFIPS(df=seasonal, col_="county_fips")
 seasonal.head(5)
-
-# %%
 
 # %%
 import pickle
@@ -337,17 +291,38 @@ pickle.dump(export_, open(filename, "wb"))
 seasonal.head(2)
 
 # %%
+len(seasonal.state_fips.unique())
+
+# %%
+A = seasonal[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[A.s3_statemean_avg_tavg == 21.72]
+
+# %%
 county_fips.head(2)
 
 # %%
-seasonal = pd.merge(seasonal, county_fips, on=["state_fips"], how="left")
+print (seasonal.shape)
+seasonal = pd.merge(seasonal, state_fips_SoI, on=["state_fips"], how="left")
+print (seasonal.shape)
 seasonal.head(2)
 
 # %%
-len(seasonal.state.unique())
+A = seasonal[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[A.s3_statemean_avg_tavg == 21.72].shape
+
+# %%
+county_fips.head(2)
+
+# %%
 
 # %%
 gridmet_mean_indices.head(5)
+
+# %%
 
 # %% [markdown]
 # # On Jan 12. HN, KR, MB
@@ -359,9 +334,7 @@ gridmet_mean_indices.head(5)
 
 needed_cols = ["state_fips", "year", "annual_avg_tavg"]
 
-nu_rows = len(gridmet_mean_indices.year.unique()) * len(
-    gridmet_mean_indices.state_fips.unique()
-)
+nu_rows = len(gridmet_mean_indices.year.unique()) * len(gridmet_mean_indices.state_fips.unique())
 annual_temp = pd.DataFrame(columns=needed_cols, index=range(nu_rows))
 
 wide_pointer = 0
@@ -369,22 +342,16 @@ for a_year in gridmet_mean_indices.year.unique():
     leap_ = calendar.isleap(a_year)
 
     for fip in gridmet_mean_indices.state_fips.unique():
-        curr_df = gridmet_mean_indices[
-            (gridmet_mean_indices.year == a_year)
-            & (gridmet_mean_indices.state_fips == fip)
-        ]
+        curr_df = gridmet_mean_indices[(gridmet_mean_indices.year == a_year)
+                                       & (gridmet_mean_indices.state_fips == fip)]
 
         annual_temp.loc[wide_pointer, "state_fips"] = fip
         annual_temp.loc[wide_pointer, "year"] = a_year
 
         if leap_:
-            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = (
-                curr_df.sum_tavg.sum() / 366
-            )
+            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = (curr_df.sum_tavg.sum() / 366)
         else:
-            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = (
-                curr_df.sum_tavg.sum() / 365
-            )
+            annual_temp.loc[wide_pointer, "annual_avg_tavg"] = (curr_df.sum_tavg.sum() / 365)
         wide_pointer += 1
 
 annual_temp.head(2)
@@ -416,6 +383,9 @@ pickle.dump(export_, open(filename, "wb"))
 annual_temp.head(2)
 
 # %%
+annual_temp.head(2)
+
+# %%
 len(annual_temp.state_fips.unique())
 
 # %%
@@ -423,19 +393,5 @@ len(annual_temp.state_fips.unique())
 # A_csv = pd.read_csv(d_ + "county_adjacency_cleaned_corrected.csv")
 # Adj_25 = pd.read_pickle(d_ + "adjacency_binary_matrix_strict25states.sav")
 # Adj = pd.read_pickle(d_ + "county_adjacency_binary_matrix.sav")
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
 
 # %%
