@@ -289,6 +289,11 @@ SW.head(2)
 
 SW.columns
 
+A = SW[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[A.s3_statemean_avg_tavg == 21.72]
+
 # +
 seasonal_precip_vars = ["s1_statemean_total_precip", "s2_statemean_total_precip",
                         "s3_statemean_total_precip", "s4_statemean_total_precip"]
@@ -309,6 +314,11 @@ SW = SW.round(3)
 
 SW.head(2)
 # -
+
+A = SW[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[A.s3_statemean_avg_tavg == 21.72]
 
 # # Others (Controls)
 #
@@ -438,6 +448,11 @@ SW["annual_statemean_total_emergency"] = (
 )
 # -
 
+A = SW[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[A.s3_statemean_avg_tavg == 21.72]
+
 Min_state_NPP.head(2)
 
 # state_yr_npp = state_yr_npp[["state_fips", "year", "state_unit_npp", "state_total_npp"]].copy()
@@ -529,6 +544,15 @@ print (36.833856 - 38.377193)
 print (42.594230 - 36.833856)
 
 state_yr_npp.year.max()
+
+A = SW[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[(A.s3_statemean_avg_tavg > 21.7) & (A.s3_statemean_avg_tavg < 21.8)]
+
+
+
+
 
 # ## Do the outer join and normalize and save in another file
 #
@@ -626,6 +650,62 @@ SW.head(2)
 
 all_df = pd.merge(annual_outer, SW, on=["state_fips", "year"], how="outer")
 all_df.head(2)
+
+A = all_df[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[(A.s3_statemean_avg_tavg > 21.7) & (A.s3_statemean_avg_tavg < 21.8)]
+
+abb_dict["state_fips"][abb_dict["state_fips"].state_full == "Kentucky"]
+
+states_interest_28 = abb_dict["state_fips"].copy()
+states_interest_28 = states_interest_28[states_interest_28.state_full.isin(SoI)].copy()
+states_interest_28 = states_interest_28[states_interest_28.state_full != "Kentucky"]
+states_interest_28.head(2)
+
+all_df.head(2)
+
+# +
+import matplotlib
+import matplotlib.pyplot as plt
+
+cols_ = ["state_fips", "unit_matt_npp", 
+         "s1_statemean_avg_tavg", "s2_statemean_avg_tavg",
+         "s3_statemean_avg_tavg", "s4_statemean_avg_tavg"]
+X = all_df[cols_].copy()
+X = X[X.state_fips.isin(list(states_interest_28.state_fips))].copy()
+
+cols_ = ["unit_matt_npp", 
+         "s1_statemean_avg_tavg", "s2_statemean_avg_tavg",
+         "s3_statemean_avg_tavg", "s4_statemean_avg_tavg"]
+X = X[cols_].copy()
+
+
+fig, axs = plt.subplots(4, 1, figsize=(7.5, 10), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+
+# This makes the ylabel become common label but messed up the ticks!
+# fig.add_subplot(111, frameon=False)
+ax1 , ax2, ax3, ax4= axs[0], axs[1], axs[2], axs[3]
+ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
+ax3.grid(axis="y", which="both"); ax4.grid(axis="y", which="both")
+
+ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[1]);
+ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[2]);
+ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[3]);
+ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[4]);
+ax1.legend(loc="best"); ax2.legend(loc="best"); ax3.legend(loc="best"); ax4.legend(loc="best");
+
+plt.xlabel("seasonal temp");
+plt.ylabel(cols_[0]);
+# -
+
+A = all_df[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A = all_df[["state_fips", "year", "s3_statemean_avg_tavg"]].copy()
+A["s3_statemean_avg_tavg"] = A["s3_statemean_avg_tavg"].astype('float64')
+A = A.round(2)
+A[(A.s3_statemean_avg_tavg > 21.5) & (A.s3_statemean_avg_tavg < 21.9)].shape
 
 all_df = pd.merge(all_df, constants, on=["state_fips"], how="outer")
 all_df.head(2)
@@ -1088,6 +1168,10 @@ ind_deltas_df[(ind_deltas_df.state_fips == "01") & (ind_deltas_df.year == 1997)]
 all_df.dropna(how="any").shape
 
 all_df_normalized.dropna(how="any").shape
+
+
+
+
 
 
 
