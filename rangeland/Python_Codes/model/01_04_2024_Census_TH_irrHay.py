@@ -346,12 +346,10 @@ inventory_RA_herb_NPP_resPop_feedCost.head(2)
 slaughter_Q1.head(2)
 
 # %%
-inventory_RA_herb_NPP_resPop_feedCost_slaughter = pd.merge(
-    inventory_RA_herb_NPP_resPop_feedCost,
-    slaughter_Q1,
-    on=["county_fips", "year"],
-    how="left",
-)
+inventory_RA_herb_NPP_resPop_feedCost_slaughter = pd.merge(inventory_RA_herb_NPP_resPop_feedCost,
+                                                           slaughter_Q1,
+                                                           on=["county_fips", "year"],
+                                                           how="left")
 
 inventory_RA_herb_NPP_resPop_feedCost_slaughter.head(2)
 
@@ -544,25 +542,20 @@ all_df[normal_cols] = normal_df
 all_df.head(2)
 
 # %%
-NPP_control_vars_noHerb_normal = [
-    i + j
-    for i, j in zip(NPP_control_vars_noHerb, ["_normal"] * len(NPP_control_vars_noHerb))
-]
+NPP_control_vars_noHerb_normal = [i + j
+                       for i, j in zip(NPP_control_vars_noHerb, ["_normal"] * len(NPP_control_vars_noHerb))
+                                 ]
 
-NPP_control_vars_wHerb_normal = [
-    i + j
-    for i, j in zip(NPP_control_vars_wHerb, ["_normal"] * len(NPP_control_vars_wHerb))
-]
+NPP_control_vars_wHerb_normal = [i + j
+                                 for i, j in zip(NPP_control_vars_wHerb, ["_normal"] * len(NPP_control_vars_wHerb))
+                                ]
 
-SW_control_vars_noHerb_normal = [
-    i + j
-    for i, j in zip(SW_control_vars_noHerb, ["_normal"] * len(SW_control_vars_noHerb))
-]
+SW_control_vars_noHerb_normal = [i + j
+                                 for i, j in zip(SW_control_vars_noHerb, ["_normal"] * len(SW_control_vars_noHerb))
+                                ]
 
-SW_control_vars_wHerb_normal = [
-    i + j
-    for i, j in zip(SW_control_vars_wHerb, ["_normal"] * len(SW_control_vars_wHerb))
-]
+SW_control_vars_wHerb_normal = [i + j
+                                for i, j in zip(SW_control_vars_wHerb, ["_normal"] * len(SW_control_vars_wHerb))]
 
 # %%
 NPP_control_vars_noHerb_normal
@@ -848,9 +841,7 @@ npp_lag_1yr[
 # %%
 slaughter_all = pd.read_pickle(reOrganized_dir + "slaughter_Q1.sav")
 slaughter_all = slaughter_all["slaughter_Q1"]
-slaughter_all.rename(
-    columns={"cattle_on_feed_sale_4_slaughter": "slaughter"}, inplace=True
-)
+slaughter_all.rename(columns={"cattle_on_feed_sale_4_slaughter": "slaughter"}, inplace=True)
 slaughter_all = slaughter_all[["year", "county_fips", "slaughter"]]
 print("max slaughter sale is [{}]".format(slaughter_all.slaughter.max()))
 slaughter_all.head(2)

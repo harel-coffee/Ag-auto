@@ -173,19 +173,14 @@ all_df[["year", "unit_matt_npp"]].dropna(how="any", inplace=False).year.max()
 all_df[["year", "max_ndvi_in_year_modis"]].dropna(how="any", inplace=False).head(2)
 
 # %%
-15979574020
+print (format(15979574020, ",d"))
 
 # %%
 all_df.tail(2)
 
 # %%
-
-# %%
 # converting to CSV file
-all_df.to_csv(reOrganized_dir + "NPP_NDVI_Invent_Mike_2May2024.csv")
-
-# %%
-reOrganized_dir
+all_df.to_csv(reOrganized_dir + "NPP_NDVI_Invent_Mike_2May2024.csv", index=False)
 
 # %%
 all_df.year.max()
@@ -256,31 +251,8 @@ plt.rcParams.update(params)
 # %%
 
 # %%
-fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, gridspec_kw={"hspace": 0.35, "wspace": 0.05})
-axs.grid(axis="y", which="both")
 
-X_axis = np.arange(len(df.county))
 
-bar_width_ = 1
-step_size_ = 5 * bar_width_
-X_axis = np.array(range(0, step_size_ * len(df.county), step_size_))
-
-axs.bar(X_axis - bar_width_ * 2, df["double-cropped"], color=color_dict["double-cropped"],
-        width=bar_width_, label="double-cropped",)
-
-axs.bar(X_axis - bar_width_, df["single-cropped"], color=color_dict["single-cropped"],
-        width=bar_width_, label="single-cropped")
-
-axs.tick_params(axis="x", labelrotation=90)
-axs.set_xticks(X_axis, df.county)
-
-axs.set_ylabel("acreage")
-axs.legend(loc="best")
-axs.xaxis.set_ticks_position("none")
-
-# send the guidelines back
-ymin, ymax = axs.get_ylim()
-axs.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
-
+# %%
 
 # %%

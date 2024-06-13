@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -47,7 +47,7 @@ param_dir = data_dir_base + "parameters/"
 Min_data_base = data_dir_base + "Min_Data/"
 reOrganized_dir = data_dir_base + "reOrganized/"
 
-plots_dir = data_dir_base + "plots/scatterPlots/"
+plots_dir = data_dir_base + "00_plots/scatterPlots/"
 os.makedirs(plots_dir, exist_ok=True)
 
 # %%
@@ -171,36 +171,32 @@ fig_name = plots_dir + "pandasScatter.png"
 # %%
 tick_legend_FontSize = 10
 
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
     # 'figure.figsize': (6, 4),
     "axes.labelsize": tick_legend_FontSize * 1.4,
     "axes.titlesize": tick_legend_FontSize * 2,
     "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
     "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "axes.titlepad": 10,
-}
+    "axes.titlepad": 10}
 plt.rcParams.update(params)
 
 # diag_kind{‘auto’, ‘hist’, ‘kde’, None}
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter.png"
-# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 X = df_OuterJoined[["inventory", "rangeland_acre", "herb_area_acr", "total_matt_npp", "irr_hay_area"]]
 
 tick_legend_FontSize = 10
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
     # 'figure.figsize': (6, 4),
     "axes.labelsize": tick_legend_FontSize * 1.4,
     "axes.titlesize": tick_legend_FontSize * 2,
     "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
     "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
-    "axes.titlepad": 10,
-}
+    "axes.titlepad": 10}
 plt.rcParams.update(params)
 
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
@@ -209,13 +205,12 @@ my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 # plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 fig_name = plots_dir + "snsScatter_herbArea.png"
-# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 
 # %%
 X = df_OuterJoined[["inventory", "rangeland_acre", "herb_area_acr", "herb_avg"]]
-
 
 tick_legend_FontSize = 10
 params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
@@ -231,7 +226,7 @@ plt.rcParams.update(params)
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter_herbBattle.png"
-# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 df_OuterJoined.rename(columns={"annual_countymean_total_precip": "yr_cntymean_precip"}, inplace=True)
@@ -253,10 +248,9 @@ plt.rcParams.update(params)
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter_heatPrecipTemp.png"
-# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
-sorted(df_OuterJoined.columns)
 
 # %%
 cols_ = ["s1_countymean_avg_tavg", "s2_countymean_avg_tavg",
@@ -265,8 +259,7 @@ cols_ = ["s1_countymean_avg_tavg", "s2_countymean_avg_tavg",
 X = df_OuterJoined[["total_matt_npp"] + cols_]
 
 tick_legend_FontSize = 10
-params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
-          # 'figure.figsize': (6, 4),
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large # 'figure.figsize': (6, 4),
           "axes.labelsize": tick_legend_FontSize * 1,
           "axes.titlesize": tick_legend_FontSize * 2,
           "xtick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
@@ -277,11 +270,13 @@ plt.rcParams.update(params)
 my_scatter = sns.pairplot(X, size=2, diag_kind="None", plot_kws={"s": 4})
 
 fig_name = plots_dir + "snsScatter_SWNPP.png"
-# plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
+plt.savefig(fname=fig_name, dpi=200, bbox_inches="tight")
 
 # %%
 
 # %%
+df_OuterJoined = pd.read_pickle(reOrganized_dir + "county_data_and_normalData_OuterJoined.sav")
+df_OuterJoined["Date"]
 
 # %%
 

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -80,7 +80,8 @@ reOrganized_dir = data_dir_base + "reOrganized/"
 os.makedirs(reOrganized_dir, exist_ok=True)
 
 # %%
-plots_dir = data_dir_base + "00_plots/NDVI_NPP/"
+plots_dir =  data_dir_base + "00_plots/NDVI_NPP_Vs_Weather_Jun102024/"
+os.makedirs(plots_dir, exist_ok=True)
 
 # %%
 abb_dict = pd.read_pickle(reOrganized_dir + "county_fips.sav")
@@ -189,6 +190,11 @@ all_df.head(3)
 all_df.columns
 
 # %%
+data_dir_base
+
+# %%
+
+# %%
 tick_legend_FontSize = 10
 params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
           # 'figure.figsize': (6, 4),
@@ -198,7 +204,6 @@ params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
           "ytick.labelsize": tick_legend_FontSize * 1,  #  * 0.75
           "axes.titlepad": 10}
 plt.rcParams.update(params)
-
 
 cols_ = ["metric_unit_matt_npp", "annual_statemean_total_precip",
          "annual_avg_tavg", "max_ndvi_in_year_modis"]
@@ -226,9 +231,10 @@ ax.set_xlabel('annual_avg_tavg', fontsize=12)
 ax.set_ylabel('annual_statemean_total_precip', fontsize=12)
 ax.set_zlabel('metric_unit_matt_npp', fontsize=12)
 
-plt.show()
+fig_name = plots_dir + "unitMetricNPP_weather_3D.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
-# %%
+plt.show()
 
 # %%
 from mpl_toolkits import mplot3d
@@ -248,6 +254,9 @@ ax.set_title('max NDVI v. annual precip and temp')
 ax.set_xlabel('annual_avg_tavg', fontsize=12)
 ax.set_ylabel('annual_statemean_total_precip', fontsize=12)
 ax.set_zlabel('max_ndvi_in_year_modis', fontsize=12)
+
+fig_name = plots_dir + "NDVI_weather_3D.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 plt.show()
 
@@ -270,21 +279,31 @@ cols_ = ["metric_unit_matt_npp",
          "s1_statemean_total_precip", "s2_statemean_total_precip",
          "s3_statemean_total_precip", "s4_statemean_total_precip"]
 X = all_df[cols_]
-fig, axs = plt.subplots(4, 1, figsize=(7.5, 10), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+fig, axs = plt.subplots(2, 2, figsize=(10, 4), sharex=True, sharey=True,
+                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 
 # This makes the ylabel become common label but messed up the ticks!
 # fig.add_subplot(111, frameon=False)
-ax1 , ax2, ax3, ax4= axs[0], axs[1], axs[2], axs[3]
+# ax1, ax2, ax3, ax4 = axs[0,1], axs[0,1], axs[1,0], axs[1,1]
+(ax1, ax2), (ax3, ax4) = axs;
 ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
 ax3.grid(axis="y", which="both"); ax4.grid(axis="y", which="both")
 
-ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
+ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[1].split("_")[0]);
+ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[2].split("_")[0]);
+ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[3].split("_")[0]);
+ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[4].split("_")[0]);
 
-plt.xlabel("seasonal precip");
-plt.ylabel(cols_[0]);
+ax1.legend(loc="best"); ax2.legend(loc="best")
+ax3.legend(loc="best"); ax4.legend(loc="best")
+
+ax3.set_xlabel("seasonal precip");
+ax4.set_xlabel("seasonal precip");
+ax1.set_ylabel(cols_[0]);
+ax3.set_ylabel(cols_[0]);
+
+fig_name = plots_dir + "unitMetricNPP_Sprecip_scatter.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 
@@ -293,47 +312,65 @@ cols_ = ["max_ndvi_in_year_modis",
          "s1_statemean_total_precip", "s2_statemean_total_precip",
          "s3_statemean_total_precip", "s4_statemean_total_precip"]
 X = all_df[cols_]
-fig, axs = plt.subplots(4, 1, figsize=(7.5, 10), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+fig, axs = plt.subplots(2, 2, figsize=(10, 4), sharex=True, sharey=True,
+                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 
 # This makes the ylabel become common label but messed up the ticks!
 # fig.add_subplot(111, frameon=False)
-ax1 , ax2, ax3, ax4= axs[0], axs[1], axs[2], axs[3]
+# ax1, ax2, ax3, ax4 = axs[0,1], axs[0,1], axs[1,0], axs[1,1]
+(ax1, ax2), (ax3, ax4) = axs;
 ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
 ax3.grid(axis="y", which="both"); ax4.grid(axis="y", which="both")
 
-ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
+ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[1].split("_")[0]);
+ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[2].split("_")[0]);
+ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[3].split("_")[0]);
+ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[4].split("_")[0]);
 
-plt.xlabel("seasonal precip");
-plt.ylabel(cols_[0]);
+ax1.legend(loc="best"); ax2.legend(loc="best")
+ax3.legend(loc="best"); ax4.legend(loc="best")
+
+ax3.set_xlabel("seasonal precip");
+ax4.set_xlabel("seasonal precip");
+ax1.set_ylabel(cols_[0]);
+ax3.set_ylabel(cols_[0]);
+
+fig_name = plots_dir + "NDVI_Sprecip_scatter.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
-
-# %%
-X[cols_[3]]
 
 # %%
 cols_ = ["max_ndvi_in_year_modis", 
          "s1_statemean_avg_tavg", "s2_statemean_avg_tavg",
          "s3_statemean_avg_tavg", "s4_statemean_avg_tavg"]
 X = all_df[cols_]
-fig, axs = plt.subplots(4, 1, figsize=(7.5, 10), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+
+fig, axs = plt.subplots(2, 2, figsize=(10, 4), sharex=True, sharey=True,
+                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 
 # This makes the ylabel become common label but messed up the ticks!
 # fig.add_subplot(111, frameon=False)
-ax1 , ax2, ax3, ax4= axs[0], axs[1], axs[2], axs[3]
+# ax1, ax2, ax3, ax4 = axs[0,1], axs[0,1], axs[1,0], axs[1,1]
+(ax1, ax2), (ax3, ax4) = axs;
 ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
 ax3.grid(axis="y", which="both"); ax4.grid(axis="y", which="both")
 
-ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
-ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x");
+ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[1].split("_")[0]);
+ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[2].split("_")[0]);
+ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[3].split("_")[0]);
+ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[4].split("_")[0]);
 
-plt.xlabel("seasonal temp");
-plt.ylabel(cols_[0]);
+ax1.legend(loc="best"); ax2.legend(loc="best")
+ax3.legend(loc="best"); ax4.legend(loc="best")
+
+ax3.set_xlabel("seasonal temp");
+ax4.set_xlabel("seasonal temp");
+ax1.set_ylabel(cols_[0]);
+ax3.set_ylabel(cols_[0]);
+
+fig_name = plots_dir + "NDVI_STemp_scatter.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 
@@ -342,27 +379,129 @@ cols_ = ["metric_unit_matt_npp",
          "s1_statemean_avg_tavg", "s2_statemean_avg_tavg",
          "s3_statemean_avg_tavg", "s4_statemean_avg_tavg"]
 X = all_df[cols_]
-fig, axs = plt.subplots(4, 1, figsize=(7.5, 10), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 
-# This makes the ylabel become common label but messed up the ticks!
-# fig.add_subplot(111, frameon=False)
-ax1 , ax2, ax3, ax4= axs[0], axs[1], axs[2], axs[3]
+fig, axs = plt.subplots(2, 2, figsize=(10, 4), sharex=True, sharey=True,
+                        gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+
+(ax1, ax2), (ax3, ax4) = axs;
 ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
 ax3.grid(axis="y", which="both"); ax4.grid(axis="y", which="both")
 
-ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[1]);
-ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[2]);
-ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[3]);
-ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[4]);
-ax1.legend(loc="best"); ax2.legend(loc="best"); ax3.legend(loc="best"); ax4.legend(loc="best");
+ax1.scatter(X[cols_[1]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[1].split("_")[0]);
+ax2.scatter(X[cols_[2]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[2].split("_")[0]);
+ax3.scatter(X[cols_[3]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[3].split("_")[0]);
+ax4.scatter(X[cols_[4]], X[cols_[0]], s=20, c="dodgerblue", marker="x", label=cols_[4].split("_")[0]);
 
-plt.xlabel("seasonal temp");
-plt.ylabel(cols_[0]);
+ax1.legend(loc="best"); ax2.legend(loc="best")
+ax3.legend(loc="best"); ax4.legend(loc="best")
+
+ax3.set_xlabel("seasonal temp");
+ax4.set_xlabel("seasonal temp");
+ax1.set_ylabel(cols_[0]);
+ax3.set_ylabel(cols_[0]);
+
+fig_name = plots_dir + "unitMetricNPP_STemp_scatter.pdf"
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+
+# %% [markdown]
+# # Model NPP/NDVI = f(weather)
 
 # %%
-explore = all_df[["year", "state_full", cols_[4], cols_[0]]].copy()
-explore[explore.s4_statemean_avg_tavg == 21.72]
+print (all_df.shape)
+all_df.head(2)
 
 # %%
+list(all_df.columns)
+
+# %%
+"Kentucky" in all_df.state_full.unique()
+
+# %% [markdown]
+# # Annual weather
+
+# %%
+indp_vars = ['annual_statemean_total_precip', 'annual_avg_tavg',]
+y_var = "metric_unit_matt_npp"
+
+#################################################################
+df = all_df[[y_var] + indp_vars].copy()
+df.dropna(how="any", inplace=True)
+X = df[indp_vars]
+for col_ in indp_vars:
+    X[col_] = X[col_].astype("float")
+
+X = sm.add_constant(X)
+Y = df[y_var].astype(float)
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
+
+# %%
+
+# %%
+indp_vars = ['annual_statemean_total_precip', 'annual_avg_tavg',]
+y_var = "max_ndvi_in_year_modis"
+
+#################################################################
+df = all_df[[y_var] + indp_vars].copy()
+df.dropna(how="any", inplace=True)
+X = df[indp_vars]
+for col_ in indp_vars:
+    X[col_] = X[col_].astype("float")
+
+X = sm.add_constant(X)
+Y = df[y_var].astype(float)
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
+
+# %% [markdown]
+# # Seasonal weather
+
+# %%
+indp_vars = ['s1_statemean_total_precip', 's2_statemean_total_precip',
+             's3_statemean_total_precip', 's4_statemean_total_precip',
+             
+             's1_statemean_avg_tavg', 's2_statemean_avg_tavg',
+             's3_statemean_avg_tavg', 's4_statemean_avg_tavg']
+
+y_var = "metric_unit_matt_npp"
+
+#################################################################
+df = all_df[[y_var] + indp_vars].copy()
+df.dropna(how="any", inplace=True)
+X = df[indp_vars]
+for col_ in indp_vars:
+    X[col_] = X[col_].astype("float")
+
+X = sm.add_constant(X)
+Y = df[y_var].astype(float)
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
+
+# %%
+
+# %%
+indp_vars = ['s1_statemean_total_precip', 's2_statemean_total_precip',
+             's3_statemean_total_precip', 's4_statemean_total_precip',
+             
+             's1_statemean_avg_tavg', 's2_statemean_avg_tavg',
+             's3_statemean_avg_tavg', 's4_statemean_avg_tavg']
+
+y_var = "max_ndvi_in_year_modis"
+
+#################################################################
+df = all_df[[y_var] + indp_vars].copy()
+df.dropna(how="any", inplace=True)
+X = df[indp_vars]
+for col_ in indp_vars:
+    X[col_] = X[col_].astype("float")
+
+X = sm.add_constant(X)
+Y = df[y_var].astype(float)
+model = sm.OLS(Y, X)
+model_result = model.fit()
+model_result.summary()
 
 # %%

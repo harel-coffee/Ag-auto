@@ -601,15 +601,13 @@ all_df_normalized.head(2)
 # %%
 filename = reOrganized_dir + "county_data_and_normalData_OuterJoined.sav"
 
-export_ = {
-    "all_df": all_df,
-    "all_df_normalized": all_df_normalized,
-    "source_code": "county_vars_oneFile_outerjoin",
-    "Author": "HN",
-    "normalized_columns": numeric_cols,
-    "non_normalized_columns": non_normal_cols,
-    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-}
+export_ = {"all_df": all_df,
+           "all_df_normalized": all_df_normalized,
+           "source_code": "county_vars_oneFile_outerjoin",
+           "Author": "HN",
+           "normalized_columns": numeric_cols,
+           "non_normalized_columns": non_normal_cols,
+           "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 pickle.dump(export_, open(filename, "wb"))
 
@@ -749,17 +747,19 @@ delta_data_normal.head(2)
 # %%
 filename = reOrganized_dir + "county_delta_and_normalDelta_OuterJoined.sav"
 
-export_ = {
-    "delta_data": delta_data,
-    "delta_data_normal": delta_data_normal,
-    "delta_cols": delta_cols,
-    "normalized_columns": numeric_cols,
-    "non_normalized_columns": non_normal_cols,
-    "source_code": "county_vars_oneFile_outerjoin",
-    "Author": "HN",
-    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-}
+export_ = {"delta_data": delta_data,
+           "delta_data_normal": delta_data_normal,
+           "delta_cols": delta_cols,
+           "normalized_columns": numeric_cols,
+           "non_normalized_columns": non_normal_cols,
+           "source_code": "county_vars_oneFile_outerjoin",
+           "Author": "HN",
+           "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 pickle.dump(export_, open(filename, "wb"))
+
+# %%
+
+# %%
 
 # %%
