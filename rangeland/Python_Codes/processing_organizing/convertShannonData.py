@@ -72,13 +72,10 @@ curr_sheet_columns[:10]
 curr_sheet.columns = list(curr_sheet.iloc[1,].astype(str))
 curr_sheet = curr_sheet[2:].copy()
 curr_sheet.rename({"nan": "state"}, axis=1, inplace=True)
-curr_sheet.rename(
-    columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True
-)
+curr_sheet.rename(columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True)
 curr_sheet.reset_index(drop=True, inplace=True)
 curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] = (
-    curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000
-)
+     curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000)
 
 # Drop rows that are entirely NA
 curr_sheet.dropna(axis=0, how="all", inplace=True)
@@ -635,7 +632,28 @@ regions_dict = {"region_1" : ['CT', 'ME', 'NH', 'VT', 'MA', 'RI'],
                 "region_9" : ['AZ', 'CA', 'HI', 'NV'],
                 "region_10": ['AK', 'ID', 'OR', 'WA']}
 
+# %% [markdown]
+# ## Drop "_beef"
+#
+# At this point we do not need _beef in the name of the region.
+#
+
 # %%
+print (beef_slaughter_tall.region.unique())
+beef_slaughter_tall.head(2)
+
+# %%
+beef_slaughter.head(2)
+
+# %%
+beef_slaughter.rename(columns=lambda x: x.replace("_beef", ""), inplace=True)
+beef_slaughter.head(2)
+
+# %%
+for idx in beef_slaughter_tall.index:
+    beef_slaughter_tall.loc[idx, "region"] = beef_slaughter_tall.loc[idx, "region"].replace("_beef", "")
+    
+beef_slaughter_tall.tail(2)
 
 # %%
 filename = reOrganized_dir + "shannon_slaughter_data.sav"

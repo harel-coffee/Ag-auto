@@ -55,18 +55,18 @@ print (state_fips.shape)
 state_fips.head(2)
 
 # %%
-county_fips = abb_dict["county_fips"]
+# county_fips = abb_dict["county_fips"]
 
-print(f"{len(county_fips.state.unique()) = }")
-# county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
-county_fips.drop_duplicates(inplace=True)
-county_fips.reset_index(drop=True, inplace=True)
-print(f"{len(county_fips.state.unique()) = }")
+# print(f"{len(county_fips.state.unique()) = }")
+# # county_fips = county_fips[county_fips.state.isin(SoI_abb)].copy()
+# county_fips.drop_duplicates(inplace=True)
+# county_fips.reset_index(drop=True, inplace=True)
+# print(f"{len(county_fips.state.unique()) = }")
 
-county_fips = county_fips[["county_fips", "county_name", "state_fips", "EW_meridian"]]
-print(f"{len(county_fips.state_fips.unique()) = }")
+# county_fips = county_fips[["county_fips", "county_name", "state_fips", "EW_meridian"]]
+# print(f"{len(county_fips.state_fips.unique()) = }")
 
-county_fips.head(2)
+# county_fips.head(2)
 
 # %% [markdown]
 # ### Rangeland areas
@@ -196,7 +196,6 @@ NDVIs.head(2)
 # %%
 NDVIs["region"] = "NA"
 for a_key in shannon_regions_dict_abbr.keys():
-    
     NDVIs.loc[NDVIs["state"].isin(shannon_regions_dict_abbr[a_key]), 'region'] = a_key
 NDVIs.head(2)
 
@@ -305,6 +304,12 @@ regional_NDVIs.head(2)
 # %%
 monthly_NDVI_beef_slaughter_tall = pd.merge(regional_NDVIs, monthly_beef_slaughter_tall, 
                                             on=["year", "month", "region"], how="outer")
+monthly_NDVI_beef_slaughter_tall.head(2)
+
+# %%
+monthly_NDVI_beef_slaughter_tall.region.unique()
+
+# %%
 monthly_NDVI_beef_slaughter_tall.head(2)
 
 # %%
