@@ -73,6 +73,9 @@ state_abb_state_fips["SoI"] = 0
 state_abb_state_fips.loc[state_abb_state_fips.state.isin(SoI_abb), "SoI"] = 1
 state_abb_state_fips.loc[state_abb_state_fips.EW_meridian=="W", "SoI"] = 2
 
+# remove kentucky
+state_abb_state_fips.loc[state_abb_state_fips.state=="KY", "SoI"] = 0
+
 state_abb_state_fips.head(2)
 
 # %%
@@ -116,7 +119,7 @@ gdf.head(2)
 
 # %%
 # remove Puerto Rico 
-gdf = gdf[~(gdf.state.isin(["PR", "VI", "AK", "HI"]))]
+gdf = gdf[~(gdf.state.isin(["PR", "VI"]))] # "AK", "HI"
 
 
 # %%
@@ -489,8 +492,7 @@ for key in legend_dict:
         patchList.append(data_key)
 
 plt.legend(handles=patchList);
-
-# fig.savefig(plot_dir + 'study_area.pdf', dpi=800, bbox_inches="tight")
+fig.savefig(plot_dir + 'study_area_python.pdf', dpi=800, bbox_inches="tight")
 
 # %%
 
@@ -530,6 +532,7 @@ for row in visframe.itertuples():
     if row.state not in ['AK','HI']:
         vf = visframe[visframe.state==row.state]
         c = col_dict[gdf[gdf.state==row.state][0:1].SoI.item()]
+        # print (c)
         vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
 
 import matplotlib.patches as mpatches
@@ -542,7 +545,7 @@ for key in legend_dict:
         patchList.append(data_key)
 
 plt.legend(handles=patchList);
-fig.savefig(plot_dir + 'study_area_red.pdf', dpi=800, bbox_inches="tight")
+fig.savefig(plot_dir + 'study_area_python_red.pdf', dpi=800, bbox_inches="tight")
 
 # %%
 
@@ -586,5 +589,100 @@ tonsor_states
 
 # %%
 SoI
+
+# %%
+shannon_regions_dict_abbr = {"region_1_region_2" : ['CT', 'ME', 'NH', 'VT', 'MA', 'RI', 'NY', 'NJ'], 
+                             "region_3" : ['DE', 'MD', 'PA', 'WV', 'VA'],
+                             "region_4" : ['AL', 'FL', 'GA', 'KY', 'MS', 'NC', 'SC', 'TN'],
+                             "region_5" : ['IL', 'IN', 'MI', 'MN', 'OH', 'WI'],
+                             "region_6" : ['AR', 'LA', 'NM', 'OK', 'TX'],
+                             "region_7" : ['IA', 'KS', 'MO', 'NE'],
+                             "region_8" : ['CO', 'MT', 'ND', 'SD', 'UT', 'WY'],
+                             "region_9" : ['AZ', 'CA', 'HI', 'NV'],
+                             "region_10": ['AK', 'ID', 'OR', 'WA']}
+
+col_dict = {"region_1_region_2": "dodgerblue",
+            "region_3": "cyan", 
+            "region_4": "green",
+            "region_5": "black",
+            "region_6": "red",
+            "region_7": "tomato",
+            "region_8": "#C0C0C0", # gray
+            "region_9": "#ffd343", # mild yellow
+            "region_10": "steelblue"}
+
+# %%
+import matplotlib.patches as mpatches
+
+# We create a colormar from our list of colors
+cm = ListedColormap([col_dict[x] for x in col_dict.keys()])
+# **************************
+# set the value column that will be visualised
+variable = "SoI"
+
+# make a column for value_determined_color in gdf
+# set the range for the choropleth values with the upper bound the rounded up maximum value
+vmin, vmax = gdf[variable].min(), gdf[variable].max() #math.ceil(gdf.pct_food_insecure.max())
+gdf = makeColorColumn(gdf,variable,vmin,vmax)
+
+# create "visframe" as a re-projected gdf using EPSG 2163 for CONUS
+visframe = gdf.to_crs({'init':'epsg:2163'})
+
+visframe["region"] = "NA"
+
+# some states may not be in a region
+# those will be gray
+visframe["region_color"] = "#C0C0C0" 
+
+for a_key in shannon_regions_dict_abbr.keys():
+    visframe.loc[visframe["state"].isin(shannon_regions_dict_abbr[a_key]), 'region'] = a_key
+    visframe.loc[visframe["state"].isin(shannon_regions_dict_abbr[a_key]), 'region_color'] = col_dict[a_key]
+visframe.head(2)
+
+# create figure and axes for Matplotlib
+fig, ax = plt.subplots(1, figsize=(18, 14))
+ax.axis('off') # remove the axis box around the vis
+hfont = {'fontname':'Helvetica'} # set the font for the visualization to Helvetica
+
+for row in visframe.itertuples():
+    if row.state not in ['AK','HI']:
+        vf = visframe[visframe.state==row.state]
+        c = vf["region_color"].item()
+        vf.plot(color=c, linewidth=0.8, ax=ax, edgecolor='0.8')
+
+############### add Alaska and Hawaii
+# add Alaska
+akax = fig.add_axes([0.1, 0.17, 0.2, 0.19])   
+akax.axis('off')
+# polygon to clip western islands
+polygon = Polygon([(-170,50),(-170,72),(-140, 72),(-140,50)])
+alaska_gdf = gdf[gdf.state=='AK'] # I donno why visframe is not working here
+alaska_gdf.clip(polygon).plot(color = visframe[visframe.state=="AK"]["region_color"].item(), 
+                              linewidth=0.8, ax=akax, edgecolor='0.8')
+
+
+# add Hawaii
+# visframe = gdf.to_crs({'init':'epsg:2163'})
+hiax = fig.add_axes([.28, 0.20, 0.1, 0.1])   
+hiax.axis('off')
+# polygon to clip western islands
+hipolygon = Polygon([(-160,0),(-160,90), (-120,90), (-120,0)])
+hawaii_gdf = gdf[gdf.state=='HI'] # I donno why visframe is not working here
+hawaii_gdf.clip(hipolygon).plot(color = visframe[visframe.state=="HI"]["region_color"].item(), 
+                                 linewidth=0.8, ax=hiax, edgecolor='0.8')
+
+
+legend_dict = col_dict
+patchList = []
+for key in legend_dict:
+    if key== "region_1_region_2":
+        label_ = "region 1 & 2"
+    else:
+        label_ = key.replace("_", " ")
+    data_key = mpatches.Patch(color=legend_dict[key], label=label_, lw=0.2)
+    patchList.append(data_key)
+
+plt.legend(handles=patchList, bbox_to_anchor=(5, 1), ncols=2,  fontsize=12);
+fig.savefig(plot_dir + 'regions.pdf', dpi=800, bbox_inches="tight")
 
 # %%
