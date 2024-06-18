@@ -485,9 +485,6 @@ beef_slaughter.head(2)
 # beef_slaughter["year"] = beef_slaughter.date.dt.year
 # beef_slaughter["month"] = beef_slaughter.date.dt.month
 
-# %%
-beef_slaughter.head(2)
-
 # %% [markdown]
 # ### Change Format:
 # Some regions have weeks/months of missing data. Dropping NA in this fashion is hard. We can change the format
@@ -504,6 +501,32 @@ curr_sheet_tall.head(5)
 
 # %%
 beef_slaughter_tall.head(5)
+
+# %%
+beef_slaughter_tall.region.unique()
+
+# %%
+df = beef_slaughter_tall.copy()
+df = df[df.region == "region_8_beef"].copy()
+df = df[["date", "region", "slaughter_count"]].copy()
+df.dropna(how="any", inplace=True)
+print (df.shape)
+
+df9 = beef_slaughter_tall.copy()
+df9 = df9[df9.region == "region_9_beef"].copy()
+df9 = df9[["date", "region", "slaughter_count"]].copy()
+df9.dropna(how="any", inplace=True)
+
+print (df9.shape)
+
+# %%
+df.head(2)
+
+# %%
+df9.head(2)
+
+# %%
+[x for x in df9.date.values if not (x in df.date.values)]
 
 # %%
 print (curr_sheet_tall.shape)

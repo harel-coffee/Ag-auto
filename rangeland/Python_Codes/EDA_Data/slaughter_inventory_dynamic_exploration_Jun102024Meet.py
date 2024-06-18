@@ -89,6 +89,13 @@ monthly_slaughter.head(2)
 annual_slaughter = monthly_slaughter.groupby(["region", "year"])["slaughter_count"].sum().reset_index()
 annual_slaughter.head(2)
 
+# %%
+df = annual_slaughter[annual_slaughter["region"] == "region_8"].copy()
+print (df.shape)
+
+df = annual_slaughter[annual_slaughter["region"] == "region_9"].copy()
+print (df.shape)
+
 # %% [markdown]
 # ### Compute regional inventory
 
@@ -269,6 +276,8 @@ for a_region in low_inv_regions:
 # %%
 
 # %%
+
+# %%
 fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 (ax1, ax2) = axs;
 ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
@@ -278,23 +287,28 @@ ax1.title.set_text('slaughter: dashed lines')
 
 y_var = "inventory"
 for a_region in high_inv_regions:
-    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    df = region_slaughter_inventory.copy()
+    df = df[df["region"] == a_region].copy()
     ax1.plot(df.year, df[y_var], color = col_dict[a_region], linewidth=3,
             label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); # 
 
 for a_region in low_inv_regions:
-    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    df = region_slaughter_inventory.copy()
+    df = df[df["region"] == a_region].copy()
     ax2.plot(df.year, df[y_var], color = col_dict[a_region], linewidth=3,
              label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); #
 
 
 y_var = "slaughter_count"
 for a_region in high_inv_regions:
-    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    df = region_slaughter_inventory.copy()
+    df = df[df["region"] == a_region].copy()
     ax1.plot(df.year, df[y_var], linestyle="dashed",
              color = col_dict[a_region], linewidth=3)
 
 for a_region in low_inv_regions:
+    df = region_slaughter_inventory.copy()
+    df = df[df["region"] == a_region].copy()
     df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
     ax2.plot(df.year, df[y_var], linestyle="dashed",
              color = col_dict[a_region], linewidth=3)
@@ -304,11 +318,12 @@ ax1.legend(loc="best"); ax2.legend(loc="best");
 # %%
 
 # %%
-fig, axs = plt.subplots(1, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+fig, axs = plt.subplots(1, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace":0.15, "wspace":0.05})
 axs.grid(axis="y", which="both")
 
 region = "region_9"
-df = region_slaughter_inventory[region_slaughter_inventory["region"] == region].copy()
+df = region_slaughter_inventory.copy()
+df = df[df["region"] == region].copy()
 axs.plot(df.year, df.inventory, linewidth=3, label="inventory " +  region, color="dodgerblue")
 axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+ region, 
          color="dodgerblue", linestyle="dashed");
@@ -345,5 +360,110 @@ inventory_annal_diff = inventory_annal_diff[["region", "year", "inventory_delta"
 
 inventory_annal_diff["inventory_delta"] = inventory_annal_diff["inventory_delta"].astype(int)
 inventory_annal_diff.head(2)
+
+# %%
+inventory_annal_diff.shape
+
+# %%
+inventory_annal_diff[inventory_annal_diff["inventory_delta"] < 0].shape
+
+# %%
+inventory_annal_diff[(inventory_annal_diff["region"]== "region_6") & 
+                     (inventory_annal_diff["inventory_delta"] < 0)].shape
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace":0.15, "wspace":0.05})
+axs.grid(axis="y", which="both")
+axs.grid(axis="x", which="major")
+
+region = "region_6"
+df = inventory_annal_diff.copy()
+df = df[df["region"] == region].copy()
+# axs.plot(df.year, df.inventory_delta, 
+#          linewidth=3, label="inventory delta " +  region, color="dodgerblue")
+axs.scatter(df.year, df.inventory_delta, label="inventory delta " +  region)
+
+
+plt.xticks(rotation=90);
+# axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+ region, 
+#          color="dodgerblue", linestyle="dashed");
+
+plt.title("inventory deltas")
+plt.legend(loc = "best");
+
+# %%
+df.year.unique()
+
+# %%
+inventory_annal_diff[(inventory_annal_diff.region == "region_6") &
+                     (inventory_annal_diff.year == "2012_2011")]
+
+# %%
+region_slaughter_inventory[(region_slaughter_inventory.region == "region_6") &
+                           (region_slaughter_inventory.year == 2012)]
+
+# %%
+870300 - 759000
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+s = pd.read_pickle(reOrganized_dir + "shannon_slaughter_data.sav")
+s_old = pd.read_pickle(reOrganized_dir + "shannon_slaughter_data_old.sav")
+
+s = s["beef_slaughter_tall"]
+s_old = s_old["beef_slaughter_tall"]
+
+s_old.head(2)
+
+# %%
+s_8 = s[s.region == "region_8"]
+s_8 = s_8[["region", "slaughter_count"]].copy()
+s_8.dropna(how="any", inplace=True)
+
+s_old_8 = s_old[s_old.region == "region_8"]
+s_old_8 = s_old_8[["region", "slaughter_count"]].copy()
+s_old_8.dropna(how="any", inplace=True)
+
+s_9 = s[s.region == "region_9"]
+s_9 = s_9[["region", "slaughter_count"]].copy()
+s_9.dropna(how="any", inplace=True)
+
+
+s_old_9 = s_old[s_old.region == "region_9"]
+s_old_9 = s_old_9[["region", "slaughter_count"]].copy()
+s_old_9.dropna(how="any", inplace=True)
+
+print (s_8.shape)
+print (s_old_8.shape)
+
+print (s_9.shape)
+print (s_old_9.shape)
+
+# %%
+
+# %%
 
 # %%

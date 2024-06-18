@@ -333,3 +333,18 @@ pickle.dump(export_, open(filename, 'wb'))
 
 
 # %%
+df = monthly_NDVI_beef_slaughter_tall[monthly_NDVI_beef_slaughter_tall["region"] == "region_8"].copy()
+df = df[["year", "region", "slaughter_count"]].copy()
+df.dropna(how="any", inplace=True)
+print (df.shape)
+
+df = monthly_NDVI_beef_slaughter_tall[monthly_NDVI_beef_slaughter_tall["region"] == "region_9"].copy()
+df = df[["year", "region", "slaughter_count"]].copy()
+df.dropna(how="any", inplace=True)
+
+print (df.shape)
+
+# %%
+monthly_NDVI_beef_slaughter_tall.head(2)
+
+# %%
