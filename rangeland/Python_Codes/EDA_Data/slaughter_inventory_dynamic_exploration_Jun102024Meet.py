@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -103,7 +103,7 @@ all_data = all_data_dict["all_df_outerjoined"].copy()
 inventory_df = all_data[["year", "inventory", "state_fips"]].copy()
 
 inventory_df.dropna(subset=["inventory"], inplace=True)
-
+inventory_df["inventory"] = inventory_df["inventory"].astype(int)
 # do NOT subset to states of interest as slaughter data ignores that
 # inventory_df = inventory_df[inventory_df["state_fips"].isin(list(state_fips_SoI["state_fips"].unique()))]
 inventory_df.reset_index(drop=True, inplace=True)
@@ -220,39 +220,86 @@ col_dict = {"region_1_region_2": "cyan",
             "region_10": "steelblue"}
 
 # %%
-fig, axs = plt.subplots(2, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 (ax1, ax2) = axs;
 ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
-
+y_var = "inventory"
 for a_region in high_inv_regions:
     df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
-    ax1.plot(df.year, df.inventory, 
+    ax1.plot(df.year, df[y_var], 
              color = col_dict[a_region], linewidth=3, 
-             label="inv. " +  a_region.replace("_", " ").title()); #
+             label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); #
     ax1.legend(loc="best");
     
 
 for a_region in low_inv_regions:
     df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
-    ax2.plot(df.year, df.inventory, 
+    ax2.plot(df.year, df[y_var], 
              color = col_dict[a_region], linewidth=3, 
-             label="inv. " +  a_region.replace("_", " ").title()); #
+             label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); #
     ax2.legend(loc="best");
 
 # %%
-fig, axs = plt.subplots(1, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
-axs.grid(axis="y", which="both")
+region_slaughter_inventory.head(2)
 
-for a_region in log_inv_regions:
-    df = interesting_regions_df[interesting_regions_df["region"] == a_region].copy()
-    axs.plot(df.year, df.inventory, linewidth=3, label="inventory " +  a_region); #
-    plt.legend(loc="best");
+# %%
+fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+(ax1, ax2) = axs;
+ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
+y_var = "slaughter_count"
+for a_region in high_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax1.plot(df.year, df[y_var], 
+             color = col_dict[a_region], linewidth=3, 
+             label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); #
+    ax1.legend(loc="best");
+    
+
+for a_region in low_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax2.plot(df.year, df[y_var], 
+             color = col_dict[a_region], linewidth=3, 
+             label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); #
+    ax2.legend(loc="best");
 
 # %%
 
 # %%
 
 # %%
+
+# %%
+fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+(ax1, ax2) = axs;
+ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
+
+# fig.suptitle("slaughter: dashed lines");
+ax1.title.set_text('slaughter: dashed lines')
+
+y_var = "inventory"
+for a_region in high_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax1.plot(df.year, df[y_var], color = col_dict[a_region], linewidth=3,
+            label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); # 
+
+for a_region in low_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax2.plot(df.year, df[y_var], color = col_dict[a_region], linewidth=3,
+             label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); #
+
+
+y_var = "slaughter_count"
+for a_region in high_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax1.plot(df.year, df[y_var], linestyle="dashed",
+             color = col_dict[a_region], linewidth=3)
+
+for a_region in low_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax2.plot(df.year, df[y_var], linestyle="dashed",
+             color = col_dict[a_region], linewidth=3)
+
+ax1.legend(loc="best"); ax2.legend(loc="best");
 
 # %%
 
@@ -262,24 +309,41 @@ axs.grid(axis="y", which="both")
 
 region = "region_9"
 df = region_slaughter_inventory[region_slaughter_inventory["region"] == region].copy()
-axs.plot(df.year, df.inventory, linewidth=3, label="inventory " +  region); # color="dodgerblue", 
-axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+ region); # color="orange",
-
-
+axs.plot(df.year, df.inventory, linewidth=3, label="inventory " +  region, color="dodgerblue")
+axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+ region, 
+         color="dodgerblue", linestyle="dashed");
 
 region = "region_10"
 df = region_slaughter_inventory[region_slaughter_inventory["region"] == region].copy()
-axs.plot(df.year, df.inventory, linewidth=3, label="inventory "+  region); # color="dodgerblue", 
-axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+  region); # color="orange",
+axs.plot(df.year, df.inventory, linewidth=3, label="inventory "+  region, 
+         color="orange")
+axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+  region, 
+         color="orange", linestyle="dashed");
 
 # plt.title(region.replace("_", " ").title())
 plt.legend(loc="best");
 
 
 # %%
+region_slaughter_inventory.head(2)
 
 # %%
+inventory_annal_diff = pd.DataFrame()
+for a_region in regions:
+    curr_df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    curr_df = curr_df[['region', 'year', 'inventory']].copy()
+    curr_df.sort_values("year", inplace=True)
+    curr_diff = pd.DataFrame()
+    curr_diff["inventory_delta"] = curr_df.iloc[1:]["inventory"].values - curr_df.iloc[:-1]["inventory"].values
+    curr_diff["region"] = a_region
+    curr_diff["year"] = curr_df.iloc[1:]["year"].astype("str").values + "_" + \
+                                curr_df.iloc[:-1]["year"].astype("str").values
+    
+    inventory_annal_diff = pd.concat([inventory_annal_diff, curr_diff])
 
-# %%
+inventory_annal_diff = inventory_annal_diff[["region", "year", "inventory_delta"]]
+
+inventory_annal_diff["inventory_delta"] = inventory_annal_diff["inventory_delta"].astype(int)
+inventory_annal_diff.head(2)
 
 # %%

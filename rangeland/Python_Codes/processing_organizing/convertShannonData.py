@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -51,13 +51,10 @@ EX_sheet_names
 ii = 0
 sheet_name_ = EX_sheet_names[ii]
 
-curr_sheet = pd.read_excel(
-    io=Shannon_data_dir + "CATINV.xls", sheet_name=sheet_name_, header=0, skiprows=0
-)
+curr_sheet = pd.read_excel(io=Shannon_data_dir + "CATINV.xls", sheet_name=sheet_name_, header=0, skiprows=0)
 curr_sheet_columns = list(curr_sheet.columns)
-named_columns = curr_sheet_columns[
-    0
-]  # [x for x in curr_sheet_columns if not("Unnamed" in x)]
+named_columns = curr_sheet_columns[0]  
+# [x for x in curr_sheet_columns if not("Unnamed" in x)]
 named_columns
 
 # %%
@@ -128,13 +125,10 @@ out_name = reOrganized_dir + "Beef_Cows_fromCATINV.csv"
 years = list(Beef_Cows_CATINV.columns[1:])
 num_years = len(years)
 
-CATINV_df_tall = pd.DataFrame(
-    data=None,
-    index=range(num_years * len(Beef_Cows_CATINV.state.unique())),
-    columns=["state", "year", "inventory"],
-    dtype=None,
-    copy=False,
-)
+CATINV_df_tall = pd.DataFrame(data=None,
+                              index=range(num_years * len(Beef_Cows_CATINV.state.unique())),
+                              columns=["state", "year", "inventory"],
+                              dtype=None, copy=False)
 
 idx_ = 0
 for a_state in Beef_Cows_CATINV.state.unique():
@@ -231,16 +225,11 @@ EX_sheet_names
 ii = 0
 sheet_name_ = EX_sheet_names[ii]
 
-curr_sheet = pd.read_excel(
-    io=Shannon_data_dir + "Annual Cattle Inventory by State.xls",
-    sheet_name=sheet_name_,
-    header=0,
-    skiprows=0,
-)
+curr_sheet = pd.read_excel(io=Shannon_data_dir + "Annual Cattle Inventory by State.xls",
+                           sheet_name=sheet_name_, header=0, skiprows=0,)
 curr_sheet_columns = list(curr_sheet.columns)
-named_columns = curr_sheet_columns[
-    0
-]  # [x for x in curr_sheet_columns if not("Unnamed" in x)]
+named_columns = curr_sheet_columns[0]  
+# [x for x in curr_sheet_columns if not("Unnamed" in x)]
 
 print(f"{named_columns=}")
 curr_sheet.head(4)
@@ -250,15 +239,11 @@ curr_sheet.columns = list(curr_sheet.iloc[1,].astype(str))
 curr_sheet = curr_sheet[2:].copy()
 
 curr_sheet.rename({"nan": "state"}, axis=1, inplace=True)
-curr_sheet.rename(
-    columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True
-)
+curr_sheet.rename(columns={x: x.replace(".0", "") for x in curr_sheet.columns[1:]}, inplace=True)
 curr_sheet.reset_index(drop=True, inplace=True)
 
 curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] = (
-    curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000
-)
-
+          curr_sheet.loc[:, curr_sheet.columns[1] : curr_sheet.columns[-1]] * 1000)
 
 # Drop rows that are entirely NA
 curr_sheet.dropna(axis=0, how="all", inplace=True)
@@ -332,13 +317,10 @@ Beef_Cows_CATINV.loc[Beef_Cows_CATINV.state=="ID", "2020"]
 years = list(Beef_Cows_annual.columns[1:])
 num_years = len(years)
 
-Cows_annual_df_tall = pd.DataFrame(
-    data=None,
-    index=range(num_years * len(Beef_Cows_annual.state.unique())),
-    columns=["state", "year", "inventory"],
-    dtype=None,
-    copy=False,
-)
+Cows_annual_df_tall = pd.DataFrame(data=None,
+                                   index=range(num_years * len(Beef_Cows_annual.state.unique())),
+                                   columns=["state", "year", "inventory"],
+                                   dtype=None, copy=False)
 
 idx_ = 0
 for a_state in Beef_Cows_annual.state.unique():
@@ -374,13 +356,11 @@ A.equals(B)
 # %%
 filename = reOrganized_dir + "Shannon_Beef_Cows_AnnualCattleInventorybyState.sav"
 
-export_ = {
-    "Cows_annual_df_tall": Cows_annual_df_tall,
-    "Beef_Cows_annual": Beef_Cows_annual,
-    "source_code": "convertShannonData",
-    "Author": "HN",
-    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-}
+export_ = {"Cows_annual_df_tall": Cows_annual_df_tall,
+           "Beef_Cows_annual": Beef_Cows_annual,
+           "source_code": "convertShannonData",
+           "Author": "HN",
+           "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 pickle.dump(export_, open(filename, "wb"))
 
@@ -404,9 +384,7 @@ EX_sheet_names
 ii = 0
 sheet_name_ = EX_sheet_names[ii]
 
-curr_sheet = pd.read_excel(
-    io=Shannon_data_dir + file_, sheet_name=sheet_name_, header=0, skiprows=4
-)
+curr_sheet = pd.read_excel(io=Shannon_data_dir + file_, sheet_name=sheet_name_, header=0, skiprows=4)
 curr_sheet_columns = list(curr_sheet.columns)
 curr_sheet.head(7)
 
@@ -420,20 +398,10 @@ curr_sheet.reset_index(drop=True, inplace=True)
 for a_col in list(curr_sheet.columns):
     if not ("Unnamed" in a_col):
         curr_index = list(curr_sheet.columns).index(a_col)
-        new_part = (
-            a_col.replace(".1", "")
-            .replace("- ", "")
-            .replace(" ", "_")
-            .replace("(", "")
-            .replace(")", "")
-        )
+        new_part = (a_col.replace(".1", "").replace("- ", "").replace(" ", "_").replace("(", "").replace(")", ""))
 
-        curr_sheet.iloc[0, curr_index] = (
-            new_part + "_" + curr_sheet.iloc[0, curr_index].replace(" ", "")
-        )
-        curr_sheet.iloc[0, curr_index + 1] = (
-            new_part + "_" + curr_sheet.iloc[0, curr_index + 1].replace(" ", "")
-        )
+        curr_sheet.iloc[0, curr_index] = (new_part + "_" + curr_sheet.iloc[0, curr_index].replace(" ", ""))
+        curr_sheet.iloc[0, curr_index + 1] = (new_part + "_" + curr_sheet.iloc[0, curr_index + 1].replace(" ", ""))
 
 curr_sheet.iloc[0, 0] = "date"
 curr_sheet.iloc[0, 1] = "week"
@@ -446,16 +414,33 @@ curr_sheet.reset_index(drop=True, inplace=True)
 curr_sheet.head(7)
 
 # %%
-curr_sheet["Region_1_&_Region_2_beef"] = (
-    curr_sheet["Region_1_&_Region_2_Beef&dairy"]
-    - curr_sheet["Region_1_&_Region_2_dairy"]
-)
+
+# %% [markdown]
+# # Multiply things by 1000
+#
+# multiply things by 1000 here and round so we do not get random stuff that are not integers.
+
+# %%
+for col in curr_sheet.columns[2:]:
+    curr_sheet[col] = curr_sheet[col] * 1000
+
+# %%
+import math
+
+for col in curr_sheet.columns[2:]:
+    for idx in curr_sheet.index:
+        if type(curr_sheet.loc[idx, col])!= str:
+            if not(np.isnan(curr_sheet.loc[idx, col])):
+                curr_sheet.loc[idx, col] = round(curr_sheet.loc[idx, col])
+                # curr_sheet.loc[idx, col] = math.ceil(curr_sheet.loc[idx, col])
+
+# %%
+curr_sheet["Region_1_&_Region_2_beef"] = (curr_sheet["Region_1_&_Region_2_Beef&dairy"]
+                                          - curr_sheet["Region_1_&_Region_2_dairy"])
 
 for ii in range(3, 11):
-    curr_sheet["Region_" + str(ii) + "_beef"] = (
-        curr_sheet["Region_" + str(ii) + "_Beef&dairy"]
-        - curr_sheet["Region_" + str(ii) + "_dairy"]
-    )
+    curr_sheet["Region_" + str(ii) + "_beef"] = (curr_sheet["Region_" + str(ii) + "_Beef&dairy"]
+                                                 - curr_sheet["Region_" + str(ii) + "_dairy"])
 
 # %%
 curr_sheet.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
@@ -465,6 +450,9 @@ curr_sheet.rename(columns=lambda x: x.lower().replace("__", "_"), inplace=True)
 curr_sheet.head(2)
 
 # %%
+curr_sheet.head(5)
+
+# %%
 curr_sheet.date = pd.to_datetime(curr_sheet.date)
 
 # %%
@@ -472,6 +460,8 @@ curr_sheet.date = pd.to_datetime(curr_sheet.date)
 curr_sheet.dropna(subset="week", inplace=True)
 curr_sheet.reset_index(drop=True, inplace=True)
 curr_sheet.head(2)
+
+# %%
 
 # %%
 drop_cols_ = ['calculated_totalbeef', 'calculated_percentbeeftotal',
@@ -495,6 +485,9 @@ beef_slaughter.head(2)
 # beef_slaughter["year"] = beef_slaughter.date.dt.year
 # beef_slaughter["month"] = beef_slaughter.date.dt.month
 
+# %%
+beef_slaughter.head(2)
+
 # %% [markdown]
 # ### Change Format:
 # Some regions have weeks/months of missing data. Dropping NA in this fashion is hard. We can change the format
@@ -504,14 +497,8 @@ beef_slaughter.head(2)
 curr_sheet_tall = pd.melt(curr_sheet, id_vars=['date', 'week'])
 beef_slaughter_tall = pd.melt(beef_slaughter, id_vars=['date', 'week'])
 
-beef_slaughter_tall.rename(columns={"variable": "region",
-                                    "value": "slaughter_count"},
-                           inplace=True)
-
-curr_sheet_tall.rename(columns={"variable": "region",
-                                "value": "slaughter_count"},
-                           inplace=True)
-
+beef_slaughter_tall.rename(columns={"variable": "region", "value": "slaughter_count"}, inplace=True)
+curr_sheet_tall.rename(columns={"variable": "region", "value": "slaughter_count"}, inplace=True)
 
 curr_sheet_tall.head(5)
 
@@ -529,13 +516,47 @@ print (beef_slaughter_tall.shape)
 
 beef_slaughter_tall.head(2)
 
-# %% [markdown]
-# # Multipy things by 1000
+# %%
+beef_slaughter_tall.loc[1, "slaughter_count"]
 
 # %%
-curr_sheet_tall["slaughter_count"] = curr_sheet_tall["slaughter_count"]*1000
-beef_slaughter_tall["slaughter_count"] = beef_slaughter_tall["slaughter_count"]*1000
-beef_slaughter_tall.head(2)
+
+# %%
+# Multipy things by 1000 (did it earlier)
+# curr_sheet_tall["slaughter_count"] = curr_sheet_tall["slaughter_count"]*1000
+# beef_slaughter_tall["slaughter_count"] = beef_slaughter_tall["slaughter_count"]*1000
+# beef_slaughter_tall.head(2)
+
+# %%
+count = -1
+for idx in beef_slaughter_tall.index:
+    count += 1
+    aa = beef_slaughter_tall.loc[idx, "slaughter_count"]
+    if not (aa % 10 == 0):
+        print (f"{aa = }")
+        print (f"{idx = }")
+
+# %%
+beef_slaughter_tall.loc[10153]
+
+# %%
+(18.6*1000) - (5.5186*1000)
+
+# %%
+beef_slaughter_tall.loc[10163]
+
+# %%
+curr_sheet.head(2)
+
+# %%
+a_date = beef_slaughter_tall.loc[10153, "date"]
+reg_6_cols = [x for x in curr_sheet.columns if "region_6" in x]
+curr_sheet[curr_sheet.date == a_date][reg_6_cols]
+
+# %%
+beef_slaughter_tall.loc[10153, "date"]
+
+# %%
 
 # %% [markdown]
 # # Go back to wide

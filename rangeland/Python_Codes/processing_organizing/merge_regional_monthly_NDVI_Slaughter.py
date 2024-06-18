@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -289,6 +289,14 @@ beef_slaughter = slaughter["beef_slaughter"]
 # There are some rows with NA in them
 # slaughter['week'] = slaughter['week'].astype(int)
 beef_slaughter_tall.head(4)
+
+# %%
+# count = -1
+# for aa in beef_slaughter_tall.slaughter_count.values:
+#     count += 1
+#     if not (aa % 10 == 0):
+#         print (aa)
+#         print (count)
 
 # %%
 beef_slaughter.head(2)
