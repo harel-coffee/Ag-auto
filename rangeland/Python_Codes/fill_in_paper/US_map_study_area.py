@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -103,7 +103,6 @@ ax.axis('off')
 # create map of all states except AK and HI in the main map axis
 visframe[~visframe.state.isin(["AK", "HI"])].plot(color='lightblue', 
                                                   linewidth=0.8, ax=ax, edgecolor='0.8');
-
 
 # Add Alaska Axis (x, y, width, height)
 # akax = fig.add_axes([0.1, 0.17, 0.17, 0.16])   
@@ -293,25 +292,20 @@ df['text'] = df['state'] + '<br>' + \
     'Fruits ' + df['total fruits'] + ' Veggies ' + df['total veggies'] + '<br>' + \
     'Wheat ' + df['wheat'] + ' Corn ' + df['corn']
 
-fig = go.Figure(data=go.Choropleth(
-    locations=df['code'],
-    z=df['total exports'].astype(float),
-    locationmode='USA-states',
-    colorscale='Reds',
-    autocolorscale=False,
-    text=df['text'], # hover text
-    marker_line_color='white', # line markers between states
-    colorbar_title="Millions USD"
-))
+fig = go.Figure(data=go.Choropleth(locations=df['code'],
+                                   z=df['total exports'].astype(float),
+                                   locationmode='USA-states',
+                                   colorscale='Reds',
+                                   autocolorscale=False,
+                                   text=df['text'], # hover text
+                                   marker_line_color='white', # line markers between states
+                                   colorbar_title="Millions USD"))
 
-fig.update_layout(
-    title_text='2011 US Agriculture Exports by State<br>(Hover for breakdown)',
-    geo = dict(
-        scope='usa',
-        projection=go.layout.geo.Projection(type = 'albers usa'),
-        showlakes=True, # lakes
-        lakecolor='rgb(255, 255, 255)'),
-)
+fig.update_layout(title_text='2011 US Agriculture Exports by State<br>(Hover for breakdown)',
+                  geo = dict(scope='usa',
+                             projection=go.layout.geo.Projection(type = 'albers usa'),
+                             showlakes=True, # lakes
+                             lakecolor='rgb(255, 255, 255)'))
 
 fig.show()
 
@@ -601,13 +595,13 @@ shannon_regions_dict_abbr = {"region_1_region_2" : ['CT', 'ME', 'NH', 'VT', 'MA'
                              "region_9" : ['AZ', 'CA', 'HI', 'NV'],
                              "region_10": ['AK', 'ID', 'OR', 'WA']}
 
-col_dict = {"region_1_region_2": "dodgerblue",
-            "region_3": "cyan", 
+col_dict = {"region_1_region_2": "cyan",
+            "region_3": "black", 
             "region_4": "green",
-            "region_5": "black",
+            "region_5": "tomato",
             "region_6": "red",
-            "region_7": "tomato",
-            "region_8": "#C0C0C0", # gray
+            "region_7": "dodgerblue",
+            "region_8": "dimgray", # gray: "#C0C0C0"
             "region_9": "#ffd343", # mild yellow
             "region_10": "steelblue"}
 

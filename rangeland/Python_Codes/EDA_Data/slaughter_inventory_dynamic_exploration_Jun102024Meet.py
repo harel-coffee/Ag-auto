@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -14,6 +14,8 @@
 
 # %% [markdown]
 # When we met on June 10, 2024 Mike mentioned it would be good to look into how much and what kind of interaction/dynamic exist between inventory and slaughter. Lets see what we can do!
+#
+# I think here we need Jan 1 inventory. and then see how many were slaughtered thereafter during the same year. dammit.
 
 # %%
 import pandas as pd
@@ -25,6 +27,11 @@ sys.path.append("/Users/hn/Documents/00_GitHub/Ag/rangeland/Python_Codes/")
 import rangeland_core as rc
 
 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+# %%
+import matplotlib
+import matplotlib.pyplot as plt
+
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/RangeLand/Data/"
@@ -59,8 +66,15 @@ state_fips = abb_dict["state_fips"]
 filename = reOrganized_dir + "monthly_NDVI_beef_slaughter.sav"
 
 monthly_NDVI_beef_slaughter = pd.read_pickle(filename)
+print (monthly_NDVI_beef_slaughter["Date"])
 monthly_NDVI_beef_slaughter = monthly_NDVI_beef_slaughter["monthly_NDVI_beef_slaughter"]
 monthly_NDVI_beef_slaughter.head(2)
+
+# %%
+regions = monthly_NDVI_beef_slaughter["region"].unique()
+
+# %%
+monthly_NDVI_beef_slaughter["region"].unique()
 
 # %% [markdown]
 # ### Compute annual slaughter
@@ -134,6 +148,12 @@ region_inventory.head(2)
 # %%
 annual_slaughter.head(2)
 
+# %% [markdown]
+# ## Add one year to each inventory data so we have Jan 1st inventory.
+
+# %%
+region_inventory["year"] = region_inventory["year"] + 1
+
 # %%
 region_slaughter_inventory = pd.merge(region_inventory, annual_slaughter, 
                                       on=["region", "year"], how="outer")
@@ -144,6 +164,10 @@ print (f"{region_slaughter_inventory.shape = }")
 region_slaughter_inventory.head(2)
 
 # %%
+annual_slaughter.head(10)
+
+# %%
+region_inventory.shape
 
 # %%
 #### it seems in some years some of the data are not available
@@ -155,6 +179,102 @@ print (region_slaughter_inventory.shape)
 region_slaughter_inventory.head(2)
 
 # %%
+NotInteresting_regions_L = ["region_1_region_2", "region_3", "region_5"]
+high_inv_regions = ["region_" + str(x) for x in [4, 6, 7, 8]]
+low_inv_regions = ["region_" + str(x) for x in [9, 10]]
+
+# %%
+font = {'size' : 14}
+matplotlib.rc('font', **font)
+
+tick_legend_FontSize = 10
+
+params = {"legend.fontsize": tick_legend_FontSize * 1.2,  # medium, large
+          # 'figure.figsize': (6, 4),
+          "axes.labelsize": tick_legend_FontSize * 1.2,
+          "axes.titlesize": tick_legend_FontSize * 1.2,
+          "xtick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize * 1.1,  #  * 0.75
+          "axes.titlepad": 10}
+
+plt.rc("font", family="Palatino")
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["xtick.labelbottom"] = True
+plt.rcParams["ytick.labelleft"] = True
+plt.rcParams.update(params)
+
+# %%
+
+# %%
+# These colors are from US_map_study_area.py to be consistent with regions.
+
+col_dict = {"region_1_region_2": "cyan",
+            "region_3": "black", 
+            "region_4": "green",
+            "region_5": "tomato",
+            "region_6": "red",
+            "region_7": "dodgerblue",
+            "region_8": "dimgray", # gray: "#C0C0C0"
+            "region_9": "#ffd343", # mild yellow
+            "region_10": "steelblue"}
+
+# %%
+fig, axs = plt.subplots(2, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+(ax1, ax2) = axs;
+ax1.grid(axis="y", which="both"); ax2.grid(axis="y", which="both")
+
+for a_region in high_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax1.plot(df.year, df.inventory, 
+             color = col_dict[a_region], linewidth=3, 
+             label="inv. " +  a_region.replace("_", " ").title()); #
+    ax1.legend(loc="best");
+    
+
+for a_region in low_inv_regions:
+    df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    ax2.plot(df.year, df.inventory, 
+             color = col_dict[a_region], linewidth=3, 
+             label="inv. " +  a_region.replace("_", " ").title()); #
+    ax2.legend(loc="best");
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+for a_region in log_inv_regions:
+    df = interesting_regions_df[interesting_regions_df["region"] == a_region].copy()
+    axs.plot(df.year, df.inventory, linewidth=3, label="inventory " +  a_region); #
+    plt.legend(loc="best");
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+fig, axs = plt.subplots(1, 1, figsize=(10, 4), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.grid(axis="y", which="both")
+
+region = "region_9"
+df = region_slaughter_inventory[region_slaughter_inventory["region"] == region].copy()
+axs.plot(df.year, df.inventory, linewidth=3, label="inventory " +  region); # color="dodgerblue", 
+axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+ region); # color="orange",
+
+
+
+region = "region_10"
+df = region_slaughter_inventory[region_slaughter_inventory["region"] == region].copy()
+axs.plot(df.year, df.inventory, linewidth=3, label="inventory "+  region); # color="dodgerblue", 
+axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+  region); # color="orange",
+
+# plt.title(region.replace("_", " ").title())
+plt.legend(loc="best");
+
 
 # %%
 
