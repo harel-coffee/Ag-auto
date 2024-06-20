@@ -51,10 +51,8 @@ SoI = abb_dict["SoI"]
 SoI_abb = [abb_dict["full_2_abb"][x] for x in SoI]
 
 # %%
-d = {
-    "state": abb_dict["abb_2_full"].keys(),
-    "full_state": abb_dict["abb_2_full"].values(),
-}
+d = {"state": abb_dict["abb_2_full"].keys(),
+    "full_state": abb_dict["abb_2_full"].values()}
 
 # creating a Dataframe object
 state_abbrFull_df = pd.DataFrame(d)
@@ -228,11 +226,9 @@ print(f"{sorted(county_annual_NPP_Ra.year.unique()) = }")
 print(f"{sorted(county_annual_SW_Ra.year.unique()) = }")
 
 # %%
-common_years = (
-    set(cattle_inventory.year.unique())
-    .intersection(set(county_annual_NPP_Ra.year.unique()))
-    .intersection(set(county_annual_SW_Ra.year.unique()))
-)
+common_years = (set(cattle_inventory.year.unique())
+                .intersection(set(county_annual_NPP_Ra.year.unique()))
+                .intersection(set(county_annual_SW_Ra.year.unique())))
 common_years
 
 # %%
