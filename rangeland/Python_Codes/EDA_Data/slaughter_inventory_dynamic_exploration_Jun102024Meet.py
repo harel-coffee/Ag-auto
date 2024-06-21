@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -31,6 +31,7 @@ datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 # %%
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 
 # %%
@@ -334,9 +335,19 @@ fig_name = plot_dir + "inv_slau_TS_" + datetime.now().strftime('%Y-%m-%d time-%H
 plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
+annual_slaughter.head(2)
 
 # %%
-region_slaughter_inventory.head(2)
+region_inventory.head(2)
+
+# %%
+min_year = annual_slaughter.year.unique().min()
+min_year = max([region_inventory.year.unique().min(), min_year])
+
+# %%
+print (region_slaughter_inventory.shape)
+region_slaughter_inventory = region_slaughter_inventory[region_slaughter_inventory.year >= 1984].copy()
+print (region_slaughter_inventory.shape)
 
 # %%
 inventory_annal_diff = pd.DataFrame()
@@ -369,8 +380,6 @@ inventory_annal_diff[(inventory_annal_diff["region"]== "region_6") &
                      (inventory_annal_diff["inventory_delta"] < 0)].shape
 
 # %%
-import matplotlib.ticker as ticker 
-
 fig, axs = plt.subplots(1, 1, figsize=(12, 3), sharex=True, gridspec_kw={"hspace":0.15, "wspace":0.05})
 axs.grid(axis="y", which="both")
 axs.grid(axis="x", which="major")
@@ -402,10 +411,11 @@ region_slaughter_inventory[(region_slaughter_inventory.region == "region_6") &
                            (region_slaughter_inventory.year == 2012)]
 
 # %%
-inventory_annal_diff.loc[inventory_annal_diff.region == "region_6", "inventory_delta"].idxmin()
+aa = inventory_annal_diff.loc[inventory_annal_diff.region == "region_6", "inventory_delta"].idxmin()
+aa
 
 # %%
-inventory_annal_diff.loc[606]
+inventory_annal_diff.loc[aa]
 
 # %%
 region_slaughter_inventory[(region_slaughter_inventory["region"] == "region_6") &
@@ -444,6 +454,33 @@ region_slaughter_inventory.head(2)
 #     axs.legend(loc="best");
 
 # %%
+graph_dict = {"region_10" : ["region_8", "region_9"],
+              "region_9" : ["region_6", "region_8", "region_10"],
+              "region_8" : ["region_10", "region_9", "region_7", "region_5"],
+              "region_7" : ["region_8", "region_6", "region_5", "region_4"],
+              "region_6" : ["region_9", "region_7", "region_4"],
+              "region_5" : ["region_8", "region_7", "region_4", "region_3"],
+              "region_4" : ["region_7", "region_6", "region_5", "region_3"],
+              "region_3" : ["region_5", "region_4", "region_1_region_2"],
+              "region_1_region_2" : ["region_3"]
+               }
+
+# %%
+# we need to look at the years of overlap
+# between inventory and slaughter!
+
+slr_more_than_inv_change = {}
+
+for a_region in regions:
+    curr_region_df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
+    for an_inv_yr in region_slaughter_inventory.year.unique():
+        curr_region_df_yr = curr_region_df[curr_region_df.year == an_inv_yr].copy()
+        
+
+# %%
+
+# %%
+region_slaughter_inventory
 
 # %%
 
@@ -456,19 +493,6 @@ region_slaughter_inventory.head(2)
 # %%
 
 # %%
-
-# %%
-
-# %%
-
-# %%
-s = pd.read_pickle(reOrganized_dir + "shannon_slaughter_data.sav")
-s_old = pd.read_pickle(reOrganized_dir + "shannon_slaughter_data_old.sav")
-
-s = s["beef_slaughter_tall"]
-s_old = s_old["beef_slaughter_tall"]
-
-s_old.head(2)
 
 # %%
 s_8 = s[s.region == "region_8"]

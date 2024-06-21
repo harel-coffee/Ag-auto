@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -389,6 +389,8 @@ curr_sheet_columns = list(curr_sheet.columns)
 curr_sheet.head(7)
 
 # %%
+print (curr_sheet.shape)
+
 curr_sheet.loc[1,] = curr_sheet.loc[0,] + curr_sheet.loc[1,]
 curr_sheet = curr_sheet.loc[1:,].copy()
 curr_sheet.reset_index(drop=True, inplace=True)
@@ -411,9 +413,8 @@ curr_sheet.rename(columns=curr_sheet.iloc[0], inplace=True)
 curr_sheet.drop(axis=1, index=0, inplace=True)
 curr_sheet.reset_index(drop=True, inplace=True)
 
-curr_sheet.head(7)
-
-# %%
+print (curr_sheet.shape)
+curr_sheet.head(3)
 
 # %% [markdown]
 # # Multiply things by 1000
@@ -433,6 +434,105 @@ for col in curr_sheet.columns[2:]:
             if not(np.isnan(curr_sheet.loc[idx, col])):
                 curr_sheet.loc[idx, col] = round(curr_sheet.loc[idx, col])
                 # curr_sheet.loc[idx, col] = math.ceil(curr_sheet.loc[idx, col])
+
+# %%
+curr_sheet["year"] = pd.to_datetime(curr_sheet['date']).dt.year
+curr_sheet["month"] = pd.to_datetime(curr_sheet['date']).dt.month
+curr_sheet.head(2)
+
+# %%
+# 2023 is incomplete for all regions
+curr_sheet = curr_sheet[curr_sheet.year < 2023].copy()
+
+# %%
+regions = curr_sheet.columns
+regions = [x for x in regions if "Region" in x]
+regions_numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+num_weeks_in_yr = curr_sheet.week.max()
+print (num_weeks_in_yr)
+
+regions
+
+# %%
+
+# %%
+## There are years with 52 weeks and years with 53 weeks. and is not leap dependent
+
+# find the years that does not have all weeks in them
+incomplete_dict = {}
+
+for a_region_num in regions_numbers:
+    slaughter_cols = [x for x in regions if str(a_region_num) in x]
+    curr_columns = ["year", "month", "date", "week"] + slaughter_cols
+    curr_df = curr_sheet[curr_columns].copy()
+    curr_df.dropna(subset=["week"], inplace=True)
+    
+    for a_year in curr_df.year.unique():
+        curr_df_year = curr_df[curr_df.year == a_year].copy()
+        curr_df_year.dropna(subset=slaughter_cols, how='any', inplace=True)
+        
+#         if curr_df_year.week.max() < 52:
+        if len(curr_df_year) < 52:
+            if a_region_num in incomplete_dict.keys():
+                incomplete_dict[a_region_num] += [a_year]
+                
+            else:
+                incomplete_dict[a_region_num] = [a_year]
+
+# %%
+incomplete_dict
+
+# %%
+a_year = 2005
+a_region_num = 8
+slaughter_cols = [x for x in regions if str(a_region_num) in x]
+
+print (slaughter_cols)
+curr_columns = ["year", "month", "date", "week"] + slaughter_cols
+curr_df = curr_sheet[curr_columns].copy()
+curr_df.dropna(subset=["week"], inplace=True)
+
+curr_df_year = curr_df[curr_df.year == a_year].copy()
+curr_df_year.dropna(subset=slaughter_cols, how='any', inplace=True)
+curr_df_year
+
+# %%
+
+# %%
+a_year = 2014
+a_region_num = 7
+slaughter_cols = [x for x in regions if str(a_region_num) in x]
+
+print (slaughter_cols)
+curr_columns = ["year", "month", "date", "week"] + slaughter_cols
+curr_df = curr_sheet[curr_columns].copy()
+curr_df.dropna(subset=["week"], inplace=True)
+
+curr_df_year = curr_df[curr_df.year == a_year].copy()
+curr_df_year.dropna(subset=slaughter_cols, how='any', inplace=True)
+curr_df_year
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+a_year = 2001
+a_region_num = 10
+slaughter_cols = [x for x in regions if str(a_region_num) in x]
+
+print (slaughter_cols)
+curr_columns = ["year", "month", "date", "week"] + slaughter_cols
+curr_df = curr_sheet[curr_columns].copy()
+curr_df.dropna(subset=["week"], inplace=True)
+
+curr_df_year = curr_df[curr_df.year == a_year].copy()
+curr_df_year.dropna(subset=slaughter_cols, how='any', inplace=True)
+curr_df_year
+
+# %%
 
 # %%
 curr_sheet["Region_1_&_Region_2_beef"] = (curr_sheet["Region_1_&_Region_2_Beef&dairy"]
@@ -485,14 +585,22 @@ beef_slaughter.head(2)
 # beef_slaughter["year"] = beef_slaughter.date.dt.year
 # beef_slaughter["month"] = beef_slaughter.date.dt.month
 
+# %%
+# A = beef_slaughter[["date", "week", "year", "month", "region_3_beef"]].copy()
+# A[A.year == 1997]
+
+# %%
+
+# %%
+
 # %% [markdown]
 # ### Change Format:
 # Some regions have weeks/months of missing data. Dropping NA in this fashion is hard. We can change the format
 # to tall so that each ro corresponds to a given pair of (region, week). Then dropping NAs would not be problematic.
 
 # %%
-curr_sheet_tall = pd.melt(curr_sheet, id_vars=['date', 'week'])
-beef_slaughter_tall = pd.melt(beef_slaughter, id_vars=['date', 'week'])
+curr_sheet_tall = pd.melt(curr_sheet, id_vars=['date', 'week', "month", "year"])
+beef_slaughter_tall = pd.melt(beef_slaughter, id_vars=['date', 'week', "month", "year"])
 
 beef_slaughter_tall.rename(columns={"variable": "region", "value": "slaughter_count"}, inplace=True)
 curr_sheet_tall.rename(columns={"variable": "region", "value": "slaughter_count"}, inplace=True)
@@ -526,7 +634,7 @@ df.head(2)
 df9.head(2)
 
 # %%
-[x for x in df9.date.values if not (x in df.date.values)]
+# [x for x in df9.date.values if not (x in df.date.values)]
 
 # %%
 print (curr_sheet_tall.shape)
@@ -540,7 +648,8 @@ print (beef_slaughter_tall.shape)
 beef_slaughter_tall.head(2)
 
 # %%
-beef_slaughter_tall.loc[1, "slaughter_count"]
+beef_slaughter_tall[(beef_slaughter_tall.region == "region_8_beef") & 
+                    (beef_slaughter_tall.year == 2005)]
 
 # %%
 
@@ -559,25 +668,108 @@ for idx in beef_slaughter_tall.index:
         print (f"{aa = }")
         print (f"{idx = }")
 
-# %%
-beef_slaughter_tall.loc[10153]
+# %% [markdown]
+# ### Keep complete years for inventory match
 
 # %%
-(18.6*1000) - (5.5186*1000)
+beef_slaughter_tall
 
 # %%
-beef_slaughter_tall.loc[10163]
+beef_slaught_complete_yrs = pd.DataFrame()
+
+for a_region in beef_slaughter_tall["region"].unique():
+    curr_df = beef_slaughter_tall[beef_slaughter_tall["region"] == a_region].copy()
+    curr_df.dropna(subset=["week"], inplace=True)
+    
+    for a_year in curr_df.year.unique():
+        curr_df_year = curr_df[curr_df.year == a_year].copy()
+        curr_df_year.dropna(subset=["slaughter_count"], inplace=True)
+        if len(curr_df_year) >= 52:
+            beef_slaught_complete_yrs = pd.concat([beef_slaught_complete_yrs, curr_df_year])
 
 # %%
-curr_sheet.head(2)
+a_region = "region_8_beef"
+curr_df = beef_slaughter_tall[beef_slaughter_tall["region"] == a_region].copy()
+
+a_year = 2005
+curr_df_year = curr_df[curr_df.year == a_year].copy()
+curr_df_year.dropna(subset=["slaughter_count"], inplace=True)
+curr_df_year
+
+# %% [markdown]
+# ### Keep complete months for NDVI match
 
 # %%
-a_date = beef_slaughter_tall.loc[10153, "date"]
-reg_6_cols = [x for x in curr_sheet.columns if "region_6" in x]
-curr_sheet[curr_sheet.date == a_date][reg_6_cols]
+beef_slaught_complete_months = pd.DataFrame()
+
+for a_region in beef_slaughter_tall["region"].unique():
+    curr_df = beef_slaughter_tall[beef_slaughter_tall["region"] == a_region].copy()
+    curr_df.dropna(subset=["week"], inplace=True)
+    
+    for a_year in curr_df.year.unique():
+        curr_df_year = curr_df[curr_df.year == a_year].copy()
+        curr_df_year.dropna(subset=["slaughter_count"], inplace=True)
+        
+        for a_month in np.arange(1, 13):
+            curr_df_year_month = curr_df_year[curr_df_year["month"] == a_month].copy()
+            if len(curr_df_year_month) >= 4:
+                beef_slaught_complete_months = pd.concat([beef_slaught_complete_months, curr_df_year_month])
 
 # %%
-beef_slaughter_tall.loc[10153, "date"]
+print (beef_slaughter_tall.shape)
+print (beef_slaught_complete_yrs.shape)
+print (beef_slaught_complete_months.shape)
+
+# %%
+17184-17178
+
+# %%
+# find the years that does not have all weeks in them
+incomplete_months_dict = {}
+
+for a_region in beef_slaughter_tall["region"].unique():
+    curr_df = beef_slaughter_tall[beef_slaughter_tall["region"] == a_region].copy()
+    curr_df.dropna(subset=["week"], inplace=True)
+    
+    for a_year in beef_slaughter_tall.year.unique():
+        curr_df_year = curr_df[curr_df.year == a_year].copy()
+        curr_df_year.dropna(subset=["slaughter_count"], inplace=True)
+        
+        for a_month in np.arange(1, 13):
+            curr_df_year_month = curr_df_year[curr_df_year["month"] == a_month].copy()
+            if len(curr_df_year_month) < 4:
+                # print (a_region, a_year, a_month)
+                if a_region in incomplete_months_dict.keys():
+                    incomplete_months_dict[a_region] += [str(a_year) + "_" + str(a_month)]
+
+                else:
+                    incomplete_months_dict[a_region] = [str(a_year) + "_" + str(a_month)]
+                    
+incomplete_months_dict
+
+# %%
+missing_months_count = 0
+for a_key in incomplete_months_dict.keys():
+    missing_months_count += len(incomplete_months_dict[a_key])
+
+print (missing_months_count)
+
+# %%
+# slaughter_complete_years = pd.DataFrame()
+
+# for a_region_num in regions_numbers:
+#     slaughter_cols = [x for x in regions if str(a_region_num) in x]
+#     curr_columns = ["year", "month", "date", "week"] + slaughter_cols
+#     curr_df = curr_sheet[curr_columns].copy()
+#     curr_df.dropna(subset=["week"], inplace=True)
+    
+#     for a_year in curr_df.year.unique():
+#         curr_df_year = curr_df[curr_df.year == a_year].copy()
+#         curr_df_year.dropna(subset=slaughter_cols, how='any', inplace=True)
+#         if len(curr_df_year) >= 52:
+#             slaughter_complete_years = pd.concat([slaughter_complete_years, curr_df_year])
+
+# %%
 
 # %%
 
