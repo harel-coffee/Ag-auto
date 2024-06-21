@@ -278,39 +278,32 @@ regional_NDVIs.head(2)
 
 # %%
 # The following file is created in convertShannonData.ipynb
-
 out_name = reOrganized_dir + "shannon_slaughter_data.sav"
 slaughter = pd.read_pickle(out_name)
 
-
-beef_slaughter_tall = slaughter["beef_slaughter_tall"]
-beef_slaughter = slaughter["beef_slaughter"]
+# beef_slaughter_tall = slaughter["beef_slaughter_tall"]
 
 # There are some rows with NA in them
 # slaughter['week'] = slaughter['week'].astype(int)
-beef_slaughter_tall.head(4)
+# beef_slaughter_tall.head(4)
 
 # %%
-# count = -1
-# for aa in beef_slaughter_tall.slaughter_count.values:
-#     count += 1
-#     if not (aa % 10 == 0):
-#         print (aa)
-#         print (count)
+beef_slaught_complete_months_tall = slaughter["beef_slaught_complete_months_tall"]
+# beef_slaught_complete_months = slaughter["beef_slaught_complete_months_tall"]
 
-# %%
-beef_slaughter.head(2)
+beef_slaught_complete_months_tall.head(2)
 
 # %%
 group_cols = ["year", "month", "region"]
-monthly_beef_slaughter_tall = beef_slaughter_tall.groupby(group_cols)["slaughter_count"].sum().reset_index()
-monthly_beef_slaughter_tall.head(2)
+monthly_beef_slaughter = beef_slaught_complete_months_tall.groupby(group_cols)["slaughter_count"].sum()\
+                              .reset_index()
+monthly_beef_slaughter.head(2)
 
 # %%
 regional_NDVIs.head(2)
 
 # %%
-monthly_NDVI_beef_slaughter_tall = pd.merge(regional_NDVIs, monthly_beef_slaughter_tall, 
+monthly_NDVI_beef_slaughter_tall = pd.merge(regional_NDVIs, monthly_beef_slaughter, 
                                             on=["year", "month", "region"], how="outer")
 monthly_NDVI_beef_slaughter_tall.head(2)
 
@@ -324,7 +317,6 @@ monthly_NDVI_beef_slaughter_tall.head(2)
 filename = reOrganized_dir + "monthly_NDVI_beef_slaughter.sav"
 
 export_ = {"monthly_NDVI_beef_slaughter": monthly_NDVI_beef_slaughter_tall,
-           "weekly_beef_slaughter_wide": beef_slaughter,
            "source_code" : "merge_regional_monthly_NDVI_Slaughter",
            "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
            "Author": "HN"}

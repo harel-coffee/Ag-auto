@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -389,6 +389,8 @@ curr_sheet_columns = list(curr_sheet.columns)
 curr_sheet.head(7)
 
 # %%
+
+# %%
 print (curr_sheet.shape)
 
 curr_sheet.loc[1,] = curr_sheet.loc[0,] + curr_sheet.loc[1,]
@@ -415,6 +417,50 @@ curr_sheet.reset_index(drop=True, inplace=True)
 
 print (curr_sheet.shape)
 curr_sheet.head(3)
+
+# %%
+A = curr_sheet.copy()
+A.drop(["date", "week"], inplace=True, axis=1)
+
+print (curr_sheet.shape)
+A.dropna(how="all", inplace=False).shape
+
+# %%
+
+# %%
+calculated_cols = [x for x in curr_sheet.columns if "calculated" in x]
+Calculated_cols = [x for x in curr_sheet.columns if "Calculated" in x]
+Reported_cols = [x for x in curr_sheet.columns if "Reported" in x]
+calc_cols = calculated_cols + Calculated_cols + Reported_cols
+
+curr_sheet.drop(columns = calc_cols, inplace=True)
+curr_sheet.head(2)
+
+# %%
+# Some rows have nothing but date and week in them:
+
+A = curr_sheet.copy()
+A.drop(["date", "week"], inplace=True, axis=1)
+
+print (curr_sheet.shape)
+A.dropna(how="all", inplace=False).shape
+
+
+# %%
+# Some rows have nothing but date and week in them:
+A = curr_sheet.copy()
+A.drop(["date", "week"], inplace=True, axis=1)
+
+print (curr_sheet.shape)
+A.dropna(how="all", inplace=False).shape
+
+# %%
+cols = list(curr_sheet.columns)
+cols.remove("date")
+cols.remove("week")
+
+curr_sheet.dropna(subset=cols, how='all', inplace=True)
+print (curr_sheet.shape)
 
 # %% [markdown]
 # # Multiply things by 1000
@@ -515,10 +561,6 @@ curr_df_year
 # %%
 
 # %%
-
-# %%
-
-# %%
 a_year = 2001
 a_region_num = 10
 slaughter_cols = [x for x in regions if str(a_region_num) in x]
@@ -564,16 +606,6 @@ curr_sheet.head(2)
 # %%
 
 # %%
-drop_cols_ = ['calculated_totalbeef', 'calculated_percentbeeftotal',
-              'calculated_totaldairy', 'calculated_totalbfdairy',
-              'reported_calculated_totaldairy', 'reported_calculated_totalbfdairy',
-              'reported_totaldairy',
-              'reported_totalbfdairy',]
-
-curr_sheet.drop(columns=drop_cols_, inplace=True)
-curr_sheet.head(2)
-
-# %%
 beef_cols = [x for x in curr_sheet.columns if not ("dairy" in x)]
 beef_cols
 
@@ -588,10 +620,6 @@ beef_slaughter.head(2)
 # %%
 # A = beef_slaughter[["date", "week", "year", "month", "region_3_beef"]].copy()
 # A[A.year == 1997]
-
-# %%
-
-# %%
 
 # %% [markdown]
 # ### Change Format:
@@ -652,12 +680,6 @@ beef_slaughter_tall[(beef_slaughter_tall.region == "region_8_beef") &
                     (beef_slaughter_tall.year == 2005)]
 
 # %%
-
-# %%
-# Multipy things by 1000 (did it earlier)
-# curr_sheet_tall["slaughter_count"] = curr_sheet_tall["slaughter_count"]*1000
-# beef_slaughter_tall["slaughter_count"] = beef_slaughter_tall["slaughter_count"]*1000
-# beef_slaughter_tall.head(2)
 
 # %%
 count = -1
@@ -771,48 +793,71 @@ print (missing_months_count)
 
 # %%
 
-# %%
-
 # %% [markdown]
 # # Go back to wide
 # Now that slaughter numbers are in real count (not in 1000 Head)
 
 # %%
-beef_slaughter_wide = beef_slaughter_tall.pivot(index=["date", "week"], 
+beef_slaughter_wide = beef_slaughter_tall.pivot(index=["date", "week", "year", "month"], 
                                                 columns='region', values='slaughter_count')
 beef_slaughter_wide.reset_index(drop=False, inplace=True)
 beef_slaughter_wide.columns = beef_slaughter_wide.columns.values
 ##########################################################################################
-curr_sheet_wide = curr_sheet_tall.pivot(index=["date", "week"], 
-                                                columns='region', values='slaughter_count')
+curr_sheet_wide = curr_sheet_tall.pivot(index=["date", "week", "year", "month"], 
+                                               columns='region', values='slaughter_count')
 curr_sheet_wide.reset_index(drop=False, inplace=True)
 curr_sheet_wide.columns = curr_sheet_wide.columns.values
 
-
 beef_slaughter_wide.head(2)
+
+# %%
+beef_slaughter_tall.head(2)
+
+# %% [markdown]
+# ### widen complete years and months frames
+
+# %%
+beef_slaught_complete_months_wide = beef_slaught_complete_months.pivot(index=["date", "week", "year", "month"], 
+                                                columns='region', values='slaughter_count')
+beef_slaught_complete_months_wide.reset_index(drop=False, inplace=True)
+beef_slaught_complete_months_wide.columns = beef_slaught_complete_months_wide.columns.values
+
+
+############
+
+beef_slaught_complete_yrs_wide = beef_slaught_complete_yrs.pivot(index=["date", "week", "year", "month"], 
+                                                columns='region', values='slaughter_count')
+beef_slaught_complete_yrs_wide.reset_index(drop=False, inplace=True)
+beef_slaught_complete_yrs_wide.columns = beef_slaught_complete_yrs_wide.columns.values
+
+beef_slaught_complete_yrs_wide.head(2)
+
+# %%
+print (f"{beef_slaughter_tall.shape = }")
+print (f"{beef_slaught_complete_yrs.shape = }")
+print (f"{beef_slaught_complete_months.shape = }")
+
+print ()
+print (f"{curr_sheet_wide.shape = }")
+print (f"{beef_slaught_complete_yrs_wide.shape = }")
+print (f"{beef_slaught_complete_months_wide.shape = }")
+
+# %%
+curr_sheet_wide.head(2)
 
 # %%
 ### Re-order columns back to original
-curr_sheet_wide = curr_sheet_wide[list(curr_sheet.columns)]
-beef_slaughter_wide = beef_slaughter_wide[list(beef_slaughter.columns)]
-beef_slaughter_wide.head(2)
+# curr_sheet_wide = curr_sheet_wide[list(curr_sheet.columns)]
+# beef_slaughter_wide = beef_slaughter_wide[list(beef_slaughter.columns)]
+# beef_slaughter_wide.head(2)
 
 # %%
-beef_slaughter.head(2)
+curr_sheet.head(2)
 
 # %%
+curr_sheet_wide.head(2)
 
 # %%
-# Some rows have nothing but date and week in them:
-print (beef_slaughter_wide.shape)
-print (beef_slaughter.shape)
-print ()
-print (curr_sheet_wide.shape)
-print (curr_sheet.shape)
-
-A = curr_sheet.copy()
-A.drop(["date", "week"], inplace=True, axis=1)
-A.dropna(how="all", inplace=False).shape
 
 # %%
 # Safe to delete them 
@@ -828,21 +873,8 @@ region_columns
 # curr_sheet.head(2)
 
 # %%
-curr_sheet["region_1_region_2_dairy"].unique()
-region_columns
-
-# %%
-curr_sheet["year"] = curr_sheet.date.dt.year
-curr_sheet["month"] = curr_sheet.date.dt.month
-
-curr_sheet_tall["year"] = curr_sheet_tall.date.dt.year
-curr_sheet_tall["month"] = curr_sheet_tall.date.dt.month
-
-beef_slaughter["year"] = beef_slaughter.date.dt.year
-beef_slaughter["month"] = beef_slaughter.date.dt.month
-
-beef_slaughter_tall["year"] = beef_slaughter_tall.date.dt.year
-beef_slaughter_tall["month"] = beef_slaughter_tall.date.dt.month
+# curr_sheet["region_1_region_2_dairy"].unique()
+# region_columns
 
 # %%
 beef_slaughter_tall.head(2)
@@ -883,13 +915,40 @@ beef_slaughter.head(2)
 
 # %%
 beef_slaughter.rename(columns=lambda x: x.replace("_beef", ""), inplace=True)
+for idx in beef_slaughter_tall.index:
+    beef_slaughter_tall.loc[idx, "region"] = beef_slaughter_tall.loc[idx, "region"].replace("_beef", "")
+
 beef_slaughter.head(2)
 
 # %%
-for idx in beef_slaughter_tall.index:
-    beef_slaughter_tall.loc[idx, "region"] = beef_slaughter_tall.loc[idx, "region"].replace("_beef", "")
-    
 beef_slaughter_tall.tail(2)
+
+# %%
+beef_slaught_complete_months_wide.rename(columns=lambda x: x.replace("_beef", ""), inplace=True)
+beef_slaught_complete_yrs_wide.rename(columns=lambda x: x.replace("_beef", ""), inplace=True)
+
+
+for idx in beef_slaught_complete_months.index:
+    beef_slaught_complete_months.loc[idx, "region"] = \
+              beef_slaught_complete_months.loc[idx, "region"].replace("_beef", "")
+
+for idx in beef_slaught_complete_yrs.index:
+    beef_slaught_complete_yrs.loc[idx, "region"] = \
+              beef_slaught_complete_yrs.loc[idx, "region"].replace("_beef", "")
+
+# %%
+beef_slaught_complete_months_wide.head(2)
+
+# %%
+beef_slaught_complete_yrs_wide.head(2)
+
+# %%
+beef_slaught_complete_yrs.head(2)
+
+# %%
+beef_slaught_complete_months.head(2)
+
+# %%
 
 # %%
 filename = reOrganized_dir + "shannon_slaughter_data.sav"
@@ -898,6 +957,11 @@ export_ = {"beef_slaughter_tall": beef_slaughter_tall,
            "beef_slaughter" : beef_slaughter, 
            "beef_dairy_slaughter_tall" : curr_sheet_tall,
            "beef_dairy_slaughter" : curr_sheet,
+           "beef_slaught_complete_months_tall" : beef_slaught_complete_months,
+           "beef_slaught_complete_yrs_tall" : beef_slaught_complete_yrs,
+           "beef_slaught_complete_yrs" : beef_slaught_complete_yrs_wide,
+           "beef_slaught_complete_months" : beef_slaught_complete_months_wide,
+           
            "regions": regions_dict,
            "source_code": "convertShannonData.ipynb",
            "Author": "HN",
