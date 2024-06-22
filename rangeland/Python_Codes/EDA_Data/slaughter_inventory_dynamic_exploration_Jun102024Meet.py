@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -126,21 +126,14 @@ inventory_df["inventory"] = inventory_df["inventory"].astype(int)
 # inventory_df = inventory_df[inventory_df["state_fips"].isin(list(state_fips_SoI["state_fips"].unique()))]
 inventory_df.reset_index(drop=True, inplace=True)
 
+print (f"{inventory_df.year.max() = }")
 inventory_df.head(2)
-
-# %%
-inventory_df.year.max()
 
 # %%
 inventory_df = pd.merge(inventory_df, state_fips[['state', 'state_fips', 'state_full']], 
                         on=["state_fips"], how="left")
 
 inventory_df.head(2)
-
-# %%
-print (inventory_df.year.max())
-
-inventory_df[inventory_df.year==2022]
 
 # %%
 shannon_regions_dict_abbr = {"region_1_region_2" : ['CT', 'ME', 'NH', 'VT', 'MA', 'RI', 'NY', 'NJ'], 
@@ -159,11 +152,6 @@ for a_key in shannon_regions_dict_abbr.keys():
     inventory_df.loc[inventory_df["state"].isin(shannon_regions_dict_abbr[a_key]), 'region'] = a_key
 inventory_df.head(2)
 
-# %%
-print (inventory_df.year.max())
-
-inventory_df[inventory_df.year==2022]
-
 # %% [markdown]
 # ### compute inventory in each region
 
@@ -173,13 +161,6 @@ region_inventory = region_inventory[["year", "region", "inventory"]]
 
 region_inventory = region_inventory.groupby(["region", "year"])["inventory"].sum().reset_index()
 region_inventory.head(2)
-
-# %%
-print (region_inventory.year.max())
-region_inventory[region_inventory.year==2022]
-
-# %%
-region_inventory[region_inventory.year==2022]
 
 # %%
 annual_slaughter.head(2)
@@ -222,9 +203,6 @@ print (region_slaughter_inventory.shape)
 
 # %%
 region_slaughter_inventory.head(2)
-
-# %%
-region_slaughter_inventory[region_slaughter_inventory.year == 2022]
 
 # %%
 NotInteresting_regions_L = ["region_1_region_2", "region_3", "region_5"]
@@ -414,9 +392,8 @@ inventory_annal_diff.reset_index(drop=True, inplace=True)
 inventory_annal_diff.head(2)
 
 # %%
-inventory_annal_diff.loc[37]
-
-# %%
+inventory_annal_diff.rename(columns={"year": "diff_years"}, inplace=True)
+inventory_annal_diff.head(2)
 
 # %%
 inventory_annal_diff[inventory_annal_diff["inventory_delta"] < 0].shape
@@ -433,8 +410,8 @@ axs.grid(axis="x", which="major")
 region = "region_6"
 df = inventory_annal_diff.copy()
 df = df[df["region"] == region].copy()
-axs.plot(df.year, df.inventory_delta, linewidth=1,color="dodgerblue")
-axs.scatter(df.year, df.inventory_delta, label="inventory delta " +  region)
+axs.plot(df["diff_years"], df.inventory_delta, linewidth=1,color="dodgerblue")
+axs.scatter(df["diff_years"], df.inventory_delta, label="inventory delta " +  region)
 
 plt.xticks(rotation=90);
 # axs.plot(df.year, df.slaughter_count, linewidth=3, label="slaughter "+ region, 
@@ -454,11 +431,8 @@ plt.legend(loc = "best");
 inventory_annal_diff.head(2)
 
 # %%
-inventory_annal_diff["numeric_year"] = inventory_annal_diff["year"].str.split("_", expand=True)[1]
-inventory_annal_diff["numeric_year"] = inventory_annal_diff["numeric_year"].astype(int)
-inventory_annal_diff.head(2)
-
-# %%
+inventory_annal_diff["year"] = inventory_annal_diff["diff_years"].str.split("_", expand=True)[1]
+inventory_annal_diff["year"] = inventory_annal_diff["year"].astype(int)
 inventory_annal_diff.head(2)
 
 # %%
@@ -473,13 +447,13 @@ y_var = "inventory_delta"
 for a_region in high_inv_regions:
     df = inventory_annal_diff.copy()
     df = df[df["region"] == a_region].copy()
-    ax1.plot(df["numeric_year"], df[y_var], color = col_dict[a_region], linewidth=3,
+    ax1.plot(df["year"], df[y_var], color = col_dict[a_region], linewidth=3,
             label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); # 
 
 for a_region in low_inv_regions:
     df = inventory_annal_diff.copy()
     df = df[df["region"] == a_region].copy()
-    ax2.plot(df["numeric_year"], df[y_var], color = col_dict[a_region], linewidth=3,
+    ax2.plot(df["year"], df[y_var], color = col_dict[a_region], linewidth=3,
              label = y_var[:3].title() + ". " +  a_region.replace("_", " ").title()); #
 
 y_var = "slaughter_count"
@@ -510,11 +484,11 @@ ax2.set_xticklabels(ax2.get_xticklabels(), rotation=90);
 
 
 fig_name = plot_dir + "invDiff_slau_TS_" + datetime.now().strftime('%Y-%m-%d time-%H.%M') + ".pdf"
-# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 inventory_annal_diff[(inventory_annal_diff.region == "region_6") &
-                     (inventory_annal_diff.year == "2012_2011")]
+                     (inventory_annal_diff.diff_years == "2012_2011")]
 
 # %%
 region_slaughter_inventory[(region_slaughter_inventory.region == "region_6") &
@@ -541,7 +515,7 @@ region_slaughter_inventory[(region_slaughter_inventory["region"].isin(Rs)) &
 Rs = ["region_4", "region_7", "region_8", "region_9"]
 
 inventory_annal_diff[(inventory_annal_diff["region"].isin(Rs)) &
-                     (inventory_annal_diff["year"].isin(["2012_2011"])) ]
+                     (inventory_annal_diff["diff_years"].isin(["2012_2011"])) ]
 
 # %%
 annual_slaughter.head(2)
@@ -588,23 +562,139 @@ region_Adj = np.array([
 region_Adj
 
 # %%
+inventory_annal_diff.sort_values(["region", "year"], inplace=True)
+inventory_annal_diff.reset_index(drop=True, inplace=True)
+inventory_annal_diff.head(4)
+
+# %%
+region_slaughter_inventory.sort_values(["region", "year"], inplace=True)
+region_slaughter_inventory.reset_index(drop=True, inplace=True)
+region_slaughter_inventory.head(4)
+
+# %%
+inventory_annal_diff = pd.merge(inventory_annal_diff, 
+                                region_slaughter_inventory[['region', 'year', 'slaughter_count']], 
+                                on=["region", "year"], how="left")
+
+inventory_annal_diff.head(2)
+
+# %% [markdown]
+# # Inventory vs. Slaughter
+#
+# There are 3 cases:
+#
+#   - Inventory decline is less than slaughter. Which means some of slaughters came into the region to be slaughtered.
+#   
+#     e.g. inventory goes from 100 to 80 and slaughter is 50. So, 30 cows were impoprted to be killed.
+#   
+# --------
+#   - Inventory decline is more than slaughter, which means some of inventory moved out of state?
+#   
+#     e.g. inventory goes from 100 to 20 and slaughter is 50. So, 30 cows are lost (moved out of state?)
+# --------
+#   - Inventory increases even tho there are slaughters. So, some cows are imported and added to the inventory.
+#   
+#     e.g. inventory goes from 100 to 120 and slaughter is 50. So, 70 cows are imported to the region.
+#     either for slaughter or all added to the inventory.
+
+# %%
+inventory_annal_diff.head(2)
+
+# %%
+incresed_inv_case = inventory_annal_diff[inventory_annal_diff.inventory_delta > 0].copy()
+incresed_inv_case.reset_index(drop=True, inplace=True)
+
+print (f"{incresed_inv_case.shape = }")
+incresed_inv_case.head(2)
+
+# %%
+inventory_annal_diff.index
 
 # %%
 # we need to look at the years of overlap
 # between inventory and slaughter!
 
-slr_more_than_inv_change = {}
+A = inventory_annal_diff.copy()
+A = A[A.inventory_delta < 0].copy()
+A = A[abs(A["inventory_delta"]) < A["slaughter_count"]].copy()
+A.reset_index(drop=True, inplace=True)
+slr_more_than_inv_decline = A.copy()
+del(A)
 
-for a_region in regions:
-    curr_region_df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
-    for an_inv_yr in region_slaughter_inventory.year.unique():
-        curr_region_df_yr = curr_region_df[curr_region_df.year == an_inv_yr].copy()
-
+print (slr_more_than_inv_decline.shape)
+slr_more_than_inv_decline.head(2)
 
 # %%
+A = inventory_annal_diff.copy()
+A = A[A.inventory_delta < 0].copy()
+A = A[abs(A["inventory_delta"]) > A["slaughter_count"]].copy()
+A.reset_index(drop=True, inplace=True)
+slr_less_than_inv_decline = A.copy()
+del(A)
+
+print (slr_less_than_inv_decline.shape)
+slr_less_than_inv_decline.head(2)
 
 # %%
-region_slaughter_inventory
+A = inventory_annal_diff.copy()
+A = A[A.inventory_delta < 0].copy()
+A = A[abs(A["inventory_delta"]) == A["slaughter_count"]].copy()
+A.reset_index(drop=True, inplace=True)
+slr_equal_inv_decline = A.copy()
+del(A)
+
+print (slr_equal_inv_decline.shape)
+slr_equal_inv_decline.head(2)
+
+# %% [markdown]
+# # Region_1_2 is not intersting
+#
+# and there is only 1 case of ```region_10```. Let us look at ```region_8```.
+
+# %%
+slr_less_than_inv_decline.groupby(["region"]).count()
+
+# %%
+slr_less_than_inv_decline[slr_less_than_inv_decline.region == "region_8"]
+
+# %%
+aa_ = slr_less_than_inv_decline[slr_less_than_inv_decline.region == "region_8"].year.values
+aa_
+
+# %% [markdown]
+# #### Look at neighbors and those years
+#
+# to see if we can find anything. 
+#
+# Slaughter has been less than inventory decline. So, if we assume inventory/slaughter data are correctly recorded.:
+#
+# - either some of inventory has gone to neighbors.
+# - or some cows from other states have been imported here solely for slaughtering.
+# - or both?
+#
+# So, we need to find a neghbor(s) whose
+# - This is not doable. What if a neighboring state's slaughter is also contamintated by importing cows to it for only slaughtering? Lets say that has not happened. If they had capacity to slaughter, they would have slaughtered their own cows.
+#
+# So, we need to find a neghbor(s) whose
+# - relation between ```inventory_decline``` and ```slaughter``` is opposited of what we have above; ```abs(inventory_decline) < slaughter```. BUT, those neighbors have neighbors of their own. They might be interacting with them too. it is a hard thing to attack in a brute force fashion!
+
+# %%
+# we are looking for this discrepancy
+target_year = aa_[0]
+df_ = slr_less_than_inv_decline[(slr_less_than_inv_decline.region == "region_8") &
+                                (slr_less_than_inv_decline.year == target_year)]
+
+abs(df_["inventory_delta"].item()) - df_["slaughter_count"].item()
+
+# %%
+explore_df = inventory_annal_diff[(inventory_annal_diff["region"].isin(graph_dict["region_8"])) &
+                                  (inventory_annal_diff["year"] == target_year)].copy()
+
+explore_df
+
+# %%
+explore_df["slaughter_minus_abs_inv_decline"] = explore_df["slaughter_count"] - abs(explore_df["inventory_delta"])
+explore_df
 
 # %%
 
