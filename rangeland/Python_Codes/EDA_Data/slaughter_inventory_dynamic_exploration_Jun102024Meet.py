@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -46,6 +46,155 @@ os.makedirs(reOrganized_dir, exist_ok=True)
 plot_dir = data_dir_base + "00_plots/slaughter_inventory_exploration/"
 
 os.makedirs(plot_dir, exist_ok=True)
+
+# %%
+
+# %%
+graph_dict = {"region_10" : ["region_8", "region_9"],
+              "region_9" : ["region_6", "region_8", "region_10"],
+              "region_8" : ["region_10", "region_9", "region_7", "region_6", "region_5"],
+              "region_7" : ["region_8", "region_6", "region_5", "region_4"],
+              "region_6" : ["region_9", "region_8", "region_7", "region_4"],
+              "region_5" : ["region_8", "region_7", "region_4", "region_3"],
+              "region_4" : ["region_7", "region_6", "region_5", "region_3"],
+              "region_3" : ["region_5", "region_4", "region_1_region_2"],
+              "region_1_region_2" : ["region_3"]
+               }
+
+region_Adj = np.array([
+                       [0, 1, 0, 0, 0, 0, 0, 0, 0],
+                       [1, 0, 1, 1, 0, 0, 0, 0, 0],
+                       [0, 1, 0, 1, 1, 1, 0, 0, 0],
+                       [0, 1, 1, 0, 0, 1, 1, 0, 0],
+                       [0, 0, 1, 0, 0, 1, 1, 1, 0],
+                       [0, 0, 1, 1, 1, 0, 1, 0, 0],
+                       [0, 0, 0, 1, 1, 1, 0, 1, 1],
+                       [0, 0, 0, 0, 1, 0, 1, 0, 1],
+                       [0, 0, 0, 0, 0, 0, 1, 1, 0],
+                      ])
+region_Adj
+
+# %%
+# These colors are from US_map_study_area.py to be consistent with regions.
+col_dict = {"R1&2": "cyan",
+            "R3": "black", 
+            "R4": "green",
+            "R5": "tomato",
+            "R6": "red",
+            "R7": "dodgerblue",
+            "R8": "dimgray", # gray: "#C0C0C0"
+            "R9": "#ffd343", # mild yellow
+            "R10": "steelblue"}
+
+# %%
+import networkx as nx
+np.random.seed(11)
+
+G = nx.DiGraph(directed=True)
+G.add_weighted_edges_from([('R1&2', 'R3', 3.0), 
+                  ('R3', 'R4', 1), ('R3', 'R5', 1), 
+                  ('R4', 'R5', 1), ('R4', 'R6', 1), ('R4', 'R7', 1),
+                  ('R5', 'R7', 1), ('R5', 'R8', 1),
+                  ('R6', 'R7', 1), ('R6', 'R8', 1), ('R6', 'R9', 1),
+                  ('R7', 'R8', 1),
+                  ('R8', 'R9', 1), ('R8', 'R10', 1),
+                  ('R9', 'R10', 1)])
+
+# G.add_edges_from([('R1&2', 'R3'), 
+#                   ('R3', 'R4'), ('R3', 'R5'), 
+#                   ('R4', 'R5'), ('R4', 'R6'), ('R4', 'R7'),
+#                   ('R5', 'R7'), ('R5', 'R8'),
+#                   ('R6', 'R7'), ('R6', 'R8'), ('R4', 'R9'),
+#                   ('R7', 'R8'),
+#                   ('R8', 'R9'), ('R8', 'R10'),
+#                   ('R9', 'R10')])
+
+# G.add_weighted_edges_from([(0, 1, 3.0), (1, 2, 7.5)])
+
+values = [col_dict.get(node, 2) for node in G.nodes()]
+
+options = {# 'node_color': 'dodgerblue',
+           'node_color' : values,
+           'node_size': 1000,
+           'width': 2,
+           'arrowstyle': '-|>',
+           'arrowsize': 10,
+           'font_color' : "white"}
+
+nx.draw_networkx(G, arrows=True, **options)
+limits = plt.axis("off")
+
+# %%
+
+# %%
+# G=nx.Graph()
+# i=1
+# G.add_node(i, pos=(i, i))
+# G.add_node(2, pos=(1, 2))
+# G.add_node(3, pos=(1, 4))
+# G.add_edge(1, 2, weight=0.5)
+# G.add_edge(1, 3, weight=9.8)
+# pos=nx.get_node_attributes(G,'pos')
+# nx.draw(G,pos)
+# labels = nx.get_edge_attributes(G,'weight')
+# nx.draw_networkx_edge_labels(G,pos,edge_labels=labels);
+
+# %%
+DGraph = nx.DiGraph()
+
+vertex_list = ['R1&2', "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"]
+edges_list = [('R1&2', 'R3', "M23"), 
+              ('R3', 'R4', "M34"), ('R3', 'R5', "M35"), 
+              ('R4', 'R5', "M45"), ('R4', 'R6', "M46"), ('R4', 'R7', "M47"),
+              ('R5', 'R7', "M57"), ('R5', 'R8', "M58"),
+              ('R6', 'R7', "M67"), ('R6', 'R8', "M68"), ('R6', 'R9', "M69"),
+              ('R7', 'R8', "M78"),
+              ('R8', 'R9', "M89"), ('R8', 'R10', "M810"),
+              ('R9', 'R10', "M910")]
+
+DGraph.add_nodes_from(vertex_list)
+DGraph.add_weighted_edges_from(edges_list)
+
+DGraph._node['R1&2']['pos'] = (10, 9)
+DGraph._node['R3']['pos'] = (8, 7)
+DGraph._node['R4']['pos'] = (5, 5)
+DGraph._node['R5']['pos'] = (5, 9)
+DGraph._node['R6']['pos'] = (-1, 5)
+DGraph._node['R7']['pos'] = (2, 7)
+DGraph._node['R8']['pos'] = (-2, 9)
+DGraph._node['R9']['pos'] = (-6, 5)
+DGraph._node['R10']['pos'] = (-7, 9)
+
+node_pos=nx.get_node_attributes(DGraph,'pos')
+arc_weight=nx.get_edge_attributes(DGraph,'weight')
+
+nx.draw_networkx_nodes(DGraph , pos=node_pos, node_color=values, node_size=1000)
+nx.draw_networkx_labels(DGraph , pos=node_pos, font_color="white")
+nx.draw_networkx_edges(DGraph , node_pos, connectionstyle='arc3, rad = 0', 
+                       arrowsize=20, # arrowstyle='-|>', label="S"
+                       width=1,)
+nx.draw_networkx_edge_labels(DGraph , node_pos , arc_weight)
+
+plt.axis('off');
+
+fig_name = plot_dir + "directedRegions.pdf"
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight");
+
+# %%
+
+# %%
+
+# %%
+# These colors are from US_map_study_area.py to be consistent with regions.
+col_dict = {"region_1_region_2": "cyan",
+            "region_3": "black", 
+            "region_4": "green",
+            "region_5": "tomato",
+            "region_6": "red",
+            "region_7": "dodgerblue",
+            "region_8": "dimgray", # gray: "#C0C0C0"
+            "region_9": "#ffd343", # mild yellow
+            "region_10": "steelblue"}
 
 # %%
 
@@ -171,8 +320,12 @@ annual_slaughter.head(2)
 # %%
 region_inventory["year"] = region_inventory["year"] + 1
 
+region_inventory.rename(columns={"inventory": "inventory_Jan1"}, inplace=True)
+
 # slaughter goes only up to 2022. So, lets do that to inventory
 region_inventory = region_inventory[region_inventory["year"] < 2023].copy()
+
+region_inventory.head(2)
 
 # %%
 region_slaughter_inventory = pd.merge(region_inventory, annual_slaughter, 
@@ -184,7 +337,7 @@ print (f"{region_slaughter_inventory.shape = }")
 region_slaughter_inventory.head(2)
 
 # %%
-annual_slaughter.head(10)
+annual_slaughter.head(3)
 
 # %%
 print (region_inventory.shape)
@@ -231,24 +384,15 @@ plt.rcParams["ytick.labelleft"] = True
 plt.rcParams.update(params)
 
 # %%
+region_slaughter_inventory.head(2)
 
 # %%
-# These colors are from US_map_study_area.py to be consistent with regions.
-col_dict = {"region_1_region_2": "cyan",
-            "region_3": "black", 
-            "region_4": "green",
-            "region_5": "tomato",
-            "region_6": "red",
-            "region_7": "dodgerblue",
-            "region_8": "dimgray", # gray: "#C0C0C0"
-            "region_9": "#ffd343", # mild yellow
-            "region_10": "steelblue"}
 
 # %%
 fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
 (ax1, ax2) = axs;
 ax1.grid(axis="both", which="both"); ax2.grid(axis="both", which="both")
-y_var = "inventory"
+y_var = "inventory_Jan1"
 for a_region in high_inv_regions:
     df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
     ax1.plot(df.year, df[y_var], 
@@ -268,7 +412,7 @@ space = 5
 ax1.xaxis.set_major_locator(ticker.MultipleLocator(space)) 
 
 fig_name = plot_dir + "inventory_TS_" + datetime.now().strftime('%Y-%m-%d time-%H.%M') + ".pdf"
-plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 region_slaughter_inventory.head(2)
@@ -294,7 +438,7 @@ for a_region in low_inv_regions:
     ax2.legend(loc="best");
     
 fig_name = plot_dir + "slaughter_TS_" + datetime.now().strftime('%Y-%m-%d time-%H.%M') + ".pdf"
-plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 
@@ -306,7 +450,7 @@ ax1.grid(axis="both", which="both"); ax2.grid(axis="both", which="both")
 # fig.suptitle("slaughter: dashed lines");
 ax1.title.set_text('slaughter: dashed lines')
 
-y_var = "inventory"
+y_var = "inventory_Jan1"
 for a_region in high_inv_regions:
     df = region_slaughter_inventory.copy()
     df = df[df["region"] == a_region].copy()
@@ -339,7 +483,7 @@ space = 5
 ax1.xaxis.set_major_locator(ticker.MultipleLocator(space)) 
 
 fig_name = plot_dir + "inv_slau_TS_" + datetime.now().strftime('%Y-%m-%d time-%H.%M') + ".pdf"
-plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 annual_slaughter.head(2)
@@ -367,14 +511,14 @@ print (region_slaughter_inventory.shape)
 inventory_annal_diff = pd.DataFrame()
 for a_region in regions:
     curr_df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
-    curr_df = curr_df[['region', 'year', 'inventory']].copy()
+    curr_df = curr_df[['region', 'year', 'inventory_Jan1']].copy()
     curr_df.sort_values("year", inplace=True)
     curr_region_diff = pd.DataFrame(columns=["region", "year", "inventory_delta"])
     for a_year in curr_df.year.unique():
         curr_df_yr = curr_df[curr_df.year.isin([a_year, a_year-1])].copy()
         if len(curr_df_yr) == 2:
-            curr_diff = curr_df_yr.iloc[1]["inventory"] - \
-                                              curr_df_yr.iloc[0]["inventory"]
+            curr_diff = curr_df_yr.iloc[1]["inventory_Jan1"] - \
+                                              curr_df_yr.iloc[0]["inventory_Jan1"]
             
             d = pd.DataFrame.from_dict({'region': [a_region], 
                                         'year': [str(a_year) + "_" + str(a_year-1)], 
@@ -482,9 +626,8 @@ ax2.xaxis.set_major_locator(ticker.MultipleLocator(space))
 ax1.set_xticklabels(ax1.get_xticklabels(), rotation=90);
 ax2.set_xticklabels(ax2.get_xticklabels(), rotation=90);
 
-
 fig_name = plot_dir + "invDiff_slau_TS_" + datetime.now().strftime('%Y-%m-%d time-%H.%M') + ".pdf"
-plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
+# plt.savefig(fname=fig_name, dpi=100, bbox_inches="tight")
 
 # %%
 inventory_annal_diff[(inventory_annal_diff.region == "region_6") &
@@ -534,32 +677,6 @@ region_slaughter_inventory.head(2)
 #     df = region_slaughter_inventory[region_slaughter_inventory["region"] == a_region].copy()
 #     axs.scatter(df["year"], df["inventory"], label="inventory " +  a_region)
 #     axs.legend(loc="best");
-
-# %%
-graph_dict = {"region_10" : ["region_8", "region_9"],
-              "region_9" : ["region_6", "region_8", "region_10"],
-              "region_8" : ["region_10", "region_9", "region_7", "region_6", "region_5"],
-              "region_7" : ["region_8", "region_6", "region_5", "region_4"],
-              "region_6" : ["region_9", "region_8", "region_7", "region_4"],
-              "region_5" : ["region_8", "region_7", "region_4", "region_3"],
-              "region_4" : ["region_7", "region_6", "region_5", "region_3"],
-              "region_3" : ["region_5", "region_4", "region_1_region_2"],
-              "region_1_region_2" : ["region_3"]
-               }
-
-# %%
-region_Adj = np.array([
-                       [0, 1, 0, 0, 0, 0, 0, 0, 0],
-                       [1, 0, 1, 1, 0, 0, 0, 0, 0],
-                       [0, 1, 0, 1, 1, 1, 0, 0, 0],
-                       [0, 1, 1, 0, 0, 1, 1, 0, 0],
-                       [0, 0, 1, 0, 0, 1, 1, 1, 0],
-                       [0, 0, 1, 1, 1, 0, 1, 0, 0],
-                       [0, 0, 0, 1, 1, 1, 0, 1, 1],
-                       [0, 0, 0, 0, 1, 0, 1, 0, 1],
-                       [0, 0, 0, 0, 0, 0, 1, 1, 0],
-                      ])
-region_Adj
 
 # %%
 inventory_annal_diff.sort_values(["region", "year"], inplace=True)
@@ -697,5 +814,38 @@ explore_df["slaughter_minus_abs_inv_decline"] = explore_df["slaughter_count"] - 
 explore_df
 
 # %%
+
+# %%
+region_slaughter_inventory.head(2)
+
+# %%
+inventory_annal_diff["invDelta_plusSla"] = inventory_annal_diff["inventory_delta"] + \
+                                         inventory_annal_diff["slaughter_count"]
+
+# %%
+inventory_annal_diff[inventory_annal_diff["invDelta_plusSla"] < 0 ]
+
+# %%
+annual_slaughter.head(2)
+
+# %%
+region_inventory.head(2)
+
+# %%
+region_slaughter_inventory.head(2)
+
+# %%
+region_inventory[(region_inventory["region"] == "region_1_region_2") & 
+                 (region_inventory["year"].isin([2013, 2012]))]
+
+# %%
+141500 - 159000 + 6100
+
+# %%
+annual_slaughter[(annual_slaughter["region"] == "region_1_region_2") & 
+                 (annual_slaughter["year"].isin([2012]))]
+
+# %%
+inventory_annal_diff.head(2)
 
 # %%
